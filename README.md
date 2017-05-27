@@ -79,3 +79,9 @@ Consider that API isn't yet stable.
 
 ## reduce
 
+# General purpose collection pipelines
+
+- https://github.com/DusanKasan/Knapsack
+- Submit PR
+
+[More about pipelines in general.](https://martinfowler.com/articles/collection-pipeline/)
