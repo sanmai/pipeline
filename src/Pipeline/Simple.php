@@ -4,7 +4,7 @@ namespace Pipeline;
 /**
  * Not your general purpose pipeline
  */
-class Simple extends Conceptual
+class Simple extends Principal
 {
     /**
      * @param callable $func

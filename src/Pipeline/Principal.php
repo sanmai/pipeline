@@ -1,7 +1,7 @@
 <?php
 namespace Pipeline;
 
-abstract class Conceptual implements \IteratorAggregate
+abstract class Principal implements \IteratorAggregate
 {
 	/**
 	 * Pre-primed pipeline
