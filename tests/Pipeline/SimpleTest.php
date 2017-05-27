@@ -4,16 +4,16 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
-class GeneratorTest extends TestCase
+class SimpleTest extends TestCase
 {
     public function testEmpty()
     {
-        $this->assertEquals([], iterator_to_array(new Generator()));
+        $this->assertEquals([], iterator_to_array(new Simple()));
     }
 
     public function testSingle()
     {
-        $pipeline = new Generator(function () {
+        $pipeline = new Simple(function () {
             foreach (range(1, 3) as $i) {
                 yield $i;
             }
@@ -24,7 +24,7 @@ class GeneratorTest extends TestCase
 
     public function testDouble()
     {
-        $pipeline = new Generator(function () {
+        $pipeline = new Simple(function () {
             foreach (range(1, 3) as $i) {
                 yield $i;
             }
@@ -41,7 +41,7 @@ class GeneratorTest extends TestCase
 
     public function testTriple()
     {
-        $pipeline = new Generator();
+        $pipeline = new Simple();
 
         $pipeline->map(function () {
             foreach (range(1, 3) as $i) {
@@ -74,7 +74,7 @@ class GeneratorTest extends TestCase
 
     public function testFilter()
     {
-        $pipeline = new Generator(function () {
+        $pipeline = new Simple(function () {
             foreach (range(1, 100) as $i) {
                 yield $i;
             }
@@ -95,7 +95,7 @@ class GeneratorTest extends TestCase
 
     public function testReduce()
     {
-        $pipeline = new Generator(function () {
+        $pipeline = new Simple(function () {
             foreach (range(1, 10) as $i) {
                 yield $i;
             }
@@ -110,7 +110,7 @@ class GeneratorTest extends TestCase
 
     public function testReduceToArray()
     {
-        $pipeline = new Generator(function () {
+        $pipeline = new Simple(function () {
             foreach (range(1, 10) as $i) {
                 yield $i;
             }

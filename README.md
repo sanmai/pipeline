@@ -15,7 +15,7 @@ One may think he can unroll cycles with `array_map`. But there's a catch: you ca
     <?php
     include 'vendor/autoload.php';
     
-    $pipeline = new \Pipeline\Generator();
+    $pipeline = new \Pipeline\Simple();
     
     // initial generator (could also be passed to constructor)
     $pipeline->map(function () {
@@ -66,7 +66,7 @@ Consider that API isn't yet stable.
 
 # TODO
 
-- Deal with class naming (Code complete goes funky on `Generator`) 
+- Deal with class naming and abstractions
 - Consider accepting existing generators as arguments
 - Document all the things
 - Scrutinize and format

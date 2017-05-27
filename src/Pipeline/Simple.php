@@ -5,7 +5,7 @@ namespace Pipeline;
 /**
  * Not your general purpose pipeline
  */
-class Generator implements \IteratorAggregate
+class Simple implements \IteratorAggregate
 {
     /**
      * Pre-primed pipeline
@@ -22,7 +22,7 @@ class Generator implements \IteratorAggregate
 
     /**
      * @param callable $func - must yield values (return a generator)
-     * @return Generator
+     * @return Simple
      */
     public function map(callable $func)
     {
@@ -48,7 +48,7 @@ class Generator implements \IteratorAggregate
 
     /**
      * @param callable $func
-     * @return Generator
+     * @return Simple
      */
     public function filter(callable $func = null)
     {

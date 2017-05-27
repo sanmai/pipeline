@@ -1,7 +1,7 @@
 <?php
 include 'vendor/autoload.php';
 
-$pipeline = new \Pipeline\Generator();
+$pipeline = new \Pipeline\Simple();
 
 $pipeline->map(function () {
     foreach (range(1, 3) as $i) {
