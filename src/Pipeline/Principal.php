@@ -1,7 +1,12 @@
 <?php
 namespace Pipeline;
 
-abstract class Principal implements \IteratorAggregate
+/**
+ * Principal abstract pipeline with no defaults.
+ *
+ * You're not expected to use this class directly, but you may subclass it as you see fit.
+ */
+abstract class Principal implements PipelineInterface
 {
 	/**
 	 * Pre-primed pipeline
@@ -9,10 +14,6 @@ abstract class Principal implements \IteratorAggregate
 	 */
 	private $pipeline;
 
-	/**
-	 * @param callable $func - must yield values (return a generator)
-	 * @return Simple
-	 */
 	public function map(callable $func)
 	{
 		if (!$this->pipeline) {
@@ -35,11 +36,7 @@ abstract class Principal implements \IteratorAggregate
 		return $this;
 	}
 
-	/**
-	 * @param callable $func
-	 * @return Simple
-	 */
-	public function filter(callable $func = null)
+	public function filter(callable $func)
 	{
 		$this->map(function ($value) use ($func) {
 			if ($func($value)) {
@@ -63,11 +60,6 @@ abstract class Principal implements \IteratorAggregate
 		return $this->pipeline;
 	}
 
-	/**
-	 * @param callable $func (mixed $carry, mixed $item)
-	 * @param mixed $initial
-	 * @return mixed
-	 */
 	public function reduce(callable $func, $initial = null)
 	{
 		foreach ($this as $value) {

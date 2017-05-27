@@ -2,26 +2,26 @@
 namespace Pipeline;
 
 /**
- * Not your general purpose pipeline
+ * Concrete pipeline with sane default callbacks.
  */
 class Simple extends Principal
 {
     /**
-     * @param callable $func
-     * @return Simple
+     * With no callback drops all null and false values (not unlike array_filter defaults).
      */
     public function filter(callable $func = null)
     {
-        return parent::filter($func ? $func :  function ($value) {
-        	// akin to default array_filter callback
+        if ($func) {
+            return parent::filter($func);
+        }
+
+        return parent::filter(function ($value) {
         	return (bool) $value;
         });
     }
 
     /**
-     * @param callable $func (mixed $carry, mixed $item)
-     * @param mixed $initial
-     * @return mixed
+     * Defaults to summation.
      */
     public function reduce(callable $func = null, $initial = null)
     {
@@ -29,7 +29,6 @@ class Simple extends Principal
     		return parent::reduce($func, $initial);
     	}
 
-    	// default to summation
     	return parent::reduce(function ($a, $b) {
 			return $a + $b;
     	}, 0);
