@@ -12,8 +12,8 @@
         "phpunit/phpunit": "^6.1"
     },
     "license": "Apache",
-	"minimum-stability": "dev",
-	"prefer-stable": true,
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {"": "src/"}
     },
