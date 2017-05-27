@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
+
 # Pipeline
 
 Not your general purpose collection pipeline.
