@@ -6,7 +6,7 @@ namespace Pipeline;
  *
  * You're not expected to use this class directly, but you may subclass it as you see fit.
  */
-abstract class Principal implements PipelineInterface
+abstract class Principal implements Interfaces\Pipeline
 {
 	/**
 	 * Pre-primed pipeline

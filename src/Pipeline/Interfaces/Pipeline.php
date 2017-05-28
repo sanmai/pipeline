@@ -1,19 +1,19 @@
 <?php
-namespace Pipeline;
+namespace Pipeline\Interfaces;
 
-interface PipelineInterface extends \IteratorAggregate
+interface Pipeline extends \IteratorAggregate
 {
-    /**
-     * @param callable $func - must yield values (return a generator)
-     * @return
-     */
-    public function filter(callable $func);
-
     /**
      * @param callable $func
      * @return PipelineInterface
      */
 	public function map(callable $func);
+
+	/**
+	 * @param callable $func - must yield values (return a generator)
+	 * @return
+	 */
+	public function filter(callable $func);
 
 	/**
 	 * @param callable $func (mixed $carry, mixed $item)
