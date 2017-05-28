@@ -17,7 +17,7 @@ One may think he can unroll cycles with `array_map`. But there's a catch: you ca
     
     $pipeline = new \Pipeline\Simple();
     
-    // initial generator (could also be passed to constructor)
+    // initial generator
     $pipeline->map(function () {
         foreach (range(1, 3) as $i) {
             yield $i;
