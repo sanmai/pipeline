@@ -3,7 +3,7 @@
 namespace Pipeline;
 
 /**
- * Concrete pipeline with sane default callbacks.
+ * Concrete pipeline with sensible default callbacks.
  */
 class Simple extends Principal
 {
