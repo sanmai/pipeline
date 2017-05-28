@@ -66,7 +66,6 @@ Consider that API isn't yet stable.
 
 # TODO
 
-- Deal with class naming and abstractions
 - Consider accepting existing generators as arguments
 - Document all the things
 - Scrutinize and format
