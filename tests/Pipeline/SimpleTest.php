@@ -15,8 +15,8 @@ class SimpleTest extends TestCase
         $pipeline = new Simple();
 
         $pipeline->map(function () {
-               foreach (range(1, 3) as $i) {
-                  yield $i;
+            foreach (range(1, 3) as $i) {
+                yield $i;
             }
         });
 

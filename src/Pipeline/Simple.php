@@ -16,7 +16,7 @@ class Simple extends Principal
         }
 
         return parent::filter(function ($value) {
-        	return (bool) $value;
+            return (bool) $value;
         });
     }
 
@@ -25,12 +25,12 @@ class Simple extends Principal
      */
     public function reduce(callable $func = null, $initial = null)
     {
-    	if ($func) {
-    		return parent::reduce($func, $initial);
-    	}
+        if ($func) {
+            return parent::reduce($func, $initial);
+        }
 
-    	return parent::reduce(function ($a, $b) {
-			return $a + $b;
-    	}, 0);
+        return parent::reduce(function ($a, $b) {
+            return $a + $b;
+        }, 0);
     }
 }
