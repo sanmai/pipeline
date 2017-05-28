@@ -1,5 +1,4 @@
 <?php
-
 namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
@@ -13,9 +12,11 @@ class SimpleTest extends TestCase
 
     public function testSingle()
     {
-        $pipeline = new Simple(function () {
-            foreach (range(1, 3) as $i) {
-                yield $i;
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
+               foreach (range(1, 3) as $i) {
+                  yield $i;
             }
         });
 
@@ -24,7 +25,9 @@ class SimpleTest extends TestCase
 
     public function testDouble()
     {
-        $pipeline = new Simple(function () {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
             foreach (range(1, 3) as $i) {
                 yield $i;
             }
@@ -74,7 +77,9 @@ class SimpleTest extends TestCase
 
     public function testFilter()
     {
-        $pipeline = new Simple(function () {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
             foreach (range(1, 100) as $i) {
                 yield $i;
             }
@@ -95,22 +100,24 @@ class SimpleTest extends TestCase
 
     public function testReduce()
     {
-        $pipeline = new Simple(function () {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
             foreach (range(1, 10) as $i) {
                 yield $i;
             }
         });
 
-        $result = $pipeline->reduce(function ($sum, $i) {
-            return $sum + $i;
-        }, 0);
+        $result = $pipeline->reduce();
 
         $this->assertEquals(55, $result);
     }
 
     public function testReduceToArray()
     {
-        $pipeline = new Simple(function () {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
             foreach (range(1, 10) as $i) {
                 yield $i;
             }
