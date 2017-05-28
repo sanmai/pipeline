@@ -1,4 +1,5 @@
 <?php
+
 namespace Pipeline;
 
 /**
@@ -9,7 +10,8 @@ namespace Pipeline;
 abstract class Principal implements Interfaces\Pipeline
 {
     /**
-     * Pre-primed pipeline
+     * Pre-primed pipeline.
+     *
      * @var \Generator
      */
     private $pipeline;
@@ -18,6 +20,7 @@ abstract class Principal implements Interfaces\Pipeline
     {
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
+
             return $this;
         }
 

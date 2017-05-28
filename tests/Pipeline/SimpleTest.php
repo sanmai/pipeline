@@ -1,4 +1,5 @@
 <?php
+
 namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
@@ -135,6 +136,7 @@ class SimpleTest extends TestCase
         // just what iterator_to_array does
         $result = $pipeline->reduce(function ($sum, $i) {
             $sum[] = $i;
+
             return $sum;
         }, []);
 

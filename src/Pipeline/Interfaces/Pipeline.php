@@ -1,17 +1,20 @@
 <?php
+
 namespace Pipeline\Interfaces;
 
 interface Pipeline extends \IteratorAggregate
 {
     /**
      * @param callable $func
+     *
      * @return PipelineInterface
      */
     public function map(callable $func);
 
     /**
      * @param callable $func - must yield values (return a generator)
-     * @return
+     *
+     * @return PipelineInterface
      */
     public function filter(callable $func);
 
