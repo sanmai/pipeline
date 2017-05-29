@@ -12,9 +12,21 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Generator
+     * @var \Traversable
      */
     private $pipeline;
+
+    /**
+     * Optional source of data
+     *
+     * @param \Traversable $input
+     */
+    public function __construct(\Traversable $input = null)
+    {
+        if ($input) {
+            $this->pipeline = $input;
+        }
+    }
 
     public function map(callable $func)
     {
@@ -51,7 +63,7 @@ abstract class Principal implements Interfaces\Pipeline
     }
 
     /**
-     * @return \ArrayIterator|Generator
+     * @return \Traversable
      */
     public function getIterator()
     {
