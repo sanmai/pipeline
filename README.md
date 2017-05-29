@@ -83,6 +83,7 @@ Consider that API isn't yet stable.
 # General purpose collection pipelines
 
 - https://github.com/DusanKasan/Knapsack
+- https://github.com/mtdowling/transducers.php
 - Submit PR
 
 [More about pipelines in general.](https://martinfowler.com/articles/collection-pipeline/)
