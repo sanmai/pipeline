@@ -67,7 +67,6 @@ Consider that API isn't yet stable.
 
 # TODO
 
-- Consider accepting existing generators as arguments
 - Document all the things
 - Scrutinize and format
 - More tests
