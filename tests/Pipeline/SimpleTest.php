@@ -90,7 +90,7 @@ class SimpleTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], iterator_to_array($pipeline));
+        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], array_values(iterator_to_array($pipeline)));
     }
 
     public function testReduce()
@@ -147,5 +147,18 @@ class SimpleTest extends TestCase
         });
 
         $this->assertEquals(0, $pipeline->reduce());
+    }
+
+    /**
+     * Edge case: if a non-primed pipeline gets mapped, it'll work unexpectedly
+     */
+    public function testMapEmpty()
+    {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
+            // gets called without an argument
+            $this->assertEquals(0, func_num_args());
+        });
     }
 }

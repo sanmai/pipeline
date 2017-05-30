@@ -23,9 +23,7 @@ abstract class Principal implements Interfaces\Pipeline
      */
     public function __construct(\Traversable $input = null)
     {
-        if ($input) {
-            $this->pipeline = $input;
-        }
+        $this->pipeline = $input;
     }
 
     public function map(callable $func)
@@ -53,11 +51,7 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        $this->map(function ($value) use ($func) {
-            if ($func($value)) {
-                yield $value;
-            }
-        });
+        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
@@ -67,11 +61,6 @@ abstract class Principal implements Interfaces\Pipeline
      */
     public function getIterator()
     {
-        // with non-primed pipeline just return empty iterator
-        if (!$this->pipeline) {
-            return new \ArrayIterator([]);
-        }
-
         return $this->pipeline;
     }
 
