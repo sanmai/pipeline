@@ -23,9 +23,7 @@ abstract class Principal implements Interfaces\Pipeline
      */
     public function __construct(\Traversable $input = null)
     {
-        if ($input) {
-            $this->pipeline = $input;
-        }
+        $this->pipeline = $input;
     }
 
     public function map(callable $func)
