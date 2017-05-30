@@ -28,6 +28,9 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
+        assert((new \ReflectionFunction($func))->isGenerator(), "Callback must be a generator");
+        assert($this->pipeline || (new \ReflectionFunction($func))->getNumberOfRequiredParameters() == 0, "Initial generator must not require parameters");
+
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
 
