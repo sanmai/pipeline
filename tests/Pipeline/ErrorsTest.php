@@ -9,7 +9,7 @@ class ErrorsTest extends TestCase
     protected function setUp()
     {
         if (ini_get('zend.assertions') != 1) {
-            $this->markTestSkipped("Requires internal assertions");
+            $this->markTestSkipped("This test case requires internal assertions being enabled");
         }
     }
 
@@ -17,5 +17,25 @@ class ErrorsTest extends TestCase
     {
         $this->expectException(\AssertionError::class);
         assert(false);
+    }
+
+    public function testInvalidInitialGenerator()
+    {
+        $this->expectException(\AssertionError::class);
+
+        $pipeline = new Simple();
+        $pipeline->map(function ($a, $b = null) {
+            yield;
+        });
+    }
+
+    public function testNotGenerator()
+    {
+        $this->expectException(\AssertionError::class);
+
+        $pipeline = new Simple();
+        $pipeline->map(function () {
+            return 0;
+        });
     }
 }

@@ -148,17 +148,4 @@ class SimpleTest extends TestCase
 
         $this->assertEquals(0, $pipeline->reduce());
     }
-
-    /**
-     * Edge case: if a non-primed pipeline gets mapped, it'll work unexpectedly
-     */
-    public function testMapEmpty()
-    {
-        $pipeline = new Simple();
-
-        $pipeline->map(function () {
-            // gets called without an argument
-            $this->assertEquals(0, func_num_args());
-        });
-    }
 }
