@@ -12,3 +12,5 @@ cache:
 install:
   - composer install --prefer-dist
 
+after_success:
+  - travis_retry php vendor/bin/coveralls
