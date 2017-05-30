@@ -65,11 +65,6 @@ abstract class Principal implements Interfaces\Pipeline
      */
     public function getIterator()
     {
-        // with non-primed pipeline just return empty iterator
-        if (!$this->pipeline) {
-            return new \ArrayIterator([]);
-        }
-
         return $this->pipeline;
     }
 

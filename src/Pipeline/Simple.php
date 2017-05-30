@@ -36,4 +36,17 @@ class Simple extends Principal
             return $a + $b;
         }, 0);
     }
+
+    /**
+     * @return \Traversable
+     */
+    public function getIterator()
+    {
+        // with non-primed pipeline just return empty iterator
+        if (!$iterator = parent::getIterator()) {
+            return new \ArrayIterator([]);
+        }
+
+        return $iterator;
+    }
 }
