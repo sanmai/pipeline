@@ -51,11 +51,7 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        $this->map(function ($value) use ($func) {
-            if ($func($value)) {
-                yield $value;
-            }
-        });
+        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }

@@ -90,7 +90,7 @@ class SimpleTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], iterator_to_array($pipeline));
+        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], array_values(iterator_to_array($pipeline)));
     }
 
     public function testReduce()
