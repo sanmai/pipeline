@@ -9,9 +9,6 @@ cache:
   directories:
     - $HOME/.composer/cache
 
-before_install:
-  - phpenv config-rm xdebug.ini || return 0
-
 install:
   - composer install --prefer-dist
 
