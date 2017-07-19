@@ -1,4 +1,5 @@
 <?php
+
 include 'vendor/autoload.php';
 
 $pipeline = new \Pipeline\Simple();
@@ -39,4 +40,3 @@ $value = $pipeline->reduce(function ($a, $b) {
 
 // int(104)
 var_dump($value);
-

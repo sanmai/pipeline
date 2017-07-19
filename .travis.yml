@@ -12,5 +12,10 @@ cache:
 install:
   - composer install --prefer-dist
 
+script:
+  - vendor/bin/phpunit --verbose || travis_terminate 1
+  - vendor/bin/php-cs-fixer --diff --dry-run -v fix
+
 after_success:
   - travis_retry php vendor/bin/coveralls
+  

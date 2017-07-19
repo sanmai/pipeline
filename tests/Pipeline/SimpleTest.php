@@ -35,9 +35,9 @@ class SimpleTest extends TestCase
         });
 
         $pipeline->map(function ($i) {
-            yield $i*10;
-            yield $i*100;
-            yield $i*1000;
+            yield $i * 10;
+            yield $i * 100;
+            yield $i * 1000;
         });
 
         $this->assertEquals([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], iterator_to_array($pipeline));
