@@ -24,7 +24,7 @@ class ErrorsTest extends TestCase
     protected function setUp()
     {
         if (ini_get('zend.assertions') != 1) {
-            $this->markTestSkipped("This test case requires internal assertions being enabled");
+            $this->markTestSkipped('This test case requires internal assertions being enabled');
         }
     }
 
