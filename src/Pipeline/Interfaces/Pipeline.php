@@ -19,8 +19,9 @@ interface Pipeline extends \IteratorAggregate
     public function filter(callable $func);
 
     /**
-     * @param callable $func (mixed $carry, mixed $item)
-     * @param mixed $initial
+     * @param callable $func    (mixed $carry, mixed $item)
+     * @param mixed    $initial
+     *
      * @return mixed
      */
     public function reduce(callable $func, $initial);
