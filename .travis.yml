@@ -7,7 +7,7 @@ php:
 
 cache:
   directories:
-    - $HOME/.composer/cache
+    - $HOME/.composer
 
 install:
   - composer install --prefer-dist
