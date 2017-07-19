@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
+[![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 
 # Pipeline
 
@@ -17,7 +18,7 @@ One may think he can unroll cycles with `array_map`. But there's a catch: you ca
     
     $pipeline = new \Pipeline\Simple();
     
-    // initial generator (could also be passed to constructor)
+    // initial generator
     $pipeline->map(function () {
         foreach (range(1, 3) as $i) {
             yield $i;
@@ -66,8 +67,6 @@ Consider that API isn't yet stable.
 
 # TODO
 
-- Deal with class naming and abstractions
-- Consider accepting existing generators as arguments
 - Document all the things
 - Scrutinize and format
 - More tests
@@ -84,6 +83,7 @@ Consider that API isn't yet stable.
 # General purpose collection pipelines
 
 - https://github.com/DusanKasan/Knapsack
+- https://github.com/mtdowling/transducers.php
 - Submit PR
 
 [More about pipelines in general.](https://martinfowler.com/articles/collection-pipeline/)

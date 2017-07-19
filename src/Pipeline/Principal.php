@@ -12,12 +12,25 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Generator
+     * @var \Traversable
      */
     private $pipeline;
 
+    /**
+     * Optional source of data
+     *
+     * @param \Traversable $input
+     */
+    public function __construct(\Traversable $input = null)
+    {
+        $this->pipeline = $input;
+    }
+
     public function map(callable $func)
     {
+        assert((new \ReflectionFunction($func))->isGenerator(), "Callback must be a generator");
+        assert($this->pipeline || (new \ReflectionFunction($func))->getNumberOfRequiredParameters() == 0, "Initial generator must not require parameters");
+
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
 
@@ -41,25 +54,16 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        $this->map(function ($value) use ($func) {
-            if ($func($value)) {
-                yield $value;
-            }
-        });
+        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
 
     /**
-     * @return \ArrayIterator|Generator
+     * @return \Traversable
      */
     public function getIterator()
     {
-        // with non-primed pipeline just return empty iterator
-        if (!$this->pipeline) {
-            return new \ArrayIterator([]);
-        }
-
         return $this->pipeline;
     }
 

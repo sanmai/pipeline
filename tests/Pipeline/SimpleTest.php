@@ -45,13 +45,7 @@ class SimpleTest extends TestCase
 
     public function testTriple()
     {
-        $pipeline = new Simple();
-
-        $pipeline->map(function () {
-            foreach (range(1, 3) as $i) {
-                yield $i;
-            }
-        });
+        $pipeline = new Simple(new \ArrayIterator(range(1, 3)));
 
         $pipeline->map(function ($i) {
             yield pow($i, 2);
@@ -96,7 +90,7 @@ class SimpleTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], iterator_to_array($pipeline));
+        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], array_values(iterator_to_array($pipeline)));
     }
 
     public function testReduce()
@@ -141,5 +135,17 @@ class SimpleTest extends TestCase
         }, []);
 
         $this->assertEquals([9, 27, 36, 216, 81, 729], $result);
+    }
+
+    public function testMeaningless()
+    {
+        $pipeline = new Simple(new \ArrayIterator([]));
+
+        $pipeline->map(function ($i) {
+            // never gets called
+            yield $i + 1;
+        });
+
+        $this->assertEquals(0, $pipeline->reduce());
     }
 }

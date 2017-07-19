@@ -3,7 +3,7 @@
 namespace Pipeline;
 
 /**
- * Concrete pipeline with sane default callbacks.
+ * Concrete pipeline with sensible default callbacks.
  */
 class Simple extends Principal
 {
@@ -35,5 +35,18 @@ class Simple extends Principal
         return parent::reduce(function ($a, $b) {
             return $a + $b;
         }, 0);
+    }
+
+    /**
+     * @return \Traversable
+     */
+    public function getIterator()
+    {
+        // with non-primed pipeline just return empty iterator
+        if (!$iterator = parent::getIterator()) {
+            return new \ArrayIterator([]);
+        }
+
+        return $iterator;
     }
 }
