@@ -30,6 +30,7 @@ return PhpCsFixer\Config::create()
         'phpdoc_order' => true,
         'semicolon_after_instruction' => true,
         'header_comment' => ['header' => $header, 'separate' => 'bottom'],
+        'yoda_style' => null,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
