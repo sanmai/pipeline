@@ -13,7 +13,7 @@
         "satooshi/php-coveralls": "^1.0",
         "friendsofphp/php-cs-fixer": "^2.4"
     },
-    "license": "Apache",
+    "license": "Apache-2.0",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
