@@ -1,21 +1,98 @@
 [![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 
-# Pipeline
+Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example of a pyramid of doom:
 
-Not your general purpose collection pipeline.
+	foreach ($obj->generator() as $val) {
+	    if ($val->a || $val->foo() == 3) {
+	        foreach ($val->bar as $b) {
+	            if ($b->keys) {
+	                foreach ($b->keys as $key) {
+	                    if ($key->name == "foo") {
+	                        foreach ($b->assoc[$key->id] as $foo) {
+	                            // ...
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	}
 
-## Purpose
+Now, you naturally want to break this monster down into manageable steps. You think you could do it like this:
 
-Cycles unrolling where it isn't feasible to store intermediary result.
+	$step1 = [];
+	foreach ($obj->generator() as $val) {
+	    if ($val->a || $val->foo() == 3) {
+	        $step1[] = $val->bar;
+	    }
+	}
+	
+	$step2 = [];
+	foreach ($step1 as $b) {
+	    if ($b->keys) {
+	        $step2[] = $b->keys;
+	    }
+	}
+	
+	$step3 = [];
+	foreach ($step2 as $key) {
+	    if ($key->name == "foo") {
+	        $step3[] = $b->assoc[$key->id];
+	    }
+	}
+	
+	$step4 = [];
+	foreach ($step3 as $foo) {
+	    // ...
+	}
 
-## Example
+Indeed you made it somewhat simpler to understand, but this is still far from perfect. Three things come to mind:
+
+1. You lost type information here and there, so no autocomplete suggestions for you.
+2. On every step, every result has to buffer. This not only takes memory space, but you would not see if your algorithm is failing on the last step until you passed all the previous steps.
+2. These separate cycles are nice, but you still can not test them one by one. That's practically impossible.
 
 One may think he can unroll cycles with `array_map`. But there's a catch: you can't easily return more than one value from `array_map`.
 
-    <?php
-    include 'vendor/autoload.php';
-    
+So, how do you solve this problem? Look no more! Pipeline to the rescue. 
+
+# Pipeline
+
+With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators.
+
+Take a single step and write a generator for it:
+
+    $this->double = function ($value) {
+        yield $value * 2;
+    };
+
+	$this->rowTotal = function (SomeType $value) {
+	    yield $value->price * $value->quantity;
+	};
+
+With type checks and magic of autocomplete! Apply it to the data:
+
+    $sourceData = new \ArrayIterator(range(1, 1000)); // can be any type of generator
+
+    $pipeline = new \Pipeline\Simple($sourceData);
+    $pipeline->map($this->double);
+    // any number of times in any sequence
+    $pipeline->map($this->double);
+
+Get results for the first rows immediately.
+
+    foreach ($pipeline as $result) {
+        echo "$result,";
+    }
+    // immediately stats printing 4,8,12,...
+
+Test with ease:
+
+    $this->assertSame([2], iterator_to_array(call_user_func($example->double, 1)));
+
+## Another example
+
     $pipeline = new \Pipeline\Simple();
     
     // initial generator
@@ -51,7 +128,7 @@ One may think he can unroll cycles with `array_map`. But there's a catch: you ca
         return $i > 100;
     });
 
-    // for the sake of convinience    
+    // for the sake of convenience    
     $value = $pipeline->reduce(function ($a, $b) {
         return $a + $b;
     }, 0);
@@ -62,15 +139,16 @@ One may think he can unroll cycles with `array_map`. But there's a catch: you ca
 # Install
 
     composer require sanmai/pipeline
-    
-Consider that API isn't yet stable.
+
+# Common pitfalls
+
+Check that you passing an actual generator.
 
 # TODO
 
-- Document all the things
-- Scrutinize and format
-- More tests
-- Memory benchmarks?
+- [ ] Document all the things
+- [ ] Scrutinize and format
+- [ ] Memory benchmarks?
 
 # Methods
 

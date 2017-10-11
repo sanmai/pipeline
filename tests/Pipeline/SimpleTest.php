@@ -163,4 +163,24 @@ class SimpleTest extends TestCase
 
         $this->assertEquals(0, $pipeline->reduce());
     }
+
+    private $double;
+
+    public function testTestableGenerator()
+    {
+        $this->double = function ($value) {
+            yield $value * 2;
+        };
+
+        $this->assertSame([2], iterator_to_array(call_user_func($this->double, 1)));
+
+        // initial generator
+        $sourceData = new \ArrayIterator(range(1, 5));
+
+        $pipeline = new \Pipeline\Simple($sourceData);
+        $pipeline->map($this->double);
+        $pipeline->map($this->double);
+
+        $this->assertSame([4, 8, 12,16, 20], iterator_to_array($pipeline));
+    }
 }
