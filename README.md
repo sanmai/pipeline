@@ -50,10 +50,10 @@ Now, you naturally want to break this monster down into manageable steps. You th
 Indeed you made it somewhat simpler to understand, but this is still far from perfect. Three things come to mind:
 
 1. You lost type information here and there, so no autocomplete suggestions for you.
-2. On every step, every result has to buffer. This not only takes memory space, but you would not see if your algorithm is failing on the last step until you passed all the previous steps.
+2. On every step, every result has to buffer. This not only takes memory space, but you would not see if your algorithm is failing on the last step until you passed all the previous steps. What a bummer!
 2. These separate cycles are nice, but you still can not test them one by one. That's practically impossible.
 
-One may think he can unroll cycles with `array_map`. But there's a catch: you can't easily return more than one value from `array_map`.
+One may think he can pull the trick with `array_map`. But there's a catch: you can't easily return more than one value from `array_map`. No luck here too.
 
 So, how do you solve this problem? Look no more! Pipeline to the rescue. 
 
@@ -90,6 +90,8 @@ Get results for the first rows immediately.
 Test with ease:
 
     $this->assertSame([2], iterator_to_array(call_user_func($example->double, 1)));
+
+Pretty neat, eh?
 
 ## Another example
 
