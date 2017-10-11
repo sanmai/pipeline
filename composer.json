@@ -17,10 +17,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
-        "psr-4": {"": "src/"}
+        "psr-4": {"Pipeline\\": "src/Pipeline/"}
     },
     "autoload-dev": {
-        "psr-4": {"": "tests/"}
+        "psr-4": {"Pipeline\\": "tests/Pipeline/"}
     },
     "require": {
         "php": ">=7"
