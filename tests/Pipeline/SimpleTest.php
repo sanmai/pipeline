@@ -181,6 +181,6 @@ class SimpleTest extends TestCase
         $pipeline->map($this->double);
         $pipeline->map($this->double);
 
-        $this->assertSame([4, 8, 12,16, 20], iterator_to_array($pipeline));
+        $this->assertSame([4, 8, 12, 16, 20], iterator_to_array($pipeline));
     }
 }
