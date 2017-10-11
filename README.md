@@ -144,6 +144,18 @@ Test with ease:
 
 Check that you passing an actual generator.
 
+    $pipeline->map(function ($i) {
+        // this won't work - not a generator!
+        return $i * 2;
+    });
+
+Make sure you consume the results.
+
+    foreach ($pipeline as $result) {
+        // processing happens only if you consume the results
+    }
+
+
 # TODO
 
 - [ ] Document all the things
