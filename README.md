@@ -175,7 +175,7 @@ Make sure you consume the results.
 # General purpose collection pipelines
 
 - https://github.com/DusanKasan/Knapsack
-- https://github.com/mtdowling/transducers.php
+- https://github.com/mtdowling/transducers.php ([Detailed writeup.](http://mtdowling.com/blog/2014/12/04/transducers-php/))
 - Submit PR
 
 [More about pipelines in general.](https://martinfowler.com/articles/collection-pipeline/)
