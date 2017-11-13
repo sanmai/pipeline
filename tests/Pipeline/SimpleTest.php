@@ -68,7 +68,7 @@ class SimpleTest extends TestCase
         });
 
         $pipeline->map(function ($i) {
-            yield $i - 1;
+            return $i - 1;
         });
 
         $pipeline->map(function ($i) {
@@ -165,14 +165,22 @@ class SimpleTest extends TestCase
     }
 
     private $double;
+    private $plusone;
 
     public function testTestableGenerator()
     {
         $this->double = function ($value) {
-            yield $value * 2;
+            return $value * 2;
         };
 
-        $this->assertSame([2], iterator_to_array(call_user_func($this->double, 1)));
+        $this->assertSame(8, call_user_func($this->double, 4));
+
+        $this->plusone = function ($value) {
+            yield $value;
+            yield $value + 1;
+        };
+
+        $this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
 
         // initial generator
         $sourceData = new \ArrayIterator(range(1, 5));
@@ -180,7 +188,8 @@ class SimpleTest extends TestCase
         $pipeline = new \Pipeline\Simple($sourceData);
         $pipeline->map($this->double);
         $pipeline->map($this->double);
+        $pipeline->map($this->plusone);
 
-        $this->assertSame([4, 8, 12, 16, 20], iterator_to_array($pipeline));
+        $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], iterator_to_array($pipeline));
     }
 }

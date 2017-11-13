@@ -43,7 +43,7 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
-        assert((new \ReflectionFunction($func))->isGenerator(), 'Callback must be a generator');
+        assert($this->pipeline || (new \ReflectionFunction($func))->isGenerator(), 'Initial callback must be a generator');
         assert($this->pipeline || (new \ReflectionFunction($func))->getNumberOfRequiredParameters() == 0, 'Initial generator must not require parameters');
 
         if (!$this->pipeline) {
@@ -55,11 +55,17 @@ abstract class Principal implements Interfaces\Pipeline
         $previous = $this->pipeline;
         $this->pipeline = call_user_func(function () use ($previous, $func) {
             foreach ($previous as $value) {
-                // `yield from` does not reset the keys
-                // iterator_to_array() goes nuts
-                // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-                foreach ($func($value) as $value) {
-                    yield $value;
+                $result = $func($value);
+                if ($result instanceof \Generator) {
+                    // `yield from` does not reset the keys
+                    // iterator_to_array() goes nuts, hence no use for us
+                    // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
+                    foreach ($result as $value) {
+                        yield $value;
+                    }
+                } else {
+                    // Case of a plain old mapping function
+                    yield $result;
                 }
             }
         });

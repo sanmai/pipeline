@@ -59,12 +59,12 @@ So, how do you solve this problem? Look no more! Pipeline to the rescue.
 
 # Pipeline
 
-With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators.
+With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions.
 
-Take a single step and write a generator for it:
+Take a single step and write a generator or a function for it:
 
     $this->double = function ($value) {
-        yield $value * 2;
+        return $value * 2;
     };
 
 	$this->rowTotal = function (SomeType $value) {
@@ -111,7 +111,7 @@ Pretty neat, eh?
     });
     
     $pipeline->map(function ($i) {
-        yield $i - 1;
+        return $i - 1;
     });
     
     $pipeline->map(function ($i) {
