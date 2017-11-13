@@ -89,7 +89,12 @@ Get results for the first rows immediately.
 
 Test with ease:
 
-    $this->assertSame([2], iterator_to_array(call_user_func($example->double, 1)));
+    $this->plusone = function ($value) {
+        yield $value;
+        yield $value + 1;
+    };
+
+    $this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
 
 Pretty neat, eh?
 
