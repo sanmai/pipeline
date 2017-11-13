@@ -19,7 +19,7 @@ Imagine you have a very deep and complex processing chain. Something akin to thi
 	    }
 	}
 
-Now, you naturally want to break this monster down into manageable steps. You think you could do it like this:
+Now, you naturally want to break this monster down into manageable parts. You think you could do it like this:
 
 	$step1 = [];
 	foreach ($obj->generator() as $val) {
@@ -149,19 +149,13 @@ Pretty neat, eh?
 
 # Common pitfalls
 
-Check that you passing an actual generator.
-
-    $pipeline->map(function ($i) {
-        // this won't work - not a generator!
-        return $i * 2;
-    });
-
 Make sure you consume the results.
 
     foreach ($pipeline as $result) {
         // processing happens only if you consume the results
     }
 
+Nothing will happen unless you use the results. That's the point of it.
 
 # TODO
 
