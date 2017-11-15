@@ -173,8 +173,16 @@ Nothing will happen unless you use the results. That's the point of it.
 
 # General purpose collection pipelines
 
-- https://github.com/DusanKasan/Knapsack
-- https://github.com/mtdowling/transducers.php ([Detailed writeup.](http://mtdowling.com/blog/2014/12/04/transducers-php/))
-- Submit PR
+What about alternatives? How are they different?
 
-[More about pipelines in general.](https://martinfowler.com/articles/collection-pipeline/)
+- [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value. 
+
+- [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Lots of utility functions for those who need them: they're out of scope for this project.
+
+- [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you admire transducers from Clojure. API is not very PHP-esque. Read as not super friendly. ([Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
+
+- Submit PR to add yours.
+
+[More about pipelines in general](https://martinfowler.com/articles/collection-pipeline/) from Martin Fowler.
+
+
