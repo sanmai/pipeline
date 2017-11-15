@@ -182,17 +182,31 @@ Takes an insance of `Traversable` or none. In the latter case the pipeline must 
 
 Takes a processing stage in a form of a generator function or a plain mapping function. Can also take an initial generator, where it must not require any arguments.
 
+    $pipeline->filter(function (Customer $customer) {
+        foreach ($customer->allPayments() as $item) {
+            yield $item;
+        }
+    });
+
 ## `filter()`
 
 Takes a filter callback not unlike that of `array_filter`. Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
+
+    $pipeline->filter(function ($item) {
+        return $item->isGood() && $item->amount > 0;
+    });
 
 ## `reduce()`
 
 Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item. As a second argument it can take an inital value. Simple pipeline has a default callback that sums all values.
 
+    $total = $pipeline->reduce(function ($curry, $item) {
+        return $curry + $item->amount;
+    }, 0);
+
 ## `getIterator()`
 
-A method to conform `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator. Therefore this should work without errors:
+A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator. Therefore this should work without errors:
 
     $pipeline = new \Pipeline\Simple();
     foreach ($pipeline as $value) {
