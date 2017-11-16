@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
-Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example of a pyramid of doom:
+Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
 
 	foreach ($obj->generator() as $val) {
 	    if ($val->a || $val->foo() == 3) {
@@ -66,7 +66,7 @@ So, how do you solve this problem? Pipeline to the rescue!
 
 # Pipeline
 
-With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions.
+With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions. Want to know average shipping delay for these three warehouses for orders made during previous sale? Map matching orders into shipments, exclude unwanted warehouses, map shipments into dates and timings, sum and divide. Done!
 
 Take a single step and write a generator or a function for it:
 
