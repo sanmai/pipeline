@@ -187,15 +187,16 @@ This allows to skip type checks for return values if one has no results to retur
 
 Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
 
-	$a = new Simple();
-	$a->map(function () {
+	$foo = new Simple();
+	$foo->map(function () {
 	    yield 1;
 	    yield 2;
 	});
 	
-	$b = new Simple();
-	$b->map($a);
-	var_dump($b->reduce());
+	$bar = new Simple();
+	$bar->map($foo);
+	$this->assertEquals(3, $bar->reduce());
+	var_dump($bar->reduce());
 	// int(3)
 
 # Showcase
