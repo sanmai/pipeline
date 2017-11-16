@@ -246,7 +246,13 @@ Returns a generator with all values currently in the pipeline. Allows to connect
     var_dump($value);
     // int(104)
 
-# General purpose collection pipelines
+# Contributions
+
+Contributions to documentation and test cases are welcome.
+
+I am very reluctant to change the API. It should stay as simple as it is. Do not expect PRs with utility functions to get accepted.
+
+# About collection pipelines in general
 
 What about alternatives? How are they different?
 
