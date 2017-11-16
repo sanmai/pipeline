@@ -39,7 +39,7 @@ class ErrorsTest extends TestCase
         $this->expectException(\AssertionError::class);
 
         $pipeline = new Simple();
-        $pipeline->map(function ($a, $b = null) {
+        $pipeline->map(function ($a) {
             // Shall never be called
             $this->fail();
             yield $a;
