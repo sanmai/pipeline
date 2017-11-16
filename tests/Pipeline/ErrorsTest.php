@@ -40,7 +40,9 @@ class ErrorsTest extends TestCase
 
         $pipeline = new Simple();
         $pipeline->map(function ($a, $b = null) {
-            yield;
+            // Shall never be called
+            $this->fail();
+            yield $a;
         });
     }
 

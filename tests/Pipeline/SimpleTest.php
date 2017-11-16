@@ -181,15 +181,15 @@ class SimpleTest extends TestCase
 
         $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
 
-        $a = new Simple();
-        $a->map(function () {
+        $foo = new Simple();
+        $foo->map(function () {
             yield 1;
             yield 2;
         });
 
-        $b = new Simple();
-        $b->map($a);
-        $this->assertEquals(3, $b->reduce());
+        $bar = new Simple();
+        $bar->map($foo);
+        $this->assertEquals(3, $bar->reduce());
     }
 
     private $double;
