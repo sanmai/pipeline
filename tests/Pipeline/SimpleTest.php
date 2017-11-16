@@ -157,6 +157,7 @@ class SimpleTest extends TestCase
         $pipeline = new Simple(new \ArrayIterator([]));
 
         $pipeline->map(function ($i) {
+            $this->fail();
             // never gets called
             yield $i + 1;
         });
