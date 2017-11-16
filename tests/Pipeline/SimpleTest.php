@@ -165,6 +165,33 @@ class SimpleTest extends TestCase
         $this->assertEquals(0, $pipeline->reduce());
     }
 
+    public function testPipelineInPipeline()
+    {
+        $pipeline1 = new Simple(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline1->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $pipeline2 = new Simple();
+        $pipeline2->map($pipeline1);
+        $pipeline2->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
+
+        $a = new Simple();
+        $a->map(function () {
+            yield 1;
+            yield 2;
+        });
+
+        $b = new Simple();
+        $b->map($a);
+        $this->assertEquals(3, $b->reduce());
+    }
+
     private $double;
     private $plusone;
 

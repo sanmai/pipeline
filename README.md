@@ -129,7 +129,7 @@ Keys for yielded values are not being kept. This may change in the future, but t
 
 # Methods
 
-## `__construct`
+## `__construct()`
 
 Takes an insance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
 
@@ -174,14 +174,31 @@ Simple pipeline has a default callback that sums all values.
 
 ## `getIterator()`
 
-A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator. Therefore this should work without errors:
+A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
 
     $pipeline = new \Pipeline\Simple();
     foreach ($pipeline as $value) {
         // no errors here
     }
 
-## Another example
+This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
+
+## `__invoke()`
+
+Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
+
+	$a = new Simple();
+	$a->map(function () {
+	    yield 1;
+	    yield 2;
+	});
+	
+	$b = new Simple();
+	$b->map($a);
+	var_dump($b->reduce());
+	// int(3)
+
+# Showcase
 
     $pipeline = new \Pipeline\Simple();
 

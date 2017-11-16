@@ -53,4 +53,16 @@ class ErrorsTest extends TestCase
             return 0;
         });
     }
+
+    public function testObjectNotGenerator()
+    {
+        $this->expectException(\AssertionError::class);
+
+        $pipeline = new Simple();
+        $pipeline->map($this);
+    }
+
+    public function __invoke()
+    {
+    }
 }
