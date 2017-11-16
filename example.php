@@ -62,4 +62,3 @@ $value = $pipeline->reduce(function ($a, $b) {
 
 var_dump($value);
 // int(104)
-
