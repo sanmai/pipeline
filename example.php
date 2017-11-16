@@ -19,39 +19,47 @@ include 'vendor/autoload.php';
 
 $pipeline = new \Pipeline\Simple();
 
+// initial generator
 $pipeline->map(function () {
     foreach (range(1, 3) as $i) {
         yield $i;
     }
 });
 
+// next processing step
 $pipeline->map(function ($i) {
     yield pow($i, 2);
     yield pow($i, 3);
 });
 
+// simple one-to-one mapper
 $pipeline->map(function ($i) {
-    yield $i - 1;
+    return $i - 1;
 });
 
+// one-to-many generator
 $pipeline->map(function ($i) {
     yield $i * 2;
     yield $i * 4;
 });
 
+// one way to filter
 $pipeline->map(function ($i) {
     if ($i > 50) {
         yield $i;
     }
 });
 
+// this uses a filtering iterator from SPL under the hood
 $pipeline->filter(function ($i) {
     return $i > 100;
 });
 
+// default reducer from the simple pipeline, for the sake of convenience
 $value = $pipeline->reduce(function ($a, $b) {
     return $a + $b;
 }, 0);
 
-// int(104)
 var_dump($value);
+// int(104)
+

@@ -104,51 +104,6 @@ Test with ease:
 
 Pretty neat, eh?
 
-## Another example
-
-    $pipeline = new \Pipeline\Simple();
-
-    // initial generator
-    $pipeline->map(function () {
-        foreach (range(1, 3) as $i) {
-            yield $i;
-        }
-    });
-
-    // next processing test
-    $pipeline->map(function ($i) {
-        yield pow($i, 2);
-        yield pow($i, 3);
-    });
-
-    $pipeline->map(function ($i) {
-        return $i - 1;
-    });
-
-    $pipeline->map(function ($i) {
-        yield $i * 2;
-        yield $i * 4;
-    });
-
-    // one way to filter    
-    $pipeline->map(function ($i) {
-        if ($i > 50) {
-            yield $i;
-        }
-    });
-
-    $pipeline->filter(function ($i) {
-        return $i > 100;
-    });
-
-    // for the sake of convenience    
-    $value = $pipeline->reduce(function ($a, $b) {
-        return $a + $b;
-    }, 0);
-
-    var_dump($value);
-    // int(104)
-
 # Install
 
     composer require sanmai/pipeline
@@ -182,27 +137,40 @@ Takes an insance of `Traversable` or none. In the latter case the pipeline must 
 
 Takes a processing stage in a form of a generator function or a plain mapping function. Can also take an initial generator, where it must not require any arguments.
 
-    $pipeline->filter(function (Customer $customer) {
+    $pipeline->map(function (Customer $customer) {
         foreach ($customer->allPayments() as $item) {
             yield $item;
         }
     });
+    
+Can also take an initial generator, where it must not require any arguments.
+
+    $pipeline = new \Pipeline\Simple();
+    $pipeline->map(function () {
+        yield $this->foo;
+        yield $this->bar;
+    });
 
 ## `filter()`
 
-Takes a filter callback not unlike that of `array_filter`. Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
+Takes a filter callback not unlike that of `array_filter`.
 
     $pipeline->filter(function ($item) {
         return $item->isGood() && $item->amount > 0;
     });
+    
+Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
 ## `reduce()`
 
-Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item. As a second argument it can take an inital value. Simple pipeline has a default callback that sums all values.
+Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item. 
+As a second argument it can take an inital value.
 
     $total = $pipeline->reduce(function ($curry, $item) {
         return $curry + $item->amount;
     }, 0);
+
+Simple pipeline has a default callback that sums all values.
 
 ## `getIterator()`
 
@@ -212,6 +180,54 @@ A method to conform to the `Traversable` interface. In case of unprimed `\Pipeli
     foreach ($pipeline as $value) {
         // no errors here
     }
+
+## Another example
+
+    $pipeline = new \Pipeline\Simple();
+
+    // initial generator
+    $pipeline->map(function () {
+        foreach (range(1, 3) as $i) {
+            yield $i;
+        }
+    });
+
+    // next processing step
+    $pipeline->map(function ($i) {
+        yield pow($i, 2);
+        yield pow($i, 3);
+    });
+
+    // simple one-to-one mapper
+    $pipeline->map(function ($i) {
+        return $i - 1;
+    });
+
+    // one-to-many generator
+    $pipeline->map(function ($i) {
+        yield $i * 2;
+        yield $i * 4;
+    });
+
+    // one way to filter
+    $pipeline->map(function ($i) {
+        if ($i > 50) {
+            yield $i;
+        }
+    });
+
+    // this uses a filtering iterator from SPL under the hood
+    $pipeline->filter(function ($i) {
+        return $i > 100;
+    });
+
+    // default reducer from the simple pipeline, for the sake of convenience    
+    $value = $pipeline->reduce(function ($a, $b) {
+        return $a + $b;
+    }, 0);
+
+    var_dump($value);
+    // int(104)
 
 # General purpose collection pipelines
 
