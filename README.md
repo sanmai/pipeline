@@ -252,7 +252,7 @@ Returns a generator with all values currently in the pipeline. Allows to connect
 
 Contributions to documentation and test cases are welcome.
 
-I am very reluctant to change the API. It should stay as simple as it is. Do not expect PRs with utility functions to get accepted.
+API is expected to stay as simple as it is. Do not expect a PR with utility functions to get accepted.
 
 # About collection pipelines in general
 
@@ -260,9 +260,9 @@ What about alternatives? How are they different?
 
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
-- [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Lots of utility functions for those who need them: they're out of scope for this project.
+- [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Has lots of utility functions for those who need them: they're out of scope for this project.
 
-- [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you admire transducers from Clojure. API is not very PHP-esque. Read as not super friendly. ([Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
+- [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 
 - Submit PR to add yours.
 
