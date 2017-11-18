@@ -109,18 +109,20 @@ Pretty neat, eh?
 
     composer require sanmai/pipeline
 
-# Common pitfalls
+# Known caveats
 
-Make sure you consume the results.
+- Since all callback are lazily evaluated as more data coming in and out, make sure you consume the results.
 
-    foreach ($pipeline as $result) {
-        // Processing happens only if you consume the results.
-        // Want to stop early after few results? Not a problem here!
-    }
+        foreach ($pipeline as $result) {
+            // Processing happens only if you consume the results.
+            // Want to stop early after few results? Not a problem here!
+        }
 
-Nothing will happen unless you use the results. That's the point of having lazy evaluation.
+  Nothing will happen unless you use the results. That's the point of having lazy evaluation.
 
-Keys for yielded values are not being kept. This may change in the future, but that is for now.
+- Keys for yielded values are not being kept. This may change in the future, but that is for now.
+
+- The resulting pipeline is an iterator and by default is not rewindable.
 
 # Classes and interfaces
 
