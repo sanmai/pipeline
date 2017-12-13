@@ -62,3 +62,23 @@ $value = $pipeline->reduce(function ($a, $b) {
 
 var_dump($value);
 // int(104)
+
+// now with League\Pipeline
+$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
+    return $payload + 1;
+})->pipe(function ($payload) {
+    return $payload * 2;
+});
+
+$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+$pipeline->map($leaguePipeline);
+
+var_dump(iterator_to_array($pipeline));
+// array(3) {
+//   [0] =>
+//     int(22)
+//   [1] =>
+//     int(42)
+//   [2] =>
+//     int(62)
+// }
