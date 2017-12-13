@@ -105,6 +105,22 @@ Test with ease:
 
 Pretty neat, eh?
 
+Heck, you can even pass on an instance of [League\Pipeline](https://github.com/thephpleague/pipeline) to batch-process a collection of values, not just a single value it can usually handle:
+
+	$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
+	    return $payload + 1;
+	})->pipe(function ($payload) {
+	    return $payload * 2;
+	});
+	
+	$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+	$pipeline->map($leaguePipeline);
+	
+	foreach ($pipeline as $result) {
+	    echo "$result,";
+	}
+	// prints 22,42,62,
+
 # Install
 
     composer require sanmai/pipeline
