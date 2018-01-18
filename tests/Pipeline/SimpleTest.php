@@ -157,11 +157,39 @@ class SimpleTest extends TestCase
         $pipeline = new Simple(new \ArrayIterator([]));
 
         $pipeline->map(function ($i) {
+            $this->fail();
             // never gets called
             yield $i + 1;
         });
 
         $this->assertEquals(0, $pipeline->reduce());
+    }
+
+    public function testPipelineInPipeline()
+    {
+        $pipeline1 = new Simple(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline1->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $pipeline2 = new Simple();
+        $pipeline2->map($pipeline1);
+        $pipeline2->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
+
+        $foo = new Simple();
+        $foo->map(function () {
+            yield 1;
+            yield 2;
+        });
+
+        $bar = new Simple();
+        $bar->map($foo);
+        $this->assertEquals(3, $bar->reduce());
     }
 
     private $double;

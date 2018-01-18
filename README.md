@@ -1,9 +1,10 @@
 [![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7484f26ddbfd42ebb6f0eac92e68d04d)](https://www.codacy.com/app/sanmai/pipeline?utm_source=github.com&utm_medium=referral&utm_content=sanmai/pipeline&utm_campaign=badger)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
-Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example of a pyramid of doom:
+Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
 
 	foreach ($obj->generator() as $val) {
 	    if ($val->a || $val->foo() == 3) {
@@ -65,7 +66,7 @@ So, how do you solve this problem? Pipeline to the rescue!
 
 # Pipeline
 
-With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions.
+With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions. Want to know average shipping delay for these three warehouses for orders made during previous sale? Map matching orders into shipments, exclude unwanted warehouses, map shipments into dates and timings, sum and divide. Done!
 
 Take a single step and write a generator or a function for it:
 
@@ -104,22 +105,40 @@ Test with ease:
 
 Pretty neat, eh?
 
+Heck, you can even pass on an instance of [League\Pipeline](https://github.com/thephpleague/pipeline) to batch-process a collection of values, not just a single value it can usually handle:
+
+	$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
+	    return $payload + 1;
+	})->pipe(function ($payload) {
+	    return $payload * 2;
+	});
+	
+	$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+	$pipeline->map($leaguePipeline);
+	
+	foreach ($pipeline as $result) {
+	    echo "$result,";
+	}
+	// prints 22,42,62,
+
 # Install
 
     composer require sanmai/pipeline
 
-# Common pitfalls
+# Known caveats
 
-Make sure you consume the results.
+- Since all callback are lazily evaluated as more data coming in and out, make sure you consume the results.
 
-    foreach ($pipeline as $result) {
-        // Processing happens only if you consume the results.
-        // Want to stop early after few results? Not a problem here!
-    }
+        foreach ($pipeline as $result) {
+            // Processing happens only if you consume the results.
+            // Want to stop early after few results? Not a problem here!
+        }
 
-Nothing will happen unless you use the results. That's the point of having lazy evaluation.
+  Nothing will happen unless you use the results. That's the point of having lazy evaluation.
 
-Keys for yielded values are not being kept. This may change in the future, but that is for now.
+- Keys for yielded values are not being kept. This may change in the future, but that is for now.
+
+- The resulting pipeline is an iterator and by default is not rewindable.
 
 # Classes and interfaces
 
@@ -129,7 +148,7 @@ Keys for yielded values are not being kept. This may change in the future, but t
 
 # Methods
 
-## `__construct`
+## `__construct()`
 
 Takes an insance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
 
@@ -174,14 +193,32 @@ Simple pipeline has a default callback that sums all values.
 
 ## `getIterator()`
 
-A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator. Therefore this should work without errors:
+A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
 
     $pipeline = new \Pipeline\Simple();
     foreach ($pipeline as $value) {
         // no errors here
     }
 
-## Another example
+This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
+
+## `__invoke()`
+
+Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
+
+	$foo = new Simple();
+	$foo->map(function () {
+	    yield 1;
+	    yield 2;
+	});
+	
+	$bar = new Simple();
+	$bar->map($foo);
+	$this->assertEquals(3, $bar->reduce());
+	var_dump($bar->reduce());
+	// int(3)
+
+# Showcase
 
     $pipeline = new \Pipeline\Simple();
 
@@ -229,15 +266,21 @@ A method to conform to the `Traversable` interface. In case of unprimed `\Pipeli
     var_dump($value);
     // int(104)
 
-# General purpose collection pipelines
+# Contributions
+
+Contributions to documentation and test cases are welcome.
+
+API is expected to stay as simple as it is. Do not expect a PR with utility functions to get accepted.
+
+# About collection pipelines in general
 
 What about alternatives? How are they different?
 
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
-- [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Lots of utility functions for those who need them: they're out of scope for this project.
+- [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Has lots of utility functions for those who need them: they're out of scope for this project.
 
-- [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you admire transducers from Clojure. API is not very PHP-esque. Read as not super friendly. ([Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
+- [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 
 - Submit PR to add yours.
 

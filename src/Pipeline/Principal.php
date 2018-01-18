@@ -43,8 +43,7 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
-        assert($this->pipeline || (new \ReflectionFunction($func))->isGenerator(), 'Initial callback must be a generator');
-        assert($this->pipeline || (new \ReflectionFunction($func))->getNumberOfRequiredParameters() == 0, 'Initial generator must not require parameters');
+        assert($this->pipeline || $this->verifyInitialGenerator($func), 'Initial callback must be a generator and must not require any parameters.');
 
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
@@ -95,5 +94,31 @@ abstract class Principal implements Interfaces\Pipeline
         }
 
         return $initial;
+    }
+
+    public function __invoke()
+    {
+        foreach ($this as $value) {
+            yield $value;
+        }
+    }
+
+    /**
+     * Verifies an initial generator be it a function or an object. Only gets called if assertions are enabled.
+     *
+     * @param callable $func
+     *
+     * @return bool
+     */
+    private function verifyInitialGenerator(callable $func)
+    {
+        if (is_object($func) && !($func instanceof \Closure)) {
+            // even if a closure is a generator, its __invoke method is not
+            $reflection = new \ReflectionMethod($func, '__invoke');
+        } else {
+            $reflection = new \ReflectionFunction($func);
+        }
+
+        return $reflection->isGenerator() && $reflection->getNumberOfRequiredParameters() == 0;
     }
 }
