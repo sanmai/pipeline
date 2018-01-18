@@ -92,7 +92,7 @@ Get results for the first rows immediately.
     foreach ($pipeline as $result) {
         echo "$result,";
     }
-    // immediately stats printing 4,8,12,...
+    // immediately starts printing 4,8,12,...
 
 Test with ease:
 
