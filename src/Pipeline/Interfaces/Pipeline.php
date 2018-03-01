@@ -22,14 +22,14 @@ interface Pipeline extends \IteratorAggregate
     /**
      * @param callable $func
      *
-     * @return PipelineInterface
+     * @return Pipeline
      */
     public function map(callable $func);
 
     /**
      * @param callable $func - must yield values (return a generator)
      *
-     * @return PipelineInterface
+     * @return Pipeline
      */
     public function filter(callable $func);
 
