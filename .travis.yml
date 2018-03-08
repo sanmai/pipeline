@@ -6,17 +6,24 @@ php:
   - 7.1
   - 7.2
 
+env:
+  global:
+    - PHAN_DISABLE_XDEBUG_WARN=1
+
 cache:
   directories:
     - $HOME/.composer
     - build/cache
 
 install:
+  - pecl install ast
   - composer install --prefer-dist
 
 script:
+  - composer validate
   - vendor/bin/phpunit --verbose || travis_terminate 1
   - mkdir -p build/cache && vendor/bin/php-cs-fixer --cache-file=build/cache/.php_cs.cache --diff --dry-run --stop-on-violation --verbose fix
+  - vendor/bin/phan --init --init-level=1 --init-overwrite > /dev/null && vendor/bin/phan
 
 after_success:
   - travis_retry php vendor/bin/coveralls

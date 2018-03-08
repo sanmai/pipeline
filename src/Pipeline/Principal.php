@@ -34,7 +34,7 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Optional source of data.
      *
-     * @param \Traversable $input
+     * @param \Traversable|null $input
      */
     public function __construct(\Traversable $input = null)
     {
