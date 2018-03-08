@@ -43,18 +43,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
-        // verify that an initial generator does not require any parameters whatsoever
-        assert($this->pipeline || 0 == call_user_func(function () use ($func) {
-            if ($func instanceof \Closure || !is_object($func)) {
-                // even if a closure is a generator, its __invoke method is not;
-                // therefore we should consider a closure as a function
-                return (new \ReflectionFunction($func))->getNumberOfRequiredParameters();
-            }
-
-            // objects go by their magic method
-            return (new \ReflectionMethod($func, '__invoke'))->getNumberOfRequiredParameters();
-        }), 'Initial callback must not require any parameters.');
-
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
 

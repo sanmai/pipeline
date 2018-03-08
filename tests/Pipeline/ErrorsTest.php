@@ -17,27 +17,14 @@
 
 namespace Pipeline;
 
+use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 class ErrorsTest extends TestCase
 {
-    protected function setUp()
+    public function testInvalidInitialGeneratorWithArguments()
     {
-        if (ini_get('zend.assertions') != 1 || ini_get('assert.exception') != 1) {
-            $this->markTestSkipped('This test case requires internal assertions to throw up.');
-        }
-    }
-
-    public function testAssertFalse()
-    {
-        $this->expectException(\AssertionError::class);
-        assert(false);
-    }
-
-    public function testInvalidInitialGenerator()
-    {
-        $this->expectException(\AssertionError::class);
-        $this->expectExceptionMessage('Initial callback must not require any parameters.');
+        $this->expectException(Warning::class);
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
