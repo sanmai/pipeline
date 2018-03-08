@@ -23,8 +23,8 @@ class ErrorsTest extends TestCase
 {
     protected function setUp()
     {
-        if (ini_get('zend.assertions') != 1) {
-            $this->markTestSkipped('This test case requires internal assertions being enabled');
+        if (ini_get('zend.assertions') != 1 || ini_get('assert.exception') != 1) {
+            $this->markTestSkipped('This test case requires internal assertions to throw up.');
         }
     }
 
@@ -37,34 +37,11 @@ class ErrorsTest extends TestCase
     public function testInvalidInitialGenerator()
     {
         $this->expectException(\AssertionError::class);
+        $this->expectExceptionMessage('Initial callback must not require any parameters.');
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
-            // Shall never be called
-            $this->fail();
-            yield $a;
+            $this->fail('Shall never be called');
         });
-    }
-
-    public function testNotGenerator()
-    {
-        $this->expectException(\AssertionError::class);
-
-        $pipeline = new Simple();
-        $pipeline->map(function () {
-            return 0;
-        });
-    }
-
-    public function testObjectNotGenerator()
-    {
-        $this->expectException(\AssertionError::class);
-
-        $pipeline = new Simple();
-        $pipeline->map($this);
-    }
-
-    public function __invoke()
-    {
     }
 }

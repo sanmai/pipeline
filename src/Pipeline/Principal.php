@@ -43,10 +43,29 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
-        assert($this->pipeline || $this->verifyInitialGenerator($func), 'Initial callback must be a generator and must not require any parameters.');
+        // verify that an initial generator does not require any parameters whatsoever
+        assert($this->pipeline || 0 == call_user_func(function () use ($func) {
+            if ($func instanceof \Closure || !is_object($func)) {
+                // even if a closure is a generator, its __invoke method is not;
+                // therefore we should consider a closure as a function
+                return (new \ReflectionFunction($func))->getNumberOfRequiredParameters();
+            }
+
+            // objects go by their magic method
+            return (new \ReflectionMethod($func, '__invoke'))->getNumberOfRequiredParameters();
+        }), 'Initial callback must not require any parameters.');
 
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
+
+            // Not a generator means we were given a simple value to be treated as an array
+            if (!($this->pipeline instanceof \Generator)) {
+                // We do not cast to an array here because casting a null to an array results in
+                // an empty array; that's surprising and not how map() works in other cases
+                $this->pipeline = new \ArrayIterator([
+                    $this->pipeline,
+                ]);
+            }
 
             return $this;
         }
@@ -101,24 +120,5 @@ abstract class Principal implements Interfaces\Pipeline
         foreach ($this as $value) {
             yield $value;
         }
-    }
-
-    /**
-     * Verifies an initial generator be it a function or an object. Only gets called if assertions are enabled.
-     *
-     * @param callable $func
-     *
-     * @return bool
-     */
-    private function verifyInitialGenerator(callable $func)
-    {
-        if (is_object($func) && !($func instanceof \Closure)) {
-            // even if a closure is a generator, its __invoke method is not
-            $reflection = new \ReflectionMethod($func, '__invoke');
-        } else {
-            $reflection = new \ReflectionFunction($func);
-        }
-
-        return $reflection->isGenerator() && $reflection->getNumberOfRequiredParameters() == 0;
     }
 }
