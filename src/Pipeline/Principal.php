@@ -58,8 +58,7 @@ abstract class Principal implements Interfaces\Pipeline
             return $this;
         }
 
-        $previous = $this->pipeline;
-        $this->pipeline = call_user_func(function () use ($previous, $func) {
+        $this->pipeline = (function ($previous) use ($func) {
             foreach ($previous as $value) {
                 $result = $func($value);
                 if ($result instanceof \Generator) {
@@ -74,7 +73,7 @@ abstract class Principal implements Interfaces\Pipeline
                     yield $result;
                 }
             }
-        });
+        })($this->pipeline);
 
         return $this;
     }
