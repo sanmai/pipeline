@@ -23,6 +23,20 @@ namespace Pipeline;
 class Simple extends Principal
 {
     /**
+     * An extra variant of `map` which unpacks arrays into arguments.
+     *
+     * @param callable $func
+     *
+     * @return self
+     */
+    public function unpack(callable $func)
+    {
+        return $this->map(function (/* iterable */ $args) use ($func) {
+            return $func(...$args);
+        });
+    }
+
+    /**
      * With no callback drops all null and false values (not unlike array_filter defaults).
      */
     public function filter(callable $func = null)
