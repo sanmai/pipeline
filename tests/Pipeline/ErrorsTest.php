@@ -24,7 +24,11 @@ class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments()
     {
-        $this->expectException(Warning::class);
+        if (class_exists(\ArgumentCountError::class)) { // since PHP 7.1
+            $this->expectException(\ArgumentCountError::class);
+        } else {
+            $this->expectException(Warning::class);
+        }
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
