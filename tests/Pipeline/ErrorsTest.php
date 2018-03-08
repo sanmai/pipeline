@@ -24,7 +24,11 @@ class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments()
     {
-        if (class_exists(\ArgumentCountError::class)) { // since PHP 7.1
+        // PHP 7.1+ fails with: Too few arguments to function...
+        // PHP 7.0 fails with: Missing argument 1 for...
+        $this->expectExceptionMessage('argument');
+
+        if (class_exists(\ArgumentCountError::class)) {
             $this->expectException(\ArgumentCountError::class);
         } else {
             $this->expectException(Warning::class);
