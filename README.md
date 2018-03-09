@@ -69,53 +69,57 @@ var_dump($value);
 
 Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
 
-	foreach ($obj->generator() as $val) {
-	    if ($val->a || $val->foo() == 3) {
-	        foreach ($val->bar as $b) {
-	            if ($b->keys) {
-	                foreach ($b->keys as $key) {
-	                    if ($key->name == "foo") {
-	                        foreach ($b->assoc[$key->id] as $foo) {
-	                            // ...
-	                        }
-                            foreach ($b->uassoc[$key->id] as $foo) {
-                                // ...
-                            }
-	                    }
-	                }
-	            }
-	        }
-	    }
-	}
+```php
+foreach ($obj->generator() as $val) {
+    if ($val->a || $val->foo() == 3) {
+        foreach ($val->bar as $b) {
+            if ($b->keys) {
+                foreach ($b->keys as $key) {
+                    if ($key->name == "foo") {
+                        foreach ($b->assoc[$key->id] as $foo) {
+                            // ...
+                        }
+                           foreach ($b->uassoc[$key->id] as $foo) {
+                               // ...
+                           }
+                    }
+                }
+            }
+        }
+    }
+}
+```
 
 Now, you naturally want to break this monster down into manageable parts. You think you could do it like this:
 
-	$step1 = [];
-	foreach ($obj->generator() as $val) {
-	    if ($val->a || $val->foo() == 3) {
-	        $step1[] = $val->bar;
-	    }
-	}
+```php
+$step1 = [];
+foreach ($obj->generator() as $val) {
+    if ($val->a || $val->foo() == 3) {
+        $step1[] = $val->bar;
+    }
+}
 
-	$step2 = [];
-	foreach ($step1 as $b) {
-	    if ($b->keys) {
-	        $step2[] = $b->keys;
-	    }
-	}
+$step2 = [];
+foreach ($step1 as $b) {
+    if ($b->keys) {
+        $step2[] = $b->keys;
+    }
+}
 
-	$step3 = [];
-	foreach ($step2 as $key) {
-	    if ($key->name == "foo") {
-	        $step3[] = $b->assoc[$key->id];
-	        $step3[] = $b->uassoc[$key->id];
-	    }
-	}
+$step3 = [];
+foreach ($step2 as $key) {
+    if ($key->name == "foo") {
+        $step3[] = $b->assoc[$key->id];
+        $step3[] = $b->uassoc[$key->id];
+    }
+}
 
-	$step4 = [];
-	foreach ($step3 as $foo) {
-	    // ...
-	}
+$step4 = [];
+foreach ($step3 as $foo) {
+    // ...
+}
+```
 
 Indeed you made it somewhat simpler to understand, but this is still far from perfect. Three things come to mind:
 
@@ -133,60 +137,66 @@ With the pipeline, you could split just about any processing chain into a manage
 
 Take a single step and write a generator or a function for it:
 
-    $this->double = function ($value) {
-        return $value * 2;
-    };
+```php
+$this->double = function ($value) {
+    return $value * 2;
+};
 
-	$this->rowTotal = function (SomeType $value) {
-	    yield $value->price * $value->quantity;
-	};
+$this->rowTotal = function (SomeType $value) {
+    yield $value->price * $value->quantity;
+};
+```
 
 With type checks and magic of autocomplete! Apply it to the data:
 
-    $sourceData = new \ArrayIterator(range(1, 1000)); // can be any type of generator
+```php
+$sourceData = new \ArrayIterator(range(1, 1000)); // can be any type of generator
 
-    $pipeline = new \Pipeline\Simple($sourceData);
-    $pipeline->map($this->double);
-    // any number of times in any sequence
-    $pipeline->map($this->double);
+$pipeline = new \Pipeline\Simple($sourceData);
+$pipeline->map($this->double);
+// any number of times in any sequence
+$pipeline->map($this->double);
+```
 
 Get results for the first rows immediately.
 
-    foreach ($pipeline as $result) {
-        echo "$result,";
-    }
-    // immediately starts printing 4,8,12,...
+```php
+foreach ($pipeline as $result) {
+    echo "$result,";
+}
+// immediately starts printing 4,8,12,...
+```
 
 Test with ease:
 
-    $this->plusone = function ($value) {
-        yield $value;
-        yield $value + 1;
-    };
+```php
+$this->plusone = function ($value) {
+    yield $value;
+    yield $value + 1;
+};
 
-    $this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
+$this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
+```
 
 Pretty neat, eh?
 
-Heck, you can even pass on an instance of [League\Pipeline](https://github.com/thephpleague/pipeline) to batch-process a collection of values, not just a single value it can usually handle:
+You can even pass on an instance of [League\Pipeline](https://github.com/thephpleague/pipeline) to batch-process a collection of values, not just a single value it can usually handle:
 
-	$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
-	    return $payload + 1;
-	})->pipe(function ($payload) {
-	    return $payload * 2;
-	});
-	
-	$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
-	$pipeline->map($leaguePipeline);
-	
-	foreach ($pipeline as $result) {
-	    echo "$result,";
-	}
-	// prints 22,42,62,
+```php
+$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
+    return $payload + 1;
+})->pipe(function ($payload) {
+    return $payload * 2;
+});
 
-# Install
+$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+$pipeline->map($leaguePipeline);
 
-    composer require sanmai/pipeline
+foreach ($pipeline as $result) {
+    echo "$result,";
+}
+// prints 22,42,62,
+```
 
 # Known caveats
 
@@ -219,19 +229,23 @@ Takes an insance of `Traversable` or none. In the latter case the pipeline must 
 
 Takes a processing stage in a form of a generator function or a plain mapping function.
 
-    $pipeline->map(function (Customer $customer) {
-        foreach ($customer->allPayments() as $item) {
-            yield $item;
-        }
-    });
+```php
+$pipeline->map(function (Customer $customer) {
+    foreach ($customer->allPayments() as $item) {
+        yield $item;
+    }
+});
+```
 
 Can also take an initial generator, where it must not require any arguments.
 
-    $pipeline = new \Pipeline\Simple();
-    $pipeline->map(function () {
-        yield $this->foo;
-        yield $this->bar;
-    });
+```php
+$pipeline = new \Pipeline\Simple();
+$pipeline->map(function () {
+    yield $this->foo;
+    yield $this->bar;
+});
+```
 
 ## `unpack()`
 
@@ -239,20 +253,24 @@ An extra variant of `map` which unpacks arrays into arguments for a callback.
 
 Where with `map()` you would use:
 
-    $pipeline->map(function ($args) {
-        list ($a, $b) = $args;
+```php
+$pipeline->map(function ($args) {
+    list ($a, $b) = $args;
 
-        // and so on
-    });
+    // and so on
+});
+```
 
 With `unpack()` these things are done behind the scene for you:
 
-    $pipeline->map(function () {
-        yield [-1, [10, 20], new DateTime()];
-    });
-    $pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
-        // and so on
-    });
+```php
+$pipeline->map(function () {
+    yield [-1, [10, 20], new DateTime()];
+});
+$pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
+    // and so on
+});
+```
 
 You can have all kinds of standard type checks with ease too.
 
@@ -260,9 +278,11 @@ You can have all kinds of standard type checks with ease too.
 
 Takes a filter callback not unlike that of `array_filter`.
 
-    $pipeline->filter(function ($item) {
-        return $item->isGood() && $item->amount > 0;
-    });
+```php
+$pipeline->filter(function ($item) {
+    return $item->isGood() && $item->amount > 0;
+});
+```
 
 Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
@@ -271,9 +291,11 @@ Simple pipeline has a default callback with the same effect as in `array_filter`
 Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item.
 As a second argument it can take an inital value.
 
-    $total = $pipeline->reduce(function ($curry, $item) {
-        return $curry + $item->amount;
-    }, 0);
+```php
+$total = $pipeline->reduce(function ($curry, $item) {
+    return $curry + $item->amount;
+}, 0);
+```
 
 Simple pipeline has a default callback that sums all values.
 
@@ -281,10 +303,11 @@ Simple pipeline has a default callback that sums all values.
 
 A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
 
-    $pipeline = new \Pipeline\Simple();
-    foreach ($pipeline as $value) {
-        // no errors here
-    }
+```php
+$pipeline = new \Pipeline\Simple();
+foreach ($pipeline as $value) {
+    // no errors here
+}
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
 
@@ -292,17 +315,19 @@ This allows to skip type checks for return values if one has no results to retur
 
 Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
 
-	$foo = new Simple();
-	$foo->map(function () {
-	    yield 1;
-	    yield 2;
-	});
-	
-	$bar = new Simple();
-	$bar->map($foo);
-	$this->assertEquals(3, $bar->reduce());
-	var_dump($bar->reduce());
-	// int(3)
+```php
+$foo = new Simple();
+$foo->map(function () {
+    yield 1;
+    yield 2;
+});
+
+$bar = new Simple();
+$bar->map($foo);
+$this->assertEquals(3, $bar->reduce());
+var_dump($bar->reduce());
+// int(3)
+```
 
 # Contributions
 
