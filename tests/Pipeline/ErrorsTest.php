@@ -31,11 +31,13 @@ class ErrorsTest extends TestCase
         if (class_exists(\ArgumentCountError::class)) {
             $this->expectException(\ArgumentCountError::class);
         } else {
+            // fallback for PHP 7.0
             $this->expectException(Warning::class);
         }
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
+            // $a is intentionally left unused
             $this->fail('Shall never be called');
         });
     }
