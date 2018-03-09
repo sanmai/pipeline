@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2017 Alexey Kopytko <alexey@kopytko.com>
+ * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,20 @@ namespace Pipeline;
  */
 class Simple extends Principal
 {
+    /**
+     * An extra variant of `map` which unpacks arrays into arguments.
+     *
+     * @param callable $func
+     *
+     * @return self
+     */
+    public function unpack(callable $func)
+    {
+        return $this->map(function (/* iterable */ $args) use ($func) {
+            return $func(...$args);
+        });
+    }
+
     /**
      * With no callback drops all null and false values (not unlike array_filter defaults).
      */

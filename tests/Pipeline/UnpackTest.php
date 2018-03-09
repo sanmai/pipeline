@@ -15,29 +15,27 @@
  * limitations under the License.
  */
 
-namespace Pipeline\Interfaces;
+namespace Pipeline;
 
-interface Pipeline extends \IteratorAggregate
+use PHPUnit\Framework\TestCase;
+
+class UnpackTest extends TestCase
 {
-    /**
-     * @param callable $func
-     *
-     * @return Pipeline
-     */
-    public function map(callable $func);
+    public function testMapVector()
+    {
+        $pipeline = new \Pipeline\Simple();
 
-    /**
-     * @param callable $func - must yield values (return a generator)
-     *
-     * @return Pipeline
-     */
-    public function filter(callable $func);
+        $pipeline->map(function () {
+            yield [5, 7];
+            yield [13, 13];
+            yield [-1, 1];
+            yield [-5, -7];
+        });
 
-    /**
-     * @param callable $func    (mixed $carry, mixed $item)
-     * @param mixed    $initial
-     *
-     * @return mixed
-     */
-    public function reduce(callable $func, $initial);
+        $pipeline->unpack(function ($x, $y) {
+            return sqrt($x ** 2 + $y ** 2);
+        });
+
+        $this->assertEquals(37, round($pipeline->reduce()));
+    }
 }

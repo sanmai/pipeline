@@ -171,6 +171,26 @@ Can also take an initial generator, where it must not require any arguments.
         yield $this->bar;
     });
 
+## `unpack()`
+
+An extra variant of `map` which unpacks arrays into arguments for a callback.
+
+Where with `map()` you would use:
+
+    $pipeline->map(function ($args) {
+        list ($a, $b) = $args;
+        
+        // and so on
+    });
+
+With `unpack()` these things are done behind the scene for you:
+
+    $pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
+        // and so on
+    });
+
+You can have all kinds of standard type checks with ease too.
+
 ## `filter()`
 
 Takes a filter callback not unlike that of `array_filter`.
