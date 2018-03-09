@@ -55,9 +55,10 @@ $pipeline->filter(function ($i) {
     return $i > 100;
 });
 
-// default reducer from the simple pipeline, for the sake of convenience    
-$value = $pipeline->reduce(function ($a, $b) {
-    return $a + $b;
+// reduce to a single value; can be an array or any value
+$value = $pipeline->reduce(function ($carry, $item) {
+    // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
+    return $carry + $item;
 }, 0);
 
 var_dump($value);
