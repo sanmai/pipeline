@@ -39,8 +39,13 @@ $pipeline->map(function ($i) {
 
 // one-to-many generator
 $pipeline->map(function ($i) {
-    yield $i * 2;
-    yield $i * 4;
+    yield [$i, 2];
+    yield [$i, 4];
+});
+
+// mapper with arguments unpacked from an input array
+$pipeline->unpack(function ($i, $j) {
+    yield $i * $j;
 });
 
 // one way to filter

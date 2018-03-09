@@ -5,6 +5,67 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
+# Install
+
+    composer require sanmai/pipeline
+
+# Showcase
+
+```PHP
+$pipeline = new \Pipeline\Simple();
+
+// initial generator
+$pipeline->map(function () {
+    foreach (range(1, 3) as $i) {
+        yield $i;
+    }
+});
+
+// next processing step
+$pipeline->map(function ($i) {
+    yield pow($i, 2);
+    yield pow($i, 3);
+});
+
+// simple one-to-one mapper
+$pipeline->map(function ($i) {
+    return $i - 1;
+});
+
+// one-to-many generator
+$pipeline->map(function ($i) {
+    yield [$i, 2];
+    yield [$i, 4];
+});
+
+// mapper with arguments unpacked from an input array
+$pipeline->unpack(function ($i, $j) {
+    yield $i * $j;
+});
+
+// one way to filter
+$pipeline->map(function ($i) {
+    if ($i > 50) {
+        yield $i;
+    }
+});
+
+// this uses a filtering iterator from SPL under the hood
+$pipeline->filter(function ($i) {
+    return $i > 100;
+});
+
+// default reducer from the simple pipeline, for the sake of convenience    
+$value = $pipeline->reduce(function ($a, $b) {
+    return $a + $b;
+}, 0);
+
+var_dump($value);
+// int(104)
+```
+
+# Rationale
+
 Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
 
 	foreach ($obj->generator() as $val) {
@@ -128,16 +189,16 @@ Heck, you can even pass on an instance of [League\Pipeline](https://github.com/t
 
 # Known caveats
 
-- Since all callback are lazily evaluated as more data coming in and out, make sure you consume the results.
+- Since all callback are lazily evaluated as more data coming in and out, make sure you consume the results with a plain `foreach` or use a `reduce()`.
 
         foreach ($pipeline as $result) {
             // Processing happens only if you consume the results.
             // Want to stop early after few results? Not a problem here!
         }
 
-  Nothing will happen unless you use the results. That's the point of having lazy evaluation.
+  Nothing will happen unless you use the results. That's the point of lazy evaluation after all!
 
-- Keys for yielded values are not being kept. This may change in the future, but that is for now.
+- Keys for yielded values are not being kept to let you use `iterator_to_array()` on a pipeline [without any second thoughts](http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from).
 
 - The resulting pipeline is an iterator and by default is not rewindable.
 
@@ -155,14 +216,14 @@ Takes an insance of `Traversable` or none. In the latter case the pipeline must 
 
 ## `map()`
 
-Takes a processing stage in a form of a generator function or a plain mapping function. Can also take an initial generator, where it must not require any arguments.
+Takes a processing stage in a form of a generator function or a plain mapping function.
 
     $pipeline->map(function (Customer $customer) {
         foreach ($customer->allPayments() as $item) {
             yield $item;
         }
     });
-    
+
 Can also take an initial generator, where it must not require any arguments.
 
     $pipeline = new \Pipeline\Simple();
@@ -179,12 +240,15 @@ Where with `map()` you would use:
 
     $pipeline->map(function ($args) {
         list ($a, $b) = $args;
-        
+
         // and so on
     });
 
 With `unpack()` these things are done behind the scene for you:
 
+    $pipeline->map(function () {
+        yield [-1, [10, 20], new DateTime()];
+    });
     $pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
         // and so on
     });
@@ -198,12 +262,12 @@ Takes a filter callback not unlike that of `array_filter`.
     $pipeline->filter(function ($item) {
         return $item->isGood() && $item->amount > 0;
     });
-    
+
 Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
 ## `reduce()`
 
-Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item. 
+Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item.
 As a second argument it can take an inital value.
 
     $total = $pipeline->reduce(function ($curry, $item) {
@@ -238,54 +302,6 @@ Returns a generator with all values currently in the pipeline. Allows to connect
 	$this->assertEquals(3, $bar->reduce());
 	var_dump($bar->reduce());
 	// int(3)
-
-# Showcase
-
-    $pipeline = new \Pipeline\Simple();
-
-    // initial generator
-    $pipeline->map(function () {
-        foreach (range(1, 3) as $i) {
-            yield $i;
-        }
-    });
-
-    // next processing step
-    $pipeline->map(function ($i) {
-        yield pow($i, 2);
-        yield pow($i, 3);
-    });
-
-    // simple one-to-one mapper
-    $pipeline->map(function ($i) {
-        return $i - 1;
-    });
-
-    // one-to-many generator
-    $pipeline->map(function ($i) {
-        yield $i * 2;
-        yield $i * 4;
-    });
-
-    // one way to filter
-    $pipeline->map(function ($i) {
-        if ($i > 50) {
-            yield $i;
-        }
-    });
-
-    // this uses a filtering iterator from SPL under the hood
-    $pipeline->filter(function ($i) {
-        return $i > 100;
-    });
-
-    // default reducer from the simple pipeline, for the sake of convenience    
-    $value = $pipeline->reduce(function ($a, $b) {
-        return $a + $b;
-    }, 0);
-
-    var_dump($value);
-    // int(104)
 
 # Contributions
 
