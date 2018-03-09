@@ -61,8 +61,10 @@ class Simple extends Principal
             return parent::reduce($func, $initial);
         }
 
-        return parent::reduce(function ($a, $b) {
-            return $a + $b;
+        return parent::reduce(function ($carry, $item) {
+            $carry += $item;
+
+            return $carry;
         }, 0);
     }
 

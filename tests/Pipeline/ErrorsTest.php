@@ -17,54 +17,26 @@
 
 namespace Pipeline;
 
+use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 class ErrorsTest extends TestCase
 {
-    protected function setUp()
+    public function testInvalidInitialGeneratorWithArguments()
     {
-        if (ini_get('zend.assertions') != 1) {
-            $this->markTestSkipped('This test case requires internal assertions being enabled');
+        // PHP 7.1+ fails with: Too few arguments to function...
+        // PHP 7.0 fails with: Missing argument 1 for...
+        $this->expectExceptionMessage('argument');
+
+        if (class_exists(\ArgumentCountError::class)) {
+            $this->expectException(\ArgumentCountError::class);
+        } else {
+            $this->expectException(Warning::class);
         }
-    }
-
-    public function testAssertFalse()
-    {
-        $this->expectException(\AssertionError::class);
-        assert(false);
-    }
-
-    public function testInvalidInitialGenerator()
-    {
-        $this->expectException(\AssertionError::class);
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
-            // Shall never be called
-            $this->fail();
-            yield $a;
+            $this->fail('Shall never be called');
         });
-    }
-
-    public function testNotGenerator()
-    {
-        $this->expectException(\AssertionError::class);
-
-        $pipeline = new Simple();
-        $pipeline->map(function () {
-            return 0;
-        });
-    }
-
-    public function testObjectNotGenerator()
-    {
-        $this->expectException(\AssertionError::class);
-
-        $pipeline = new Simple();
-        $pipeline->map($this);
-    }
-
-    public function __invoke()
-    {
     }
 }

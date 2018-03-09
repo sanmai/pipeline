@@ -220,4 +220,35 @@ class SimpleTest extends TestCase
 
         $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], iterator_to_array($pipeline));
     }
+
+    public function testInitialCallbackNotGenerator()
+    {
+        $pipeline = new Simple();
+        $pipeline->map(function () {
+            return PHP_INT_MAX;
+        });
+
+        $this->assertEquals([PHP_INT_MAX], iterator_to_array($pipeline));
+    }
+
+    public function testInitialInvokeReturnsScalar()
+    {
+        $pipeline = new Simple();
+        $pipeline->map($this);
+
+        $this->assertEquals([null], iterator_to_array($pipeline));
+    }
+
+    public function testInvokeMaps()
+    {
+        $pipeline = new \Pipeline\Simple(new \ArrayIterator(range(1, 5)));
+        $pipeline->map($this);
+
+        $this->assertEquals(range(1, 5), iterator_to_array($pipeline));
+    }
+
+    public function __invoke($default = null)
+    {
+        return $default;
+    }
 }
