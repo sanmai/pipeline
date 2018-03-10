@@ -60,9 +60,10 @@ $pipeline->filter(function ($i) {
     return $i > 100;
 });
 
-// default reducer from the simple pipeline, for the sake of convenience
-$value = $pipeline->reduce(function ($a, $b) {
-    return $a + $b;
+// reduce to a single value; can be an array or any value
+$value = $pipeline->reduce(function ($carry, $item) {
+    // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
+    return $carry + $item;
 }, 0);
 
 var_dump($value);
@@ -78,7 +79,8 @@ $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
 $pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
-var_dump(iterator_to_array($pipeline));
+$result = iterator_to_array($pipeline);
+var_dump($result);
 // array(3) {
 //   [0] =>
 //     int(22)
