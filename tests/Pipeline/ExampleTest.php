@@ -19,6 +19,9 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @coversNothing
+ */
 class ExampleTest extends TestCase
 {
     public function testExample()

@@ -19,6 +19,10 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Pipeline\Simple
+ * @covers \Pipeline\Principal
+ */
 class SimpleTest extends TestCase
 {
     public function testEmpty()
