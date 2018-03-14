@@ -200,7 +200,7 @@ foreach ($pipeline as $result) {
 
 # Known caveats
 
-- Since all callback are lazily evaluated as more data coming in and out, make sure you consume the results with a plain `foreach` or use a `reduce()`.
+- Since all callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
 
         foreach ($pipeline as $result) {
             // Processing happens only if you consume the results.
@@ -218,6 +218,8 @@ foreach ($pipeline as $result) {
 - `\Pipeline\Simple` is the main user-facing class for the pipeline with sane defaults for most methods.
 - `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
 - Interface `Pipeline` defines three main functions all pipelines must bear.
+
+This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
 # Methods
 
@@ -337,7 +339,9 @@ API is expected to stay as simple as it is. Do not expect a PR with utility func
 
 # About collection pipelines in general
 
-What about alternatives? How are they different?
+[About pipelines in general](https://martinfowler.com/articles/collection-pipeline/) from Martin Fowler.
+
+What else is out there:
 
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
@@ -345,9 +349,11 @@ What about alternatives? How are they different?
 
 - [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 
-- Submit PR to add yours.
+- [Functional PHP](https://github.com/lstrojny/functional-php) is supposed to complement currently exisiting PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining. 
 
-[More about pipelines in general](https://martinfowler.com/articles/collection-pipeline/) from Martin Fowler.
+- [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
+
+- Submit a PR to add yours.
 
 
 # TODO
