@@ -31,6 +31,14 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([PHP_INT_MAX], iterator_to_array($pipeline));
     }
 
+    public function testStandardStringFunctions()
+    {
+        $pipeline = new Simple(new \ArrayIterator([1, 2, 'foo', 'bar']));
+        $pipeline->filter('is_int');
+
+        $this->assertEquals([1, 2], iterator_to_array($pipeline));
+    }
+
     public function testInitialInvokeReturnsScalar()
     {
         $pipeline = new Simple();
