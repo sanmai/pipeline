@@ -31,7 +31,7 @@ class Simple extends Principal
      */
     public function unpack(callable $func)
     {
-        return $this->map(function (/* iterable */ $args) use ($func) {
+        return $this->map(static function (/* iterable */ $args) use ($func) {
             return $func(...$args);
         });
     }
@@ -45,7 +45,7 @@ class Simple extends Principal
             return parent::filter($func);
         }
 
-        return parent::filter(function ($value) {
+        return parent::filter(static function ($value) {
             return (bool) $value;
         });
     }
@@ -61,7 +61,7 @@ class Simple extends Principal
             return parent::reduce($func, $initial);
         }
 
-        return parent::reduce(function ($carry, $item) {
+        return parent::reduce(static function ($carry, $item) {
             $carry += $item;
 
             return $carry;
