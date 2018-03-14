@@ -58,7 +58,7 @@ abstract class Principal implements Interfaces\Pipeline
             return $this;
         }
 
-        $this->pipeline = (function ($previous) use ($func) {
+        $this->pipeline = (static function ($previous) use ($func) {
             foreach ($previous as $value) {
                 $result = $func($value);
                 if ($result instanceof \Generator) {
