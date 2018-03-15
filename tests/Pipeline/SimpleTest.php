@@ -224,4 +224,31 @@ class SimpleTest extends TestCase
 
         $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], iterator_to_array($pipeline));
     }
+
+    public function testMethodChaining()
+    {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
+            return range(1, 3);
+        })->unpack(function ($a, $b, $c) {
+            yield $a;
+            yield $b;
+            yield $c;
+        })->map(function ($i) {
+            yield pow($i, 2);
+            yield pow($i, 3);
+        })->map(function ($i) {
+            return $i - 1;
+        })->map(function ($i) {
+            yield $i * 2;
+            yield $i * 4;
+        })->filter(function ($i) {
+            return $i > 50;
+        })->map(function ($i) {
+            return $i;
+        });
+
+        $this->assertEquals([52, 104], iterator_to_array($pipeline));
+    }
 }
