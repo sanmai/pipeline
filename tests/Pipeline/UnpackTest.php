@@ -19,6 +19,9 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Pipeline\Simple
+ */
 class UnpackTest extends TestCase
 {
     public function testMapVector()

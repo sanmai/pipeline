@@ -19,6 +19,9 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @coversNothing
+ */
 class LeaguePipelineTest extends TestCase
 {
     public function testWithLeaguePipeline()

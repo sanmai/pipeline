@@ -20,6 +20,9 @@ namespace Pipeline;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Pipeline\Simple
+ */
 class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments()

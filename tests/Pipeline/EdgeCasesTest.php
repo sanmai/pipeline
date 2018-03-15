@@ -19,6 +19,10 @@ namespace Pipeline;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \Pipeline\Simple
+ * @covers \Pipeline\Principal
+ */
 class EdgeCasesTest extends TestCase
 {
     public function testInitialCallbackNotGenerator()

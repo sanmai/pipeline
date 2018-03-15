@@ -58,7 +58,7 @@ abstract class Principal implements Interfaces\Pipeline
             return $this;
         }
 
-        $this->pipeline = (function ($previous) use ($func) {
+        $this->pipeline = (static function ($previous) use ($func) {
             foreach ($previous as $value) {
                 $result = $func($value);
                 if ($result instanceof \Generator) {
@@ -82,7 +82,7 @@ abstract class Principal implements Interfaces\Pipeline
     {
         // Strings usually are internal functions, which require exact number of parameters.
         if (is_string($func)) {
-            $func = function ($value) use ($func) {
+            $func = static function ($value) use ($func) {
                 return $func($value);
             };
         }
