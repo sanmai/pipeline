@@ -14,7 +14,8 @@
         "friendsofphp/php-cs-fixer": "^2.4",
         "codacy/coverage": "^1.4",
         "league/pipeline": "^0.3",
-        "phan/phan": "^0.12.1"
+        "phan/phan": "^0.12.1",
+        "infection/infection": "^0.8.1"
     },
     "license": "Apache-2.0",
     "minimum-stability": "dev",
