@@ -9,8 +9,8 @@
         }
     ],
     "require-dev": {
-        "phpunit/phpunit": "^6.1",
-        "satooshi/php-coveralls": "^1.0",
+        "phpunit/phpunit": ">=6",
+        "php-coveralls/php-coveralls": "^2.0",
         "friendsofphp/php-cs-fixer": "^2.4",
         "codacy/coverage": "^1.4",
         "league/pipeline": "^0.3",
