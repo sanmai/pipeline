@@ -22,14 +22,14 @@ interface Pipeline extends \IteratorAggregate
     /**
      * @param callable $func
      *
-     * @return Pipeline
+     * @return $this
      */
     public function map(callable $func);
 
     /**
      * @param callable $func - must yield values (return a generator)
      *
-     * @return Pipeline
+     * @return $this
      */
     public function filter(callable $func);
 
@@ -40,4 +40,11 @@ interface Pipeline extends \IteratorAggregate
      * @return mixed
      */
     public function reduce(callable $func, $initial);
+
+    /**
+     * Creates an array with all values from a pipeline.
+     *
+     * @return array
+     */
+    public function toArray();
 }

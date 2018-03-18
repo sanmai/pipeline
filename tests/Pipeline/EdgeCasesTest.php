@@ -51,6 +51,22 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([null], iterator_to_array($pipeline));
     }
 
+    public function testIteratorToArrayWithSameKeys()
+    {
+        $pipeline = new \Pipeline\Simple();
+        $pipeline->map(function () {
+            yield 1;
+            yield 2;
+        });
+
+        $pipeline->map(function ($i) {
+            yield $i + 1;
+            yield $i + 2;
+        });
+
+        $this->assertEquals([3, 4], iterator_to_array($pipeline));
+    }
+
     public function testInvokeMaps()
     {
         $pipeline = new \Pipeline\Simple(new \ArrayIterator(range(1, 5)));

@@ -28,6 +28,9 @@ class SimpleTest extends TestCase
     public function testEmpty()
     {
         $this->assertEquals([], iterator_to_array(new Simple()));
+
+        $pipeline = new Simple();
+        $this->assertEquals([], $pipeline->toArray());
     }
 
     public function testSingle()
@@ -59,7 +62,7 @@ class SimpleTest extends TestCase
             yield $i * 1000;
         });
 
-        $this->assertEquals([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], iterator_to_array($pipeline));
+        $this->assertEquals([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], $pipeline->toArray());
     }
 
     public function testTriple()
@@ -86,7 +89,7 @@ class SimpleTest extends TestCase
             }
         });
 
-        $this->assertEquals([52, 104], iterator_to_array($pipeline));
+        $this->assertEquals([52, 104], $pipeline->toArray());
     }
 
     public function testFilter()
@@ -109,7 +112,7 @@ class SimpleTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], array_values(iterator_to_array($pipeline)));
+        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], $pipeline->toArray());
     }
 
     public function testReduce()
@@ -222,7 +225,7 @@ class SimpleTest extends TestCase
         $pipeline->map($this->double);
         $pipeline->map($this->plusone);
 
-        $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], iterator_to_array($pipeline));
+        $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], $pipeline->toArray());
     }
 
     public function testMethodChaining()

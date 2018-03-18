@@ -27,7 +27,7 @@ class Simple extends Principal
      *
      * @param callable $func
      *
-     * @return self
+     * @return $this
      */
     public function unpack(callable $func)
     {
@@ -41,6 +41,13 @@ class Simple extends Principal
      */
     public function filter(callable $func = null)
     {
+        // Strings usually are internal functions, which require exact number of parameters.
+        if (is_string($func)) {
+            $func = static function ($value) use ($func) {
+                return $func($value);
+            };
+        }
+
         if ($func) {
             return parent::filter($func);
         }
@@ -79,5 +86,15 @@ class Simple extends Principal
         }
 
         return $iterator;
+    }
+
+    public function toArray()
+    {
+        // with non-primed pipeline just return empty array
+        if (!$iterator = parent::getIterator()) {
+            return [];
+        }
+
+        return parent::toArray();
     }
 }

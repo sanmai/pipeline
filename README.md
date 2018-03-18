@@ -210,7 +210,7 @@ foreach ($pipeline as $result) {
 
   Nothing will happen unless you use the results. That's the point of lazy evaluation after all!
 
-- Keys for yielded values are not being kept to let you use `iterator_to_array()` on a pipeline [without any second thoughts](http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from).
+- Keys for yielded values are being kept as is, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used.
 
 - The resulting pipeline is an iterator and by default is not rewindable.
 
@@ -301,6 +301,32 @@ $total = $pipeline->reduce(function ($curry, $item) {
 ```
 
 Simple pipeline has a default callback that sums all values.
+
+## `toArray()`
+
+Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
+
+```php
+$pipeline = new \Pipeline\Simple();
+
+// Yields [0 => 1, 1 => 2]
+$pipeline->map(function () {
+    yield 1;
+    yield 2;
+});
+
+// For each value yields [0 => $i + 1, 1 => $i + 2]
+$pipeline->map(function ($i) {
+    yield $i + 1;
+    yield $i + 2;
+});
+
+$result = $pipeline->toArray();
+// Since keys are ignored we get:
+// [2, 3, 3, 4]
+```
+
+If in the example about one would use `iterator_to_array($result)` he would get just `[3, 4]`.
 
 ## `getIterator()`
 

@@ -89,3 +89,32 @@ var_dump($result);
 //   [2] =>
 //     int(62)
 // }
+
+// Now an example for toArray()
+$pipeline = new \Pipeline\Simple();
+
+// Yields [0 => 1, 1 => 2]
+$pipeline->map(function () {
+    yield 1;
+    yield 2;
+});
+
+// For each value yields [0 => $i + 1, 1 => $i + 2]
+$pipeline->map(function ($i) {
+    yield $i + 1;
+    yield $i + 2;
+});
+
+$arrayResult = $pipeline->toArray();
+var_dump($arrayResult);
+// Since keys are discarded we get:
+// array(4) {
+//     [0] =>
+//     int(2)
+//     [1] =>
+//     int(3)
+//     [2] =>
+//     int(3)
+//     [3] =>
+//     int(4)
+// }

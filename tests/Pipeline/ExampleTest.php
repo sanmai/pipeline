@@ -29,6 +29,7 @@ class ExampleTest extends TestCase
         // These variables will be set inside example.php
         $value = null;
         $result = null;
+        $arrayResult = null;
 
         ob_start();
         include 'example.php';
@@ -36,5 +37,6 @@ class ExampleTest extends TestCase
 
         $this->assertSame(104, $value);
         $this->assertSame([22, 42, 62], $result);
+        $this->assertSame([2, 3, 3, 4], $arrayResult);
     }
 }

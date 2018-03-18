@@ -62,12 +62,7 @@ abstract class Principal implements Interfaces\Pipeline
             foreach ($previous as $value) {
                 $result = $func($value);
                 if ($result instanceof \Generator) {
-                    // `yield from` does not reset the keys
-                    // iterator_to_array() goes nuts, hence no use for us
-                    // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-                    foreach ($result as $value) {
-                        yield $value;
-                    }
+                    yield from $result;
                 } else {
                     // Case of a plain old mapping function
                     yield $result;
@@ -80,13 +75,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        // Strings usually are internal functions, which require exact number of parameters.
-        if (is_string($func)) {
-            $func = static function ($value) use ($func) {
-                return $func($value);
-            };
-        }
-
         $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
@@ -100,6 +88,13 @@ abstract class Principal implements Interfaces\Pipeline
         return $this->pipeline;
     }
 
+    public function toArray()
+    {
+        // Because `yield from` does not reset keys we have to ignore them on export to return every item.
+        // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
+        return iterator_to_array($this, false);
+    }
+
     public function reduce(callable $func, $initial = null)
     {
         foreach ($this as $value) {
@@ -111,8 +106,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function __invoke()
     {
-        foreach ($this as $value) {
-            yield $value;
-        }
+        yield from $this;
     }
 }
