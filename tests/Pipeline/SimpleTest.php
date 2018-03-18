@@ -28,6 +28,9 @@ class SimpleTest extends TestCase
     public function testEmpty()
     {
         $this->assertEquals([], iterator_to_array(new Simple()));
+
+        $pipeline = new Simple();
+        $this->assertEquals([], $pipeline->toArray());
     }
 
     public function testSingle()

@@ -80,4 +80,14 @@ class Simple extends Principal
 
         return $iterator;
     }
+
+    public function toArray()
+    {
+        // with non-primed pipeline just return empty array
+        if (!$iterator = parent::getIterator()) {
+            return [];
+        }
+
+        return parent::toArray();
+    }
 }
