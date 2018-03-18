@@ -40,4 +40,11 @@ interface Pipeline extends \IteratorAggregate
      * @return mixed
      */
     public function reduce(callable $func, $initial);
+
+    /**
+     * Creates an array with all values from a pipeline.
+     *
+     * @return array
+     */
+    public function toArray();
 }
