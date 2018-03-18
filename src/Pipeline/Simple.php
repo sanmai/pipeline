@@ -41,6 +41,13 @@ class Simple extends Principal
      */
     public function filter(callable $func = null)
     {
+        // Strings usually are internal functions, which require exact number of parameters.
+        if (is_string($func)) {
+            $func = static function ($value) use ($func) {
+                return $func($value);
+            };
+        }
+
         if ($func) {
             return parent::filter($func);
         }

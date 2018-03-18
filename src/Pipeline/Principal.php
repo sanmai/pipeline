@@ -75,13 +75,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        // Strings usually are internal functions, which require exact number of parameters.
-        if (is_string($func)) {
-            $func = static function ($value) use ($func) {
-                return $func($value);
-            };
-        }
-
         $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
