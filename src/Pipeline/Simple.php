@@ -27,7 +27,7 @@ class Simple extends Principal
      *
      * @param callable $func
      *
-     * @return self
+     * @return $this
      */
     public function unpack(callable $func)
     {
