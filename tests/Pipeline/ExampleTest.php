@@ -26,6 +26,10 @@ class ExampleTest extends TestCase
 {
     public function testExample()
     {
+        // These variables will be set inside example.php
+        $value = null;
+        $result = null;
+
         ob_start();
         include 'example.php';
         ob_end_clean();
