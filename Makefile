@@ -43,34 +43,38 @@ all: ci
 
 ci: SILENT=
 ci: prerequisites ci-phpunit ci-analyze
-	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --dry-run --stop-on-violation fix
 	$(SILENT) $(COMPOSER) validate --strict
 
-ci-phpunit: prerequisites
+ci-phpunit: ci-cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --quiet
 
-ci-analyze: prerequisites
+ci-analyze: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
+
+ci-cs: prerequisites
+	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --dry-run --stop-on-violation fix
 
 ##############################################################
 # Development Workflow                                       #
 ##############################################################
 
 test: phpunit analyze
-	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --diff fix
 	$(SILENT) $(COMPOSER) validate --strict
 
 test-prerequisites: prerequisites composer.lock
 
-phpunit: test-prerequisites
+phpunit: cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --log-verbosity=2 --show-mutations
 
-analyze: test-prerequisites
+analyze: cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS)
+
+cs: test-prerequisites
+	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --diff fix
 
 ##############################################################
 # Prerequisites Setup                                        #
