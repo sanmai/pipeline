@@ -43,6 +43,14 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
+        // If we know the callback is one of us, we can use a shortcut
+        // This also allows inheriting classes to replace the pipeline
+        if ($func instanceof self) {
+            $this->pipeline = call_user_func($func);
+
+            return $this;
+        }
+
         if (!$this->pipeline) {
             $this->pipeline = call_user_func($func);
 

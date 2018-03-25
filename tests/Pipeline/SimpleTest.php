@@ -181,8 +181,7 @@ class SimpleTest extends TestCase
         });
 
         $pipeline2 = new Simple();
-        $pipeline2->map($pipeline1);
-        $pipeline2->filter(function ($i) {
+        $pipeline2->map($pipeline1)->filter(function ($i) {
             return $i % 2 != 0;
         });
 

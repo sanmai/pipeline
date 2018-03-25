@@ -17,6 +17,7 @@
 
 namespace Pipeline;
 
+use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
@@ -25,23 +26,45 @@ use PHPUnit\Framework\TestCase;
  */
 class ErrorsTest extends TestCase
 {
+    private function expectExceptionFallback(string $exception, string $php70fallback)
+    {
+        if (class_exists($exception)) {
+            $this->expectException($exception);
+        } else {
+            // fallback for PHP 7.0
+            $this->expectException($php70fallback);
+        }
+    }
+
     public function testInvalidInitialGeneratorWithArguments()
     {
         // PHP 7.1+ fails with: Too few arguments to function...
         // PHP 7.0 fails with: Missing argument 1 for...
         $this->expectExceptionMessage('argument');
-
-        if (class_exists(\ArgumentCountError::class)) {
-            $this->expectException(\ArgumentCountError::class);
-        } else {
-            // fallback for PHP 7.0
-            $this->expectException(Warning::class);
-        }
+        $this->expectExceptionFallback(\ArgumentCountError::class, Warning::class);
 
         $pipeline = new Simple();
         $pipeline->map(function ($a) {
             // $a is intentionally left unused
             $this->fail('Shall never be called');
         });
+    }
+
+    public function testPipelineInPipelineUsesSelf()
+    {
+        $pipeline = new Simple(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $pipeline->map($pipeline)->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->expectExceptionMessage('Cannot resume an already running generator');
+        $this->expectExceptionFallback(\Error::class, Error::class);
+
+        $pipeline->reduce();
     }
 }
