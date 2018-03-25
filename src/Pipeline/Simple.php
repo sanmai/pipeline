@@ -38,6 +38,8 @@ class Simple extends Principal
 
     /**
      * With no callback drops all null and false values (not unlike array_filter defaults).
+     *
+     * @return $this
      */
     public function filter(callable $func = null)
     {
@@ -75,23 +77,12 @@ class Simple extends Principal
         }, 0);
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function toArray(): array
     {
-        // with non-primed pipeline just return empty iterator
-        if (!$iterator = parent::getIterator()) {
-            return new \ArrayIterator([]);
-        }
+        $iterator = parent::getIterator();
 
-        return $iterator;
-    }
-
-    public function toArray()
-    {
         // with non-primed pipeline just return empty array
-        if (!$iterator = parent::getIterator()) {
+        if ($iterator instanceof \EmptyIterator) {
             return [];
         }
 

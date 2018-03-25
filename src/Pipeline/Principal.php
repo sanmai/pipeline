@@ -27,16 +27,14 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Traversable
+     * @var iterable|null
      */
     private $pipeline;
 
     /**
-     * Optional source of data.
-     *
-     * @param \Traversable|null $input
+     * Contruction with an optional source of data.
      */
-    public function __construct(\Traversable $input = null)
+    public function __construct(iterable $input = null)
     {
         $this->pipeline = $input;
     }
@@ -88,15 +86,12 @@ abstract class Principal implements Interfaces\Pipeline
         return $this;
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
-        return $this->pipeline;
+        return $this->pipeline ?? new \EmptyIterator();
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         // Because `yield from` does not reset keys we have to ignore them on export to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
@@ -112,7 +107,7 @@ abstract class Principal implements Interfaces\Pipeline
         return $initial;
     }
 
-    public function __invoke()
+    public function __invoke(): iterable
     {
         yield from $this;
     }
