@@ -1,10 +1,7 @@
 [![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 [![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7484f26ddbfd42ebb6f0eac92e68d04d)](https://www.codacy.com/app/sanmai/pipeline?utm_source=github.com&utm_medium=referral&utm_content=sanmai/pipeline&utm_campaign=badger)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a1291887920116526e2a/maintainability)](https://codeclimate.com/github/sanmai/pipeline/maintainability)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
-[![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
 Pipeline makes creating do-it-yourself data pipelines easy by using chaining generators. Pipeline comes with the most important basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and iterators.
 
@@ -395,6 +392,12 @@ What else is out there:
 - [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
 
 - Submit a PR to add yours.
+
+# More badges
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7484f26ddbfd42ebb6f0eac92e68d04d)](https://www.codacy.com/app/sanmai/pipeline?utm_source=github.com&utm_medium=referral&utm_content=sanmai/pipeline&utm_campaign=badger)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a1291887920116526e2a/maintainability)](https://codeclimate.com/github/sanmai/pipeline/maintainability)
+[![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
 
 # TODO
