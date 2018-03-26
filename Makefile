@@ -94,5 +94,5 @@ composer.lock: composer.json
 	$(SILENT) $(COMPOSER) update && touch composer.lock
 
 .phan:
-	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=native
+	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=native > /dev/null
 
