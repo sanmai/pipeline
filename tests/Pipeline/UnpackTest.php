@@ -22,7 +22,7 @@ namespace Pipeline;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Pipeline\Simple
+ * @covers \Pipeline\Standard
  */
 class UnpackTest extends TestCase
 {

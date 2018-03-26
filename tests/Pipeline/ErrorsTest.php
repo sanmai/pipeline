@@ -24,7 +24,7 @@ use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Pipeline\Simple
+ * @covers \Pipeline\Standard
  */
 class ErrorsTest extends TestCase
 {

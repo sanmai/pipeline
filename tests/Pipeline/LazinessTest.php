@@ -22,7 +22,7 @@ namespace Pipeline;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Pipeline\Simple
+ * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
  */
 class LazinessTest extends TestCase
