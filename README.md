@@ -3,19 +3,24 @@
 [![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 
-Pipeline makes creating do-it-yourself data pipelines easy by using chaining generators. Pipeline comes with the most important basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and iterators.
+Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. 
 
-This rigorously tested library should just work. Pipeline never throws any exceptions. It has none whatsoever.
+Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
+
+This rigorously tested library just works. Pipeline never throws any exceptions.
 
 # In a nutshell
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes a callback that takes input value and may return or yield results. |  `array_map`, `select`                  |
-| `unpack()`  | Unpacks arrays into arguments for a callback. |  `flat_map`, `flatten`, `SelectMany`                |
-| `filter()`  | Filters elements. |  `array_filter`, `Where`                |
-| `reduce()`  | Reduces input values to a single value.   | `array_reduce`, `Aggregate`, `Sum` | 
-| `toArray()` | Returns an array with all values. | `dict`, `ToDictionary` |
+| `map()`     | Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. |  `array_map`, `Select`, `SelectMany`                  |
+| `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
+| `filter()`  | Removed elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `reduce()`  | Reduces input values to a single value. Defaults to summation.  | `array_reduce`, `Aggregate`, `Sum` | 
+| `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
+| `__construct()` | Can be provided with an optional iterator. |  |
+
+Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
 
 # Install
 
