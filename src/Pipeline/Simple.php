@@ -19,6 +19,11 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+/**
+ * Legacy alias from early days. Please do not remove.
+ *
+ * @deprecated
+ */
 class Simple extends Standard
 {
 }

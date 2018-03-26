@@ -29,7 +29,7 @@ Pipeline is an iterator and can be used as any other iterable. Implements `JsonS
 # Use
 
 ```PHP
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 
 // initial generator
 $pipeline->map(function () {
@@ -95,10 +95,10 @@ var_dump($value);
 
   Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
   
-- That said, something still happens as you add processing stages. Specifically, PHP will try to validate the very first generator by loading the very first value from it. As a workaround, it is possible to prepend a falsey value to an expensive generator, then filter it out.
+- That said, something still may happens as you add processing stages. Specifically, PHP may try to validate the very first generator by loading the very first value from it. As a workaround, it is possible to prepend a falsey value to an expensive generator, then filter it out.
 
     ```php
-    $pipeline = new Simple();
+    $pipeline = new \Pipeline\Standard();
     $pipeline->map(function () use ($veryExpensiveGenerator) {
         yield false;
         yield from $veryExpensiveGenerator;
@@ -118,7 +118,7 @@ var_dump($value);
 
 # Classes and interfaces
 
-- `\Pipeline\Simple` is the main user-facing class for the pipeline with sane defaults for most methods.
+- `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 - `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
 - Interface `Pipeline` defines three main functions all pipelines must bear.
 
@@ -145,7 +145,7 @@ $pipeline->map(function (Customer $customer) {
 Can also take an initial generator, where it must not require any arguments.
 
 ```php
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 $pipeline->map(function () {
     yield $this->foo;
     yield $this->bar;
@@ -189,7 +189,7 @@ $pipeline->filter(function ($item) {
 });
 ```
 
-Simple pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
+Standard pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
 ## `reduce()`
 
@@ -202,14 +202,14 @@ $total = $pipeline->reduce(function ($curry, $item) {
 }, 0);
 ```
 
-Simple pipeline has a default callback that sums all values.
+Standard pipeline has a default callback that sums all values.
 
 ## `toArray()`
 
 Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
 
 ```php
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 
 // Yields [0 => 1, 1 => 2]
 $pipeline->map(function () {
@@ -232,10 +232,10 @@ If in the example about one would use `iterator_to_array($result)` he would get 
 
 ## `getIterator()`
 
-A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Simple` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
+A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Standard` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
 
 ```php
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 foreach ($pipeline as $value) {
     // no errors here
 }
@@ -248,13 +248,13 @@ This allows to skip type checks for return values if one has no results to retur
 Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
 
 ```php
-$foo = new Simple();
+$foo = new \Pipeline\Standard();
 $foo->map(function () {
     yield 1;
     yield 2;
 });
 
-$bar = new Simple();
+$bar = new \Pipeline\Standard();
 $bar->map($foo);
 $this->assertEquals(3, $bar->reduce());
 var_dump($bar->reduce());
@@ -356,7 +356,7 @@ With type checks and magic of autocomplete! Apply it to the data:
 ```php
 $sourceData = new \ArrayIterator(range(1, 1000)); // can be any type of generator
 
-$pipeline = new \Pipeline\Simple($sourceData);
+$pipeline = new \Pipeline\Standard($sourceData);
 $pipeline->map($this->double);
 // any number of times in any sequence
 $pipeline->map($this->double);
@@ -393,7 +393,7 @@ $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
     return $payload * 2;
 });
 
-$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+$pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
 foreach ($pipeline as $result) {
