@@ -85,7 +85,7 @@ build/cache:
 vendor/bin:
 	$(SILENT) $(COMPOSER) install --prefer-dist
 
-composer.lock: vendor/bin
+composer.lock: vendor/autoload.php
 composer.lock: composer.json
 	$(SILENT) $(COMPOSER) update && touch composer.lock
 

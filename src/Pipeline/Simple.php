@@ -27,12 +27,16 @@ class Simple extends Principal
     /**
      * An extra variant of `map` which unpacks arrays into arguments.
      *
-     * @param callable $func
+     * @param ?callable $func
      *
      * @return $this
      */
-    public function unpack(callable $func)
+    public function unpack(callable $func = null)
     {
+        $func = $func ?? function (...$args) {
+            yield from $args;
+        };
+
         return $this->map(static function (/* iterable */ $args) use ($func) {
             return $func(...$args);
         });

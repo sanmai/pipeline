@@ -6,6 +6,20 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
+Pipeline makes creating do-it-yourself data pipelines easy by using chaining generators. Pipeline comes with the most important basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and iterators.
+
+This rigorously tested library should just work. Pipeline never throws any exceptions. It has none whatsoever.
+
+# In a nutshell
+
+|  Method     | Details                       | A.K.A.            |
+| ----------- | ----------------------------- | ----------------- |
+| `map()`     | Takes a callback that takes input value and may return or yield results. |  `array_map`, `select`                  |
+| `unpack()`  | Unpacks arrays into arguments for a callback. |  `flat_map`, `flatten`, `SelectMany`                |
+| `filter()`  | Filters elements. |  `array_filter`, `Where`                |
+| `reduce()`  | Reduces input values to a single value.   | `array_reduce`, `Aggregate`, `Sum` | 
+| `toArray()` | Returns an array with all values. | `dict`, `ToDictionary` |
+
 # Install
 
     composer require sanmai/pipeline
