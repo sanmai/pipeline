@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Concrete pipeline with sensible default callbacks.
  */
-class Simple extends Principal
+class Simple extends Principal implements Interfaces\SimplePipeline
 {
     /**
      * An extra variant of `map` which unpacks arrays into arguments.
