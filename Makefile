@@ -17,6 +17,10 @@ PHP_CS_FIXER_ARGS=--cache-file=build/cache/.php_cs.cache --verbose
 PHPUNIT=vendor/bin/phpunit
 PHPUNIT_ARGS=--coverage-xml=coverage/coverage-xml --log-junit=coverage/phpunit.junit.xml
 
+# Coverage Check
+COVERAGE_CHECK=vendor/bin/coverage-check
+COVERAGE_CHECK_ARGS=build/logs/clover.xml 100
+
 # Phan
 PHAN=vendor/bin/phan
 PHAN_ARGS=-j $(JOBS)
@@ -48,6 +52,7 @@ ci: prerequisites ci-phpunit ci-analyze
 
 ci-phpunit: prerequisites
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
+	$(SILENT) $(COVERAGE_CHECK) $(COVERAGE_CHECK_ARGS)
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --quiet
 
 ci-analyze: prerequisites
@@ -66,6 +71,7 @@ test-prerequisites: prerequisites composer.lock
 
 phpunit: test-prerequisites
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
+	$(SILENT) $(COVERAGE_CHECK) $(COVERAGE_CHECK_ARGS)
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --log-verbosity=2 --show-mutations
 
 analyze: test-prerequisites
