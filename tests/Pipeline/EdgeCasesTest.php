@@ -45,6 +45,16 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([1, 2], iterator_to_array($pipeline));
     }
 
+    public function testMapUnprimed()
+    {
+        $pipeline = new Simple();
+        $pipeline->map(function () {
+            return 1;
+        });
+
+        $this->assertEquals([1], $pipeline->toArray());
+    }
+
     public function testFilterUnprimed()
     {
         $pipeline = new Simple();
