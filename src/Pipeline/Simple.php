@@ -37,7 +37,7 @@ class Simple extends Principal
             yield from $args;
         };
 
-        return $this->map(static function (/* iterable */ $args) use ($func) {
+        return $this->map(static function (/* iterable */ $args = []) use ($func) {
             return $func(...$args);
         });
     }
