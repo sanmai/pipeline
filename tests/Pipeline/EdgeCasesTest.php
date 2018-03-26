@@ -81,9 +81,32 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([null], iterator_to_array($pipeline));
     }
 
+    private function firstValueFromIterator(\Iterator $iterator)
+    {
+        $iterator->rewind();
+
+        return $iterator->current();
+    }
+
+    public function testIteratorIterator()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            return 42;
+        });
+
+        $iterator = new \IteratorIterator($pipeline);
+        /* @var $iterator \Iterator */
+        $this->assertEquals(42, $this->firstValueFromIterator($iterator));
+
+        $pipeline = new Standard(new \ArrayIterator([42]));
+        $iterator = new \IteratorIterator($pipeline);
+        $this->assertEquals(42, $this->firstValueFromIterator($iterator));
+    }
+
     public function testIteratorToArrayWithSameKeys()
     {
-        $pipeline = new \Pipeline\Simple();
+        $pipeline = new \Pipeline\Standard();
         $pipeline->map(function () {
             yield 1;
             yield 2;
@@ -99,7 +122,7 @@ class EdgeCasesTest extends TestCase
 
     public function testInvokeMaps()
     {
-        $pipeline = new \Pipeline\Simple(new \ArrayIterator(range(1, 5)));
+        $pipeline = new \Pipeline\Standard(new \ArrayIterator(range(1, 5)));
         $pipeline->map($this);
 
         $this->assertEquals(range(1, 5), iterator_to_array($pipeline));
