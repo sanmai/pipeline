@@ -26,6 +26,9 @@ use PHPUnit\Framework\TestCase;
  */
 class UnpackTest extends TestCase
 {
+    /**
+     * @covers \Pipeline\Simple::unpack()
+     */
     public function testMapVector()
     {
         $pipeline = new \Pipeline\Simple();
@@ -42,5 +45,22 @@ class UnpackTest extends TestCase
         });
 
         $this->assertEquals(37, round($pipeline->reduce()));
+    }
+
+    /**
+     * @covers \Pipeline\Simple::unpack()
+     */
+    public function testFlatMap()
+    {
+        $pipeline = new \Pipeline\Simple();
+
+        $pipeline->map(function () {
+            yield [1];
+            yield [2, 3];
+            yield [4, 5, 6];
+            yield [7, 8, 9, 10];
+        })->unpack();
+
+        $this->assertEquals((10 * 11) / 2, round($pipeline->reduce()));
     }
 }
