@@ -19,20 +19,110 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
-use PHPUnit\Framework\TestCase;
-
 /**
  * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
  */
-class LazinessTest extends TestCase
+class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     private function yieldFail()
     {
         $this->fail();
     }
 
-    public function testMapLazy()
+    public function testEagerReturn()
+    {
+        $this->expectException(\Exception::class);
+
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            // Executed on spot
+            throw new \Exception();
+        });
+    }
+
+    private function failingGenerator()
+    {
+        // Should never throw if used lazily
+        throw new \Exception();
+        yield;
+    }
+
+    public function testGeneratorReturn()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            // Executed on spot
+            return $this->failingGenerator();
+        })->map(function ($value) {
+            return $value;
+        })->filter();
+
+        // All good, no exceptions were thrown
+        $this->addToAssertionCount(1);
+    }
+
+    public function testGeneratorYieldFrom()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            throw new \Exception();
+            yield from $this->failingGenerator();
+        })->map(function ($value) {
+            return $value;
+        })->filter();
+
+        // All good, no exceptions were thrown
+        $this->addToAssertionCount(1);
+    }
+
+    public function testLazyIterator()
+    {
+        $spy = \Mockery::spy(\ArrayIterator::class);
+
+        $c = new Standard($spy);
+        $c->map(function ($value) {
+            yield $value;
+        })->map(function ($value) {
+            return $value;
+        })->filter();
+
+        $spy->shouldNotReceive('rewind');
+    }
+
+    public function testLazyIteratorYieldFrom()
+    {
+        $spy = \Mockery::spy(\ArrayIterator::class);
+
+        $c = new Standard();
+        $c->map(function () use ($spy) {
+            yield from $spy;
+        })->map(function ($value) {
+            yield $value;
+        })->map(function ($value) {
+            return $value;
+        })->filter();
+
+        $spy->shouldNotReceive('rewind');
+    }
+
+    public function testLazyIteratorReturn()
+    {
+        $spy = \Mockery::spy(\ArrayIterator::class);
+
+        $c = new Standard();
+        $c->map(function () use ($spy) {
+            return $spy;
+        })->map(function ($value) {
+            yield $value;
+        })->map(function ($value) {
+            return $value;
+        })->filter();
+
+        $spy->shouldNotReceive('rewind');
+    }
+
+    public function testMapLazyOnce()
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -48,7 +138,7 @@ class LazinessTest extends TestCase
         }
     }
 
-    public function testFilterLazy()
+    public function testFilterLazyOnce()
     {
         $pipeline = new Standard(new \ArrayIterator([true]));
         $pipeline->filter(function () {
@@ -59,7 +149,7 @@ class LazinessTest extends TestCase
         $this->assertInstanceOf(\Traversable::class, $iterator);
     }
 
-    public function testUnpackLazy()
+    public function testUnpackLazyOnce()
     {
         $pipeline = new Standard();
         $pipeline->unpack(function () {
