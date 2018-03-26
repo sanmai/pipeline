@@ -53,6 +53,16 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([], $pipeline->toArray());
     }
 
+    public function testUnpackUnprimed()
+    {
+        $pipeline = new Simple();
+        $pipeline->unpack(function () {
+            return 1;
+        });
+
+        $this->assertEquals([1], $pipeline->toArray());
+    }
+
     public function testInitialInvokeReturnsScalar()
     {
         $pipeline = new Simple();
