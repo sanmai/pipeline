@@ -41,6 +41,22 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         });
     }
 
+    private function veryExpensiveMethod()
+    {
+        throw new \Exception();
+    }
+
+    public function testExpensiveMethod()
+    {
+        $this->expectException(\Exception::class);
+
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            // Executed on spot
+            return $this->veryExpensiveMethod();
+        });
+    }
+
     private function failingGenerator()
     {
         // Should never throw if used lazily

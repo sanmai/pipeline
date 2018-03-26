@@ -95,13 +95,13 @@ var_dump($value);
 
   Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
   
-- That said, something still may happens as you add processing stages. Specifically, PHP may try to validate the very first generator by loading the very first value from it. As a workaround, it is possible to prepend a falsey value to an expensive generator, then filter it out.
+- That said, if a non-generator used to seed the pipeline, it will be executed eagerly.
 
     ```php
     $pipeline = new \Pipeline\Standard();
-    $pipeline->map(function () use ($veryExpensiveGenerator) {
-        yield false;
-        yield from $veryExpensiveGenerator;
+    $pipeline->map(function () {
+        // will be executed immediately on spot, unless yield is used
+        return $this->veryExpensiveMethod();
     })->filter();
     ```
 
