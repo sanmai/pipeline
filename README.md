@@ -228,7 +228,15 @@ foreach ($pipeline as $result) {
 
   Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
   
-- That said, something still happens as you add processing stages. Specifically, PHP will try to validate a previous generator by loading the very first value from it.
+- That said, something still happens as you add processing stages. Specifically, PHP will try to validate the very first generator by loading the very first value from it. As a workaround, it is possible to prepend a falsey value to an expensive generator, then filter it out.
+
+    ```php
+    $pipeline = new Simple();
+    $pipeline->map(function () use ($veryExpensiveGenerator) {
+        yield false;
+        yield from $veryExpensiveGenerator;
+    })->filter();
+    ```
 
 - Keys for yielded values are being kept as is, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used.
 
