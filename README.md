@@ -219,20 +219,25 @@ foreach ($pipeline as $result) {
 
 - Since all callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
 
-        foreach ($pipeline as $result) {
-            // Processing happens only if you consume the results.
-            // Want to stop early after few results? Not a problem here!
-        }
+    ```php
+    foreach ($pipeline as $result) {
+        // Processing happens only if you consume the results.
+        // Want to stop early after few results? Not a problem here!
+    }
+    ```
 
-  Nothing will happen unless you use the results. That's the point of lazy evaluation after all!
+  Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
 
 - Keys for yielded values are being kept as is, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used.
 
 - The resulting pipeline is an iterator and by default is not rewindable.
 
-- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be converted:
+- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapper with `IteratorIterator`:
 
-
+    ```php
+    $iterator = new \IteratorIterator($pipeline)
+    /** @var $iterator \Iterator */
+    ```
 
 # Classes and interfaces
 
