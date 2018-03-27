@@ -26,7 +26,7 @@ Pipeline is an iterator and can be used as any other iterable. Implements `JsonS
 
     composer require sanmai/pipeline
 
-# Showcase
+# Use
 
 ```PHP
 $pipeline = new \Pipeline\Simple();
@@ -82,7 +82,7 @@ var_dump($value);
 // int(104)
 ```
 
-# Known caveats
+# Caveats
 
 - Since all callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
 
