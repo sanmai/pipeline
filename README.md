@@ -353,6 +353,7 @@ $pipeline = new \Pipeline\Simple();
 foreach ($pipeline as $value) {
     // no errors here
 }
+```
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
 
