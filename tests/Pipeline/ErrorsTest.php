@@ -24,7 +24,7 @@ use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Pipeline\Simple
+ * @covers \Pipeline\Standard
  */
 class ErrorsTest extends TestCase
 {
@@ -45,7 +45,7 @@ class ErrorsTest extends TestCase
         $this->expectExceptionMessage('argument');
         $this->expectExceptionFallback(\ArgumentCountError::class, Warning::class);
 
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->map(function ($a) {
             // $a is intentionally left unused
             $this->fail('Shall never be called');
@@ -54,7 +54,7 @@ class ErrorsTest extends TestCase
 
     public function testPipelineInPipelineUsesSelf()
     {
-        $pipeline = new Simple(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
         $pipeline->map(function ($prime) {
             yield $prime;
             yield $prime * 2;

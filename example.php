@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 include 'vendor/autoload.php';
 
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 
 // initial generator
 $pipeline->map(function () {
@@ -78,7 +78,7 @@ $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
     return $payload * 2;
 });
 
-$pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+$pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
 $result = iterator_to_array($pipeline);
@@ -93,7 +93,7 @@ var_dump($result);
 // }
 
 // Now an example for toArray()
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 
 // Yields [0 => 1, 1 => 2]
 $pipeline->map(function () {
