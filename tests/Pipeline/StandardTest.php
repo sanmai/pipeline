@@ -29,15 +29,15 @@ class StandardTest extends TestCase
 {
     public function testEmpty()
     {
-        $this->assertEquals([], iterator_to_array(new Simple()));
+        $this->assertEquals([], iterator_to_array(new Standard()));
 
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $this->assertEquals([], $pipeline->toArray());
     }
 
     public function testSingle()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             foreach (range(1, 3) as $i) {
@@ -50,7 +50,7 @@ class StandardTest extends TestCase
 
     public function testDouble()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             foreach (range(1, 3) as $i) {
@@ -69,7 +69,7 @@ class StandardTest extends TestCase
 
     public function testTriple()
     {
-        $pipeline = new Simple(new \ArrayIterator(range(1, 3)));
+        $pipeline = new Standard(new \ArrayIterator(range(1, 3)));
 
         $pipeline->map(function ($i) {
             yield pow($i, 2);
@@ -96,7 +96,7 @@ class StandardTest extends TestCase
 
     public function testFilter()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             foreach (range(1, 100) as $i) {
@@ -119,7 +119,7 @@ class StandardTest extends TestCase
 
     public function testReduce()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             foreach (range(1, 10) as $i) {
@@ -134,7 +134,7 @@ class StandardTest extends TestCase
 
     public function testReduceToArray()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             foreach (range(1, 10) as $i) {
@@ -163,7 +163,7 @@ class StandardTest extends TestCase
 
     public function testMeaningless()
     {
-        $pipeline = new Simple(new \ArrayIterator([]));
+        $pipeline = new Standard(new \ArrayIterator([]));
 
         $pipeline->map(function ($i) {
             $this->fail();
@@ -176,26 +176,26 @@ class StandardTest extends TestCase
 
     public function testPipelineInPipeline()
     {
-        $pipeline1 = new Simple(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline1 = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
         $pipeline1->map(function ($prime) {
             yield $prime;
             yield $prime * 2;
         });
 
-        $pipeline2 = new Simple();
+        $pipeline2 = new Standard();
         $pipeline2->map($pipeline1)->filter(function ($i) {
             return $i % 2 != 0;
         });
 
         $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
 
-        $foo = new Simple();
+        $foo = new Standard();
         $foo->map(function () {
             yield 1;
             yield 2;
         });
 
-        $bar = new Simple();
+        $bar = new Standard();
         $bar->map($foo);
         $this->assertEquals(3, $bar->reduce());
     }
@@ -231,7 +231,7 @@ class StandardTest extends TestCase
 
     public function testMethodChaining()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             return range(1, 3);

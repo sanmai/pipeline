@@ -29,7 +29,7 @@ class EdgeCasesTest extends TestCase
 {
     public function testInitialCallbackNotGenerator()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->map(function () {
             return PHP_INT_MAX;
         });
@@ -39,7 +39,7 @@ class EdgeCasesTest extends TestCase
 
     public function testStandardStringFunctions()
     {
-        $pipeline = new Simple(new \ArrayIterator([1, 2, 'foo', 'bar']));
+        $pipeline = new Standard(new \ArrayIterator([1, 2, 'foo', 'bar']));
         $pipeline->filter('is_int');
 
         $this->assertEquals([1, 2], iterator_to_array($pipeline));
@@ -47,7 +47,7 @@ class EdgeCasesTest extends TestCase
 
     public function testMapUnprimed()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->map(function () {
             return 1;
         });
@@ -57,7 +57,7 @@ class EdgeCasesTest extends TestCase
 
     public function testFilterUnprimed()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->filter();
 
         $this->assertEquals([], $pipeline->toArray());
@@ -65,7 +65,7 @@ class EdgeCasesTest extends TestCase
 
     public function testUnpackUnprimed()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->unpack(function () {
             return 1;
         });
@@ -75,7 +75,7 @@ class EdgeCasesTest extends TestCase
 
     public function testInitialInvokeReturnsScalar()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->map($this);
 
         $this->assertEquals([null], iterator_to_array($pipeline));

@@ -34,7 +34,7 @@ class LazinessTest extends TestCase
 
     public function testMapLazy()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->map(function () {
             yield true;
             yield $this->yieldFail();
@@ -50,7 +50,7 @@ class LazinessTest extends TestCase
 
     public function testFilterLazy()
     {
-        $pipeline = new Simple(new \ArrayIterator([true]));
+        $pipeline = new Standard(new \ArrayIterator([true]));
         $pipeline->filter(function () {
             $this->fail();
         });
@@ -61,7 +61,7 @@ class LazinessTest extends TestCase
 
     public function testUnpackLazy()
     {
-        $pipeline = new Simple();
+        $pipeline = new Standard();
         $pipeline->unpack(function () {
             yield true;
             yield $this->yieldFail();
