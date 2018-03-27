@@ -80,19 +80,22 @@ cs: test-prerequisites
 # Prerequisites Setup                                        #
 ##############################################################
 
+# We need both vendor/autoload.php and composer.lock being up to date
 .PHONY: prerequisites
-prerequisites: build/cache vendor/bin .phan
+prerequisites: build/cache vendor/autoload.php .phan composer.lock
 
-build/cache:
-	mkdir -p build/cache
-
-vendor/bin:
+# Do install if there's no 'vendor'
+vendor/autoload.php:
 	$(SILENT) $(COMPOSER) install --prefer-dist
 
-composer.lock: vendor/autoload.php
+# If composer.lock is older than `composer.json`, do update,
+# and touch composer.lock because composer not always does that
 composer.lock: composer.json
 	$(SILENT) $(COMPOSER) update && touch composer.lock
 
 .phan:
 	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=native > /dev/null
+
+build/cache:
+	mkdir -p build/cache
 
