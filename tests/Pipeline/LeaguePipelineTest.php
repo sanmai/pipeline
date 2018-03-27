@@ -36,7 +36,7 @@ class LeaguePipelineTest extends TestCase
 
         $this->assertEquals(22, $leaguePipeline->process(10));
 
-        $pipeline = new \Pipeline\Simple(new \ArrayIterator([10, 20, 30]));
+        $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
         $pipeline->map($leaguePipeline);
 
         $this->assertEquals([22, 42, 62], iterator_to_array($pipeline));

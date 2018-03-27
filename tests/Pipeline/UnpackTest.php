@@ -27,11 +27,11 @@ use PHPUnit\Framework\TestCase;
 class UnpackTest extends TestCase
 {
     /**
-     * @covers \Pipeline\Simple::unpack()
+     * @covers \Pipeline\Standard::unpack()
      */
     public function testMapVector()
     {
-        $pipeline = new \Pipeline\Simple();
+        $pipeline = new \Pipeline\Standard();
 
         $pipeline->map(function () {
             yield [5, 7];
@@ -48,11 +48,11 @@ class UnpackTest extends TestCase
     }
 
     /**
-     * @covers \Pipeline\Simple::unpack()
+     * @covers \Pipeline\Standard::unpack()
      */
     public function testFlatMap()
     {
-        $pipeline = new \Pipeline\Simple();
+        $pipeline = new \Pipeline\Standard();
 
         $pipeline->map(function () {
             yield [1];
