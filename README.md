@@ -230,6 +230,10 @@ foreach ($pipeline as $result) {
 
 - The resulting pipeline is an iterator and by default is not rewindable.
 
+- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be converted:
+
+
+
 # Classes and interfaces
 
 - `\Pipeline\Simple` is the main user-facing class for the pipeline with sane defaults for most methods.
