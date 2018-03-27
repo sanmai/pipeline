@@ -96,8 +96,8 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
-        $c = new Standard($spy);
-        $c->map(function ($value) {
+        $pipeline = new Standard($spy);
+        $pipeline->map(function ($value) {
             yield $value;
         })->map(function ($value) {
             return $value;
@@ -110,8 +110,8 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
-        $c = new Standard();
-        $c->map(function () use ($spy) {
+        $pipeline = new Standard();
+        $pipeline->map(function () use ($spy) {
             yield from $spy;
         })->map(function ($value) {
             yield $value;
@@ -126,8 +126,8 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
-        $c = new Standard();
-        $c->map(function () use ($spy) {
+        $pipeline = new Standard();
+        $pipeline->map(function () use ($spy) {
             return $spy;
         })->map(function ($value) {
             yield $value;
