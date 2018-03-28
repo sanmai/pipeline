@@ -49,7 +49,7 @@ abstract class Principal implements Interfaces\Pipeline
         // This also allows inheriting classes to replace the pipeline
         // Moreover, using one of use as a callback is dubious
         if ($func instanceof self) {
-            $this->pipeline = $func();
+            $this->pipeline = $func->getIterator();
 
             return $this;
         }

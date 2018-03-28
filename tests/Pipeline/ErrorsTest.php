@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
-use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
@@ -50,23 +49,5 @@ class ErrorsTest extends TestCase
             // $a is intentionally left unused
             $this->fail('Shall never be called');
         });
-    }
-
-    public function testPipelineInPipelineUsesSelf()
-    {
-        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
-        $pipeline->map(function ($prime) {
-            yield $prime;
-            yield $prime * 2;
-        });
-
-        $pipeline->map($pipeline)->filter(function ($i) {
-            return $i % 2 != 0;
-        });
-
-        $this->expectExceptionMessage('Cannot resume an already running generator');
-        $this->expectExceptionFallback(\Error::class, Error::class);
-
-        $pipeline->reduce();
     }
 }

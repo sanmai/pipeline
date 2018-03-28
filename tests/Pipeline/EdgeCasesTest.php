@@ -138,6 +138,21 @@ class EdgeCasesTest extends TestCase
         $this->assertSame([3, 4], $pipeline->toArray());
     }
 
+    public function testPipelineInPipelineUsesSelf()
+    {
+        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $pipeline->map($pipeline)->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->assertSame([3, 5, 7, 11], $pipeline->toArray());
+    }
+
     public function testArrayReduce()
     {
         $pipeline = new Standard();
