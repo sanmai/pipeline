@@ -21,7 +21,7 @@ install:
   - composer install --prefer-dist
 
 script:
-  - make ci --keep-going
+  - make ci --keep-going COMPOSER='/bin/sh -c composer'
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls
