@@ -258,4 +258,15 @@ class StandardTest extends TestCase
 
         $this->assertEquals([52, 104], iterator_to_array($pipeline));
     }
+
+    public function testMapNoop()
+    {
+        $pipeline = new Standard();
+
+        $pipeline->map(function () {
+            return range(1, 3);
+        })->unpack()->map()->map()->map();
+
+        $this->assertEquals(range(1, 3), iterator_to_array($pipeline));
+    }
 }

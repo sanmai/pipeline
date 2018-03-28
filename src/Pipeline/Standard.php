@@ -43,6 +43,22 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
+     * With no callback is a no-op.
+     *
+     * @param ?callable $func
+     *
+     * @return $this
+     */
+    public function map(callable $func = null)
+    {
+        if (is_null($func)) {
+            return $this;
+        }
+
+        return parent::map($func);
+    }
+
+    /**
      * With no callback drops all null and false values (not unlike array_filter defaults).
      *
      * @return $this
@@ -70,7 +86,7 @@ class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function reduce(callable $func = null, $initial = null)
     {
-        if (!$func) {
+        if (is_null($func)) {
             return parent::reduce(static function ($carry, $item) {
                 $carry += $item;
 
