@@ -255,4 +255,25 @@ class StandardTest extends TestCase
 
         $this->assertEquals([52, 104], iterator_to_array($pipeline));
     }
+
+    public function testInvokeMaps()
+    {
+        $pipeline = new Standard(new \ArrayIterator(range(1, 3)));
+
+        $pipeline(function ($i) {
+            yield pow($i, 2);
+            yield pow($i, 3);
+        })(function ($i) {
+            return $i - 1;
+        })(function ($i) {
+            yield $i * 2;
+            yield $i * 4;
+        })(function ($i) {
+            if ($i > 50) {
+                yield $i;
+            }
+        });
+
+        $this->assertEquals([52, 104], $pipeline->toArray());
+    }
 }

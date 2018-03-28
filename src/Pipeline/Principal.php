@@ -151,12 +151,12 @@ abstract class Principal implements Interfaces\Pipeline
     }
 
     /**
-     * Must not take any arguments whatsoever.
+     * Convinience method to allow pipeline to be used as an argument to map().
      *
-     * @return \Generator
+     * Must not take any arguments whatsoever: therefore final.
      */
-    public function __invoke()
+    final public function __invoke(callable $func)
     {
-        yield from $this;
+        return $this->map($func);
     }
 }
