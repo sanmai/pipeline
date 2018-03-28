@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Pipeline\Interfaces;
 
-interface SimplePipeline extends Pipeline
+interface StandardPipeline extends Pipeline
 {
     /**
      * An extra variant of `map` which unpacks arrays into arguments.

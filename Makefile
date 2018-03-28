@@ -27,11 +27,11 @@ PHPSTAN=vendor/bin/phpstan
 PHPSTAN_ARGS=analyse src tests --level=2 -c .phpstan.neon
 
 # Composer
-COMPOSER=composer
+COMPOSER=$(PHP) $(shell which composer)
 
 # Infection
 INFECTION=vendor/bin/infection
-MIN_MSI=95
+MIN_MSI=90
 MIN_COVERED_MSI=100
 INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=coverage
 
@@ -82,7 +82,7 @@ cs: test-prerequisites
 
 # We need both vendor/autoload.php and composer.lock being up to date
 .PHONY: prerequisites
-prerequisites: build/cache vendor/autoload.php .phan composer.lock
+prerequisites: report-php-version build/cache vendor/autoload.php .phan composer.lock
 
 # Do install if there's no 'vendor'
 vendor/autoload.php:
@@ -99,3 +99,6 @@ composer.lock: composer.json
 build/cache:
 	mkdir -p build/cache
 
+.PHONY:
+report-php-version:
+	# Using $(PHP)
