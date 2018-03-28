@@ -95,10 +95,18 @@ abstract class Principal implements Interfaces\Pipeline
     public function filter(callable $func)
     {
         if (!$this->pipeline) {
-            // No-op: either an empty array or null
+            // No-op: either an empty array or null.
             return $this;
         }
 
+        // We got an array, that's what we need. Moving along.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_filter($this->pipeline, $func);
+
+            return $this;
+        }
+
+        // Got iterator. No other choice but this.
         $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
@@ -151,12 +159,11 @@ abstract class Principal implements Interfaces\Pipeline
     }
 
     /**
-     * Convinience method to allow pipeline to be used as an argument to map().
-     *
-     * Must not take any arguments whatsoever: therefore final.
+     * Convinience method to allow pipeline pass for a callable, used in map().
+     * Shall be used for only the above reason: therefore final.
+     * Must not take any arguments whatsoever. Returns nothing.
      */
-    final public function __invoke(callable $func)
+    final public function __invoke()
     {
-        return $this->map($func);
     }
 }

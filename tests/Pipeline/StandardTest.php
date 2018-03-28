@@ -188,7 +188,10 @@ class StandardTest extends TestCase
         });
 
         $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
+    }
 
+    public function testPipelineReadsFromPipeline()
+    {
         $foo = new Standard();
         $foo->map(function () {
             yield 1;
@@ -254,26 +257,5 @@ class StandardTest extends TestCase
         });
 
         $this->assertEquals([52, 104], iterator_to_array($pipeline));
-    }
-
-    public function testInvokeMaps()
-    {
-        $pipeline = new Standard(new \ArrayIterator(range(1, 3)));
-
-        $pipeline(function ($i) {
-            yield pow($i, 2);
-            yield pow($i, 3);
-        })(function ($i) {
-            return $i - 1;
-        })(function ($i) {
-            yield $i * 2;
-            yield $i * 4;
-        })(function ($i) {
-            if ($i > 50) {
-                yield $i;
-            }
-        });
-
-        $this->assertEquals([52, 104], $pipeline->toArray());
     }
 }
