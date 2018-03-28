@@ -78,7 +78,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
             $carry += $item;
 
             return $carry;
-        }, 0);
+        }, $initial ?? 0);
     }
 
     /**

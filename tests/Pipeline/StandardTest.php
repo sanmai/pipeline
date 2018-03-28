@@ -147,6 +147,21 @@ class StandardTest extends TestCase
         $this->assertEquals(55 * 1.05, $result);
     }
 
+    public function testReduceArrays()
+    {
+        $pipeline = new Standard();
+
+        $pipeline->map(function () {
+            yield [0 => 1];
+            yield [1 => 2];
+            yield [0 => 3];
+        });
+
+        $result = $pipeline->reduce(null, []);
+
+        $this->assertEquals([1, 2], $result);
+    }
+
     public function testReduceToArray()
     {
         $pipeline = new Standard();
