@@ -91,7 +91,7 @@ class Standard extends Principal implements Interfaces\StandardPipeline
                 $carry += $item;
 
                 return $carry;
-            }, 0);
+            }, $initial ?? 0);
         }
 
         return parent::reduce($func, $initial);
