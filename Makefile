@@ -20,6 +20,7 @@ PHPUNIT_ARGS=--coverage-xml=coverage/coverage-xml --log-junit=coverage/phpunit.j
 # Phan
 PHAN=vendor/bin/phan
 PHAN_ARGS=-j $(JOBS)
+PHAN_PHP_VERSION=7.1
 export PHAN_DISABLE_XDEBUG_WARN=1
 
 # PHPStan
@@ -94,7 +95,7 @@ composer.lock: composer.json
 	$(SILENT) $(COMPOSER) update && touch composer.lock
 
 .phan:
-	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=native > /dev/null
+	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=$(PHAN_PHP_VERSION) > /dev/null
 
 build/cache:
 	mkdir -p build/cache
