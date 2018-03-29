@@ -299,4 +299,10 @@ class StandardTest extends TestCase
 
         $this->assertEquals(range(1, 3), iterator_to_array($pipeline));
     }
+
+    public function testFinal()
+    {
+        $reflector = new \ReflectionClass(Standard::class);
+        $this->assertTrue($reflector->isFinal());
+    }
 }

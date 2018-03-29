@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Concrete pipeline with sensible default callbacks.
  */
-class Standard extends Principal implements Interfaces\StandardPipeline
+final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     /**
      * An extra variant of `map` which unpacks arrays into arguments.
