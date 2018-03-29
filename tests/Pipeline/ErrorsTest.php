@@ -45,9 +45,10 @@ class ErrorsTest extends TestCase
         $this->expectExceptionFallback(\ArgumentCountError::class, Warning::class);
 
         $pipeline = new Standard();
-        $pipeline->map(function ($a) {
-            // $a is intentionally left unused
+        $pipeline->map(function ($unused) {
             $this->fail('Shall never be called');
+
+            return $unused;
         });
     }
 }

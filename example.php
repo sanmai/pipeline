@@ -23,49 +23,49 @@ $pipeline = new \Pipeline\Standard();
 
 // initial generator
 $pipeline->map(function () {
-    foreach (range(1, 3) as $i) {
-        yield $i;
+    foreach (range(1, 3) as $value) {
+        yield $value;
     }
 });
 
 // next processing step
-$pipeline->map(function ($i) {
-    yield pow($i, 2);
-    yield pow($i, 3);
+$pipeline->map(function ($value) {
+    yield pow($value, 2);
+    yield pow($value, 3);
 });
 
 // simple one-to-one mapper
-$pipeline->map(function ($i) {
-    return $i - 1;
+$pipeline->map(function ($value) {
+    return $value - 1;
 });
 
 // one-to-many generator
-$pipeline->map(function ($i) {
-    yield [$i, 2];
-    yield [$i, 4];
+$pipeline->map(function ($value) {
+    yield [$value, 2];
+    yield [$value, 4];
 });
 
 // mapper with arguments unpacked from an input array
-$pipeline->unpack(function ($i, $j) {
-    yield $i * $j;
+$pipeline->unpack(function ($value, $multiplier) {
+    yield $value * $multiplier;
 });
 
 // one way to filter
-$pipeline->map(function ($i) {
-    if ($i > 50) {
-        yield $i;
+$pipeline->map(function ($value) {
+    if ($value > 50) {
+        yield $value;
     }
 });
 
 // this uses a filtering iterator from SPL under the hood
-$pipeline->filter(function ($i) {
-    return $i > 100;
+$pipeline->filter(function ($value) {
+    return $value > 100;
 });
 
 // reduce to a single value; can be an array or any value
-$value = $pipeline->reduce(function ($carry, $item) {
+$value = $pipeline->reduce(function ($carry, $valuetem) {
     // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
-    return $carry + $item;
+    return $carry + $valuetem;
 }, 0);
 
 var_dump($value);
@@ -101,10 +101,10 @@ $pipeline->map(function () {
     yield 2;
 });
 
-// For each value yields [0 => $i + 1, 1 => $i + 2]
-$pipeline->map(function ($i) {
-    yield $i + 1;
-    yield $i + 2;
+// For each value yields [0 => $value + 1, 1 => $value + 2]
+$pipeline->map(function ($value) {
+    yield $value + 1;
+    yield $value + 2;
 });
 
 $arrayResult = $pipeline->toArray();
