@@ -37,8 +37,8 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
             yield from $args;
         };
 
-        return $this->map(static function (/* iterable */ $args = []) use ($func) {
-            return $func(...$args);
+        return $this->map(static function (/* iterable */ $args = null) use ($func) {
+            return $func(...$args ?? []);
         });
     }
 

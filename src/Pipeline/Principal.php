@@ -29,7 +29,9 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Traversable
+     * @var \Traversable|array|null
+     *
+     * @todo To be replaced with '?iterable' in PHP7.1+
      */
     private $pipeline;
 
@@ -37,6 +39,8 @@ abstract class Principal implements Interfaces\Pipeline
      * Contructor with an optional source of data.
      *
      * @param \Traversable|null $input
+     *
+     * @todo To be replaced with '?iterable' in PHP7.1+
      */
     public function __construct(\Traversable $input = null)
     {
@@ -55,7 +59,7 @@ abstract class Principal implements Interfaces\Pipeline
         }
 
         // That's the standard case for any next stages
-        if ($this->pipeline) {
+        if (is_iterable($this->pipeline)) {
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -79,7 +83,7 @@ abstract class Principal implements Interfaces\Pipeline
         return $this;
     }
 
-    private static function apply($previous, callable $func): \Generator
+    private static function apply(/* iterable */ $previous, callable $func): \Generator
     {
         foreach ($previous as $value) {
             $result = $func($value);
@@ -112,10 +116,7 @@ abstract class Principal implements Interfaces\Pipeline
         return $this;
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         if ($this->pipeline instanceof \Traversable) {
             return $this->pipeline;
@@ -128,7 +129,7 @@ abstract class Principal implements Interfaces\Pipeline
         return new \EmptyIterator();
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         // With non-primed pipeline just return an empty array
         if (empty($this->pipeline)) {
@@ -137,7 +138,7 @@ abstract class Principal implements Interfaces\Pipeline
 
         // We got what we need, moving along
         if (is_array($this->pipeline)) {
-            return $this->pipeline;
+            return array_values($this->pipeline);
         }
 
         // Because `yield from` does not reset keys we have to ignore them on export to return every item.
@@ -161,7 +162,6 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Convinience method to allow pipeline pass for a callable, used in map().
      * Shall be used for only the above reason: therefore final.
-     * Must not take any arguments whatsoever. Returns nothing.
      */
     final public function __invoke()
     {
