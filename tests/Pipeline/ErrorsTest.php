@@ -50,10 +50,4 @@ class ErrorsTest extends TestCase
             $this->fail('Shall never be called');
         });
     }
-
-    public function __invoke()
-    {
-        // Like the standard pipeline does
-        return $this;
-    }
 }
