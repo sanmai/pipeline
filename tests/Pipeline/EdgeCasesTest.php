@@ -27,16 +27,6 @@ use PHPUnit\Framework\TestCase;
  */
 class EdgeCasesTest extends TestCase
 {
-    public function testInitialCallbackNotGenerator()
-    {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
-            return PHP_INT_MAX;
-        });
-
-        $this->assertEquals([PHP_INT_MAX], iterator_to_array($pipeline));
-    }
-
     public function testStandardStringFunctions()
     {
         $pipeline = new Standard(new \ArrayIterator([1, 2, 'foo', 'bar']));
@@ -58,7 +48,7 @@ class EdgeCasesTest extends TestCase
     public function testFilterUnprimed()
     {
         $pipeline = new Standard();
-        $pipeline->filter();
+        $pipeline->filter()->unpack();
 
         $this->assertEquals([], $pipeline->toArray());
     }
@@ -104,9 +94,9 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(42, $this->firstValueFromIterator($iterator));
     }
 
-    public function testIteratorToArrayWithSameKeys()
+    private function pipelineWithNonUniqueKeys(): Standard
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
         $pipeline->map(function () {
             yield 1;
             yield 2;
@@ -117,12 +107,61 @@ class EdgeCasesTest extends TestCase
             yield $i + 2;
         });
 
-        $this->assertEquals([3, 4], iterator_to_array($pipeline));
+        return $pipeline;
+    }
+
+    public function testIteratorToArrayWithSameKeys()
+    {
+        $this->assertEquals([3, 4], iterator_to_array($this->pipelineWithNonUniqueKeys()));
+    }
+
+    public function testIteratorToArrayWithAllValues()
+    {
+        $this->assertEquals([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
+    }
+
+    public function testPointlessReplace()
+    {
+        $pipeline = new Standard(new \ArrayIterator([1, 2]));
+
+        $pipeline->map(function () {
+            yield from new Standard(new \ArrayIterator([3, 4]));
+        });
+
+        $this->assertSame([3, 4, 3, 4], $pipeline->toArray());
+    }
+
+    public function testNormalReplace()
+    {
+        $pipeline = new Standard(new \ArrayIterator([1, 2]));
+        $pipeline->map(new Standard(new \ArrayIterator([3, 4])));
+        $this->assertSame([3, 4], $pipeline->toArray());
+    }
+
+    public function testPipelineInPipelineUsesSelf()
+    {
+        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $pipeline->map($pipeline)->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->assertSame([3, 5, 7, 11], $pipeline->toArray());
+    }
+
+    public function testPipelineInvokeReturnsVoid()
+    {
+        $pipeline = new Standard();
+        $this->assertNull($pipeline());
     }
 
     public function testInvokeMaps()
     {
-        $pipeline = new \Pipeline\Standard(new \ArrayIterator(range(1, 5)));
+        $pipeline = new Standard(new \ArrayIterator(range(1, 5)));
         $pipeline->map($this);
 
         $this->assertEquals(range(1, 5), iterator_to_array($pipeline));

@@ -20,6 +20,7 @@ PHPUNIT_ARGS=--coverage-xml=coverage/coverage-xml --log-junit=coverage/phpunit.j
 # Phan
 PHAN=vendor/bin/phan
 PHAN_ARGS=-j $(JOBS)
+PHAN_PHP_VERSION=7.1
 export PHAN_DISABLE_XDEBUG_WARN=1
 
 # PHPStan
@@ -27,11 +28,11 @@ PHPSTAN=vendor/bin/phpstan
 PHPSTAN_ARGS=analyse src tests --level=2 -c .phpstan.neon
 
 # Composer
-COMPOSER=composer
+COMPOSER=$(PHP) $(shell which composer)
 
 # Infection
 INFECTION=vendor/bin/infection
-MIN_MSI=95
+MIN_MSI=90
 MIN_COVERED_MSI=100
 INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=coverage
 
@@ -82,7 +83,7 @@ cs: test-prerequisites
 
 # We need both vendor/autoload.php and composer.lock being up to date
 .PHONY: prerequisites
-prerequisites: build/cache vendor/autoload.php .phan composer.lock
+prerequisites: report-php-version build/cache vendor/autoload.php .phan composer.lock
 
 # Do install if there's no 'vendor'
 vendor/autoload.php:
@@ -94,8 +95,11 @@ composer.lock: composer.json
 	$(SILENT) $(COMPOSER) update && touch composer.lock
 
 .phan:
-	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=native > /dev/null
+	$(PHP) $(PHAN) --init --init-level=1 --init-overwrite --target-php-version=$(PHAN_PHP_VERSION) > /dev/null
 
 build/cache:
 	mkdir -p build/cache
 
+.PHONY:
+report-php-version:
+	# Using $(PHP)

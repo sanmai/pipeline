@@ -29,14 +29,18 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Traversable
+     * @var \Traversable|array|null
+     *
+     * @todo To be replaced with '?iterable' in PHP7.1+
      */
     private $pipeline;
 
     /**
-     * Optional source of data.
+     * Contructor with an optional source of data.
      *
      * @param \Traversable|null $input
+     *
+     * @todo To be replaced with '?iterable' in PHP7.1+
      */
     public function __construct(\Traversable $input = null)
     {
@@ -47,61 +51,96 @@ abstract class Principal implements Interfaces\Pipeline
     {
         // If we know the callback is one of us, we can use a shortcut
         // This also allows inheriting classes to replace the pipeline
+        // Moreover, using one of use as a callback is dubious
         if ($func instanceof self) {
-            $this->pipeline = call_user_func($func);
+            $this->pipeline = $func->getIterator();
 
             return $this;
         }
 
-        if (!$this->pipeline) {
-            $this->pipeline = call_user_func($func);
-
-            // Not a generator means we were given a simple value to be treated as an array
-            if (!($this->pipeline instanceof \Generator)) {
-                // We do not cast to an array here because casting a null to an array results in
-                // an empty array; that's surprising and not how map() works in other cases
-                $this->pipeline = new \ArrayIterator([
-                    $this->pipeline,
-                ]);
-            }
+        // That's the standard case for any next stages
+        if (is_iterable($this->pipeline)) {
+            $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
         }
 
-        $this->pipeline = (static function ($previous) use ($func) {
-            foreach ($previous as $value) {
-                $result = $func($value);
-                if ($result instanceof \Generator) {
-                    yield from $result;
-                } else {
-                    // Case of a plain old mapping function
-                    yield $result;
-                }
-            }
-        })($this->pipeline);
+        // Let's check what we got for a start
+        $this->pipeline = $func();
+
+        // Generator is a generator, moving along
+        if ($this->pipeline instanceof \Generator) {
+            return $this;
+        }
+
+        // Not a generator means we were given a simple value to be treated as an array
+        // We do not cast to an array here because casting a null to an array results in
+        // an empty array; that's surprising and not how map() works for other values
+        $this->pipeline = [
+            $this->pipeline,
+        ];
 
         return $this;
+    }
+
+    private static function apply(/* iterable */ $previous, callable $func): \Generator
+    {
+        foreach ($previous as $value) {
+            $result = $func($value);
+            if ($result instanceof \Generator) {
+                yield from $result;
+            } else {
+                // Case of a plain old mapping function
+                yield $result;
+            }
+        }
     }
 
     public function filter(callable $func)
     {
-        if ($this->pipeline) {
-            $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
+        if (!$this->pipeline) {
+            // No-op: either an empty array or null.
+            return $this;
         }
+
+        // We got an array, that's what we need. Moving along.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_filter($this->pipeline, $func);
+
+            return $this;
+        }
+
+        // Got iterator. No other choice but this.
+        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
-        return $this->pipeline;
+        if ($this->pipeline instanceof \Traversable) {
+            return $this->pipeline;
+        }
+
+        if ($this->pipeline) {
+            return new \ArrayIterator($this->pipeline);
+        }
+
+        return new \EmptyIterator();
     }
 
-    public function toArray()
+    public function toArray(): array
     {
+        // With non-primed pipeline just return an empty array
+        if (empty($this->pipeline)) {
+            return [];
+        }
+
+        // We got what we need, moving along
+        if (is_array($this->pipeline)) {
+            return array_values($this->pipeline);
+        }
+
         // Because `yield from` does not reset keys we have to ignore them on export to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
         return iterator_to_array($this, false);
@@ -109,6 +148,10 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function reduce(callable $func, $initial = null)
     {
+        if (is_array($this->pipeline)) {
+            return array_reduce($this->pipeline, $func, $initial);
+        }
+
         foreach ($this as $value) {
             $initial = $func($initial, $value);
         }
@@ -116,8 +159,11 @@ abstract class Principal implements Interfaces\Pipeline
         return $initial;
     }
 
-    public function __invoke()
+    /**
+     * Convinience method to allow pipeline pass for a callable, used in map().
+     * Shall be used for only the above reason: therefore final.
+     */
+    final public function __invoke()
     {
-        yield from $this;
     }
 }

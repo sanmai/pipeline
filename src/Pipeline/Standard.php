@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Concrete pipeline with sensible default callbacks.
  */
-class Standard extends Principal implements Interfaces\SimplePipeline
+final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     /**
      * An extra variant of `map` which unpacks arrays into arguments.
@@ -33,20 +33,42 @@ class Standard extends Principal implements Interfaces\SimplePipeline
      */
     public function unpack(callable $func = null)
     {
-        $func = $func ?? function (...$args) {
+        $func = $func ?? static function (...$args) {
             yield from $args;
         };
 
-        return $this->map(static function (/* iterable */ $args = []) use ($func) {
-            return $func(...$args);
+        return $this->map(static function (/* iterable */ $args = null) use ($func) {
+            return $func(...$args ?? []);
         });
     }
 
     /**
+     * With no callback is a no-op.
+     *
+     * @param ?callable $func
+     *
+     * @return $this
+     */
+    public function map(callable $func = null)
+    {
+        if (is_null($func)) {
+            return $this;
+        }
+
+        return parent::map($func);
+    }
+
+    /**
      * With no callback drops all null and false values (not unlike array_filter defaults).
+     *
+     * @return $this
      */
     public function filter(callable $func = null)
     {
+        $func = $func ?? static function ($value) {
+            return (bool) $value;
+        };
+
         // Strings usually are internal functions, which require exact number of parameters.
         if (is_string($func)) {
             $func = static function ($value) use ($func) {
@@ -54,13 +76,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
             };
         }
 
-        if ($func) {
-            return parent::filter($func);
-        }
-
-        return parent::filter(static function ($value) {
-            return (bool) $value;
-        });
+        return parent::filter($func);
     }
 
     /**
@@ -70,37 +86,14 @@ class Standard extends Principal implements Interfaces\SimplePipeline
      */
     public function reduce(callable $func = null, $initial = null)
     {
-        if ($func) {
-            return parent::reduce($func, $initial);
+        if (is_null($func)) {
+            return parent::reduce(static function ($carry, $item) {
+                $carry += $item;
+
+                return $carry;
+            }, $initial ?? 0);
         }
 
-        return parent::reduce(static function ($carry, $item) {
-            $carry += $item;
-
-            return $carry;
-        }, 0);
-    }
-
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
-    {
-        // with non-primed pipeline just return empty iterator
-        if (!$iterator = parent::getIterator()) {
-            return new \ArrayIterator([]);
-        }
-
-        return $iterator;
-    }
-
-    public function toArray()
-    {
-        // with non-primed pipeline just return empty array
-        if (!$iterator = parent::getIterator()) {
-            return [];
-        }
-
-        return parent::toArray();
+        return parent::reduce($func, $initial);
     }
 }

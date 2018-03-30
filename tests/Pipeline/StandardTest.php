@@ -132,6 +132,36 @@ class StandardTest extends TestCase
         $this->assertEquals(55, $result);
     }
 
+    public function testReduceFloat()
+    {
+        $pipeline = new Standard();
+
+        $pipeline->map(function () {
+            foreach (range(1, 10) as $i) {
+                yield $i * 1.05;
+            }
+        });
+
+        $result = $pipeline->reduce();
+
+        $this->assertEquals(55 * 1.05, $result);
+    }
+
+    public function testReduceArrays()
+    {
+        $pipeline = new Standard();
+
+        $pipeline->map(function () {
+            yield [0 => 1];
+            yield [1 => 2];
+            yield [0 => 3];
+        });
+
+        $result = $pipeline->reduce(null, []);
+
+        $this->assertEquals([1, 2], $result);
+    }
+
     public function testReduceToArray()
     {
         $pipeline = new Standard();
@@ -188,7 +218,10 @@ class StandardTest extends TestCase
         });
 
         $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
+    }
 
+    public function testPipelineReadsFromPipeline()
+    {
         $foo = new Standard();
         $foo->map(function () {
             yield 1;
@@ -254,5 +287,22 @@ class StandardTest extends TestCase
         });
 
         $this->assertEquals([52, 104], iterator_to_array($pipeline));
+    }
+
+    public function testMapNoop()
+    {
+        $pipeline = new Standard();
+
+        $pipeline->map(function () {
+            return range(1, 3);
+        })->unpack()->map()->map()->map();
+
+        $this->assertEquals(range(1, 3), iterator_to_array($pipeline));
+    }
+
+    public function testFinal()
+    {
+        $reflector = new \ReflectionClass(Standard::class);
+        $this->assertTrue($reflector->isFinal());
     }
 }

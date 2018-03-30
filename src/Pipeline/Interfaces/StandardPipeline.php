@@ -17,13 +17,16 @@
 
 declare(strict_types=1);
 
-namespace Pipeline;
+namespace Pipeline\Interfaces;
 
-/**
- * Legacy alias from early days. Please do not remove.
- *
- * @deprecated
- */
-class Simple extends Standard
+interface StandardPipeline extends Pipeline
 {
+    /**
+     * An extra variant of `map` which unpacks arrays into arguments.
+     *
+     * @param ?callable $func
+     *
+     * @return $this
+     */
+    public function unpack(callable $func = null);
 }
