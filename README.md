@@ -13,14 +13,16 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. |  `array_map`, `Select`, `SelectMany`                  |
+| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. |  `array_map`, `Select`, `SelectMany`                  |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
-| `filter()`  | Removed elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
-| `reduce()`  | Reduces input values to a single value. Defaults to summation.  | `array_reduce`, `Aggregate`, `Sum` | 
+| `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `__construct()` | Can be provided with an optional iterator. |  |
+| `__construct()` | Can be provided with an optional initial iterator. |     |
 
 Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
+
+Pipeline is a final class. It comes with a pair of interfaces to aid you with composition over inheritance.
 
 # Install
 
@@ -84,7 +86,7 @@ var_dump($value);
 
 # Caveats
 
-- Since all callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
+- Since most callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
 
     ```php
     foreach ($pipeline as $result) {
@@ -104,6 +106,7 @@ var_dump($value);
         return $this->veryExpensiveMethod();
     })->filter();
     ```
+  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly.
 
 - Keys for yielded values are being kept as is, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used.
 
@@ -116,11 +119,12 @@ var_dump($value);
     /** @var $iterator \Iterator */
     ```
 
-# Classes and interfaces
+# Classes and interfaces: overview
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 - `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
 - Interface `Pipeline` defines three main functions all pipelines must bear.
+- Interface `StandardPipeline` defines `unpack()` from the standard pipeline.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
@@ -132,7 +136,7 @@ Takes an insance of `Traversable` or none. In the latter case the pipeline must 
 
 ## `map()`
 
-Takes a processing stage in a form of a generator function or a plain mapping function.
+Takes a processing stage in a form of a generator function or a plain mapping function. Provided no callback does nothing.
 
 ```php
 $pipeline->map(function (Customer $customer) {
@@ -178,6 +182,16 @@ $pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
 ```
 
 You can have all kinds of standard type checks with ease too.
+
+With no callback, the default callback for `unpack()` will flatten inputs:
+
+```php
+$pipeline->map(function () {
+    yield [1];
+    yield [2, 3];
+})->unpack()->toArray();
+// [1, 2, 3]
+```
 
 ## `filter()`
 
@@ -228,7 +242,7 @@ $result = $pipeline->toArray();
 // [2, 3, 3, 4]
 ```
 
-If in the example about one would use `iterator_to_array($result)` he would get just `[3, 4]`.
+If in the example about one would use `iterator_to_array($result)` they would get just `[3, 4]`.
 
 ## `getIterator()`
 
@@ -331,7 +345,7 @@ Indeed you made it somewhat simpler to understand, but this is still far from pe
 2. On every step, every result has to buffer. This not only takes memory space, but you would not see if your algorithm is failing on the last step until you passed all the previous steps. What a bummer!
 3. These separate cycles are nice, but you still can not test them one by one. That's practically impossible without further work.
 
-One may think he can pull the trick with `array_map`. But there's a catch: you can't easily return more than one value from `array_map`. No luck here too.
+One may think they can pull the trick with `array_map`. But there's a catch: you can't easily return more than one value from `array_map`. No luck here too.
 
 So, how do you solve this problem? Pipeline to the rescue!
 
@@ -426,7 +440,6 @@ What else is out there:
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7484f26ddbfd42ebb6f0eac92e68d04d)](https://www.codacy.com/app/sanmai/pipeline?utm_source=github.com&utm_medium=referral&utm_content=sanmai/pipeline&utm_campaign=badger)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a1291887920116526e2a/maintainability)](https://codeclimate.com/github/sanmai/pipeline/maintainability)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
-
 
 # TODO
 
