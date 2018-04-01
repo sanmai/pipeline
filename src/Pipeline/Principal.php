@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Principal abstract pipeline with no defaults. Could be subclassed.
  */
-abstract class Principal implements Interfaces\Pipeline
+abstract class Principal implements Interfaces\PrincipalPipeline
 {
     /**
      * Pre-primed pipeline.

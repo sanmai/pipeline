@@ -39,7 +39,7 @@ class InterfaceTest extends TestCase
         $this->assertInstanceOf(Interfaces\StandardPipeline::class, $this->takesStandardInterface($pipeline));
     }
 
-    private function takesPrincipalInterface(Interfaces\Pipeline $pipeline)
+    private function takesPrincipalInterface(Interfaces\PrincipalPipeline $pipeline)
     {
         return $pipeline;
     }
@@ -48,6 +48,6 @@ class InterfaceTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $this->assertInstanceOf(Interfaces\Pipeline::class, $this->takesPrincipalInterface($pipeline));
+        $this->assertInstanceOf(Interfaces\PrincipalPipeline::class, $this->takesPrincipalInterface($pipeline));
     }
 }

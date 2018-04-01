@@ -22,7 +22,7 @@ namespace Pipeline\Interfaces;
 /**
  * Interface definitions for the standard pipeline.
  */
-interface StandardPipeline extends Pipeline
+interface StandardPipeline extends PrincipalPipeline
 {
     /**
      * {@inheritdoc}
