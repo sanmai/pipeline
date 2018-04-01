@@ -22,13 +22,6 @@ namespace Pipeline\Interfaces;
 interface Pipeline extends \IteratorAggregate
 {
     /**
-     * Optional source of data.
-     *
-     * @param \Traversable|null $input
-     */
-    public function __construct(\Traversable $input = null);
-
-    /**
      * @param callable $func
      *
      * @return $this

@@ -162,6 +162,8 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Convinience method to allow pipeline pass for a callable, used in map().
      * Shall be used for only the above reason: therefore final.
+     *
+     * Not part of any public interface. Specific to this implementation.
      */
     final public function __invoke()
     {
