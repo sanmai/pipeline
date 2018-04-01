@@ -25,9 +25,9 @@ namespace Pipeline;
 final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     /**
-     * An extra variant of `map` which unpacks arrays into arguments.
+     * {@inheritdoc}
      *
-     * @param ?callable $func
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
@@ -43,9 +43,11 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * With no callback is a no-op.
+     * {@inheritdoc}
      *
-     * @param ?callable $func
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
@@ -59,7 +61,9 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * With no callback drops all null and false values (not unlike array_filter defaults).
+     * {@inheritdoc}
+     *
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
@@ -80,9 +84,12 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * Defaults to summation.
+     * {@inheritdoc}
      *
-     * @param null|mixed $initial
+     * @param ?callable $func    {@inheritdoc}
+     * @param ?mixed    $initial {@inheritdoc}
+     *
+     * @return mixed
      */
     public function reduce(callable $func = null, $initial = null)
     {
