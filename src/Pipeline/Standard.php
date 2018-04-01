@@ -96,4 +96,12 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
 
         return parent::reduce($func, $initial);
     }
+
+    /**
+     * Not part of any public interface. Specific to this implementation.
+     */
+    public function __invoke(): \Generator
+    {
+        yield from $this;
+    }
 }

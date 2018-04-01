@@ -49,15 +49,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function map(callable $func)
     {
-        // If we know the callback is one of us, we can use a shortcut
-        // This also allows inheriting classes to replace the pipeline
-        // Moreover, using one of use as a callback is dubious
-        if ($func instanceof self) {
-            $this->pipeline = $func->getIterator();
-
-            return $this;
-        }
-
         // That's the standard case for any next stages
         if (is_iterable($this->pipeline)) {
             $this->pipeline = self::apply($this->pipeline, $func);
@@ -157,15 +148,5 @@ abstract class Principal implements Interfaces\Pipeline
         }
 
         return $initial;
-    }
-
-    /**
-     * Convinience method to allow pipeline pass for a callable, used in map().
-     * Shall be used for only the above reason: therefore final.
-     *
-     * Not part of any public interface. Specific to this implementation.
-     */
-    final public function __invoke()
-    {
     }
 }
