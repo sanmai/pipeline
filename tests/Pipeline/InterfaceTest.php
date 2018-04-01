@@ -35,8 +35,9 @@ class InterfaceTest extends TestCase
     public function testStandardInterface()
     {
         $pipeline = new Standard();
+        $pipeline = $this->takesStandardInterface($pipeline->map()->filter()->unpack());
 
-        $this->assertInstanceOf(Interfaces\StandardPipeline::class, $this->takesStandardInterface($pipeline));
+        $this->assertInstanceOf(Interfaces\StandardPipeline::class, $pipeline);
     }
 
     private function takesPrincipalInterface(Interfaces\PrincipalPipeline $pipeline)
