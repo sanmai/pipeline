@@ -31,7 +31,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function unpack(callable $func = null)
+    public function unpack(callable $func = null): self
     {
         $func = $func ?? static function (...$args) {
             yield from $args;
@@ -51,7 +51,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function map(callable $func = null)
+    public function map(callable $func = null): self
     {
         if (is_null($func)) {
             return $this;
@@ -67,7 +67,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function filter(callable $func = null)
+    public function filter(callable $func = null): self
     {
         $func = $func ?? static function ($value) {
             return (bool) $value;

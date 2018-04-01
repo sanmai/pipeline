@@ -29,7 +29,7 @@ class InterfaceTest extends TestCase
 {
     private function takesStandardInterface(Interfaces\StandardPipeline $pipeline)
     {
-        return $pipeline;
+        return $pipeline->map()->filter()->unpack();
     }
 
     public function testStandardInterface()
