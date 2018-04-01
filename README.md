@@ -22,7 +22,7 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
 Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
 
-Pipeline is a final class. It comes with a pair of interfaces to aid you with composition over inheritance.
+Pipeline is a final class. It comes with a pair of interfaces to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
 
 # Install
 
@@ -106,13 +106,13 @@ var_dump($value);
         return $this->veryExpensiveMethod();
     })->filter();
     ```
-  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly.
+  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly further along. When in doubt, use a generator.
 
-- Keys for yielded values are being kept as is, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used.
+- Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
 
 - The resulting pipeline is an iterator and by default is not rewindable.
 
-- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapper with `IteratorIterator`:
+- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
     ```php
     $iterator = new \IteratorIterator($pipeline)
@@ -283,7 +283,7 @@ Contributions to documentation and test cases are welcome. Bug reports are welco
 API is expected to stay as simple as it is, though.
 
 
-# Rationale
+# Use case
 
 Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
 
@@ -349,7 +349,7 @@ One may think they can pull the trick with `array_map`. But there's a catch: you
 
 So, how do you solve this problem? Pipeline to the rescue!
 
-# Pipeline
+## Pipeline
 
 With the pipeline, you could split just about any processing chain into a manageable sequence of testable generators or mapping functions. Want to know average shipping delay for these three warehouses for orders made during previous sale? Map matching orders into shipments, exclude unwanted warehouses, map shipments into dates and timings, sum and divide. Done!
 
@@ -441,6 +441,3 @@ What else is out there:
 [![Maintainability](https://api.codeclimate.com/v1/badges/a1291887920116526e2a/maintainability)](https://codeclimate.com/github/sanmai/pipeline/maintainability)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 
-# TODO
-
-- [ ] Memory benchmarks?

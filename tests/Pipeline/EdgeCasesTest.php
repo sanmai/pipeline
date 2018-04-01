@@ -120,43 +120,10 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
     }
 
-    public function testPointlessReplace()
-    {
-        $pipeline = new Standard(new \ArrayIterator([1, 2]));
-
-        $pipeline->map(function () {
-            yield from new Standard(new \ArrayIterator([3, 4]));
-        });
-
-        $this->assertSame([3, 4, 3, 4], $pipeline->toArray());
-    }
-
-    public function testNormalReplace()
-    {
-        $pipeline = new Standard(new \ArrayIterator([1, 2]));
-        $pipeline->map(new Standard(new \ArrayIterator([3, 4])));
-        $this->assertSame([3, 4], $pipeline->toArray());
-    }
-
-    public function testPipelineInPipelineUsesSelf()
-    {
-        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
-        $pipeline->map(function ($prime) {
-            yield $prime;
-            yield $prime * 2;
-        });
-
-        $pipeline->map($pipeline)->filter(function ($value) {
-            return $value % 2 != 0;
-        });
-
-        $this->assertSame([3, 5, 7, 11], $pipeline->toArray());
-    }
-
-    public function testPipelineInvokeReturnsVoid()
+    public function testPipelineInvokeReturnsGenerator()
     {
         $pipeline = new Standard();
-        $this->assertNull($pipeline());
+        $this->assertInstanceOf(\Generator::class, $pipeline());
     }
 
     public function testInvokeMaps()
