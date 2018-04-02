@@ -25,13 +25,13 @@ namespace Pipeline;
 final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     /**
-     * An extra variant of `map` which unpacks arrays into arguments.
+     * {@inheritdoc}
      *
-     * @param ?callable $func
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
-    public function unpack(callable $func = null)
+    public function unpack(callable $func = null): self
     {
         $func = $func ?? static function (...$args) {
             yield from $args;
@@ -43,13 +43,15 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * With no callback is a no-op.
+     * {@inheritdoc}
      *
-     * @param ?callable $func
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
-    public function map(callable $func = null)
+    public function map(callable $func = null): self
     {
         if (is_null($func)) {
             return $this;
@@ -59,11 +61,13 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * With no callback drops all null and false values (not unlike array_filter defaults).
+     * {@inheritdoc}
+     *
+     * @param ?callable $func {@inheritdoc}
      *
      * @return $this
      */
-    public function filter(callable $func = null)
+    public function filter(callable $func = null): self
     {
         $func = $func ?? static function ($value) {
             return (bool) $value;
@@ -80,9 +84,12 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * Defaults to summation.
+     * {@inheritdoc}
      *
-     * @param null|mixed $initial
+     * @param ?callable $func    {@inheritdoc}
+     * @param ?mixed    $initial {@inheritdoc}
+     *
+     * @return mixed
      */
     public function reduce(callable $func = null, $initial = null)
     {

@@ -20,11 +20,9 @@ declare(strict_types=1);
 namespace Pipeline;
 
 /**
- * Principal abstract pipeline with no defaults.
- *
- * You're not expected to use this class directly, but you may subclass it as you see fit.
+ * Principal abstract pipeline with no defaults. Could be subclassed.
  */
-abstract class Principal implements Interfaces\Pipeline
+abstract class Principal implements Interfaces\PrincipalPipeline
 {
     /**
      * Pre-primed pipeline.
@@ -47,6 +45,13 @@ abstract class Principal implements Interfaces\Pipeline
         $this->pipeline = $input;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
     public function map(callable $func)
     {
         // That's the standard case for any next stages
@@ -87,6 +92,13 @@ abstract class Principal implements Interfaces\Pipeline
         }
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
     public function filter(callable $func)
     {
         if (!$this->pipeline) {
@@ -107,6 +119,11 @@ abstract class Principal implements Interfaces\Pipeline
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return \Traversable
+     */
     public function getIterator(): \Traversable
     {
         if ($this->pipeline instanceof \Traversable) {
@@ -120,6 +137,9 @@ abstract class Principal implements Interfaces\Pipeline
         return new \EmptyIterator();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function toArray(): array
     {
         // With non-primed pipeline just return an empty array
@@ -137,7 +157,15 @@ abstract class Principal implements Interfaces\Pipeline
         return iterator_to_array($this, false);
     }
 
-    public function reduce(callable $func, $initial = null)
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $func    {@inheritdoc}
+     * @param mixed    $initial {@inheritdoc}
+     *
+     * @return mixed|null
+     */
+    public function reduce(callable $func, $initial)
     {
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);

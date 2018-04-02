@@ -19,32 +19,41 @@ declare(strict_types=1);
 
 namespace Pipeline\Interfaces;
 
-interface Pipeline extends \IteratorAggregate
+/**
+ * Interface definitions for the most basic principal pipeline.
+ */
+interface PrincipalPipeline extends \IteratorAggregate
 {
     /**
-     * @param callable $func
+     * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
+     *
+     * @param callable $func a callback must either return a value or yield values (return a generator)
      *
      * @return $this
      */
     public function map(callable $func);
 
     /**
-     * @param callable $func - must yield values (return a generator)
+     * Removes elements unless a callback returns true.
+     *
+     * @param callable $func a callback returning true or false
      *
      * @return $this
      */
     public function filter(callable $func);
 
     /**
-     * @param callable $func    (mixed $carry, mixed $item)
-     * @param mixed    $initial
+     * Reduces input values to a single value.
+     *
+     * @param callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param mixed    $initial initial value for a $carry
      *
      * @return mixed
      */
     public function reduce(callable $func, $initial);
 
     /**
-     * Creates an array with all values from a pipeline.
+     * Returns all values regardless of keys used, discarding all keys in the process.
      *
      * @return array
      */

@@ -19,14 +19,58 @@ declare(strict_types=1);
 
 namespace Pipeline\Interfaces;
 
-interface StandardPipeline extends Pipeline
+/**
+ * Interface definitions for the standard pipeline.
+ */
+interface StandardPipeline extends PrincipalPipeline
 {
     /**
-     * An extra variant of `map` which unpacks arrays into arguments.
+     * {@inheritdoc}
+     *
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @param ?callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
+    public function map(callable $func = null);
+
+    /**
+     * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
      * @param ?callable $func
      *
      * @return $this
      */
     public function unpack(callable $func = null);
+
+    /**
+     * {@inheritdoc}
+     *
+     * With no callback drops all null and false values (not unlike array_filter does by default).
+     *
+     * @param ?callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
+    public function filter(callable $func = null);
+
+    /**
+     * {@inheritdoc}
+     *
+     * Defaults to summation.
+     *
+     * @param ?callable $func    {@inheritdoc}
+     * @param ?mixed    $initial {@inheritdoc}
+     *
+     * @return mixed|null
+     */
+    public function reduce(callable $func = null, $initial = null);
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     */
+    public function toArray(): array;
 }

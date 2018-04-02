@@ -123,10 +123,19 @@ var_dump($value);
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 - `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
-- Interface `Pipeline` defines three main functions all pipelines must bear.
+- Interface `PrincipalPipeline` defines three main functions all pipelines must bear.
 - Interface `StandardPipeline` defines `unpack()` from the standard pipeline.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
+
+## Class inheritance diagram
+
+- `\Pipeline\Standard` extends `\Pipeline\Principal` and implements `StandardPipeline`.
+- Abstract `\Pipeline\Principal` implements `PrincipalPipeline`.
+- Interface `PrincipalPipeline` extends `StandardPipeline`.
+- Interface `PrincipalPipeline` extends `\IteratorAggregate`.
+
+![](classes.svg)
 
 # Methods
 

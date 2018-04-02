@@ -100,6 +100,23 @@ composer.lock: composer.json
 build/cache:
 	mkdir -p build/cache
 
-.PHONY:
+.PHONY: report-php-version
 report-php-version:
 	# Using $(PHP)
+
+##############################################################
+# Quick development testing procedure                        #
+##############################################################
+
+PHP_VERSIONS=php7.0 php7.2
+
+.PHONY: quick
+quick:
+	make --no-print-directory -j test-all
+
+.PHONY: test-all
+test-all: $(PHP_VERSIONS)
+
+.PHONY: $(PHP_VERSIONS)
+$(PHP_VERSIONS): cs
+	@make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true
