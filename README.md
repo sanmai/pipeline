@@ -102,11 +102,11 @@ var_dump($value);
     ```php
     $pipeline = new \Pipeline\Standard();
     $pipeline->map(function () {
-        // will be executed immediately on spot, unless yield is used
+        // will be executed immediately on the spot, unless yield is used
         return $this->veryExpensiveMethod();
     })->filter();
     ```
-  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly further along. When in doubt, use a generator.
+  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly further along. *When in doubt, use a generator.*
 
 - Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
 
@@ -115,7 +115,7 @@ var_dump($value);
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
     ```php
-    $iterator = new \IteratorIterator($pipeline)
+    $iterator = new \IteratorIterator($pipeline);
     /** @var $iterator \Iterator */
     ```
 
