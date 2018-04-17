@@ -18,10 +18,12 @@ cache:
 
 install:
   - pecl install ast
-  - composer install --prefer-dist
+  - if [[ "$TRAVIS_PHP_VERSION" == "nightly" ]]; then COMPOSER_ARGS='--ignore-platform-reqs'; fi
+  - composer install --prefer-dist $COMPOSER_ARGS
 
 script:
-  - make ci --keep-going COMPOSER='/bin/sh -c composer'
+  - if [[ "$TRAVIS_PHP_VERSION" == "nightly" ]]; then vendor/bin/phpunit; else make ci --keep-going COMPOSER='/bin/sh -c composer'; fi
+  - composer validate
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls
