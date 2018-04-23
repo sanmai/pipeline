@@ -3,7 +3,7 @@
 [![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 
-Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. 
+Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. If you even run bash commands in succession piping output from one to another, this library does just that but for PHP functions and generators.
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
 
@@ -291,7 +291,6 @@ Contributions to documentation and test cases are welcome. Bug reports are welco
 
 API is expected to stay as simple as it is, though.
 
-
 # Use case
 
 Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example:
@@ -431,6 +430,8 @@ foreach ($pipeline as $result) {
 [About pipelines in general](https://martinfowler.com/articles/collection-pipeline/) from Martin Fowler.
 
 What else is out there:
+
+- [Pipe operator from Hack](https://docs.hhvm.com/hack/operators/pipe-operator) is about same, only won't work for generators, and not under the regular PHP. [See a proposal for a similar operator for JavaScript.](https://github.com/tc39/proposal-pipeline-operator)
 
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
