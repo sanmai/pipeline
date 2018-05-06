@@ -85,9 +85,17 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function filter(callable $func)
     {
-        if ($this->pipeline) {
-            $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
+        if (!$this->pipeline) {
+            // No-op: either an empty array or null.
+            return $this;
         }
+
+        // CallbackFilterIterator needs a plain Iterator
+        if (!$this->pipeline instanceof \Iterator) {
+            $this->pipeline = new \IteratorIterator($this->pipeline);
+        }
+
+        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
