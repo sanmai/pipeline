@@ -17,7 +17,7 @@
         <DeprecatedProperty errorLevel="info" />
         <DeprecatedClass errorLevel="info" />
 
-        <MissingClosureReturnType errorLevel="info" />
+        <MissingClosureReturnType errorLevel="suppress" />
         <MissingReturnType errorLevel="info" />
         <MissingPropertyType errorLevel="info" />
         <InvalidDocblock errorLevel="info" />
@@ -25,7 +25,7 @@
 
         <PropertyNotSetInConstructor errorLevel="info" />
         <MissingConstructor errorLevel="info" />
-        <MissingClosureParamType errorLevel="info" />
+        <MissingClosureParamType errorLevel="suppress" />
         <MissingParamType errorLevel="info" />
 
         <DocblockTypeContradiction errorLevel="info" />
