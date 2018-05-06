@@ -220,6 +220,22 @@ class StandardTest extends TestCase
         $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
     }
 
+    public function testFiltersPipeline()
+    {
+        $input = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $input->map(function ($prime) {
+            yield $prime;
+            yield $prime * 2;
+        });
+
+        $output = new Standard($input);
+        $output->filter(function ($i) {
+            return $i % 2 != 0;
+        });
+
+        $this->assertEquals(3 + 5 + 7 + 11, $output->reduce());
+    }
+
     public function testPipelineReadsFromPipeline()
     {
         $foo = new Standard();
