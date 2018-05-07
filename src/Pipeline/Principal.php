@@ -113,7 +113,11 @@ abstract class Principal implements Interfaces\PrincipalPipeline
             return $this;
         }
 
-        // Got iterator. No other choice but this.
+        // CallbackFilterIterator needs a plain Iterator
+        if (!$this->pipeline instanceof \Iterator) {
+            $this->pipeline = new \IteratorIterator($this->pipeline);
+        }
+
         $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
 
         return $this;

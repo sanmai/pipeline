@@ -28,6 +28,10 @@ export PHAN_DISABLE_XDEBUG_WARN=1
 PHPSTAN=vendor/bin/phpstan
 PHPSTAN_ARGS=analyse src tests --level=2 -c .phpstan.neon
 
+# Psalm
+PSALM=vendor/bin/psalm
+PSALM_ARGS=--show-info=false
+
 # Composer
 COMPOSER=$(PHP) $(shell which composer)
 
@@ -54,6 +58,7 @@ ci-phpunit: ci-cs
 ci-analyze: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
+	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache
 
 ci-cs: prerequisites
 	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --dry-run --stop-on-violation fix
@@ -74,6 +79,7 @@ phpunit: cs
 analyze: cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS)
+	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
 
 cs: test-prerequisites
 	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --diff fix
