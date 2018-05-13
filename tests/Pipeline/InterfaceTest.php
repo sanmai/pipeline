@@ -17,9 +17,12 @@
 
 declare(strict_types=1);
 
-namespace Pipeline;
+namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use Pipeline\Interfaces\PrincipalPipeline;
+use Pipeline\Interfaces\StandardPipeline;
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard
@@ -27,7 +30,7 @@ use PHPUnit\Framework\TestCase;
  */
 class InterfaceTest extends TestCase
 {
-    private function takesStandardInterface(Interfaces\StandardPipeline $pipeline)
+    private function takesStandardInterface(StandardPipeline $pipeline)
     {
         return $pipeline->map()->filter()->unpack();
     }
@@ -37,10 +40,10 @@ class InterfaceTest extends TestCase
         $pipeline = new Standard();
         $pipeline = $this->takesStandardInterface($pipeline->map()->filter()->unpack());
 
-        $this->assertInstanceOf(Interfaces\StandardPipeline::class, $pipeline);
+        $this->assertInstanceOf(StandardPipeline::class, $pipeline);
     }
 
-    private function takesPrincipalInterface(Interfaces\PrincipalPipeline $pipeline)
+    private function takesPrincipalInterface(PrincipalPipeline $pipeline)
     {
         return $pipeline;
     }
@@ -49,6 +52,6 @@ class InterfaceTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $this->assertInstanceOf(Interfaces\PrincipalPipeline::class, $this->takesPrincipalInterface($pipeline));
+        $this->assertInstanceOf(PrincipalPipeline::class, $this->takesPrincipalInterface($pipeline));
     }
 }

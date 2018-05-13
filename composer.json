@@ -27,7 +27,7 @@
         "psr-4": {"Pipeline\\": "src/Pipeline/"}
     },
     "autoload-dev": {
-        "psr-4": {"Pipeline\\": "tests/Pipeline/"}
+        "psr-4": {"Tests\\Pipeline\\": "tests/Pipeline/"}
     },
     "require": {
         "php": ">=7",
