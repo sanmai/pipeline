@@ -24,6 +24,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
+        "files": ["src/functions.php"],
         "psr-4": {"Pipeline\\": "src/Pipeline/"}
     },
     "autoload-dev": {
