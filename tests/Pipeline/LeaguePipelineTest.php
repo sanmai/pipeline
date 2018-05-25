@@ -17,7 +17,7 @@
 
 declare(strict_types=1);
 
-namespace Pipeline;
+namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 

@@ -17,7 +17,9 @@
 
 declare(strict_types=1);
 
-namespace Pipeline;
+namespace Tests\Pipeline;
+
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard
