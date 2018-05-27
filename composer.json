@@ -30,8 +30,7 @@
         "psr-4": {"Tests\\Pipeline\\": "tests/Pipeline/"}
     },
     "require": {
-        "php": ">=7",
-        "symfony/polyfill-php71": "^1.7"
+        "php": ">=7.1"
     },
     "extra": {
         "branch-alias": {

@@ -27,20 +27,16 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Traversable|array|null
-     *
-     * @todo To be replaced with '?iterable' in PHP7.1+
+     * @var ?iterable
      */
     private $pipeline;
 
     /**
      * Contructor with an optional source of data.
      *
-     * @param \Traversable|null $input
-     *
-     * @todo To be replaced with '?iterable' in PHP7.1+
+     * @param ?iterable $input
      */
-    public function __construct(\Traversable $input = null)
+    public function __construct(iterable $input = null)
     {
         $this->pipeline = $input;
     }
