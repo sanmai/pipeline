@@ -19,9 +19,13 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
-if (!function_exists('pipe')) {
-    function pipe(...$args): Standard
-    {
-        return new Standard(...$args);
+function map(callable $func = null): Standard
+{
+    $pipeline = new Standard();
+
+    if (!$func) {
+        return $pipeline;
     }
+
+    return $pipeline->map($func);
 }

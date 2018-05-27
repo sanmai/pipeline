@@ -21,26 +21,26 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use function Pipeline\pipe;
+use function Pipeline\map;
 
 /**
- * @covers \Pipeline\pipe
+ * @covers \Pipeline\map
  */
 class FunctionsTest extends TestCase
 {
     public function testPipeFunction()
     {
-        $pipeline = pipe();
+        $pipeline = map();
         $this->assertInstanceOf(Standard::class, $pipeline);
+        $this->assertSame([], iterator_to_array($pipeline));
 
-        $pipeline->map(function () {
+        $pipeline = map(function () {
             yield 1;
             yield 2;
         });
 
-        $this->assertSame(3, $pipeline->reduce());
+        $this->assertInstanceOf(Standard::class, $pipeline);
 
-        $pipeline = pipe(new \ArrayIterator([1, 2]));
         $this->assertSame(3, $pipeline->reduce());
     }
 }
