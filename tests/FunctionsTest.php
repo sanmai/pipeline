@@ -28,7 +28,7 @@ use function Pipeline\map;
  */
 class FunctionsTest extends TestCase
 {
-    public function testPipeFunction()
+    public function testMapFunction()
     {
         $pipeline = map();
         $this->assertInstanceOf(Standard::class, $pipeline);
