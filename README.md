@@ -31,10 +31,10 @@ Pipeline is a final class. It comes with a pair of interfaces to aid you with [c
 # Use
 
 ```PHP
-$pipeline = new \Pipeline\Standard();
+use function Pipeline\map;
 
-// initial generator
-$pipeline->map(function () {
+// wrap an initial generator with a pipeline
+$pipeline = map(function () {
     foreach (range(1, 3) as $i) {
         yield $i;
     }
@@ -232,10 +232,8 @@ Standard pipeline has a default callback that sums all values.
 Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
 
 ```php
-$pipeline = new \Pipeline\Standard();
-
 // Yields [0 => 1, 1 => 2]
-$pipeline->map(function () {
+$pipeline = map(function () {
     yield 1;
     yield 2;
 });
