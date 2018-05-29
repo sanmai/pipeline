@@ -22,12 +22,17 @@ namespace Tests\Pipeline;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use function Pipeline\map;
+use function Pipeline\take;
 
 /**
  * @covers \Pipeline\map
+ * @covers \Pipeline\take
  */
 class FunctionsTest extends TestCase
 {
+    /**
+     * @covers \Pipeline\map
+     */
     public function testMapFunction()
     {
         $pipeline = map();
@@ -42,5 +47,19 @@ class FunctionsTest extends TestCase
         $this->assertInstanceOf(Standard::class, $pipeline);
 
         $this->assertSame(3, $pipeline->reduce());
+    }
+
+    /**
+     * @covers \Pipeline\take
+     */
+    public function testTakeFunction()
+    {
+        $pipeline = take();
+        $this->assertInstanceOf(Standard::class, $pipeline);
+        $this->assertSame([], iterator_to_array($pipeline));
+
+        $pipeline = take(new \ArrayIterator([1, 2, 3]));
+        $this->assertInstanceOf(Standard::class, $pipeline);
+        $this->assertSame(6, $pipeline->reduce());
     }
 }

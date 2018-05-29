@@ -29,3 +29,8 @@ function map(callable $func = null): Standard
 
     return $pipeline->map($func);
 }
+
+function take(\Traversable $input = null): Standard
+{
+    return new Standard($input);
+}
