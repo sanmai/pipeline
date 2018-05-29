@@ -19,10 +19,10 @@ declare(strict_types=1);
 
 include 'vendor/autoload.php';
 
-$pipeline = new \Pipeline\Standard();
+use function Pipeline\map;
 
-// initial generator
-$pipeline->map(function () {
+// wrap an initial generator with a pipeline
+$pipeline = map(function () {
     foreach (range(1, 3) as $value) {
         yield $value;
     }
@@ -93,10 +93,8 @@ var_dump($result);
 // }
 
 // Now an example for toArray()
-$pipeline = new \Pipeline\Standard();
-
 // Yields [0 => 1, 1 => 2]
-$pipeline->map(function () {
+$pipeline = map(function () {
     yield 1;
     yield 2;
 });
