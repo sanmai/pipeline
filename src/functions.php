@@ -34,3 +34,8 @@ function take(\Traversable $input = null): Standard
 {
     return new Standard($input);
 }
+
+function fromArray(array $input): Standard
+{
+    return take(new \ArrayIterator($input));
+}

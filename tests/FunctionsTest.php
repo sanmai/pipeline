@@ -21,12 +21,14 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use function Pipeline\fromArray;
 use function Pipeline\map;
 use function Pipeline\take;
 
 /**
  * @covers \Pipeline\map
  * @covers \Pipeline\take
+ * @covers \Pipeline\fromArray
  */
 class FunctionsTest extends TestCase
 {
@@ -61,5 +63,15 @@ class FunctionsTest extends TestCase
         $pipeline = take(new \ArrayIterator([1, 2, 3]));
         $this->assertInstanceOf(Standard::class, $pipeline);
         $this->assertSame(6, $pipeline->reduce());
+    }
+
+    /**
+     * @covers \Pipeline\fromArray
+     */
+    public function testFromArray()
+    {
+        $pipeline = fromArray(range(0, 100));
+        $this->assertInstanceOf(Standard::class, $pipeline);
+        $this->assertSame(range(0, 100), $pipeline->toArray());
     }
 }
