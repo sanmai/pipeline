@@ -3,7 +3,7 @@
 [![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 
-Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. If you ever piped together several bash commands in succession, where one command uses output of another, this library does just that but for PHP functions and generators.
+Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. If you ever piped together several bash commands, where one command uses output of another in succession, this library does just that but for PHP functions and generators.
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
 
