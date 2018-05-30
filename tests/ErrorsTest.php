@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;

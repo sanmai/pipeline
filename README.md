@@ -9,16 +9,26 @@ Pipeline comes with the most important yet basic building blocks. It boasts meth
 
 This rigorously tested library just works. Pipeline never throws any exceptions.
 
-# In a nutshell
+# Entry points
+
+All entry points always return an instance of a standard pipeline.
+
+|  Method     | Details                       |
+| ----------- | ----------------------------- |
+| `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. |
+| `take()`  | Takes any Traversable, initializes a standard pipeline with it.  |
+| `fromArray()`  | Takes an array, initializes a standard pipeline with it.  |
+
+# Instance methods in a nutshell
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. |  `array_map`, `Select`, `SelectMany`                  |
+| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `__construct()` | Can be provided with an optional initial iterator. |     |
+| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface. |     |
 
 Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
 
@@ -31,10 +41,10 @@ Pipeline is a final class. It comes with a pair of interfaces to aid you with [c
 # Use
 
 ```PHP
-$pipeline = new \Pipeline\Standard();
+use function Pipeline\map;
 
-// initial generator
-$pipeline->map(function () {
+// wrap an initial generator with a pipeline
+$pipeline = map(function () {
     foreach (range(1, 3) as $i) {
         yield $i;
     }
@@ -232,10 +242,8 @@ Standard pipeline has a default callback that sums all values.
 Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
 
 ```php
-$pipeline = new \Pipeline\Standard();
-
 // Yields [0 => 1, 1 => 2]
-$pipeline->map(function () {
+$pipeline = map(function () {
     yield 1;
     yield 2;
 });

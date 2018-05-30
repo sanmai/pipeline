@@ -24,10 +24,11 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
-        "psr-4": {"Pipeline\\": "src/Pipeline/"}
+        "files": ["src/functions.php"],
+        "psr-4": {"Pipeline\\": "src/"}
     },
     "autoload-dev": {
-        "psr-4": {"Tests\\Pipeline\\": "tests/Pipeline/"}
+        "psr-4": {"Tests\\Pipeline\\": "tests/"}
     },
     "require": {
         "php": ">=7",
