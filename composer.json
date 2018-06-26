@@ -13,12 +13,12 @@
         "php-coveralls/php-coveralls": "^2.0",
         "friendsofphp/php-cs-fixer": "^2.11",
         "codacy/coverage": "^1.4",
-        "league/pipeline": "^0.3",
-        "phan/phan": "^0.12.1",
-        "infection/infection": "^0.8.1",
-        "phpstan/phpstan": "^0.9.2",
+        "league/pipeline": "^1.0",
+        "phan/phan": "^0.12",
+        "infection/infection": "^0.9",
+        "phpstan/phpstan": "^0.10",
         "mockery/mockery": "^1.0",
-        "vimeo/psalm": "^1.1"
+        "vimeo/psalm": "^2.0"
     },
     "license": "Apache-2.0",
     "minimum-stability": "dev",
