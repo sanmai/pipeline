@@ -59,7 +59,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
         }
 
         return parent::filter(static function ($value) {
-            return (bool) $value;
+            return $value;
         });
     }
 
