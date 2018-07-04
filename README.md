@@ -3,40 +3,17 @@
 [![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 
-Pipeline makes creating do-it-yourself data pipelines easy by chaining generators. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
+Pipeline makes generator chaining as easy as it can be, making it a perfect tool for building bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
 
 This rigorously tested library just works. Pipeline never throws any exceptions.
 
-# Entry points
-
-All entry points always return an instance of a standard pipeline.
-
-|  Method     | Details                       |
-| ----------- | ----------------------------- |
-| `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. |
-| `take()`  | Takes any Traversable, initializes a standard pipeline with it.  |
-| `fromArray()`  | Takes an array, initializes a standard pipeline with it.  |
-
-# Instance methods in a nutshell
-
-|  Method     | Details                       | A.K.A.            |
-| ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
-| `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
-| `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
-| `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
-| `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface. |     |
-
-Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
-
-Pipeline is a final class. It comes with a pair of interfaces to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
-
 # Install
 
     composer require sanmai/pipeline
+
+The only requirement is PHP 7.0 or above.
 
 # Use
 
@@ -86,13 +63,39 @@ $pipeline->filter(function ($i) {
 
 // reduce to a single value; can be an array or any value
 $value = $pipeline->reduce(function ($carry, $item) {
-    // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
+    // for the sake of convenience the default reducer from the simple
+    // pipeline does summation, just like we do here
     return $carry + $item;
 }, 0);
 
 var_dump($value);
 // int(104)
 ```
+
+# API entry points
+
+All entry points always return an instance of a standard pipeline.
+
+|  Method     | Details                       | Use with       |
+| ----------- | ----------------------------- | ----------- |
+| `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
+| `take()`  | Takes any Traversable, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
+| `fromArray()`  | Takes an array, initializes a standard pipeline with it.  | `use function Pipeline\fromArray;` |
+
+# Instance methods in a nutshell
+
+|  Method     | Details                       | A.K.A.            |
+| ----------- | ----------------------------- | ----------------- |
+| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
+| `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
+| `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
+| `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
+| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface. |     |
+
+Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
+
+Pipeline is a final class. It comes with a pair of interfaces to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
 
 # Caveats
 
