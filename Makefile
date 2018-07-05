@@ -53,7 +53,7 @@ ci: prerequisites ci-phpunit ci-analyze
 
 ci-phpunit: ci-cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
-	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --quiet
+	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
 ci-analyze: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
