@@ -13,7 +13,7 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
     composer require sanmai/pipeline
 
-The only requirement is PHP 7.0 or above.
+PHP 7.0 or above is imperative.
 
 # Use
 
