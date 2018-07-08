@@ -80,27 +80,4 @@ class Standard extends Principal implements Interfaces\SimplePipeline
             return $carry;
         }, $initial ?? 0);
     }
-
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
-    {
-        // with non-primed pipeline just return empty iterator
-        if (!$iterator = parent::getIterator()) {
-            return new \ArrayIterator([]);
-        }
-
-        return $iterator;
-    }
-
-    public function toArray()
-    {
-        // with non-primed pipeline just return empty array
-        if (!$iterator = parent::getIterator()) {
-            return [];
-        }
-
-        return parent::toArray();
-    }
 }

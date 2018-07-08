@@ -29,7 +29,7 @@ abstract class Principal implements Interfaces\Pipeline
     /**
      * Pre-primed pipeline.
      *
-     * @var \Traversable
+     * @var \Traversable|null
      */
     private $pipeline;
 
@@ -105,7 +105,11 @@ abstract class Principal implements Interfaces\Pipeline
      */
     public function getIterator()
     {
-        return $this->pipeline;
+        if ($this->pipeline instanceof \Traversable) {
+            return $this->pipeline;
+        }
+
+        return new \EmptyIterator();
     }
 
     public function toArray()
