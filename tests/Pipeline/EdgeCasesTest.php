@@ -76,7 +76,7 @@ class EdgeCasesTest extends TestCase
     public function testFilterUnprimed()
     {
         $pipeline = new Standard();
-        $pipeline->filter();
+        $pipeline->filter()->unpack();
 
         $this->assertEquals([], $pipeline->toArray());
     }
@@ -136,6 +136,34 @@ class EdgeCasesTest extends TestCase
         });
 
         $this->assertEquals([3, 4], iterator_to_array($pipeline));
+    }
+
+    public function testPointlessReplace()
+    {
+        $pipeline = new Standard(new \ArrayIterator([1, 2]));
+
+        $pipeline->map(function () {
+            yield from new Standard(new \ArrayIterator([3, 4]));
+        });
+
+        $this->assertSame([3, 4, 3, 4], $pipeline->toArray());
+    }
+
+    public function testNormalReplace()
+    {
+        $pipeline = new Standard(new \ArrayIterator([1, 2]));
+        $pipeline->map(new Standard(new \ArrayIterator([3, 4])));
+        $this->assertSame([3, 4], $pipeline->toArray());
+    }
+
+    public function testArrayReduce()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            return 3;
+        });
+
+        $this->assertSame(3, $pipeline->reduce());
     }
 
     public function testInvokeMaps()
