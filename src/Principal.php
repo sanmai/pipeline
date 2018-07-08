@@ -75,7 +75,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return $this;
     }
 
-    private static function apply(/* iterable */ $previous, callable $func): \Generator
+    private static function apply(iterable $previous, callable $func): \Generator
     {
         foreach ($previous as $value) {
             $result = $func($value);
