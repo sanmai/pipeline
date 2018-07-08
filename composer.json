@@ -36,6 +36,7 @@
     },
     "extra": {
         "branch-alias": {
+            "dev-legacy": "1.x-dev",
             "dev-master": "2.x-dev",
             "dev-future": "3.x-dev"
         }
