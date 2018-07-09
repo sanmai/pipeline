@@ -47,6 +47,8 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      * @param callable $func {@inheritdoc}
      *
      * @return $this
+     *
+     * @psalm-suppress PossiblyNullArgument
      */
     public function map(callable $func)
     {

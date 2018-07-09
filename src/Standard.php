@@ -38,6 +38,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
         };
 
         return $this->map(static function (iterable $args = []) use ($func) {
+            /** @psalm-suppress InvalidArgument */
             return $func(...$args);
         });
     }
