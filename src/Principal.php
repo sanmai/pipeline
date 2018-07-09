@@ -52,6 +52,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     {
         // That's the standard case for any next stages
         if (is_iterable($this->pipeline)) {
+            // @phan-suppress-next-line PhanTypeMismatchArgument Phan can't track types of properties of specific instances
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
