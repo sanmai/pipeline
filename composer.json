@@ -38,5 +38,8 @@
             "dev-master": "2.x-dev",
             "dev-future": "3.x-dev"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
