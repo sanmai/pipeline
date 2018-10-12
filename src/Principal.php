@@ -48,12 +48,14 @@ abstract class Principal implements Interfaces\Pipeline
         // If we know the callback is one of us, we can use a shortcut
         // This also allows inheriting classes to replace the pipeline
         if ($func instanceof self) {
+            /** @psalm-suppress MixedAssignment */
             $this->pipeline = call_user_func($func);
 
             return $this;
         }
 
         if (!$this->pipeline) {
+            /** @psalm-suppress MixedAssignment */
             $this->pipeline = call_user_func($func);
 
             // Not a generator means we were given a simple value to be treated as an array
@@ -68,19 +70,23 @@ abstract class Principal implements Interfaces\Pipeline
             return $this;
         }
 
-        $this->pipeline = (static function ($previous) use ($func) {
-            foreach ($previous as $value) {
-                $result = $func($value);
-                if ($result instanceof \Generator) {
-                    yield from $result;
-                } else {
-                    // Case of a plain old mapping function
-                    yield $result;
-                }
-            }
-        })($this->pipeline);
+        $this->pipeline = self::apply($this->pipeline, $func);
 
         return $this;
+    }
+
+    private static function apply(\Traversable $previous, callable $func): \Generator
+    {
+        /** @psalm-suppress MixedAssignment */
+        foreach ($previous as $value) {
+            $result = $func($value);
+            if ($result instanceof \Generator) {
+                yield from $result;
+            } else {
+                // Case of a plain old mapping function
+                yield $result;
+            }
+        }
     }
 
     public function filter(callable $func)
@@ -121,6 +127,7 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function reduce(callable $func, $initial = null)
     {
+        /** @psalm-suppress MixedAssignment */
         foreach ($this as $value) {
             $initial = $func($initial, $value);
         }

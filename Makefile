@@ -12,6 +12,7 @@ SILENT=$(shell which chronic)
 # PHP CS Fixer
 PHP_CS_FIXER=vendor/bin/php-cs-fixer
 PHP_CS_FIXER_ARGS=--cache-file=build/cache/.php_cs.cache --verbose
+export PHP_CS_FIXER_IGNORE_ENV=1
 
 # PHPUnit
 PHPUNIT=vendor/bin/phpunit
@@ -36,7 +37,7 @@ COMPOSER=$(PHP) $(shell which composer)
 
 # Infection
 INFECTION=vendor/bin/infection
-MIN_MSI=90
+MIN_MSI=95
 MIN_COVERED_MSI=100
 INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=coverage
 
