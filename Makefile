@@ -12,6 +12,7 @@ SILENT=$(shell which chronic)
 # PHP CS Fixer
 PHP_CS_FIXER=vendor/bin/php-cs-fixer
 PHP_CS_FIXER_ARGS=--cache-file=build/cache/.php_cs.cache --verbose
+export PHP_CS_FIXER_IGNORE_ENV=1
 
 # PHPUnit
 PHPUNIT=vendor/bin/phpunit
