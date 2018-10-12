@@ -37,6 +37,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
             yield from $args;
         };
 
+        /** @psalm-suppress MixedArgument */
         return $this->map(static function (/* iterable */ $args = []) use ($func) {
             return $func(...$args);
         });
@@ -75,6 +76,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
         }
 
         return parent::reduce(static function ($carry, $item) {
+            /** @psalm-suppress MixedOperand */
             $carry += $item;
 
             return $carry;
