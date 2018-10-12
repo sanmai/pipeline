@@ -96,6 +96,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     {
         if (is_null($func)) {
             return parent::reduce(static function ($carry, $item) {
+                /** @psalm-suppress MixedOperand */
                 $carry += $item;
 
                 return $carry;
