@@ -52,13 +52,14 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     {
         // That's the standard case for any next stages
         if (is_iterable($this->pipeline)) {
-            // @phan-suppress-next-line PhanTypeMismatchArgument Phan can't track types of properties of specific instances
+            /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
         }
 
         // Let's check what we got for a start
+        /** @psalm-suppress MixedAssignment */
         $this->pipeline = $func();
 
         // Generator is a generator, moving along
@@ -76,6 +77,9 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return $this;
     }
 
+    /**
+     * @psalm-suppress MixedAssignment
+     */
     private static function apply(iterable $previous, callable $func): \Generator
     {
         foreach ($previous as $value) {
@@ -163,6 +167,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      *
      * @param callable $func    {@inheritdoc}
      * @param mixed    $initial {@inheritdoc}
+     * @psalm-suppress MixedAssignment
      *
      * @return mixed|null
      */
