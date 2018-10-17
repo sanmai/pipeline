@@ -7,8 +7,27 @@ php:
   - nightly
 
 matrix:
+  fast_finish: true
   allow_failures:
-    - php: nightly
+    - nightly
+
+stages:
+  - analyze
+  - test
+
+jobs:
+  exclude:
+    - php: 7.2
+  include:
+    - stage: analyze
+      php: 7.2
+      install:
+        - pecl install ast
+        - phpenv config-rm xdebug.ini
+        - composer install --prefer-dist
+      script:
+        - make ci-analyze --keep-going
+        - composer validate
 
 cache:
   directories:
@@ -16,14 +35,14 @@ cache:
     - build/cache
 
 install:
-  - pecl install ast
-  - if [[ "$TRAVIS_PHP_VERSION" == "nightly" ]]; then COMPOSER_ARGS='--ignore-platform-reqs'; fi
-  - composer install --prefer-dist $COMPOSER_ARGS
+  - phpenv config-rm xdebug.ini || true
+  - composer remove --no-update --dev
+      phan/phan phpstan/phpstan vimeo/psalm
+      infection/infection friendsofphp/php-cs-fixer
+  - composer install --prefer-dist
 
 script:
-  - if [[ "$TRAVIS_PHP_VERSION" == "nightly" ]]; then vendor/bin/phpunit; else make ci --keep-going COMPOSER='/bin/sh -c composer'; fi
-  - composer validate
+  - make ci-test --keep-going
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls
-  - travis_retry php vendor/bin/codacycoverage clover build/logs/clover.xml
