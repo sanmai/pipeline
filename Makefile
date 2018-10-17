@@ -2,6 +2,7 @@
 
 # Use any most recent PHP version
 PHP=$(shell which php7.2 || which php7.1 || which php)
+PHPDBG=phpdbg -qrr
 
 # Default parallelism
 JOBS=$(shell nproc)
@@ -16,7 +17,9 @@ export PHP_CS_FIXER_IGNORE_ENV=1
 
 # PHPUnit
 PHPUNIT=vendor/bin/phpunit
-PHPUNIT_ARGS=--coverage-xml=coverage/coverage-xml --log-junit=coverage/phpunit.junit.xml
+PHPUNIT_COVERAGE_CLOVER=--coverage-clover=build/logs/clover.xml
+PHPUNIT_GROUP=default
+PHPUNIT_ARGS=--coverage-xml=build/logs/coverage-xml --log-junit=build/logs/phpunit.junit.xml $(PHPUNIT_COVERAGE_CLOVER)
 
 # Phan
 PHAN=vendor/bin/phan
@@ -37,9 +40,9 @@ COMPOSER=$(PHP) $(shell which composer)
 
 # Infection
 INFECTION=vendor/bin/infection
-MIN_MSI=95
+MIN_MSI=90
 MIN_COVERED_MSI=100
-INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=coverage
+INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=build/logs --log-verbosity=default --show-mutations
 
 all: test
 
@@ -47,17 +50,26 @@ all: test
 # Continuous Integration                                     #
 ##############################################################
 
-ci: SILENT=
-ci: prerequisites ci-phpunit ci-analyze
-	$(SILENT) $(COMPOSER) validate --strict
+ci-test: SILENT=
+ci-test: prerequisites
+	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP)
+
+ci-analyze: SILENT=
+ci-analyze: prerequisites ci-phpunit ci-infection ci-phan ci-phpstan ci-psalm
 
 ci-phpunit: ci-cs
-	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
-	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --quiet
+	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_ARGS)
 
-ci-analyze: ci-cs
+ci-infection: ci-phpunit
+	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
+
+ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
+
+ci-phpstan: ci-cs
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
+
+ci-psalm: ci-cs
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache
 
 ci-cs: prerequisites
@@ -67,14 +79,17 @@ ci-cs: prerequisites
 # Development Workflow                                       #
 ##############################################################
 
-test: phpunit analyze
+test: phpunit analyze composer-validate
+
+.PHONY: composer-validate
+composer-validate: test-prerequisites
 	$(SILENT) $(COMPOSER) validate --strict
 
 test-prerequisites: prerequisites composer.lock
 
 phpunit: cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
-	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS) --log-verbosity=2 --show-mutations
+	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
 analyze: cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
@@ -107,6 +122,23 @@ composer.lock: composer.json
 build/cache:
 	mkdir -p build/cache
 
-.PHONY:
+.PHONY: report-php-version
 report-php-version:
 	# Using $(PHP)
+
+##############################################################
+# Quick development testing procedure                        #
+##############################################################
+
+PHP_VERSIONS=php7.0 php7.2
+
+.PHONY: quick
+quick:
+	make --no-print-directory -j test-all
+
+.PHONY: test-all
+test-all: $(PHP_VERSIONS)
+
+.PHONY: $(PHP_VERSIONS)
+$(PHP_VERSIONS): cs
+	@make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true
