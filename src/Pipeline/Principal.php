@@ -86,10 +86,7 @@ abstract class Principal implements Interfaces\Pipeline, Interfaces\Unpack
         };
 
         return $this->map(function ($args = []) use ($func) {
-            if (is_scalar($args)) {
-                $args = [$args];
-            }
-            $result = $func(...$args);
+            $result = call_user_func_array($func, $args);
             if ($result instanceof \Generator) {
                 foreach ($result as $value) {
                     yield $value;
