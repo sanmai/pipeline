@@ -17,7 +17,12 @@
 
 namespace Pipeline;
 
-function map(callable $func = null): Simple
+/**
+ * @param callable $func
+ *
+ * @return Simple
+ */
+function map(callable $func = null)
 {
     $pipeline = new Simple();
 
@@ -28,12 +33,18 @@ function map(callable $func = null): Simple
     return $pipeline->map($func);
 }
 
-function take(\Traversable $input = null): Simple
+/**
+ * @return Simple
+ */
+function take(\Traversable $input = null)
 {
     return new Simple($input);
 }
 
-function fromArray(array $input): Simple
+/**
+ * @return Simple
+ */
+function fromArray(array $input)
 {
     return take(new \ArrayIterator($input));
 }
