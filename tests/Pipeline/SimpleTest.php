@@ -152,6 +152,19 @@ class SimpleTest extends TestCase
         $this->assertEquals([9, 27, 36, 216, 81, 729], $result);
     }
 
+    public function testToArray()
+    {
+        $pipeline = new Simple();
+
+        $pipeline->map(function () {
+            foreach (range(1, 10) as $i) {
+                yield 0 => $i;
+            }
+        });
+
+        $this->assertEquals(range(1, 10), $pipeline->toArray());
+    }
+
     public function testMeaningless()
     {
         $pipeline = new Simple(new \ArrayIterator([]));

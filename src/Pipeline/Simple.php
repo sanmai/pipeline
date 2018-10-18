@@ -64,4 +64,16 @@ class Simple extends Principal
 
         return $iterator;
     }
+
+    /**
+     * Returns an array representation with keys ignored. Backported from 2.x.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        // Because `yield from` does not reset keys we have to ignore them on export to return every item.
+        // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
+        return iterator_to_array($this, false);
+    }
 }
