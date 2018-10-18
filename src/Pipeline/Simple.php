@@ -70,7 +70,7 @@ class Simple extends Principal
      *
      * @return array
      */
-    public function toArray(): array
+    public function toArray()
     {
         // Because `yield from` does not reset keys we have to ignore them on export to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
