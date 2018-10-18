@@ -22,7 +22,7 @@ namespace Pipeline;
  *
  * You're not expected to use this class directly, but you may subclass it as you see fit.
  */
-abstract class Principal implements Interfaces\Pipeline
+abstract class Principal implements Interfaces\Pipeline, Interfaces\Unpack
 {
     /**
      * Pre-primed pipeline.
@@ -55,16 +55,47 @@ abstract class Principal implements Interfaces\Pipeline
         $previous = $this->pipeline;
         $this->pipeline = call_user_func(function () use ($previous, $func) {
             foreach ($previous as $value) {
-                // `yield from` does not reset the keys
-                // iterator_to_array() goes nuts
-                // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-                foreach ($func($value) as $value) {
-                    yield $value;
+                $result = $func($value);
+                if ($result instanceof \Generator) {
+                    foreach ($result as $value) {
+                        yield $value;
+                    }
+                } else {
+                    // Case of a plain old mapping function
+                    yield $result;
                 }
             }
         });
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param ?callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
+    public function unpack(callable $func = null)
+    {
+        $func = $func ? $func : function (...$args) {
+            foreach ($args as $arg) {
+                yield $arg;
+            }
+        };
+
+        return $this->map(function ($args = []) use ($func) {
+            $result = call_user_func_array($func, $args);
+            if ($result instanceof \Generator) {
+                foreach ($result as $value) {
+                    yield $value;
+                }
+            } else {
+                // Case of a plain old mapping function
+                yield $result;
+            }
+        });
     }
 
     public function filter(callable $func)

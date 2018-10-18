@@ -17,27 +17,12 @@
 
 namespace Pipeline\Interfaces;
 
-interface Pipeline extends \IteratorAggregate
+interface Unpack extends \IteratorAggregate
 {
     /**
-     * @param callable $func
+     * @param ?callable $func
      *
      * @return $this
      */
-    public function map(callable $func);
-
-    /**
-     * @param callable $func - must yield values (return a generator)
-     *
-     * @return $this
-     */
-    public function filter(callable $func);
-
-    /**
-     * @param callable $func    (mixed $carry, mixed $item)
-     * @param mixed    $initial
-     *
-     * @return mixed
-     */
-    public function reduce(callable $func, $initial);
+    public function unpack(callable $func = null);
 }
