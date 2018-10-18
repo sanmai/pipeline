@@ -19,6 +19,7 @@
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use function Pipeline\fromArray;
 
 /**
  * @covers \Pipeline\Simple
@@ -61,5 +62,17 @@ class UnpackTest extends TestCase
         })->unpack();
 
         $this->assertEquals((10 * 11) / 2, round($pipeline->reduce()));
+    }
+
+    /**
+     * @covers \Pipeline\Simple::unpack()
+     */
+    public function testWithIterator()
+    {
+        $this->assertSame([1, 2, 3], fromArray([
+            new \ArrayIterator([1]),
+            fromArray([2]),
+            [3],
+        ])->unpack()->toArray());
     }
 }
