@@ -62,4 +62,23 @@ class UnpackTest extends TestCase
 
         $this->assertEquals((10 * 11) / 2, round($pipeline->reduce()));
     }
+
+    /**
+     * @covers \Pipeline\Simple::unpack()
+     */
+    public function testSingleValue()
+    {
+        $pipeline = new \Pipeline\Simple();
+
+        $pipeline->map(function () {
+            yield 1;
+            yield [2, 3];
+        });
+
+        $pipeline->unpack(function ($x, $y = 0) {
+            return $x + $y;
+        });
+
+        $this->assertEquals(6, round($pipeline->reduce()));
+    }
 }
