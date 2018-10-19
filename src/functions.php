@@ -30,12 +30,12 @@ function map(callable $func = null): Standard
     return $pipeline->map($func);
 }
 
-function take(\Traversable $input = null): Standard
+function take(iterable $input = null): Standard
 {
     return new Standard($input);
 }
 
 function fromArray(array $input): Standard
 {
-    return take(new \ArrayIterator($input));
+    return new Standard($input);
 }

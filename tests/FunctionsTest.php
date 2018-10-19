@@ -66,6 +66,14 @@ class FunctionsTest extends TestCase
     }
 
     /**
+     * @covers \Pipeline\take
+     */
+    public function testTakeArray()
+    {
+        $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toArray());
+    }
+
+    /**
      * @covers \Pipeline\fromArray
      */
     public function testFromArray()
