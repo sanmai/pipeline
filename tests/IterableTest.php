@@ -32,7 +32,7 @@ class IterableTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        if (PHP_VERSION_ID < 70100) {
+        if (\PHP_VERSION_ID < 70100) {
             self::$usesIterable = false;
 
             return;
@@ -53,13 +53,13 @@ class IterableTest extends TestCase
     public function testArrayToArray()
     {
         $pipeline = new Standard([1, 2, 3]);
-        $this->assertEquals([1, 2, 3], $pipeline->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->toArray());
     }
 
     public function testArrayToIterator()
     {
         $pipeline = new Standard([1, 2, 3]);
-        $this->assertEquals([1, 2, 3], iterator_to_array($pipeline));
+        $this->assertSame([1, 2, 3], iterator_to_array($pipeline));
     }
 
     public function testEmptyArrayStaysEmpty()
@@ -71,19 +71,19 @@ class IterableTest extends TestCase
             yield $value;
         })->filter()->unpack();
 
-        $this->assertEquals([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toArray());
     }
 
     public function testArrayFilter()
     {
         $pipeline = new Standard([0, 1, 2, 3, 0]);
-        $this->assertEquals([1, 2, 3], $pipeline->filter()->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->filter()->toArray());
     }
 
     public function testArrayMap()
     {
         $pipeline = new Standard([1 => 0, 1, 2, 3]);
-        $this->assertEquals([0 => 0, 1, 2, 3], $pipeline->map(function ($value) {
+        $this->assertSame([0 => 0, 1, 2, 3], $pipeline->map(function ($value) {
             return $value;
         })->toArray());
     }
@@ -91,7 +91,7 @@ class IterableTest extends TestCase
     public function testArrayMapFilter()
     {
         $pipeline = new Standard([1 => 0, 1, 2, 3]);
-        $this->assertEquals([0 => 1, 2, 3], $pipeline->map(function ($value) {
+        $this->assertSame([0 => 1, 2, 3], $pipeline->map(function ($value) {
             return $value;
         })->filter()->toArray());
     }

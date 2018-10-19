@@ -45,7 +45,7 @@ class UnpackTest extends TestCase
             return sqrt($x ** 2 + $y ** 2);
         });
 
-        $this->assertEquals(37, round($pipeline->reduce()));
+        $this->assertSame(37.0, round($pipeline->reduce()));
     }
 
     /**
@@ -62,7 +62,7 @@ class UnpackTest extends TestCase
             yield [7, 8, 9, 10];
         })->unpack();
 
-        $this->assertEquals((10 * 11) / 2, round($pipeline->reduce()));
+        $this->assertSame((10 * 11) / 2, $pipeline->reduce());
     }
 
     /**

@@ -1,4 +1,21 @@
 <?php
+/*
+ * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+declare(strict_types=1);
 
 $header = <<<'EOF'
 Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
@@ -20,6 +37,9 @@ return PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
     ->setRules([
         '@Symfony' => true,
+        '@Symfony:risky' => true,
+        '@PHP70Migration:risky' => true,
+        '@PHP71Migration:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'declare_strict_types' => true,
         'explicit_indirect_variable' => true,
@@ -31,13 +51,21 @@ return PhpCsFixer\Config::create()
         'non_printable_character' => true,
         'ordered_imports' => true,
         'php_unit_test_class_requires_covers' => true,
+        'php_unit_strict' => true,
         'phpdoc_add_missing_param_annotation' => true,
         'phpdoc_order' => true,
         'visibility_required' => true,
         'header_comment' => ['header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
         'ternary_to_null_coalescing' => true,
-        'yoda_style' => null,
+        'yoda_style' => true,
         'phpdoc_to_comment' => false,
+        'strict_comparison' => true,
+        'is_null' => true,
+        'function_to_constant' => true,
+        'void_return' => false,
+        'return_assignment' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'array_indentation' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

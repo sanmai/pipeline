@@ -115,7 +115,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         }
 
         // We got an array, that's what we need. Moving along.
-        if (is_array($this->pipeline)) {
+        if (\is_array($this->pipeline)) {
             $this->pipeline = array_filter($this->pipeline, $func);
 
             return $this;
@@ -160,7 +160,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         }
 
         // We got what we need, moving along
-        if (is_array($this->pipeline)) {
+        if (\is_array($this->pipeline)) {
             return array_values($this->pipeline);
         }
 
@@ -180,7 +180,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      */
     public function reduce(callable $func, $initial)
     {
-        if (is_array($this->pipeline)) {
+        if (\is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
         }
 
