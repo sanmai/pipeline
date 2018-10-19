@@ -49,14 +49,14 @@ abstract class Principal implements Interfaces\Pipeline
         // This also allows inheriting classes to replace the pipeline
         if ($func instanceof self) {
             /** @psalm-suppress MixedAssignment */
-            $this->pipeline = call_user_func($func);
+            $this->pipeline = \call_user_func($func);
 
             return $this;
         }
 
         if (!$this->pipeline) {
             /** @psalm-suppress MixedAssignment */
-            $this->pipeline = call_user_func($func);
+            $this->pipeline = \call_user_func($func);
 
             // Not a generator means we were given a simple value to be treated as an array
             if (!($this->pipeline instanceof \Generator)) {

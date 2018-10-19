@@ -34,11 +34,11 @@ class LeaguePipelineTest extends TestCase
             return $payload * 2;
         });
 
-        $this->assertEquals(22, $leaguePipeline(10));
+        $this->assertSame(22, $leaguePipeline(10));
 
         $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
         $pipeline->map($leaguePipeline);
 
-        $this->assertEquals([22, 42, 62], iterator_to_array($pipeline));
+        $this->assertSame([22, 42, 62], iterator_to_array($pipeline));
     }
 }
