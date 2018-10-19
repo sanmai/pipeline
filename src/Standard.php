@@ -53,7 +53,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function map(callable $func = null): self
     {
-        if (is_null($func)) {
+        if (null === $func) {
             return $this;
         }
 
@@ -75,7 +75,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
         };
 
         // Strings usually are internal functions, which require exact number of parameters.
-        if (is_string($func)) {
+        if (\is_string($func)) {
             $func = static function ($value) use ($func) {
                 return $func($value);
             };
@@ -94,7 +94,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function reduce(callable $func = null, $initial = null)
     {
-        if (is_null($func)) {
+        if (null === $func) {
             return parent::reduce(static function ($carry, $item) {
                 /** @psalm-suppress MixedOperand */
                 $carry += $item;

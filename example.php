@@ -30,8 +30,8 @@ $pipeline = map(function () {
 
 // next processing step
 $pipeline->map(function ($value) {
-    yield pow($value, 2);
-    yield pow($value, 3);
+    yield $value ** 2;
+    yield $value ** 3;
 });
 
 // simple one-to-one mapper

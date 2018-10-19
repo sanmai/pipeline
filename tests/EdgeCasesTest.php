@@ -33,7 +33,7 @@ class EdgeCasesTest extends TestCase
         $pipeline = new Standard(new \ArrayIterator([1, 2, 'foo', 'bar']));
         $pipeline->filter('is_int');
 
-        $this->assertEquals([1, 2], iterator_to_array($pipeline));
+        $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
 
     public function testFilterAnyFalseValue()
@@ -61,7 +61,7 @@ class EdgeCasesTest extends TestCase
             return 1;
         });
 
-        $this->assertEquals([1], $pipeline->toArray());
+        $this->assertSame([1], $pipeline->toArray());
     }
 
     public function testFilterUnprimed()
@@ -69,7 +69,7 @@ class EdgeCasesTest extends TestCase
         $pipeline = new Standard();
         $pipeline->filter()->unpack();
 
-        $this->assertEquals([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toArray());
     }
 
     public function testUnpackUnprimed()
@@ -79,7 +79,7 @@ class EdgeCasesTest extends TestCase
             return 1;
         });
 
-        $this->assertEquals([1], $pipeline->toArray());
+        $this->assertSame([1], $pipeline->toArray());
     }
 
     public function testInitialInvokeReturnsScalar()
@@ -87,7 +87,7 @@ class EdgeCasesTest extends TestCase
         $pipeline = new Standard();
         $pipeline->map($this);
 
-        $this->assertEquals([null], iterator_to_array($pipeline));
+        $this->assertSame([null], iterator_to_array($pipeline));
     }
 
     private function firstValueFromIterator(\Iterator $iterator)
@@ -106,11 +106,11 @@ class EdgeCasesTest extends TestCase
 
         $iterator = new \IteratorIterator($pipeline);
         /* @var $iterator \Iterator */
-        $this->assertEquals(42, $this->firstValueFromIterator($iterator));
+        $this->assertSame(42, $this->firstValueFromIterator($iterator));
 
         $pipeline = new Standard(new \ArrayIterator([42]));
         $iterator = new \IteratorIterator($pipeline);
-        $this->assertEquals(42, $this->firstValueFromIterator($iterator));
+        $this->assertSame(42, $this->firstValueFromIterator($iterator));
     }
 
     private function pipelineWithNonUniqueKeys(): Standard
@@ -131,12 +131,12 @@ class EdgeCasesTest extends TestCase
 
     public function testIteratorToArrayWithSameKeys()
     {
-        $this->assertEquals([3, 4], iterator_to_array($this->pipelineWithNonUniqueKeys()));
+        $this->assertSame([3, 4], iterator_to_array($this->pipelineWithNonUniqueKeys()));
     }
 
     public function testIteratorToArrayWithAllValues()
     {
-        $this->assertEquals([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
+        $this->assertSame([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
     }
 
     public function testPipelineInvokeReturnsGenerator()
@@ -150,7 +150,7 @@ class EdgeCasesTest extends TestCase
         $pipeline = new Standard(new \ArrayIterator(range(1, 5)));
         $pipeline->map($this);
 
-        $this->assertEquals(range(1, 5), iterator_to_array($pipeline));
+        $this->assertSame(range(1, 5), iterator_to_array($pipeline));
     }
 
     public function __invoke($default = null)

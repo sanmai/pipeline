@@ -63,7 +63,7 @@ class ErrorsTest extends TestCase
         });
 
         $pipeline->map($pipeline)->filter(function ($i) {
-            return $i % 2 != 0;
+            return 0 !== $i % 2;
         });
 
         $this->expectExceptionMessage('Cannot rewind a generator that was already run');
