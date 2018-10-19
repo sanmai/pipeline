@@ -14,8 +14,6 @@
         "friendsofphp/php-cs-fixer": "^2.4"
     },
     "license": "Apache-2.0",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "autoload": {
         "files": ["src/functions.php"],
         "psr-4": {"Pipeline\\": "src/Pipeline/"}
