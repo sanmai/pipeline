@@ -63,4 +63,18 @@ class UnpackTest extends TestCase
 
         $this->assertEquals((10 * 11) / 2, round($pipeline->reduce()));
     }
+
+    /**
+     * @covers \Pipeline\Standard::unpack()
+     */
+    public function testWithIterator()
+    {
+        $pipeline = new \Pipeline\Standard(new \ArrayIterator([
+            new \ArrayIterator([1]),
+            new \Pipeline\Standard(new \ArrayIterator([2])),
+            [3],
+        ]));
+
+        $this->assertSame([1, 2, 3], $pipeline->unpack()->toArray());
+    }
 }
