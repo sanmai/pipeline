@@ -46,7 +46,7 @@ class IterableTest extends TestCase
     protected function setUp()
     {
         if (!self::$usesIterable) {
-            $this->markTestSkipped();
+            $this->markTestSkipped('Not testing iterables: not yet supported by the interface');
         }
     }
 
