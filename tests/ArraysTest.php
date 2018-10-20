@@ -35,7 +35,7 @@ class ArraysTest extends TestCase
             return PHP_INT_MAX;
         });
 
-        $this->assertEquals([PHP_INT_MAX], iterator_to_array($pipeline));
+        $this->assertSame([PHP_INT_MAX], iterator_to_array($pipeline));
     }
 
     public function testArrayToArray()
@@ -45,7 +45,7 @@ class ArraysTest extends TestCase
             return 42;
         });
 
-        $this->assertEquals([42], $pipeline->toArray());
+        $this->assertSame([42], $pipeline->toArray());
     }
 
     public function testArrayFilter()
@@ -55,7 +55,7 @@ class ArraysTest extends TestCase
             return false;
         })->filter()->filter();
 
-        $this->assertEquals([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toArray());
     }
 
     public function testArrayReduce()
