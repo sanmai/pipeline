@@ -39,7 +39,6 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         '@Symfony:risky' => true,
         '@PHP70Migration:risky' => true,
-        '@PHP71Migration:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'declare_strict_types' => true,
         'explicit_indirect_variable' => true,
