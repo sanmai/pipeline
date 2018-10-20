@@ -17,28 +17,38 @@
 
 include 'vendor/autoload.php';
 
-$pipeline = new \Pipeline\Simple();
+$pipeline = new \Pipeline\Standard();
 
+// initial generator
 $pipeline->map(function () {
     foreach (range(1, 3) as $i) {
         yield $i;
     }
 });
 
-$pipeline->map(function ($i) {
-    yield pow($i, 2);
-    yield pow($i, 3);
+// next processing step
+$pipeline->map(function ($value) {
+    yield $value ** 2;
+    yield $value ** 3;
 });
 
+// simple one-to-one mapper
 $pipeline->map(function ($i) {
     yield $i - 1;
 });
 
+// one-to-many generator
 $pipeline->map(function ($i) {
-    yield $i * 2;
-    yield $i * 4;
+    yield [$i, 2];
+    yield [$i, 4];
 });
 
+// mapper with arguments unpacked from an input array
+$pipeline->unpack(function ($i, $j) {
+    yield $i * $j;
+});
+
+// one way to filter
 $pipeline->map(function ($i) {
     if ($i > 50) {
         yield $i;
@@ -49,9 +59,40 @@ $pipeline->filter(function ($i) {
     return $i > 100;
 });
 
-$value = $pipeline->reduce(function ($a, $b) {
-    return $a + $b;
+// reduce to a single value; can be an array or any value
+$value = $pipeline->reduce(function ($carry, $item) {
+    // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
+    return $carry + $item;
 }, 0);
 
-// int(104)
 var_dump($value);
+// int(104)
+
+// Now an example for toArray()
+$pipeline = new \Pipeline\Standard();
+
+// Yields [0 => 1, 1 => 2]
+$pipeline->map(function () {
+    yield 1;
+    yield 2;
+});
+
+// For each value yields [0 => $i + 1, 1 => $i + 2]
+$pipeline->map(function ($i) {
+    yield $i + 1;
+    yield $i + 2;
+});
+
+$arrayResult = $pipeline->toArray();
+var_dump($arrayResult);
+// Since keys are discarded we get:
+// array(4) {
+//     [0] =>
+//     int(2)
+//     [1] =>
+//     int(3)
+//     [2] =>
+//     int(3)
+//     [3] =>
+//     int(4)
+// }
