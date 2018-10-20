@@ -5,7 +5,7 @@
 
 Pipeline makes generator chaining as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
 
-Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
+Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
 This rigorously tested library just works. Pipeline never throws any exceptions.
 
