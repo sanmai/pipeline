@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Legacy alias from early days. Please do not remove.
  *
- * @deprecated
+ * @deprecated use Standard
  */
 class Simple extends Standard
 {

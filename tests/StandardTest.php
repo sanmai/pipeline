@@ -29,10 +29,10 @@ class StandardTest extends TestCase
 {
     public function testEmpty()
     {
-        $this->assertEquals([], iterator_to_array(new Standard()));
+        $this->assertSame([], iterator_to_array(new Standard()));
 
         $pipeline = new Standard();
-        $this->assertEquals([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toArray());
     }
 
     public function testSingle()
@@ -45,7 +45,7 @@ class StandardTest extends TestCase
             }
         });
 
-        $this->assertEquals([1, 2, 3], iterator_to_array($pipeline));
+        $this->assertSame([1, 2, 3], iterator_to_array($pipeline));
     }
 
     public function testDouble()
@@ -64,7 +64,7 @@ class StandardTest extends TestCase
             yield $i * 1000;
         });
 
-        $this->assertEquals([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], $pipeline->toArray());
+        $this->assertSame([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], $pipeline->toArray());
     }
 
     public function testTriple()
@@ -72,8 +72,8 @@ class StandardTest extends TestCase
         $pipeline = new Standard(new \ArrayIterator(range(1, 3)));
 
         $pipeline->map(function ($i) {
-            yield pow($i, 2);
-            yield pow($i, 3);
+            yield $i ** 2;
+            yield $i ** 3;
         });
 
         $pipeline->map(function ($i) {
@@ -91,7 +91,7 @@ class StandardTest extends TestCase
             }
         });
 
-        $this->assertEquals([52, 104], $pipeline->toArray());
+        $this->assertSame([52, 104], $pipeline->toArray());
     }
 
     public function testFilter()
@@ -105,7 +105,7 @@ class StandardTest extends TestCase
         });
 
         $pipeline->filter(function ($i) {
-            return $i % 7 == 0;
+            return 0 === $i % 7;
         });
 
         $pipeline->map(function ($i) {
@@ -114,7 +114,7 @@ class StandardTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertEquals([6, 13, 20, 27, 34, 41, 48], $pipeline->toArray());
+        $this->assertSame([6, 13, 20, 27, 34, 41, 48], $pipeline->toArray());
     }
 
     public function testReduce()
@@ -129,7 +129,7 @@ class StandardTest extends TestCase
 
         $result = $pipeline->reduce();
 
-        $this->assertEquals(55, $result);
+        $this->assertSame(55, $result);
     }
 
     public function testReduceFloat()
@@ -144,7 +144,7 @@ class StandardTest extends TestCase
 
         $result = $pipeline->reduce();
 
-        $this->assertEquals(55 * 1.05, $result);
+        $this->assertSame(55 * 1.05, $result);
     }
 
     public function testReduceArrays()
@@ -159,7 +159,7 @@ class StandardTest extends TestCase
 
         $result = $pipeline->reduce(null, []);
 
-        $this->assertEquals([1, 2], $result);
+        $this->assertSame([1, 2], $result);
     }
 
     public function testReduceToArray()
@@ -173,12 +173,12 @@ class StandardTest extends TestCase
         });
 
         $pipeline->map(function ($i) {
-            yield pow($i, 2);
-            yield pow($i, 3);
+            yield $i ** 2;
+            yield $i ** 3;
         });
 
         $pipeline->filter(function ($i) {
-            return $i % 3 == 0;
+            return 0 === $i % 3;
         });
 
         // just what iterator_to_array does
@@ -188,7 +188,7 @@ class StandardTest extends TestCase
             return $sum;
         }, []);
 
-        $this->assertEquals([9, 27, 36, 216, 81, 729], $result);
+        $this->assertSame([9, 27, 36, 216, 81, 729], $result);
     }
 
     public function testMeaningless()
@@ -201,7 +201,7 @@ class StandardTest extends TestCase
             yield $i + 1;
         });
 
-        $this->assertEquals(0, $pipeline->reduce());
+        $this->assertSame(0, $pipeline->reduce());
     }
 
     public function testPipelineInPipeline()
@@ -214,10 +214,10 @@ class StandardTest extends TestCase
 
         $pipeline2 = new Standard();
         $pipeline2->map($pipeline1)->filter(function ($i) {
-            return $i % 2 != 0;
+            return 0 !== $i % 2;
         });
 
-        $this->assertEquals(3 + 5 + 7 + 11, $pipeline2->reduce());
+        $this->assertSame(3 + 5 + 7 + 11, $pipeline2->reduce());
 
         $foo = new Standard();
         $foo->map(function () {
@@ -227,7 +227,7 @@ class StandardTest extends TestCase
 
         $bar = new Standard();
         $bar->map($foo);
-        $this->assertEquals(3, $bar->reduce());
+        $this->assertSame(3, $bar->reduce());
     }
 
     public function testFiltersPipeline()
@@ -240,10 +240,10 @@ class StandardTest extends TestCase
 
         $output = new Standard($input);
         $output->filter(function ($i) {
-            return $i % 2 != 0;
+            return 0 !== $i % 2;
         });
 
-        $this->assertEquals(3 + 5 + 7 + 11, $output->reduce());
+        $this->assertSame(3 + 5 + 7 + 11, $output->reduce());
     }
 
     private $double;
@@ -255,14 +255,14 @@ class StandardTest extends TestCase
             return $value * 2;
         };
 
-        $this->assertSame(8, call_user_func($this->double, 4));
+        $this->assertSame(8, \call_user_func($this->double, 4));
 
         $this->plusone = function ($value) {
             yield $value;
             yield $value + 1;
         };
 
-        $this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
+        $this->assertSame([4, 5], iterator_to_array(\call_user_func($this->plusone, 4)));
 
         // initial generator
         $sourceData = new \ArrayIterator(range(1, 5));
@@ -286,8 +286,8 @@ class StandardTest extends TestCase
             yield $b;
             yield $c;
         })->map(function ($i) {
-            yield pow($i, 2);
-            yield pow($i, 3);
+            yield $i ** 2;
+            yield $i ** 3;
         })->map(function ($i) {
             return $i - 1;
         })->map(function ($i) {
@@ -299,6 +299,6 @@ class StandardTest extends TestCase
             return $i;
         });
 
-        $this->assertEquals([52, 104], iterator_to_array($pipeline));
+        $this->assertSame([52, 104], iterator_to_array($pipeline));
     }
 }

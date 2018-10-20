@@ -29,9 +29,9 @@ $pipeline->map(function () {
 });
 
 // next processing step
-$pipeline->map(function ($i) {
-    yield pow($i, 2);
-    yield pow($i, 3);
+$pipeline->map(function ($value) {
+    yield $value ** 2;
+    yield $value ** 3;
 });
 
 // simple one-to-one mapper

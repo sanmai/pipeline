@@ -61,7 +61,7 @@ class ErrorsTest extends TestCase
         });
 
         $pipeline->map($pipeline)->filter(function ($i) {
-            return $i % 2 != 0;
+            return 0 !== $i % 2;
         });
 
         $this->expectExceptionMessage('Cannot resume an already running generator');
