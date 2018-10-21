@@ -20,6 +20,7 @@ declare(strict_types=1);
 include 'vendor/autoload.php';
 
 use function Pipeline\map;
+use function Pipeline\take;
 
 // wrap an initial generator with a pipeline
 $pipeline = map(function () {
@@ -70,6 +71,10 @@ $value = $pipeline->reduce(function ($carry, $valuetem) {
 
 var_dump($value);
 // int(104)
+
+$sum = take([1, 2, 3])->reduce();
+var_dump($sum);
+// int(6)
 
 // now with League\Pipeline
 $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
