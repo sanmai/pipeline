@@ -79,8 +79,7 @@ All entry points always return an instance of a standard pipeline.
 |  Method     | Details                       | Use with       |
 | ----------- | ----------------------------- | ----------- |
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
-| `take()`  | Takes any Traversable, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
-| `fromArray()`  | Takes an array, initializes a standard pipeline with it.  | `use function Pipeline\fromArray;` |
+| `take()`  | Takes any iterable, including arrays, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
 
 # Instance methods in a nutshell
 
