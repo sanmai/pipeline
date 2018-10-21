@@ -17,7 +17,7 @@ PHP 7.1 or above is a must.
 
 # Use
 
-```PHP
+```php
 use function Pipeline\map;
 
 // wrap an initial generator with a pipeline
@@ -130,7 +130,7 @@ Pipeline is a final class. It comes with a pair of interfaces to aid you with [c
 
 - Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned.
     
-    ```
+    ```php
 	$pipeline = \Pipeline\map(function () {
 	    yield 'foo' => 'bar';
 	    yield 'foo' => 'baz';
@@ -142,14 +142,14 @@ Pipeline is a final class. It comes with a pair of interfaces to aid you with [c
   
   Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
   
-    ```
+    ```php
     var_dump($pipeline->toArray());
     /* ['bar', 'baz'] */
     ```
 
 - The resulting pipeline is an iterator and should be assumed being not rewindable, just like the generators it uses.
 
-	```
+	```php
 	$pipeline = \Pipeline\map(function () {
 	    yield 1;
 	});
