@@ -1,10 +1,11 @@
+[![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 [![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
-[![Infection MSI](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/mutation-badge)](https://infection.github.io)
+[![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
 
-Pipeline makes generator chaining as easy as it can be, making it a perfect tool for building bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
+Pipeline makes generator chaining as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
 
-Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and all kinds of standard iterators.
+Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
 This rigorously tested library just works. Pipeline never throws any exceptions.
 
@@ -12,7 +13,7 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
     composer require sanmai/pipeline
 
-PHP 7.0 or above is imperative.
+PHP 7.0 or above is a must.
 
 # Use
 
