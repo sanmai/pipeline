@@ -102,7 +102,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      */
     public function filter(callable $func)
     {
-        if (!$this->pipeline) {
+        if (null === $this->pipeline || [] === $this->pipeline) {
             // No-op: either an empty array or null.
             return $this;
         }
