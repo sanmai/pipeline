@@ -120,11 +120,49 @@ Pipeline is a final class. It comes with a pair of interfaces to aid you with [c
     })->filter();
     ```
   In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly further along. *When in doubt, use a generator.*
+  
+    ```php
+    $pipeline->map(function () {
+        // will be executed only as needed, when needed
+        yield $this->veryExpensiveMethod();
+    })->filter();
+    ```  
 
-- Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned. Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
+- Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned.
+    
+    ```
+	$pipeline = \Pipeline\map(function () {
+	    yield 'foo' => 'bar';
+	    yield 'foo' => 'baz';
+	});
+	
+	var_dump(iterator_to_array($pipeline));
+	/* ['foo' => 'baz'] */
+    ```
+  
+  Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
+  
+    ```
+    var_dump($pipeline->toArray());
+    /* ['bar', 'baz'] */
+    ```
 
-- The resulting pipeline is an iterator and by default is not rewindable.
+- The resulting pipeline is an iterator and should be assumed being not rewindable, just like the generators it uses.
 
+	```
+	$pipeline = \Pipeline\map(function () {
+	    yield 1;
+	});
+	
+	$sum = $pipeline->reduce();
+	
+	// Won't work the second time though
+	$pipeline->reduce();
+	// Exception: Cannot traverse an already closed generator
+	```
+ 
+  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of API compatibility guarantees.   
+ 
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
     ```php
