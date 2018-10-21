@@ -54,6 +54,28 @@ class EdgeCasesTest extends TestCase
         $this->assertCount(0, $pipeline->toArray());
     }
 
+    public function testNonUniqueKeys()
+    {
+        $pipeline = \Pipeline\map(function () {
+            yield 'foo' => 'bar';
+            yield 'foo' => 'baz';
+        });
+
+        $this->assertSame([
+            'foo' => 'baz',
+        ], iterator_to_array($pipeline));
+
+        $pipeline = \Pipeline\map(function () {
+            yield 'foo' => 'bar';
+            yield 'foo' => 'baz';
+        });
+
+        $this->assertSame([
+            'bar',
+            'baz',
+        ], $pipeline->toArray());
+    }
+
     public function testMapUnprimed()
     {
         $pipeline = new Standard();
