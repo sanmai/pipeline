@@ -35,9 +35,6 @@ function take(iterable $input = null): Standard
     return new Standard($input);
 }
 
-/**
- * @deprecated use take() instead
- */
 function fromArray(array $input): Standard
 {
     return new Standard($input);
