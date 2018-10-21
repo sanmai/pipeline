@@ -23,9 +23,9 @@ jobs:
     - stage: analyze
       php: 7.2
       install:
-        - pecl install ast
+        - pecl install ast-0.1.7
         - phpenv config-rm xdebug.ini
-        - composer install --prefer-dist --ignore-platform-reqs
+        - composer install --prefer-dist
       script:
         - make ci-analyze --keep-going
         - composer validate
