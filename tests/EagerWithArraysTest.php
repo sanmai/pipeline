@@ -30,6 +30,12 @@ use function Pipeline\take;
  */
 class EagerWithArraysTest extends TestCase
 {
+    public static function specimens(): \Generator
+    {
+        yield 'take' => [take([0, 0, 1, 2, 3])];
+        yield 'fromArray' => [fromArray([0, 0, 1, 2, 3])];
+    }
+
     /**
      * @dataProvider specimens
      */
@@ -72,9 +78,17 @@ class EagerWithArraysTest extends TestCase
         $this->assertSame(6, $pipeline->filter()->reduce());
     }
 
-    public static function specimens(): \Generator
+    /**
+     * @dataProvider specimens
+     */
+    public function testNonEagerArrayMap(Standard $pipeline)
     {
-        yield 'take' => [take([0, 0, 1, 2, 3])];
-        yield 'fromArray' => [fromArray([0, 0, 1, 2, 3])];
+        $this->assertSame([1, 1, 1, 1, 1], $pipeline->map(function ($value) {
+            return 1;
+        })->toArray());
+
+        // This should not be possible even with an array, as map() is always lazy
+        $this->expectExceptionMessage('Cannot traverse an already closed generator');
+        $pipeline->toArray();
     }
 }
