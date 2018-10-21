@@ -62,6 +62,16 @@ class EagerWithArraysTest extends TestCase
         $this->assertSame(6, $pipeline->reduce());
     }
 
+    /**
+     * @dataProvider specimens
+     */
+    public function testEagerArrayFilterAndReduce(Standard $pipeline)
+    {
+        $this->assertSame(6, $pipeline->filter()->reduce());
+        // This should be possible with an array
+        $this->assertSame(6, $pipeline->filter()->reduce());
+    }
+
     public static function specimens(): \Generator
     {
         yield 'take' => [take([0, 0, 1, 2, 3])];
