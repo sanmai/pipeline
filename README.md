@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
-[![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
+[![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=v0.3.x)](https://travis-ci.org/sanmai/pipeline)
 
 Imagine you have a very deep and complex processing chain. Something akin to this obviously contrived example of a pyramid of doom:
 
