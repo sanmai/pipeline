@@ -36,6 +36,9 @@ class EdgeCasesTest extends TestCase
         $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
 
+    /**
+     * @covers \Pipeline\Standard::filter()
+     */
     public function testFilterAnyFalseValue()
     {
         $pipeline = new Standard();

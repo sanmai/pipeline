@@ -70,15 +70,14 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function filter(callable $func = null): self
     {
-        $func = $func ?? static function ($value) {
-            // Cast is unnecessary
-            return $value;
+        $func = $func ?? static function ($value): bool {
+            return (bool) $value;
         };
 
         // Strings usually are internal functions, which typically require exactly one parameter.
         if (\is_string($func)) {
-            $func = static function ($value) use ($func) {
-                return $func($value);
+            $func = static function ($value) use ($func): bool {
+                return (bool) $func($value);
             };
         }
 
