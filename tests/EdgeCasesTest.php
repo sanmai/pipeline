@@ -39,7 +39,7 @@ class EdgeCasesTest extends TestCase
     /**
      * @covers \Pipeline\Standard::filter()
      */
-    public function testFilterAnyFalseValue()
+    public function testFilterAnyFalseValueDefaultCallback()
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -53,6 +53,27 @@ class EdgeCasesTest extends TestCase
         });
 
         $pipeline->filter();
+
+        $this->assertCount(0, $pipeline->toArray());
+    }
+
+    /**
+     * @covers \Pipeline\Standard::filter()
+     */
+    public function testFilterAnyFalseValueCustomCallback()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            yield false;
+            yield 0;
+            yield 0.0;
+            yield '';
+            yield '0';
+            yield [];
+            yield null;
+        });
+
+        $pipeline->filter('intval');
 
         $this->assertCount(0, $pipeline->toArray());
     }
