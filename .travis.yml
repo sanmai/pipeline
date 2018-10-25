@@ -25,7 +25,7 @@ jobs:
       install:
         - pecl install ast
         - phpenv config-rm xdebug.ini
-        - composer install --prefer-dist --ignore-platform-reqs
+        - composer install --prefer-dist
       script:
         - make ci-analyze --keep-going
         - composer validate

@@ -77,9 +77,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return $this;
     }
 
-    /**
-     * @psalm-suppress MixedAssignment
-     */
     private static function apply(iterable $previous, callable $func): \Generator
     {
         foreach ($previous as $value) {
@@ -167,7 +164,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      *
      * @param callable $func    {@inheritdoc}
      * @param mixed    $initial {@inheritdoc}
-     * @psalm-suppress MixedAssignment
      *
      * @return mixed|null
      */
