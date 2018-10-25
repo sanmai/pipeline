@@ -48,7 +48,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
      */
     public function filter(callable $func = null)
     {
-        // Strings usually are internal functions, which require exact number of parameters.
+        // Strings usually are internal functions, which typically require exactly one parameter.
         if (\is_string($func)) {
             $func = static function ($value) use ($func) {
                 return $func($value);
