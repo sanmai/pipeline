@@ -34,5 +34,8 @@
         <UnresolvableInclude errorLevel="info" />
 
         <RawObjectIteration errorLevel="info" />
+
+        <MixedAssignment errorLevel="info" />
+        <MixedOperand errorLevel="info" />
     </issueHandlers>
 </psalm>

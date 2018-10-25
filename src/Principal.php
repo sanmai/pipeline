@@ -49,7 +49,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      * {@inheritdoc}
      *
      * @param callable $func {@inheritdoc}
-     * @psalm-suppress MixedAssignment
      *
      * @return $this
      */
@@ -83,7 +82,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     /**
      * @param iterable|\Traversable|array $previous
      * @param callable                    $func
-     * @psalm-suppress MixedAssignment
      *
      * @return \Generator
      */
