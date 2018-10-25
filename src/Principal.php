@@ -59,7 +59,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         }
 
         // Let's check what we got for a start
-        /** @psalm-suppress MixedAssignment */
         $this->pipeline = $func();
 
         // Generator is a generator, moving along
