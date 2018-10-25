@@ -172,7 +172,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      *
      * @param callable $func    {@inheritdoc}
      * @param mixed    $initial {@inheritdoc}
-     * @psalm-suppress MixedAssignment
      *
      * @return mixed|null
      */
