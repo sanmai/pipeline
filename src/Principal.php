@@ -51,7 +51,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     public function map(callable $func)
     {
         // That's the standard case for any next stages
-        if (is_iterable($this->pipeline)) {
+        if (\is_iterable($this->pipeline)) {
             /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
 
