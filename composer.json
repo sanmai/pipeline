@@ -1,6 +1,6 @@
 {
     "name": "sanmai/pipeline",
-    "description": "Not your general purpose collection pipeline for PHP",
+    "description": "General-purpose collections pipeline for PHP",
     "type": "library",
     "authors": [
         {
