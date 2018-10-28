@@ -1,6 +1,6 @@
 {
     "name": "sanmai/pipeline",
-    "description": "General purpose collections pipeline",
+    "description": "General-purpose collections pipeline",
     "type": "library",
     "authors": [
         {
