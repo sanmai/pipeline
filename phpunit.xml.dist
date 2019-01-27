@@ -1,4 +1,6 @@
 <phpunit bootstrap="vendor/autoload.php"
+         executionOrder="random"
+         resolveDependencies="true"
          forceCoversAnnotation="true"
          colors="true">
 
