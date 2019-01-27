@@ -67,7 +67,7 @@ class Standard extends Principal implements Interfaces\SimplePipeline
     /**
      * Defaults to summation.
      *
-     * @param null|mixed $initial
+     * @param mixed|null $initial
      */
     public function reduce(callable $func = null, $initial = null)
     {
