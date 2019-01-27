@@ -105,7 +105,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
         // We got an array, that's what we need. Moving along.
         if (\is_array($this->pipeline)) {
-            $this->pipeline = array_filter($this->pipeline, $func);
+            $this->pipeline = \array_filter($this->pipeline, $func);
 
             return $this;
         }
@@ -150,12 +150,12 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
         // We got what we need, moving along
         if (\is_array($this->pipeline)) {
-            return array_values($this->pipeline);
+            return \array_values($this->pipeline);
         }
 
         // Because `yield from` does not reset keys we have to ignore them on export to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return iterator_to_array($this, false);
+        return \iterator_to_array($this, false);
     }
 
     /**
@@ -169,7 +169,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     public function reduce(callable $func, $initial)
     {
         if (\is_array($this->pipeline)) {
-            return array_reduce($this->pipeline, $func, $initial);
+            return \array_reduce($this->pipeline, $func, $initial);
         }
 
         foreach ($this as $value) {
