@@ -18,9 +18,9 @@
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
-use Pipeline\Simple;
 use function Pipeline\fromArray;
 use function Pipeline\map;
+use Pipeline\Simple;
 use function Pipeline\take;
 
 /**
