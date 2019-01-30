@@ -19,6 +19,8 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
 Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
 
+In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not.
+
 # Install
 
     composer require sanmai/pipeline
