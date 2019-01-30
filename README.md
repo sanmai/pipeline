@@ -156,6 +156,7 @@ Make sure you consume the results.
         // processing happens only if you consume the results
     }
 
+In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not.
 
 # TODO
 
