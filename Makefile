@@ -1,7 +1,7 @@
 .PHONY: ci test prerequisites
 
 # Use any most recent PHP version
-PHP=$(shell which php7.2 || which php7.1 || which php)
+PHP=$(shell which php)
 PHPDBG=phpdbg -qrr
 
 # Default parallelism
