@@ -30,7 +30,7 @@ class IterableTest extends TestCase
 {
     private static $usesIterable;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         if (\PHP_VERSION_ID < 70100) {
             self::$usesIterable = false;
@@ -43,7 +43,7 @@ class IterableTest extends TestCase
         self::$usesIterable = $type->isBuiltin(); // Traversable isn't builtin
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         if (!self::$usesIterable) {
             $this->markTestSkipped('Not testing iterables: not yet supported by the interface');
