@@ -22,7 +22,7 @@
         "phan/phan": "^1.1",
         "php-coveralls/php-coveralls": "^2.0",
         "phpstan/phpstan": "~0.9",
-        "phpunit/phpunit": ">=6 <8",
+        "phpunit/phpunit": ">=6 <9",
         "vimeo/psalm": "^2.0 || ^3.0"
     },
     "config": {
