@@ -71,4 +71,21 @@ class ErrorsTest extends TestCase
 
         $pipeline->reduce();
     }
+
+    /**
+     * @covers \Pipeline\Standard::unpack()
+     */
+    public function testUnpackNonIterable()
+    {
+        $pipeline = new \Pipeline\Standard();
+
+        $pipeline->map(function () {
+            yield 1;
+            yield [2, 3];
+        })->unpack();
+
+        $this->expectException(Warning::class);
+        $this->expectExceptionMessage('Only arrays and Traversables can be unpacked');
+        $pipeline->toArray();
+    }
 }
