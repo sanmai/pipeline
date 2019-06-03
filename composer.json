@@ -22,14 +22,14 @@
         "php-coveralls/php-coveralls": "^2.0",
         "phpstan/phpstan": ">=0.10",
         "phpunit/phpunit": "^7.4 || ^8.1",
-        "vimeo/psalm": "^2.0"
+        "vimeo/psalm": "^2.0 || ^3.0"
     },
     "config": {
         "sort-packages": true
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "v2.x-dev"
+            "dev-master": "2.x-dev"
         }
     },
     "autoload": {

@@ -67,4 +67,19 @@ class ArraysTest extends TestCase
 
         $this->assertSame(3, $pipeline->reduce());
     }
+
+    public function testArrayValues()
+    {
+        $pipeline = new Standard();
+
+        $reflectionClass = new \ReflectionObject($pipeline);
+        $reflectionProperty = $reflectionClass->getParentClass()->getProperty('pipeline');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($pipeline, [
+            1 => 1,
+            2 => 2,
+        ]);
+
+        $this->assertSame([1, 2], $pipeline->toArray());
+    }
 }
