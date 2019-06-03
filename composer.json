@@ -1,7 +1,7 @@
 {
     "name": "sanmai/pipeline",
     "type": "library",
-    "description": "General purpose collections pipeline",
+    "description": "General-purpose collections pipeline",
     "license": "Apache-2.0",
     "authors": [
         {
