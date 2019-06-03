@@ -21,7 +21,7 @@
         "mockery/mockery": "^1.0",
         "phan/phan": "^1.1",
         "php-coveralls/php-coveralls": "^2.0",
-        "phpstan/phpstan": "~0.9",
+        "phpstan/phpstan": ">=0.9",
         "phpunit/phpunit": ">=6 <8",
         "vimeo/psalm": "^2.0 || ^3.0"
     },
