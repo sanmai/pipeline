@@ -111,6 +111,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function __invoke(): \Generator
     {
+        /** @phan-suppress-next-line PhanTypeInvalidYieldFrom */
         yield from $this;
     }
 }
