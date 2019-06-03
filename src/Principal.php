@@ -137,6 +137,6 @@ abstract class Principal implements Interfaces\Pipeline
 
     public function __invoke()
     {
-        yield from $this;
+        yield from $this->getIterator();
     }
 }
