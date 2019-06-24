@@ -60,10 +60,10 @@ abstract class Principal implements Interfaces\Pipeline, Interfaces\Unpack
                     foreach ($result as $value) {
                         yield $value;
                     }
-                } else {
-                    // Case of a plain old mapping function
-                    yield $result;
+                    continue;
                 }
+                // Case of a plain old mapping function
+                yield $result;
             }
         });
 
@@ -91,10 +91,11 @@ abstract class Principal implements Interfaces\Pipeline, Interfaces\Unpack
                 foreach ($result as $value) {
                     yield $value;
                 }
-            } else {
-                // Case of a plain old mapping function
-                yield $result;
+
+                return;
             }
+            // Case of a plain old mapping function
+            yield $result;
         });
     }
 
