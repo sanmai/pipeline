@@ -82,10 +82,11 @@ abstract class Principal implements Interfaces\PrincipalPipeline
             $result = $func($value);
             if ($result instanceof \Generator) {
                 yield from $result;
-            } else {
-                // Case of a plain old mapping function
-                yield $result;
+                continue;
             }
+
+            // Case of a plain old mapping function
+            yield $result;
         }
     }
 
