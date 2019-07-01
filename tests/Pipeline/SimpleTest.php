@@ -24,6 +24,17 @@ class SimpleTest extends TestCase
     public function testEmpty()
     {
         $this->assertEquals([], iterator_to_array(new Simple()));
+
+        $this->assertSame(0, iterator_count(new Standard()));
+    }
+
+    public function testEmptyPHPUnitWise()
+    {
+        try {
+            $this->assertCount(0, new Standard());
+        } catch (\BadMethodCallException $e) {
+            $this->markTestIncomplete($e->getMessage());
+        }
     }
 
     public function testSingle()
