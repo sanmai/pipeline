@@ -34,6 +34,9 @@ class StandardTest extends TestCase
 
         $pipeline = new Standard();
         $this->assertSame([], $pipeline->toArray());
+
+        $this->assertSame(0, iterator_count(new Standard()));
+        $this->assertCount(0, new Standard());
     }
 
     public function testSingle()
