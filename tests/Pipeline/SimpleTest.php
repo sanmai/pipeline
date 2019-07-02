@@ -176,6 +176,13 @@ class SimpleTest extends TestCase
         $this->assertEquals(range(1, 10), $pipeline->toArray());
     }
 
+    public function testReduceEmpty()
+    {
+        $pipeline = new Standard();
+
+        $this->assertSame(0, $pipeline->reduce());
+    }
+
     public function testMeaningless()
     {
         $pipeline = new Simple(new \ArrayIterator([]));
