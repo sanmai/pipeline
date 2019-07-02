@@ -203,6 +203,13 @@ class StandardTest extends TestCase
         $this->assertSame([9, 27, 36, 216, 81, 729], $result);
     }
 
+    public function testReduceEmpty()
+    {
+        $pipeline = new Standard();
+
+        $this->assertSame(0, $pipeline->reduce());
+    }
+
     public function testMeaningless()
     {
         $pipeline = new Standard(new \ArrayIterator([]));
