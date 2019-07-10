@@ -210,7 +210,25 @@ class StandardTest extends TestCase
         $this->assertSame(0, $pipeline->reduce());
     }
 
-    public function testMeaningless()
+    public function testReduceEmptyGeneratorSource()
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            return;
+            yield true;
+            $this->fail();
+        });
+
+        $pipeline->map(function () {
+            $this->fail();
+
+            return 1;
+        });
+
+        $this->assertSame(0, $pipeline->reduce());
+    }
+
+    public function testMapNotCalledForEmptyIterator()
     {
         $pipeline = new Standard(new \ArrayIterator([]));
 
