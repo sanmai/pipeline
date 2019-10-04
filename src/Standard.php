@@ -26,13 +26,9 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     public function unpack(?callable $func = null): self
     {
-        $func = $func ?? static function (...$args) {
-            yield from $args;
-        };
+        $func = $func ?? static fn (...$args) => yield from $args;
 
-        return $this->map(static function (iterable $args = []) use ($func) {
-            return $func(...$args);
-        });
+        return $this->map(static fn (iterable $args = []) => $func(...$args));
     }
 
     /**
@@ -72,11 +68,9 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     public function reduce(?callable $func = null, $initial = null)
     {
         if (null === $func) {
-            return parent::reduce(static function ($carry, $item) {
-                $carry += $item;
-
-                return $carry;
-            }, $initial ?? 0);
+            return parent::reduce(
+                static fn ($carry, $item) => $carry += $item
+            , $initial ?? 0);
         }
 
         return parent::reduce($func, $initial);
