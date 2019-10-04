@@ -57,10 +57,12 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         }
 
         // Let's check what we got for a start
-        $this->pipeline = $func();
+        $result = $func();
 
         // Generator is a generator, moving along
-        if ($this->pipeline instanceof \Generator) {
+        if ($result instanceof \Generator) {
+            $this->pipeline = $result;
+
             return $this;
         }
 
@@ -68,7 +70,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         // We do not cast to an array here because casting a null to an array results in
         // an empty array; that's surprising and not how map() works for other values
         $this->pipeline = [
-            $this->pipeline,
+            $result,
         ];
 
         return $this;
