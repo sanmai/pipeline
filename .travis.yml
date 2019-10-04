@@ -22,7 +22,7 @@ jobs:
       php: 7.4snapshot
       install:
         - pecl install ast
-        - phpenv config-rm xdebug.ini
+        - phpenv config-rm xdebug.ini || true
         - composer install --prefer-dist
       script:
         - make ci-analyze --keep-going
