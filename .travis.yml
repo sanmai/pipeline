@@ -6,12 +6,14 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4snapshot
   - nightly
 
 matrix:
   fast_finish: true
   allow_failures:
     - php: nightly
+    - php: 7.4snapshot
 
 stages:
   - analyze
@@ -41,7 +43,8 @@ install:
   - composer remove --no-update --dev
       phan/phan phpstan/phpstan vimeo/psalm
       infection/infection friendsofphp/php-cs-fixer
-  - composer install --prefer-dist
+  - if [[ $TRAVIS_PHP_VERSION = nightly ]]; then export COMPOSER_FLAGS="--ignore-platform-reqs"; fi
+  - travis_retry composer install --prefer-dist $COMPOSER_FLAGS
 
 script:
   - make ci-test --keep-going
