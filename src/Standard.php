@@ -24,14 +24,7 @@ namespace Pipeline;
  */
 final class Standard extends Principal implements Interfaces\StandardPipeline
 {
-    /**
-     * {@inheritdoc}
-     *
-     * @param ?callable $func {@inheritdoc}
-     *
-     * @return $this
-     */
-    public function unpack(callable $func = null): self
+    public function unpack(?callable $func = null): self
     {
         $func = $func ?? static function (...$args) {
             yield from $args;
@@ -46,12 +39,8 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      * {@inheritdoc}
      *
      * With no callback is a no-op (can safely take a null).
-     *
-     * @param ?callable $func {@inheritdoc}
-     *
-     * @return $this
      */
-    public function map(callable $func = null): self
+    public function map(?callable $func = null): self
     {
         if (null === $func) {
             return $this;
@@ -60,14 +49,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
         return parent::map($func);
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @param ?callable $func {@inheritdoc}
-     *
-     * @return $this
-     */
-    public function filter(callable $func = null): self
+    public function filter(?callable $func = null): self
     {
         $func = $func ?? static function ($value) {
             // Cast is unnecessary
@@ -92,7 +74,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return mixed
      */
-    public function reduce(callable $func = null, $initial = null)
+    public function reduce(?callable $func = null, $initial = null)
     {
         if (null === $func) {
             return parent::reduce(static function ($carry, $item) {

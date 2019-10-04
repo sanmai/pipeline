@@ -26,17 +26,15 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 {
     /**
      * Pre-primed pipeline.
-     *
-     * @var ?iterable
      */
-    private $pipeline;
+    private ?iterable $pipeline;
 
     /**
      * Contructor with an optional source of data.
      *
      * @param ?iterable $input
      */
-    public function __construct(iterable $input = null)
+    public function __construct(?iterable $input = null)
     {
         $this->pipeline = $input;
     }
