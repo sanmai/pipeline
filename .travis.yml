@@ -25,7 +25,7 @@ jobs:
       install:
         - pecl install ast
         - phpenv config-rm xdebug.ini
-        - composer install --prefer-dist
+        - composer install --prefer-dist --ignore-platform-reqs
       script:
         - make ci-analyze --keep-going
         - composer validate
@@ -41,7 +41,6 @@ install:
       phan/phan phpstan/phpstan vimeo/psalm
       infection/infection friendsofphp/php-cs-fixer
   - if [[ $TRAVIS_PHP_VERSION = nightly ]]; then export COMPOSER_FLAGS="--ignore-platform-reqs"; fi
-  - if [[ $TRAVIS_PHP_VERSION = 7.3 ]]; then export COMPOSER_FLAGS="--ignore-platform-reqs"; fi
   - travis_retry composer install --prefer-dist $COMPOSER_FLAGS
 
 script:
