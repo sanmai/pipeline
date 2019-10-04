@@ -13,7 +13,7 @@ This rigorously tested library just works. Pipeline never throws any exceptions.
 
     composer require sanmai/pipeline
 
-PHP 7.0 or above is a must.
+The latest version requires PHP 7.4. There are earlier versions that work under PHP 5.6 and above.
 
 # Use
 
@@ -194,7 +194,7 @@ This library is built to last. There's not a single place where an exception is 
 
 ## `__construct()`
 
-Takes an insance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. This method is not part to any interface, as per LSP.
 
 ## `map()`
 
@@ -335,6 +335,7 @@ var_dump($bar->reduce());
 // int(3)
 ```
 
+This method is not part to any interface, specific to this implementation. E.g. you don't need to implement this method when extending the pipeline.
 
 # Contributions
 
