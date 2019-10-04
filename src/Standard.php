@@ -26,9 +26,13 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
 {
     public function unpack(?callable $func = null): self
     {
-        $func = $func ?? static fn (...$args) => yield from $args;
+        $func = $func ?? static function (...$args) {
+            yield from $args;
+        };
 
-        return $this->map(static fn (iterable $args = []) => $func(...$args));
+        return $this->map(static function (iterable $args = []) use ($func) {
+            return $func(...$args);
+        });
     }
 
     /**
@@ -47,11 +51,16 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
 
     public function filter(?callable $func = null): self
     {
-        $func = $func ?? static fn ($value) => $value; // Cast is unnecessary
+        $func = $func ?? static function ($value) {
+            // Cast is unnecessary
+            return $value;
+        };
 
         // Strings usually are internal functions, which typically require exactly one parameter.
         if (\is_string($func)) {
-            $func = static fn ($value) => $func($value);
+            $func = static function ($value) use ($func) {
+                return $func($value);
+            };
         }
 
         return parent::filter($func);
@@ -68,9 +77,11 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     public function reduce(?callable $func = null, $initial = null)
     {
         if (null === $func) {
-            return parent::reduce(
-                static fn ($carry, $item) => $carry += $item
-            , $initial ?? 0);
+            return parent::reduce(static function ($carry, $item) {
+                $carry += $item;
+
+                return $carry;
+            }, $initial ?? 0);
         }
 
         return parent::reduce($func, $initial);
