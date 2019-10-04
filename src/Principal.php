@@ -31,8 +31,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
     /**
      * Contructor with an optional source of data.
-     *
-     * @param ?iterable $input
      */
     public function __construct(?iterable $input = null)
     {
