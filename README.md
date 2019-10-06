@@ -7,7 +7,7 @@ Pipeline makes generator chaining as easy as it can be, making it a perfect tool
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
-This rigorously tested library just works. Pipeline never throws any exceptions.
+This rigorously tested library just works. Pipeline neither defines nor throws any exceptions.
 
 # Install
 
