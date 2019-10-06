@@ -172,6 +172,8 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     /** @var $iterator \Iterator */
     ```
 
+- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this.
+
 # Classes and interfaces: overview
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
