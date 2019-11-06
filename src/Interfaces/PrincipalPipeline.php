@@ -54,8 +54,6 @@ interface PrincipalPipeline extends \IteratorAggregate
 
     /**
      * Returns all values regardless of keys used, discarding all keys in the process.
-     *
-     * @return array
      */
     public function toArray(): array;
 }

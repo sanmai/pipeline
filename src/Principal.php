@@ -123,8 +123,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
     /**
      * {@inheritdoc}
-     *
-     * @return \Traversable
      */
     public function getIterator(): \Traversable
     {
