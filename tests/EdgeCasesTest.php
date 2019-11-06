@@ -203,4 +203,19 @@ class EdgeCasesTest extends TestCase
     {
         return $default;
     }
+
+    public function testIterateAgainDoesNotFail()
+    {
+        $pipeline = new Standard(new \ArrayIterator(range(1, 5)));
+        $pipeline->map(function ($value) {
+            yield $value;
+        });
+
+        // NoRewindIterator works around the exception: Cannot traverse an already closed generator
+        $iterator = new \NoRewindIterator($pipeline->getIterator());
+
+        $this->assertSame(range(1, 5), iterator_to_array($iterator, false));
+
+        $this->assertSame([], iterator_to_array($iterator, false));
+    }
 }
