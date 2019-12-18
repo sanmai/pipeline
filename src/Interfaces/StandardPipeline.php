@@ -69,8 +69,6 @@ interface StandardPipeline extends PrincipalPipeline
 
     /**
      * {@inheritdoc}
-     *
-     * @return array
      */
     public function toArray(): array;
 }
