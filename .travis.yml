@@ -2,7 +2,7 @@ sudo: false
 
 language: php
 php:
-  - 7.4snapshot
+  - 7.4
   - nightly
 
 matrix:
@@ -16,10 +16,10 @@ stages:
 
 jobs:
   exclude:
-    - php: 7.4snapshot
+    - php: 7.4
   include:
     - stage: analyze
-      php: 7.4snapshot
+      php: 7.4
       install:
         - pecl install ast
         - phpenv config-rm xdebug.ini || true
