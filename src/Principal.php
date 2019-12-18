@@ -36,8 +36,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     /**
      * Contructor with an optional source of data.
      *
-     * @param \Traversable|null $input
-     *
      * @todo To be replaced with '?iterable' in PHP7.1+
      */
     public function __construct(\Traversable $input = null)
@@ -81,9 +79,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
     /**
      * @param iterable|\Traversable|array $previous
-     * @param callable                    $func
-     *
-     * @return \Generator
      */
     private static function apply(/* iterable */ $previous, callable $func): \Generator
     {
@@ -132,8 +127,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
     /**
      * {@inheritdoc}
-     *
-     * @return \Traversable
      */
     public function getIterator(): \Traversable
     {
