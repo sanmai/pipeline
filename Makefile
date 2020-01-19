@@ -71,7 +71,7 @@ ci-phpstan: ci-cs
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
 
 ci-psalm: ci-cs
-	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache
+	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
 
 ci-cs: prerequisites
 	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --dry-run --stop-on-violation fix
