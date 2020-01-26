@@ -1,5 +1,5 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
-[![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=master)](https://travis-ci.org/sanmai/pipeline)
+[![Build Status](https://travis-ci.com/sanmai/pipeline.svg?branch=master)](https://travis-ci.com/sanmai/pipeline)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
 
