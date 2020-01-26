@@ -107,7 +107,7 @@ cs: test-prerequisites
 
 # We need both vendor/autoload.php and composer.lock being up to date
 .PHONY: prerequisites
-prerequisites: report-php-version build/cache vendor/autoload.php .phan composer.lock
+prerequisites: report-php-version build/cache vendor/autoload.php .phan composer.lock infection.json.dist .phpstan.neon psalm.xml
 
 # Do install if there's no 'vendor'
 vendor/autoload.php:
