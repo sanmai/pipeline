@@ -1,22 +1,16 @@
-sudo: false
-
 language: php
 php:
   - 7.4
   - nightly
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - php: nightly
 
 stages:
   - analyze
   - test
 
 jobs:
-  exclude:
-    - php: 7.4
+  fast_finish: true
+  allow_failures:
+    - php: nightly
   include:
     - stage: analyze
       php: 7.4
