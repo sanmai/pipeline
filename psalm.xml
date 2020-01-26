@@ -27,6 +27,7 @@
         <MissingConstructor errorLevel="info" />
         <MissingClosureParamType errorLevel="suppress" />
         <MissingParamType errorLevel="info" />
+        <MixedArgumentTypeCoercion errorLevel="info" />
 
         <DocblockTypeContradiction errorLevel="info" />
         <RedundantConditionGivenDocblockType errorLevel="info" />
