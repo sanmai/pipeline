@@ -20,8 +20,6 @@ namespace Pipeline\Interfaces;
 interface Pipeline extends \IteratorAggregate
 {
     /**
-     * @param callable $func
-     *
      * @return $this
      */
     public function map(callable $func);
