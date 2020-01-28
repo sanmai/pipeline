@@ -501,6 +501,8 @@ What else is out there:
 
 - [Simple pipes with PHP generators](https://www.hughgrigg.com/posts/simple-pipes-php-generators/) by Hugh Grigg. Rationale and explanation for an exceptionally close concept. Probably one can use this library as a drop-in replacement, short of different method names.
 
+- [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) Lars Strojny can also be of interest.
+
 - Submit a PR to add yours.
 
 # More badges
