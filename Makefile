@@ -42,7 +42,7 @@ COMPOSER=$(PHP) $(shell which composer)
 INFECTION=vendor/bin/infection
 MIN_MSI=100
 MIN_COVERED_MSI=100
-INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=build/logs --log-verbosity=default --show-mutations
+INFECTION_ARGS=--min-msi=$(MIN_MSI) --min-covered-msi=$(MIN_COVERED_MSI) --threads=$(JOBS) --coverage=build/logs --log-verbosity=default --show-mutations --no-interaction
 
 all: test
 
@@ -67,10 +67,10 @@ ci-infection: ci-phpunit
 ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 
-ci-phpstan: ci-cs
+ci-phpstan: ci-cs .phpstan.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
 
-ci-psalm: ci-cs
+ci-psalm: ci-cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache
 
 ci-cs: prerequisites
@@ -93,7 +93,7 @@ phpunit: cs
 	cp build/logs/junit.xml build/logs/phpunit.junit.xml
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
-analyze: cs
+analyze: cs .phpstan.neon psalm.xml
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS)
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
