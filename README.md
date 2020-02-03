@@ -7,13 +7,13 @@ Pipeline makes generator chaining as easy as it can be, making it a perfect tool
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
-This rigorously tested library just works. Pipeline never throws any exceptions.
+This rigorously tested library just works. Pipeline neither defines nor throws any exceptions.
 
 # Install
 
     composer require sanmai/pipeline
 
-PHP 7.1 or above is a must.
+The latest version requires PHP 7.4. There are earlier versions that work under PHP 5.6 and above.
 
 # Use
 
@@ -172,6 +172,8 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     /** @var $iterator \Iterator */
     ```
 
+- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this.
+
 # Classes and interfaces: overview
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
@@ -194,7 +196,7 @@ This library is built to last. There's not a single place where an exception is 
 
 ## `__construct()`
 
-Takes an insance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. This method is not part to any interface, as per LSP.
 
 ## `map()`
 
@@ -335,6 +337,7 @@ var_dump($bar->reduce());
 // int(3)
 ```
 
+This method is not part to any interface, specific to this implementation. E.g. you don't need to implement this method when extending the pipeline.
 
 # Contributions
 
@@ -492,7 +495,7 @@ What else is out there:
 
 - [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 
-- [Functional PHP](https://github.com/lstrojny/functional-php) is supposed to complement currently exisiting PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining. 
+- [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) by Lars Strojny et al. is supposed to complement currently exisiting PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining.
 
 - [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
 
@@ -506,3 +509,4 @@ What else is out there:
 [![Maintainability](https://api.codeclimate.com/v1/badges/a1291887920116526e2a/maintainability)](https://codeclimate.com/github/sanmai/pipeline/maintainability)
 [![License](https://poser.pugx.org/sanmai/pipeline/license)](https://packagist.org/packages/sanmai/pipeline)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsanmai%2Fpipeline.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsanmai%2Fpipeline?ref=badge_shield)
+[![Type coverage badge](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/)
