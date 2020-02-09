@@ -488,6 +488,8 @@ What else is out there:
 
 - [Pipe operator from Hack](https://docs.hhvm.com/hack/operators/pipe-operator) is about same, only won't work for generators, and not under the regular PHP. [See a proposal for a similar operator for JavaScript.](https://github.com/tc39/proposal-pipeline-operator)
 
+- [Iteration primitives using generators](https://github.com/nikic/iter) provide functions like array_map and such, but returning lazy generators. You'll need quite some glue to accomplish the same thing Pipeline does out of box.
+
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
 - [Illuminate\Support\Collection](https://laravel.com/docs/master/collections) a fluent wrapper for working with arrays of data. Can only work with arrays, also immutable, which is kind of expected for an array-only wrapper.
