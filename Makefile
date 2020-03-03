@@ -29,7 +29,8 @@ export PHAN_DISABLE_XDEBUG_WARN=1
 
 # PHPStan
 PHPSTAN=vendor/bin/phpstan
-PHPSTAN_ARGS=analyse src tests --level=2 -c .phpstan.neon
+PHPSTAN_ARGS_TESTS=analyse src tests --level=2 -c .phpstan.neon
+PHPSTAN_ARGS_SRC=analyse -c .phpstan.src.neon
 
 # Psalm
 PSALM=vendor/bin/psalm
@@ -68,7 +69,8 @@ ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 
 ci-phpstan: ci-cs .phpstan.neon
-	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS) --no-progress
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
 
 ci-psalm: ci-cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
@@ -95,7 +97,8 @@ phpunit: cs
 
 analyze: cs .phpstan.neon psalm.xml
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
-	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS)
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC)
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS)
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
 
 cs: test-prerequisites

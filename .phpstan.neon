@@ -1,3 +1,7 @@
 parameters:
     excludes_analyse:
         - %currentWorkingDirectory%/tests/ErrorsTest.php
+    level: 4
+    paths:
+        - src
+        - tests
