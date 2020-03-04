@@ -34,7 +34,7 @@ PHPSTAN_ARGS_SRC=analyse -c .phpstan.src.neon
 
 # Psalm
 PSALM=vendor/bin/psalm
-PSALM_ARGS=--show-info=false --shepherd
+PSALM_ARGS=--show-info=false
 
 # Composer
 COMPOSER=$(PHP) $(shell which composer)
