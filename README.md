@@ -3,6 +3,7 @@
 ![CI](https://github.com/sanmai/pipeline/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
+[![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
 Pipeline makes generator chaining as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
 
