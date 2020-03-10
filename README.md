@@ -483,7 +483,7 @@ foreach ($pipeline as $result) {
 
 # About collection pipelines in general
 
-[About pipelines in general](https://martinfowler.com/articles/collection-pipeline/) from Martin Fowler.
+[About collection pipelines programming pattern in general](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler.
 
 What else is out there:
 
