@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,40 +36,26 @@ EOF;
 return PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
     ->setRules([
+        'header_comment' => ['commentType' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
+
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        '@PHP70Migration:risky' => true,
+        '@PHP71Migration' => true,
         '@PHP71Migration:risky' => true,
-        'array_syntax' => ['syntax' => 'short'],
-        'declare_strict_types' => true,
-        'explicit_indirect_variable' => true,
-        'no_superfluous_elseif' => true,
-        'no_unreachable_default_argument_value' => true,
-        'no_useless_else' => true,
-        'no_useless_return' => true,
+        '@PHPUnit60Migration:risky' => true,
+        '@PHPUnit75Migration:risky' => true,
+        '@PhpCsFixer' => true,
+        '@PhpCsFixer:risky' => true,
+
         'ordered_class_elements' => false,
-        'non_printable_character' => true,
-        'ordered_imports' => true,
-        'php_unit_test_class_requires_covers' => true,
-        'php_unit_strict' => true,
-        'phpdoc_add_missing_param_annotation' => true,
-        'phpdoc_order' => true,
-        'visibility_required' => true,
-        'header_comment' => ['header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
-        'ternary_to_null_coalescing' => true,
-        'yoda_style' => true,
         'phpdoc_to_comment' => false,
         'strict_comparison' => true,
-        'is_null' => true,
-        'function_to_constant' => true,
-        'void_return' => false,
-        'return_assignment' => true,
-        'array_syntax' => ['syntax' => 'short'],
-        'array_indentation' => true,
-        'native_function_invocation' => null,
+        'comment_to_phpdoc' => true,
+        'native_function_invocation' => true,
+        'php_unit_test_case_static_method_calls' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
-        ->in(__DIR__)
+            ->in(__DIR__)
     )
 ;

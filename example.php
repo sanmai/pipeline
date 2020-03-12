@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ use function Pipeline\take;
 
 // wrap an initial generator with a pipeline
 $pipeline = map(function () {
-    foreach (range(1, 3) as $value) {
+    foreach (\range(1, 3) as $value) {
         yield $value;
     }
 });
@@ -69,11 +69,11 @@ $value = $pipeline->reduce(function ($carry, $valuetem) {
     return $carry + $valuetem;
 }, 0);
 
-var_dump($value);
+\var_dump($value);
 // int(104)
 
 $sum = take([1, 2, 3])->reduce();
-var_dump($sum);
+\var_dump($sum);
 // int(6)
 
 // now with League\Pipeline
@@ -86,8 +86,8 @@ $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
 $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
-$result = iterator_to_array($pipeline);
-var_dump($result);
+$result = \iterator_to_array($pipeline);
+\var_dump($result);
 // array(3) {
 //   [0] =>
 //     int(22)
@@ -111,7 +111,7 @@ $pipeline->map(function ($value) {
 });
 
 $arrayResult = $pipeline->toArray();
-var_dump($arrayResult);
+\var_dump($arrayResult);
 // Since keys are discarded we get:
 // array(4) {
 //     [0] =>

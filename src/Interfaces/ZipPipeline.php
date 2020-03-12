@@ -17,30 +17,18 @@
 
 declare(strict_types=1);
 
-namespace Tests\Pipeline;
-
-use PHPUnit\Framework\TestCase;
+namespace Pipeline\Interfaces;
 
 /**
- * @coversNothing
- *
- * @internal
+ * Interface definitions for the zipping pipeline.
  */
-final class LeaguePipelineTest extends TestCase
+interface ZipPipeline
 {
-    public function testWithLeaguePipeline(): void
-    {
-        $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
-            return $payload + 1;
-        })->pipe(function ($payload) {
-            return $payload * 2;
-        });
-
-        $this->assertSame(22, $leaguePipeline(10));
-
-        $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
-        $pipeline->map($leaguePipeline);
-
-        $this->assertSame([22, 42, 62], \iterator_to_array($pipeline));
-    }
+    /**
+     * Performs a lazy zip operation on iterables, not unlike that of
+     * array_map with first argument set to null. Also known as transposition.
+     *
+     * @return $this
+     */
+    public function zip(iterable ...$inputs);
 }

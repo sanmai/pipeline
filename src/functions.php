@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,4 +38,12 @@ function take(iterable $input = null): Standard
 function fromArray(array $input): Standard
 {
     return new Standard($input);
+}
+
+function zip(iterable $base, iterable ...$inputs): Standard
+{
+    $result = take($base);
+    $result->zip(...$inputs);
+
+    return $result;
 }

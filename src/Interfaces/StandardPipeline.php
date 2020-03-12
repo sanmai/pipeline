@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,7 @@ interface StandardPipeline extends PrincipalPipeline
      * @param ?callable $func    {@inheritdoc}
      * @param ?mixed    $initial {@inheritdoc}
      *
-     * @return mixed|null
+     * @return null|mixed
      */
     public function reduce(callable $func = null, $initial = null);
 

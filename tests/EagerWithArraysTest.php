@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,8 +27,10 @@ use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Principal
+ *
+ * @internal
  */
-class EagerWithArraysTest extends TestCase
+final class EagerWithArraysTest extends TestCase
 {
     public static function specimens(): \Generator
     {
@@ -39,7 +41,7 @@ class EagerWithArraysTest extends TestCase
     /**
      * @dataProvider specimens
      */
-    public function testEagerArrayFilter(Standard $pipeline)
+    public function testEagerArrayFilter(Standard $pipeline): void
     {
         $reflectionClass = new \ReflectionClass(Principal::class);
         $reflectionProperty = $reflectionClass->getProperty('pipeline');
@@ -59,7 +61,7 @@ class EagerWithArraysTest extends TestCase
     /**
      * @dataProvider specimens
      */
-    public function testEagerArrayReduce(Standard $pipeline)
+    public function testEagerArrayReduce(Standard $pipeline): void
     {
         $this->assertSame(6, $pipeline->reduce());
 
@@ -71,7 +73,7 @@ class EagerWithArraysTest extends TestCase
     /**
      * @dataProvider specimens
      */
-    public function testEagerArrayFilterAndReduce(Standard $pipeline)
+    public function testEagerArrayFilterAndReduce(Standard $pipeline): void
     {
         $this->assertSame(6, $pipeline->filter()->reduce());
         // This should be possible with an array
@@ -81,7 +83,7 @@ class EagerWithArraysTest extends TestCase
     /**
      * @dataProvider specimens
      */
-    public function testNonEagerArrayMap(Standard $pipeline)
+    public function testNonEagerArrayMap(Standard $pipeline): void
     {
         $this->assertSame([1, 1, 1, 1, 1], $pipeline->map(function ($value) {
             return 1;
