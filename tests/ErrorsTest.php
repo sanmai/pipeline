@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,14 @@ use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class ErrorsTest extends TestCase
+final class ErrorsTest extends TestCase
 {
-    private function expectExceptionFallback(string $exception, string $php70fallback)
+    private function expectExceptionFallback(string $exception, string $php70fallback): void
     {
-        if (class_exists($exception)) {
+        if (\class_exists($exception)) {
             $this->expectException($exception);
         } else {
             // fallback for PHP 7.0
@@ -39,7 +41,7 @@ class ErrorsTest extends TestCase
         }
     }
 
-    public function testInvalidInitialGeneratorWithArguments()
+    public function testInvalidInitialGeneratorWithArguments(): void
     {
         // PHP 7.1+ fails with: Too few arguments to function...
         // PHP 7.0 fails with: Missing argument 1 for...
@@ -54,7 +56,7 @@ class ErrorsTest extends TestCase
         });
     }
 
-    public function testPipelineInPipelineUsesSelf()
+    public function testPipelineInPipelineUsesSelf(): void
     {
         $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
         $pipeline->map(function ($prime) {
@@ -75,7 +77,7 @@ class ErrorsTest extends TestCase
     /**
      * @covers \Pipeline\Standard::unpack()
      */
-    public function testUnpackNonIterable()
+    public function testUnpackNonIterable(): void
     {
         $pipeline = new \Pipeline\Standard();
 

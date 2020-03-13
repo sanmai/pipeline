@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,17 +25,19 @@ use Pipeline\Interfaces\StandardPipeline;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class InterfaceTest extends TestCase
+final class InterfaceTest extends TestCase
 {
     private function takesStandardInterface(StandardPipeline $pipeline)
     {
         return $pipeline->map()->filter()->unpack();
     }
 
-    public function testStandardInterface()
+    public function testStandardInterface(): void
     {
         $pipeline = new Standard();
         $pipeline = $this->takesStandardInterface($pipeline->map()->filter()->unpack());
@@ -48,7 +50,7 @@ class InterfaceTest extends TestCase
         return $pipeline;
     }
 
-    public function testPrincipalInterface()
+    public function testPrincipalInterface(): void
     {
         $pipeline = new Standard();
 

@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,23 +23,25 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class EdgeCasesTest extends TestCase
+final class EdgeCasesTest extends TestCase
 {
-    public function testStandardStringFunctions()
+    public function testStandardStringFunctions(): void
     {
         $pipeline = new Standard(new \ArrayIterator([1, 2, 'foo', 'bar']));
         $pipeline->filter('is_int');
 
-        $this->assertSame([1, 2], iterator_to_array($pipeline));
+        $this->assertSame([1, 2], \iterator_to_array($pipeline));
     }
 
     /**
      * @covers \Pipeline\Standard::filter()
      */
-    public function testFilterAnyFalseValueDefaultCallback()
+    public function testFilterAnyFalseValueDefaultCallback(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -60,7 +62,7 @@ class EdgeCasesTest extends TestCase
     /**
      * @covers \Pipeline\Standard::filter()
      */
-    public function testFilterAnyFalseValueCustomCallback()
+    public function testFilterAnyFalseValueCustomCallback(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -78,7 +80,7 @@ class EdgeCasesTest extends TestCase
         $this->assertCount(0, $pipeline->toArray());
     }
 
-    public function testNonUniqueKeys()
+    public function testNonUniqueKeys(): void
     {
         $pipeline = \Pipeline\map(function () {
             yield 'foo' => 'bar';
@@ -87,7 +89,7 @@ class EdgeCasesTest extends TestCase
 
         $this->assertSame([
             'foo' => 'baz',
-        ], iterator_to_array($pipeline));
+        ], \iterator_to_array($pipeline));
 
         $pipeline = \Pipeline\map(function () {
             yield 'foo' => 'bar';
@@ -100,7 +102,7 @@ class EdgeCasesTest extends TestCase
         ], $pipeline->toArray());
     }
 
-    public function testMapUnprimed()
+    public function testMapUnprimed(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -110,7 +112,7 @@ class EdgeCasesTest extends TestCase
         $this->assertSame([1], $pipeline->toArray());
     }
 
-    public function testFilterUnprimed()
+    public function testFilterUnprimed(): void
     {
         $pipeline = new Standard();
         $pipeline->filter()->unpack();
@@ -118,7 +120,7 @@ class EdgeCasesTest extends TestCase
         $this->assertSame([], $pipeline->toArray());
     }
 
-    public function testUnpackUnprimed()
+    public function testUnpackUnprimed(): void
     {
         $pipeline = new Standard();
         $pipeline->unpack(function () {
@@ -128,12 +130,12 @@ class EdgeCasesTest extends TestCase
         $this->assertSame([1], $pipeline->toArray());
     }
 
-    public function testInitialInvokeReturnsScalar()
+    public function testInitialInvokeReturnsScalar(): void
     {
         $pipeline = new Standard();
         $pipeline->map($this);
 
-        $this->assertSame([null], iterator_to_array($pipeline));
+        $this->assertSame([null], \iterator_to_array($pipeline));
     }
 
     private function firstValueFromIterator(\Iterator $iterator)
@@ -143,7 +145,7 @@ class EdgeCasesTest extends TestCase
         return $iterator->current();
     }
 
-    public function testIteratorIterator()
+    public function testIteratorIterator(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -151,7 +153,7 @@ class EdgeCasesTest extends TestCase
         });
 
         $iterator = new \IteratorIterator($pipeline);
-        /* @var $iterator \Iterator */
+        // @var $iterator \Iterator
         $this->assertSame(42, $this->firstValueFromIterator($iterator));
 
         $pipeline = new Standard(new \ArrayIterator([42]));
@@ -175,28 +177,28 @@ class EdgeCasesTest extends TestCase
         return $pipeline;
     }
 
-    public function testIteratorToArrayWithSameKeys()
+    public function testIteratorToArrayWithSameKeys(): void
     {
-        $this->assertSame([3, 4], iterator_to_array($this->pipelineWithNonUniqueKeys()));
+        $this->assertSame([3, 4], \iterator_to_array($this->pipelineWithNonUniqueKeys()));
     }
 
-    public function testIteratorToArrayWithAllValues()
+    public function testIteratorToArrayWithAllValues(): void
     {
         $this->assertSame([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
     }
 
-    public function testPipelineInvokeReturnsGenerator()
+    public function testPipelineInvokeReturnsGenerator(): void
     {
         $pipeline = new Standard();
         $this->assertInstanceOf(\Generator::class, $pipeline());
     }
 
-    public function testInvokeMaps()
+    public function testInvokeMaps(): void
     {
-        $pipeline = new Standard(new \ArrayIterator(range(1, 5)));
+        $pipeline = new Standard(new \ArrayIterator(\range(1, 5)));
         $pipeline->map($this);
 
-        $this->assertSame(range(1, 5), iterator_to_array($pipeline));
+        $this->assertSame(\range(1, 5), \iterator_to_array($pipeline));
     }
 
     public function __invoke($default = null)

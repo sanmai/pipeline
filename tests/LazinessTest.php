@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,33 +22,39 @@ namespace Tests\Pipeline;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
+final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
-    private function yieldFail()
+    private function yieldFail(): bool
     {
         $this->fail();
+
+        return false;
     }
 
-    public function testEagerReturn()
+    public function testEagerReturn(): void
     {
         $this->expectException(\Exception::class);
 
         $pipeline = new Standard();
-        $pipeline->map(function () {
+        $pipeline->map(function (): void {
             // Executed on spot
             throw new \Exception();
         });
     }
 
-    private function veryExpensiveMethod()
+    private function veryExpensiveMethod(): bool
     {
         throw new \Exception();
+
+        return true;
     }
 
-    public function testExpensiveMethod()
+    public function testExpensiveMethod(): void
     {
         $this->expectException(\Exception::class);
 
@@ -66,7 +72,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         yield;
     }
 
-    public function testGeneratorReturn()
+    public function testGeneratorReturn(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -80,7 +86,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->addToAssertionCount(1);
     }
 
-    public function testGeneratorYieldFrom()
+    public function testGeneratorYieldFrom(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -94,7 +100,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->addToAssertionCount(1);
     }
 
-    public function testLazyIterator()
+    public function testLazyIterator(): void
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
@@ -108,7 +114,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $spy->shouldNotReceive('rewind');
     }
 
-    public function testLazyIteratorYieldFrom()
+    public function testLazyIteratorYieldFrom(): void
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
@@ -124,7 +130,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $spy->shouldNotReceive('rewind');
     }
 
-    public function testLazyIteratorReturn()
+    public function testLazyIteratorReturn(): void
     {
         $spy = \Mockery::spy(\ArrayIterator::class);
 
@@ -140,7 +146,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $spy->shouldNotReceive('rewind');
     }
 
-    public function testMapLazyOnce()
+    public function testMapLazyOnce(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -152,14 +158,15 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         foreach ($pipeline as $value) {
             $this->assertTrue($value);
+
             break;
         }
     }
 
-    public function testFilterLazyOnce()
+    public function testFilterLazyOnce(): void
     {
         $pipeline = new Standard(new \ArrayIterator([true]));
-        $pipeline->filter(function () {
+        $pipeline->filter(function (): void {
             $this->fail();
         });
 
@@ -167,7 +174,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         $this->assertInstanceOf(\Traversable::class, $iterator);
     }
 
-    public function testUnpackLazyOnce()
+    public function testUnpackLazyOnce(): void
     {
         $pipeline = new Standard();
         $pipeline->unpack(function () {
@@ -179,6 +186,7 @@ class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
         foreach ($pipeline as $value) {
             $this->assertTrue($value);
+
             break;
         }
     }
