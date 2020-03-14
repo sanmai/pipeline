@@ -5,9 +5,9 @@
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
-Pipeline makes generator chaining as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
+Pipeline makes dealing with `iterable` types as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions, generators, arrays, and iterators.
 
-Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
+Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, zip, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
 This rigorously tested library just works. Pipeline neither defines nor throws any exceptions.
 
@@ -20,14 +20,14 @@ The latest version requires PHP 7.4. There are earlier versions that work under 
 # Use
 
 ```php
-use function Pipeline\map;
+use function Pipeline\take;
 
-// wrap an initial generator with a pipeline
-$pipeline = map(function () {
-    foreach (range(1, 3) as $i) {
-        yield $i;
-    }
-});
+// iterable corresponds to arrays, generators, iterators
+// we use an array here simplicity sake
+$iterable = range(1, 3);
+
+// wrap the initial iterable with a pipeline
+$pipeline = take($iterable);
 
 // next processing step
 $pipeline->map(function ($i) {
@@ -83,12 +83,15 @@ All entry points always return an instance of a standard pipeline.
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
 | `take()`  | Takes any iterable, including arrays, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
 | `fromArray()`  | Takes an array, initializes a standard pipeline with it.  | `use function Pipeline\fromArray;` |
+| `zip()`  | Takes an iterable, and several more, merging them together.  | `use function Pipeline\zip;` |
+
 
 # Instance methods in a nutshell
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
 | `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
+| `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
@@ -151,7 +154,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     /* ['bar', 'baz'] */
     ```
 
-- The resulting pipeline is an iterator and should be assumed being not rewindable, just like the generators it uses.
+- The resulting pipeline is an iterator and should be assumed being not rewindable, just like generators it uses.
 
 	```php
 	$pipeline = \Pipeline\map(function () {
