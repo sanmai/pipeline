@@ -148,8 +148,13 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
      */
     public function toArray(): array
     {
-        // With non-primed pipeline just return an empty array
-        if (empty($this->pipeline)) {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just return an empty array
+            return [];
+        }
+
+        if ([] === $this->pipeline) {
+            // Empty array is empty.
             return [];
         }
 
