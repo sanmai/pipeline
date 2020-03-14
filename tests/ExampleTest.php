@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +23,12 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
+ *
+ * @internal
  */
-class ExampleTest extends TestCase
+final class ExampleTest extends TestCase
 {
-    public function testExample()
+    public function testExample(): void
     {
         // These variables will be set inside example.php
         $value = null;
@@ -34,9 +36,9 @@ class ExampleTest extends TestCase
         $result = null;
         $arrayResult = null;
 
-        ob_start();
+        \ob_start();
         include 'example.php';
-        ob_end_clean();
+        \ob_end_clean();
 
         $this->assertSame(104, $value);
         $this->assertSame(6, $sum);

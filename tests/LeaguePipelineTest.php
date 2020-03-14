@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +23,12 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
+ *
+ * @internal
  */
-class LeaguePipelineTest extends TestCase
+final class LeaguePipelineTest extends TestCase
 {
-    public function testWithLeaguePipeline()
+    public function testWithLeaguePipeline(): void
     {
         $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
             return $payload + 1;
@@ -39,6 +41,6 @@ class LeaguePipelineTest extends TestCase
         $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
         $pipeline->map($leaguePipeline);
 
-        $this->assertSame([22, 42, 62], iterator_to_array($pipeline));
+        $this->assertSame([22, 42, 62], \iterator_to_array($pipeline));
     }
 }

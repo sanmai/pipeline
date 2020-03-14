@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
             $result = $func($value);
             if ($result instanceof \Generator) {
                 yield from $result;
+
                 continue;
             }
 
@@ -163,7 +164,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      * @param callable $func    {@inheritdoc}
      * @param mixed    $initial {@inheritdoc}
      *
-     * @return mixed|null
+     * @return null|mixed
      */
     public function reduce(callable $func, $initial)
     {
