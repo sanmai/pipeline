@@ -100,8 +100,13 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
      */
     public function filter(callable $func)
     {
-        if (null === $this->pipeline || [] === $this->pipeline) {
-            // No-op: either an empty array or null.
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $this;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
             return $this;
         }
 
@@ -181,7 +186,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
 
     public function zip(iterable ...$inputs): self
     {
-        if (empty($this->pipeline)) {
+        if (null === $this->pipeline) {
             $this->pipeline = \array_shift($inputs);
         }
 

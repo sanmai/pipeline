@@ -93,6 +93,53 @@ final class ZipTest extends TestCase
         $this->assertSame([3, 4], $pipeline->toArray());
     }
 
+    public function testZipEmpty(): void
+    {
+        $this->assertSame([], take([])->zip([1, 2, 3])->toArray());
+    }
+
+    public function testZipUnequalLengths(): void
+    {
+        $actual = take(['a', 'b', 'c'])
+            ->zip([1, 2], [3])
+            ->toArray()
+        ;
+
+        $this->assertSame([
+            ['a', 1, 3],
+            ['b', 2],
+            ['c'],
+        ], $actual);
+    }
+
+    public function testZipUnevenLengths(): void
+    {
+        $actual = take(['a', 'b', 'c'])
+            ->zip([1], [2, 3])
+            ->toArray()
+        ;
+
+        $this->assertSame([
+            ['a', 1, 2],
+            ['b', 3],
+            ['c'],
+        ], $actual);
+    }
+
+    public function testZipOverShortIndex(): void
+    {
+        $actual = take(['a', 'b', 'c'])
+            ->zip(\range(1, 10), \range(10, 100, 10))
+            ->toArray()
+        ;
+
+        $this->assertSame([
+            ['a', 1, 10],
+            ['b', 2, 20],
+            ['c', 3, 30],
+        ], $actual);
+    }
+
     public function testExample(): void
     {
         $iterable = \range(5, 7);
