@@ -22,7 +22,7 @@ namespace Pipeline;
 /**
  * Principal abstract pipeline with no defaults. Could be subclassed.
  */
-abstract class Principal implements Interfaces\PrincipalPipeline
+abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\ZipPipeline
 {
     /**
      * Pre-primed pipeline.
@@ -76,7 +76,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return $this;
     }
 
-    private static function apply(iterable $previous, callable $func): \Generator
+    private static function apply(iterable $previous, callable $func): iterable
     {
         foreach ($previous as $value) {
             $result = $func($value);
@@ -100,8 +100,13 @@ abstract class Principal implements Interfaces\PrincipalPipeline
      */
     public function filter(callable $func)
     {
-        if (null === $this->pipeline || [] === $this->pipeline) {
-            // No-op: either an empty array or null.
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $this;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
             return $this;
         }
 
@@ -177,5 +182,52 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         }
 
         return $initial;
+    }
+
+    public function zip(iterable ...$inputs): self
+    {
+        if (null === $this->pipeline) {
+            $this->pipeline = \array_shift($inputs);
+        }
+
+        if ($inputs === []) {
+            return $this;
+        }
+
+        $this->map(static function ($item): array {
+            return [$item];
+        });
+
+        foreach (self::toIterators(...$inputs) as $iterator) {
+            $this->map(static function (array $current) use ($iterator) {
+                if ($iterator->valid()) {
+                    $current[] = $iterator->current();
+                    $iterator->next();
+                }
+
+                return $current;
+            });
+        }
+
+        return $this;
+    }
+
+    /** @return \Iterator[] */
+    private static function toIterators(iterable ...$inputs): array
+    {
+        return \array_map(static function (iterable $input): \Iterator {
+            while ($input instanceof \IteratorAggregate) {
+                $input = $input->getIterator();
+            }
+
+            if ($input instanceof \Iterator) {
+                return $input;
+            }
+
+            // IteratorAggregate and Iterator are out of picture, which leaves... an array
+
+            /** @var array $input */
+            return new \ArrayIterator($input);
+        }, $inputs);
     }
 }

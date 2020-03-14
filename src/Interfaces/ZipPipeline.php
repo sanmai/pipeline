@@ -17,33 +17,18 @@
 
 declare(strict_types=1);
 
-namespace Pipeline;
+namespace Pipeline\Interfaces;
 
-function map(callable $func = null): Standard
+/**
+ * Interface definitions for the zipping pipeline.
+ */
+interface ZipPipeline
 {
-    $pipeline = new Standard();
-
-    if (!$func) {
-        return $pipeline;
-    }
-
-    return $pipeline->map($func);
-}
-
-function take(iterable $input = null): Standard
-{
-    return new Standard($input);
-}
-
-function fromArray(array $input): Standard
-{
-    return new Standard($input);
-}
-
-function zip(iterable $base, iterable ...$inputs): Standard
-{
-    $result = take($base);
-    $result->zip(...$inputs);
-
-    return $result;
+    /**
+     * Performs a lazy zip operation on iterables, not unlike that of
+     * array_map with first argument set to null. Also known as transposition.
+     *
+     * @return $this
+     */
+    public function zip(iterable ...$inputs);
 }

@@ -24,11 +24,13 @@ use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function Pipeline\take;
+use function Pipeline\zip;
 
 /**
  * @covers \Pipeline\fromArray
  * @covers \Pipeline\map
  * @covers \Pipeline\take
+ * @covers \Pipeline\zip
  *
  * @internal
  */
@@ -83,5 +85,21 @@ final class FunctionsTest extends TestCase
         $pipeline = fromArray(\range(0, 100));
         $this->assertInstanceOf(Standard::class, $pipeline);
         $this->assertSame(\range(0, 100), $pipeline->toArray());
+    }
+
+    /**
+     * @covers \Pipeline\zip
+     */
+    public function testZip(): void
+    {
+        $pipeline = zip([1, 2], [3, 4]);
+        $this->assertSame([[1, 3], [2, 4]], $pipeline->toArray());
+
+        $array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+
+        $pipeline = zip(...$array);
+        $this->assertInstanceOf(Standard::class, $pipeline);
+
+        $this->assertSame(\array_map(null, ...$array), $pipeline->toArray());
     }
 }

@@ -22,39 +22,54 @@ include 'vendor/autoload.php';
 use function Pipeline\map;
 use function Pipeline\take;
 
-// wrap an initial generator with a pipeline
-$pipeline = map(function () {
-    foreach (\range(1, 3) as $value) {
-        yield $value;
-    }
+// iterable corresponds to arrays, generators, iterators
+// we use an array here simplicity sake
+$iterable = \range(5, 7);
+
+// wrap the initial iterable with a pipeline
+$pipeline = take($iterable);
+
+// join side by side with other iterables of any type
+$pipeline->zip(
+    \range(1, 3),
+    map(function () {
+        yield 1;
+        yield 2;
+        yield 3;
+    })
+);
+
+// lazily process their elements together
+$pipeline->unpack(function (int $a, int $b, int $c) {
+    return $a - $b - $c;
 });
 
-// next processing step
-$pipeline->map(function ($value) {
-    yield $value ** 2;
-    yield $value ** 3;
+// map one value into several more
+$pipeline->map(function ($i) {
+    yield $i ** 2;
+    yield $i ** 3;
 });
 
 // simple one-to-one mapper
-$pipeline->map(function ($value) {
-    return $value - 1;
+$pipeline->map(function ($i) {
+    return $i - 1;
 });
 
-// one-to-many generator
-$pipeline->map(function ($value) {
-    yield [$value, 2];
-    yield [$value, 4];
+// map into arrays
+$pipeline->map(function ($i) {
+    yield [$i, 2];
+    yield [$i, 4];
 });
 
-// mapper with arguments unpacked from an input array
-$pipeline->unpack(function ($value, $multiplier) {
-    yield $value * $multiplier;
+// unpack array into arguments
+$pipeline->unpack(function ($i, $j) {
+    yield $i * $j;
 });
 
 // one way to filter
-$pipeline->map(function ($value) {
-    if ($value > 50) {
-        yield $value;
+$pipeline->map(function ($i) {
+    if ($i > 50) {
+        yield $i;
     }
 });
 

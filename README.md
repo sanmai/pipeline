@@ -5,9 +5,9 @@
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
-Pipeline makes generator chaining as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions and generators.
+Pipeline makes dealing with `iterable` types as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions, generators, arrays, and iterators.
 
-Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, and unpack data from arbitrary generators and from all kinds of standard iterators.
+Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, zip, and unpack data from arbitrary generators and from all kinds of standard iterators.
 
 This rigorously tested library just works. Pipeline neither defines nor throws any exceptions.
 
@@ -20,16 +20,31 @@ The latest version requires PHP 7.4. There are earlier versions that work under 
 # Use
 
 ```php
-use function Pipeline\map;
+use function Pipeline\take;
 
-// wrap an initial generator with a pipeline
-$pipeline = map(function () {
-    foreach (range(1, 3) as $i) {
-        yield $i;
-    }
+// iterable corresponds to arrays, generators, iterators
+// we use an array here simplicity sake
+$iterable = range(1, 3);
+
+// wrap the initial iterable with a pipeline
+$pipeline = take($iterable);
+
+// join side by side with other iterables of any type
+$pipeline->zip(
+    \range(1, 3),
+    map(function () {
+        yield 1;
+        yield 2;
+        yield 3;
+    })
+);
+
+// lazily process their elements together
+$pipeline->unpack(function (int $a, int $b, int $c) {
+    return $a - $b - $c;
 });
 
-// next processing step
+// map one value into several more
 $pipeline->map(function ($i) {
     yield pow($i, 2);
     yield pow($i, 3);
@@ -40,13 +55,13 @@ $pipeline->map(function ($i) {
     return $i - 1;
 });
 
-// one-to-many generator
+// map into arrays
 $pipeline->map(function ($i) {
     yield [$i, 2];
     yield [$i, 4];
 });
 
-// mapper with arguments unpacked from an input array
+// unpack array into arguments
 $pipeline->unpack(function ($i, $j) {
     yield $i * $j;
 });
@@ -83,12 +98,15 @@ All entry points always return an instance of a standard pipeline.
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
 | `take()`  | Takes any iterable, including arrays, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
 | `fromArray()`  | Takes an array, initializes a standard pipeline with it.  | `use function Pipeline\fromArray;` |
+| `zip()`  | Takes an iterable, and several more, merging them together.  | `use function Pipeline\zip;` |
+
 
 # Instance methods in a nutshell
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
 | `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
+| `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
@@ -123,7 +141,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
         return $this->veryExpensiveMethod();
     })->filter();
     ```
-  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly further along. *When in doubt, use a generator.*
+  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly whenever possible. Ergo, *when in doubt, use a generator.*
   
     ```php
     $pipeline->map(function () {
@@ -144,14 +162,14 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	/* ['foo' => 'baz'] */
     ```
   
-  Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, discarding all keys in the process.
+  Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
   
     ```php
     var_dump($pipeline->toArray());
     /* ['bar', 'baz'] */
     ```
 
-- The resulting pipeline is an iterator and should be assumed being not rewindable, just like the generators it uses.
+- The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
 
 	```php
 	$pipeline = \Pipeline\map(function () {
@@ -165,7 +183,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	// Exception: Cannot traverse an already closed generator
 	```
  
-  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of API compatibility guarantees.   
+  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.   
  
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
@@ -200,7 +218,7 @@ This library is built to last. There's not a single place where an exception is 
 
 Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. This method is not part to any interface, as per LSP.
 
-## `map()`
+## `$pipeline->map()`
 
 Takes a processing stage in a form of a generator function or a plain mapping function. Provided no callback does nothing.
 
@@ -222,7 +240,7 @@ $pipeline->map(function () {
 });
 ```
 
-## `unpack()`
+## `$pipeline->unpack()`
 
 An extra variant of `map` which unpacks arrays into arguments for a callback.
 
@@ -259,7 +277,21 @@ $pipeline->map(function () {
 // [1, 2, 3]
 ```
 
-## `filter()`
+## `$pipeline->zip()`
+
+Sequence-joins several iterables together, forming a feed with elements side by side:
+
+```php
+$pipeline = take($iterableA);
+$pipeline->zip($iterableB, $iterableC);
+$pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
+    // ... 
+});
+```
+
+Behavior with iterators with unequal number of elements is undefined.
+
+## `$pipeline->filter()`
 
 Takes a filter callback not unlike that of `array_filter`.
 
@@ -271,7 +303,7 @@ $pipeline->filter(function ($item) {
 
 Standard pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
-## `reduce()`
+## `$pipeline->reduce()`
 
 Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item.
 As a second argument it can take an inital value.
@@ -284,7 +316,7 @@ $total = $pipeline->reduce(function ($curry, $item) {
 
 Standard pipeline has a default callback that sums all values.
 
-## `toArray()`
+## `$pipeline->toArray()`
 
 Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
 
@@ -308,7 +340,7 @@ $result = $pipeline->toArray();
 
 If in the example about one would use `iterator_to_array($result)` they would get just `[3, 4]`.
 
-## `getIterator()`
+## `$pipeline->getIterator()`
 
 A method to conform to the `Traversable` interface. In case of unprimed `\Pipeline\Standard` it'll return an empty array iterator, essentially a no-op pipeline. Therefore this should work without errors:
 
@@ -321,7 +353,9 @@ foreach ($pipeline as $value) {
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
 
-## `__invoke()`
+## `$pipeline->__invoke()`
+
+_Deprecated in favor of `take()` due to surprising behavior._
 
 Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
 
