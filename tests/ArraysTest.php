@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,22 +23,24 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Standard
  * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class ArraysTest extends TestCase
+final class ArraysTest extends TestCase
 {
-    public function testInitialCallbackNotGenerator()
+    public function testInitialCallbackNotGenerator(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
             return PHP_INT_MAX;
         });
 
-        $this->assertSame([PHP_INT_MAX], iterator_to_array($pipeline));
+        $this->assertSame([PHP_INT_MAX], \iterator_to_array($pipeline));
     }
 
-    public function testArrayToArray()
+    public function testArrayToArray(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -48,7 +50,7 @@ class ArraysTest extends TestCase
         $this->assertSame([42], $pipeline->toArray());
     }
 
-    public function testArrayFilter()
+    public function testArrayFilter(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -58,7 +60,7 @@ class ArraysTest extends TestCase
         $this->assertSame([], $pipeline->toArray());
     }
 
-    public function testArrayReduce()
+    public function testArrayReduce(): void
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -68,7 +70,7 @@ class ArraysTest extends TestCase
         $this->assertSame(3, $pipeline->reduce());
     }
 
-    public function testArrayValues()
+    public function testArrayValues(): void
     {
         $pipeline = new Standard();
 

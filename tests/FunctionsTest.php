@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,20 +26,22 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
+ * @covers \Pipeline\fromArray
  * @covers \Pipeline\map
  * @covers \Pipeline\take
- * @covers \Pipeline\fromArray
+ *
+ * @internal
  */
-class FunctionsTest extends TestCase
+final class FunctionsTest extends TestCase
 {
     /**
      * @covers \Pipeline\map
      */
-    public function testMapFunction()
+    public function testMapFunction(): void
     {
         $pipeline = map();
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame([], iterator_to_array($pipeline));
+        $this->assertSame([], \iterator_to_array($pipeline));
 
         $pipeline = map(function () {
             yield 1;
@@ -54,11 +56,11 @@ class FunctionsTest extends TestCase
     /**
      * @covers \Pipeline\take
      */
-    public function testTakeFunction()
+    public function testTakeFunction(): void
     {
         $pipeline = take();
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame([], iterator_to_array($pipeline));
+        $this->assertSame([], \iterator_to_array($pipeline));
 
         $pipeline = take(new \ArrayIterator([1, 2, 3]));
         $this->assertInstanceOf(Standard::class, $pipeline);
@@ -68,7 +70,7 @@ class FunctionsTest extends TestCase
     /**
      * @covers \Pipeline\take
      */
-    public function testTakeArray()
+    public function testTakeArray(): void
     {
         $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toArray());
     }
@@ -76,10 +78,10 @@ class FunctionsTest extends TestCase
     /**
      * @covers \Pipeline\fromArray
      */
-    public function testFromArray()
+    public function testFromArray(): void
     {
-        $pipeline = fromArray(range(0, 100));
+        $pipeline = fromArray(\range(0, 100));
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame(range(0, 100), $pipeline->toArray());
+        $this->assertSame(\range(0, 100), $pipeline->toArray());
     }
 }

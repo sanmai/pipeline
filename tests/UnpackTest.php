@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,13 +24,15 @@ use function Pipeline\fromArray;
 
 /**
  * @covers \Pipeline\Standard
+ *
+ * @internal
  */
-class UnpackTest extends TestCase
+final class UnpackTest extends TestCase
 {
     /**
      * @covers \Pipeline\Standard::unpack()
      */
-    public function testMapVector()
+    public function testMapVector(): void
     {
         $pipeline = new \Pipeline\Standard();
 
@@ -42,16 +44,16 @@ class UnpackTest extends TestCase
         });
 
         $pipeline->unpack(function ($x, $y) {
-            return sqrt($x ** 2 + $y ** 2);
+            return \sqrt($x ** 2 + $y ** 2);
         });
 
-        $this->assertSame(37.0, round($pipeline->reduce()));
+        $this->assertSame(37.0, \round($pipeline->reduce()));
     }
 
     /**
      * @covers \Pipeline\Standard::unpack()
      */
-    public function testFlatMap()
+    public function testFlatMap(): void
     {
         $pipeline = new \Pipeline\Standard();
 
@@ -68,7 +70,7 @@ class UnpackTest extends TestCase
     /**
      * @covers \Pipeline\Standard::unpack()
      */
-    public function testWithIterator()
+    public function testWithIterator(): void
     {
         $this->assertSame([1, 2, 3], fromArray([
             new \ArrayIterator([1]),
