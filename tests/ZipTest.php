@@ -23,6 +23,8 @@ use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
+use function Pipeline\take;
+use function Pipeline\zip;
 
 /**
  * @covers \Pipeline\Principal
@@ -89,5 +91,34 @@ final class ZipTest extends TestCase
         $pipeline->zip([3, 4]);
 
         $this->assertSame([3, 4], $pipeline->toArray());
+    }
+
+    public function testExampleFromReadme(): void
+    {
+        $iterableA = new \ArrayIterator([1, 2, 3]);
+        $iterableB = new \ArrayIterator([3, 2, 1]);
+        $iterableC = new \ArrayIterator([2, 3, 1]);
+
+        $pipeline = take($iterableA);
+        $pipeline->zip($iterableB, $iterableC);
+        $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
+            return \max($elementOfA, $elementOfB, $elementOfC);
+        });
+
+        $this->assertSame(9, $pipeline->reduce());
+    }
+
+    public function testAnotherExampleForReadme(): void
+    {
+        $iterableA = new \ArrayIterator([1, 2, 3]);
+        $iterableB = new \ArrayIterator([3, 2, 1]);
+        $iterableC = new \ArrayIterator([2, 3, 1]);
+
+        $pipeline = zip($iterableA, $iterableB, $iterableC);
+        $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
+            return \max($elementOfA, $elementOfB, $elementOfC);
+        });
+
+        $this->assertSame(9, $pipeline->reduce());
     }
 }

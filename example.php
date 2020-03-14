@@ -22,12 +22,12 @@ include 'vendor/autoload.php';
 use function Pipeline\map;
 use function Pipeline\take;
 
-// wrap an initial generator with a pipeline
-$pipeline = map(function () {
-    foreach (\range(1, 3) as $value) {
-        yield $value;
-    }
-});
+// iterable corresponds to arrays, generators, iterators
+// we use an array here simplicity sake
+$iterable = \range(1, 3);
+
+// wrap the initial iterable with a pipeline
+$pipeline = take($iterable);
 
 // next processing step
 $pipeline->map(function ($value) {
