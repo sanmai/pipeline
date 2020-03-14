@@ -29,7 +29,22 @@ $iterable = range(1, 3);
 // wrap the initial iterable with a pipeline
 $pipeline = take($iterable);
 
-// next processing step
+// join side by side with other iterables of any type
+$pipeline->zip(
+    \range(1, 3),
+    map(function () {
+        yield 1;
+        yield 2;
+        yield 3;
+    })
+);
+
+// lazily process their elements together
+$pipeline->unpack(function (int $a, int $b, int $c) {
+    return $a - $b - $c;
+});
+
+// map one value into several more
 $pipeline->map(function ($i) {
     yield pow($i, 2);
     yield pow($i, 3);
@@ -40,13 +55,13 @@ $pipeline->map(function ($i) {
     return $i - 1;
 });
 
-// one-to-many generator
+// map into arrays
 $pipeline->map(function ($i) {
     yield [$i, 2];
     yield [$i, 4];
 });
 
-// mapper with arguments unpacked from an input array
+// unpack array into arguments
 $pipeline->unpack(function ($i, $j) {
     yield $i * $j;
 });

@@ -93,6 +93,26 @@ final class ZipTest extends TestCase
         $this->assertSame([3, 4], $pipeline->toArray());
     }
 
+    public function testExample(): void
+    {
+        $iterable = \range(5, 7);
+        $pipeline = take($iterable);
+        $pipeline->zip(
+            \range(1, 3),
+            map(function () {
+                yield 1;
+                yield 2;
+                yield 3;
+            })
+        );
+
+        $pipeline->unpack(function (int $a, int $b, int $c) {
+            return $a - $b - $c;
+        });
+
+        $this->assertSame(6, $pipeline->reduce());
+    }
+
     public function testExampleFromReadme(): void
     {
         $iterableA = new \ArrayIterator([1, 2, 3]);
