@@ -29,9 +29,11 @@ use Pipeline\Standard;
  */
 final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
-    private function yieldFail(): void
+    private function yieldFail(): bool
     {
         $this->fail();
+
+        return false;
     }
 
     public function testEagerReturn(): void
@@ -45,9 +47,11 @@ final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         });
     }
 
-    private function veryExpensiveMethod(): void
+    private function veryExpensiveMethod(): bool
     {
         throw new \Exception();
+
+        return true;
     }
 
     public function testExpensiveMethod(): void
