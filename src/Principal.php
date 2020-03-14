@@ -200,10 +200,14 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
 
         foreach (self::toIterators(...$inputs) as $iterator) {
             $this->map(static function (array $current) use ($iterator) {
-                if ($iterator->valid()) {
-                    $current[] = $iterator->current();
-                    $iterator->next();
+                if (!$iterator->valid()) {
+                    $current[] = null;
+
+                    return $current;
                 }
+
+                $current[] = $iterator->current();
+                $iterator->next();
 
                 return $current;
             });

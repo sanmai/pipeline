@@ -107,8 +107,8 @@ final class ZipTest extends TestCase
 
         $this->assertSame([
             ['a', 1, 3],
-            ['b', 2],
-            ['c'],
+            ['b', 2, null],
+            ['c', null, null],
         ], $actual);
     }
 
@@ -121,8 +121,8 @@ final class ZipTest extends TestCase
 
         $this->assertSame([
             ['a', 1, 2],
-            ['b', 3],
-            ['c'],
+            ['b', null, 3],
+            ['c', null, null],
         ], $actual);
     }
 
