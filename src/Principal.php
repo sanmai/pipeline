@@ -20,7 +20,9 @@ declare(strict_types=1);
 namespace Pipeline;
 
 /**
- * Principal abstract pipeline with no defaults. Could be subclassed.
+ * Principal abstract pipeline with no defaults.
+ *
+ * @internal
  */
 abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\ZipPipeline
 {
