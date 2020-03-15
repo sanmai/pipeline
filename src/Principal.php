@@ -65,6 +65,11 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
 
         // Generator is a generator, moving along
         if ($this->pipeline instanceof \Generator) {
+            // It is possible to detect if callback is a generator like so:
+            // (new \ReflectionFunction($func))->isGenerator();
+            // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
+            // But, again, we could add a direct internal method to replace the pipeline, e.g. as done by unpack()
+
             return $this;
         }
 
