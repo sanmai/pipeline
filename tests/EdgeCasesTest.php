@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use function Pipeline\map;
 use Pipeline\Standard;
 
 /**
@@ -219,5 +220,34 @@ final class EdgeCasesTest extends TestCase
         $this->assertSame(\range(1, 5), \iterator_to_array($iterator, false));
 
         $this->assertSame([], \iterator_to_array($iterator, false));
+    }
+
+    public function testReplaceGenerator(): void
+    {
+        $actual = map(static function (): iterable {
+            $generator = static function (): iterable {
+                yield 1;
+            };
+
+            // Pipeline does not check if a callback is a generator, only return value is checked.
+            return $generator();
+        })->reduce();
+
+        $this->assertSame(1, $actual);
+    }
+
+    public function testNotReplaceGenerator(): void
+    {
+        $actual = map(static function (): iterable {
+            $generator = static function (): iterable {
+                yield 1;
+            };
+
+            yield $generator();
+        })->map(static function (iterable $value): iterable {
+            yield from $value;
+        })->reduce();
+
+        $this->assertSame(1, $actual);
     }
 }
