@@ -40,6 +40,12 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
      */
     public function __construct(iterable $input = null)
     {
+        // IteratorAggregate is a nuance best we avoid dealing with.
+        // For example, CallbackFilterIterator needs a plain Iterator.
+        while ($input instanceof \IteratorAggregate) {
+            $input = $input->getIterator();
+        }
+
         $this->pipeline = $input;
     }
 
@@ -124,12 +130,11 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
             return $this;
         }
 
-        // CallbackFilterIterator needs a plain Iterator
-        if (!$this->pipeline instanceof \Iterator) {
-            $this->pipeline = new \IteratorIterator($this->pipeline);
-        }
+        /** @var \Iterator $iterator */
+        $iterator = $this->pipeline;
 
-        $this->pipeline = new \CallbackFilterIterator($this->pipeline, $func);
+        /** @phan-suppress-next-line PhanTypeMismatchArgumentInternal */
+        $this->pipeline = new \CallbackFilterIterator($iterator, $func);
 
         return $this;
     }
@@ -143,7 +148,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
             return $this->pipeline;
         }
 
-        if ($this->pipeline) {
+        if (null !== $this->pipeline) {
             return new \ArrayIterator($this->pipeline);
         }
 

@@ -6,5 +6,4 @@ parameters:
     paths:
         - src
     ignoreErrors:
-        - '#Strict comparison .* between array\(\) and iterable .* false#'
         - '#should return \$this.* but returns Pipeline.Standard#'
