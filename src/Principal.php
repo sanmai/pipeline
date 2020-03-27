@@ -24,7 +24,7 @@ namespace Pipeline;
  *
  * @internal
  */
-abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\ZipPipeline
+abstract class Principal implements Interfaces\PrincipalPipeline
 {
     /**
      * Pre-primed pipeline.
@@ -183,12 +183,12 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
     /**
      * {@inheritdoc}
      *
-     * @param callable $func    {@inheritdoc}
      * @param mixed    $initial {@inheritdoc}
+     * @param callable $func    {@inheritdoc}
      *
-     * @return null|mixed
+     * @return ?mixed
      */
-    public function reduce(callable $func, $initial)
+    public function fold($initial, callable $func)
     {
         if (\is_array($this->pipeline)) {
             return \array_reduce($this->pipeline, $func, $initial);
@@ -201,7 +201,10 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
         return $initial;
     }
 
-    public function zip(iterable ...$inputs): self
+    /**
+     * {@inheritdoc}
+     */
+    public function zip(iterable ...$inputs)
     {
         if (null === $this->pipeline) {
             $this->pipeline = \array_shift($inputs);

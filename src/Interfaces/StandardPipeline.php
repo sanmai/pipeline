@@ -33,7 +33,7 @@ interface StandardPipeline extends PrincipalPipeline
      *
      * @return $this
      */
-    public function map(callable $func = null);
+    public function map(?callable $func = null);
 
     /**
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
@@ -42,7 +42,7 @@ interface StandardPipeline extends PrincipalPipeline
      *
      * @return $this
      */
-    public function unpack(callable $func = null);
+    public function unpack(?callable $func = null);
 
     /**
      * {@inheritdoc}
@@ -53,19 +53,29 @@ interface StandardPipeline extends PrincipalPipeline
      *
      * @return $this
      */
-    public function filter(callable $func = null);
+    public function filter(?callable $func = null);
+
+    /**
+     * Reduces input values to a single value. Defaults to summation.
+     *
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param ?mixed    $initial initial value for a $carry
+     *
+     * @return ?mixed
+     */
+    public function reduce(?callable $func = null, $initial = null);
 
     /**
      * {@inheritdoc}
      *
      * Defaults to summation.
      *
-     * @param ?callable $func    {@inheritdoc}
      * @param ?mixed    $initial {@inheritdoc}
+     * @param ?callable $func    {@inheritdoc}
      *
-     * @return null|mixed
+     * @return ?mixed
      */
-    public function reduce(callable $func = null, $initial = null);
+    public function fold($initial, ?callable $func = null);
 
     /**
      * {@inheritdoc}

@@ -45,12 +45,20 @@ interface PrincipalPipeline extends \IteratorAggregate
     /**
      * Reduces input values to a single value.
      *
-     * @param callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      * @param mixed    $initial initial value for a $carry
+     * @param callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
      * @return mixed
      */
-    public function reduce(callable $func, $initial);
+    public function fold($initial, callable $func);
+
+    /**
+     * Performs a lazy zip operation on iterables, not unlike that of
+     * array_map with first argument set to null. Also known as transposition.
+     *
+     * @return $this
+     */
+    public function zip(iterable ...$inputs);
 
     /**
      * Returns all values regardless of keys used, discarding all keys in the process.

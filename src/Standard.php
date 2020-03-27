@@ -31,7 +31,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function unpack(callable $func = null): self
+    public function unpack(?callable $func = null): self
     {
         $func = $func ?? static function (...$args) {
             yield from $args;
@@ -51,7 +51,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function map(callable $func = null): self
+    public function map(?callable $func = null): self
     {
         if (null === $func) {
             return $this;
@@ -67,7 +67,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return $this
      */
-    public function filter(callable $func = null): self
+    public function filter(?callable $func = null): self
     {
         $func = $func ?? static function ($value) {
             // Cast is unnecessary
@@ -92,17 +92,33 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      *
      * @return mixed
      */
-    public function reduce(callable $func = null, $initial = null)
+    public function reduce(?callable $func = null, $initial = null)
     {
-        if (null === $func) {
-            return parent::reduce(static function ($carry, $item) {
+        return $this->fold($initial ?? 0, $func);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param mixed     $initial {@inheritdoc}
+     * @param ?callable $func    {@inheritdoc}
+     *
+     * @return ?mixed
+     */
+    public function fold($initial, ?callable $func = null)
+    {
+        if (null !== $func) {
+            return parent::fold($initial, $func);
+        }
+
+        return parent::fold(
+            $initial,
+            static function ($carry, $item) {
                 $carry += $item;
 
                 return $carry;
-            }, $initial ?? 0);
-        }
-
-        return parent::reduce($func, $initial);
+            }
+        );
     }
 
     /**

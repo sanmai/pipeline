@@ -140,6 +140,13 @@ final class ZipTest extends TestCase
         ], $actual);
     }
 
+    public function testZipNothing(): void
+    {
+        $pipeline = new Standard();
+
+        $this->assertSame([], $pipeline->zip([])->toArray());
+    }
+
     public function testExample(): void
     {
         $iterable = \range(5, 7);
