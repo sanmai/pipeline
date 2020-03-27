@@ -202,7 +202,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
             $this->pipeline = \array_shift($inputs);
         }
 
-        if ($inputs === []) {
+        if ([] === $inputs) {
             return $this;
         }
 
