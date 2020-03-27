@@ -216,6 +216,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
         });
 
         foreach (self::toIterators(...$inputs) as $iterator) {
+            // MultipleIterator won't work here because it'll stop at first invalid iterator
             $this->map(static function (array $current) use ($iterator) {
                 if (!$iterator->valid()) {
                     $current[] = null;
