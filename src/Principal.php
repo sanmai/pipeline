@@ -38,7 +38,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline, Interfaces\Zip
      *
      * @param ?iterable $input
      */
-    public function __construct(iterable $input = null)
+    final public function __construct(iterable $input = null)
     {
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
