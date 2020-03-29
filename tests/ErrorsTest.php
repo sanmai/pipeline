@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
@@ -54,24 +53,6 @@ final class ErrorsTest extends TestCase
 
             return $unused;
         });
-    }
-
-    public function testPipelineInPipelineUsesSelf(): void
-    {
-        $pipeline = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
-        $pipeline->map(function ($prime) {
-            yield $prime;
-            yield $prime * 2;
-        });
-
-        $pipeline->map($pipeline)->filter(function ($i) {
-            return 0 !== $i % 2;
-        });
-
-        $this->expectExceptionMessage('Cannot rewind a generator that was already run');
-        $this->expectExceptionFallback(\Exception::class, Error::class);
-
-        $pipeline->reduce();
     }
 
     /**

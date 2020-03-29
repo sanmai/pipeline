@@ -233,8 +233,8 @@ final class StandardTest extends TestCase
             yield $prime * 2;
         });
 
-        $pipeline2 = new Standard();
-        $pipeline2->map($pipeline1)->filter(function ($i) {
+        $pipeline2 = new Standard($pipeline1);
+        $pipeline2->filter(function ($i) {
             return 0 !== $i % 2;
         });
 
@@ -265,8 +265,7 @@ final class StandardTest extends TestCase
             yield 2;
         });
 
-        $bar = new Standard();
-        $bar->map($foo);
+        $bar = new Standard($foo);
         $this->assertSame(3, $bar->reduce());
     }
 

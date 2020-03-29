@@ -188,12 +188,6 @@ final class EdgeCasesTest extends TestCase
         $this->assertSame([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
     }
 
-    public function testPipelineInvokeReturnsGenerator(): void
-    {
-        $pipeline = new Standard();
-        $this->assertInstanceOf(\Generator::class, $pipeline());
-    }
-
     public function testInvokeMaps(): void
     {
         $pipeline = new Standard(new \ArrayIterator(\range(1, 5)));

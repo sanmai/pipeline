@@ -353,28 +353,6 @@ foreach ($pipeline as $value) {
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
 
-## `$pipeline->__invoke()`
-
-_Deprecated in favor of `take()` due to surprising behavior._
-
-Returns a generator with all values currently in the pipeline. Allows to connect pipelines freely.
-
-```php
-$foo = new \Pipeline\Standard();
-$foo->map(function () {
-    yield 1;
-    yield 2;
-});
-
-$bar = new \Pipeline\Standard();
-$bar->map($foo);
-$this->assertEquals(3, $bar->reduce());
-var_dump($bar->reduce());
-// int(3)
-```
-
-This method is not part to any interface, specific to this implementation. E.g. you don't need to implement this method when extending the pipeline.
-
 # Contributions
 
 Contributions to documentation and test cases are welcome. Bug reports are welcome too. 
