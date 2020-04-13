@@ -22,7 +22,7 @@ namespace Pipeline\Interfaces;
 /**
  * Interface definitions for the most basic principal pipeline.
  */
-interface PrincipalPipeline extends \IteratorAggregate
+interface PrincipalPipeline extends \IteratorAggregate, \Countable
 {
     /**
      * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.

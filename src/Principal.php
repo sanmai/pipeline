@@ -180,6 +180,26 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return \iterator_to_array($this, false);
     }
 
+    public function count(): int
+    {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just return zero
+            return 0;
+        }
+
+        if ([] === $this->pipeline) {
+            // Empty array is empty.
+            return 0;
+        }
+
+        if (!\is_array($this->pipeline)) {
+            // Count values for an iterator
+            $this->pipeline = \iterator_to_array($this, false);
+        }
+
+        return \count($this->pipeline);
+    }
+
     /**
      * {@inheritdoc}
      *
