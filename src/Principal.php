@@ -24,7 +24,7 @@ namespace Pipeline;
  *
  * @internal
  */
-abstract class Principal implements Interfaces\PrincipalPipeline
+abstract class Principal implements \IteratorAggregate, \Countable
 {
     /**
      * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
@@ -50,13 +50,9 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param callable $func {@inheritdoc}
-     *
      * @return $this
      */
-    public function map(callable $func)
+    protected function map(callable $func)
     {
         // That's the standard case for any next stages
         if (\is_iterable($this->pipeline)) {
@@ -105,13 +101,9 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param callable $func {@inheritdoc}
-     *
      * @return $this
      */
-    public function filter(callable $func)
+    protected function filter(callable $func)
     {
         if (null === $this->pipeline) {
             // No-op: null.
@@ -139,9 +131,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getIterator(): \Traversable
     {
         if ($this->pipeline instanceof \Traversable) {
@@ -155,9 +144,6 @@ abstract class Principal implements Interfaces\PrincipalPipeline
         return new \EmptyIterator();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toArray(bool $useKeys = false): array
     {
         if (null === $this->pipeline) {
@@ -205,14 +191,11 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param mixed    $initial {@inheritdoc}
-     * @param callable $func    {@inheritdoc}
+     * @param mixed $initial
      *
      * @return ?mixed
      */
-    public function fold($initial, callable $func)
+    protected function fold($initial, callable $func)
     {
         if (\is_array($this->pipeline)) {
             return \array_reduce($this->pipeline, $func, $initial);
@@ -226,7 +209,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * @return $this
      */
     public function zip(iterable ...$inputs)
     {

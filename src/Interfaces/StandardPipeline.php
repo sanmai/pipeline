@@ -22,14 +22,14 @@ namespace Pipeline\Interfaces;
 /**
  * Interface definitions for the standard pipeline.
  */
-interface StandardPipeline extends PrincipalPipeline
+interface StandardPipeline extends \IteratorAggregate, \Countable
 {
     /**
-     * {@inheritdoc}
+     * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func a callback must either return a value or yield values (return a generator)
      *
      * @return $this
      */
@@ -45,7 +45,7 @@ interface StandardPipeline extends PrincipalPipeline
     public function unpack(?callable $func = null);
 
     /**
-     * {@inheritdoc}
+     * Removes elements unless a callback returns true.
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
@@ -66,19 +66,27 @@ interface StandardPipeline extends PrincipalPipeline
     public function reduce(?callable $func = null, $initial = null);
 
     /**
-     * {@inheritdoc}
+     * Reduces input values to a single value.
      *
      * Defaults to summation.
      *
-     * @param ?mixed    $initial {@inheritdoc}
-     * @param ?callable $func    {@inheritdoc}
+     * @param mixed     $initial initial value for a $carry
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
      * @return ?mixed
      */
     public function fold($initial, ?callable $func = null);
 
     /**
-     * {@inheritdoc}
+     * Performs a lazy zip operation on iterables, not unlike that of
+     * array_map with first argument set to null. Also known as transposition.
+     *
+     * @return $this
      */
-    public function toArray(): array;
+    public function zip(iterable ...$inputs);
+
+    /**
+     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys.
+     */
+    public function toArray(bool $useKeys = false): array;
 }
