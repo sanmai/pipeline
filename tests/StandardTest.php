@@ -20,6 +20,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use function Pipeline\fromArray;
+use function Pipeline\map;
 use Pipeline\Standard;
 
 /**
@@ -340,5 +342,46 @@ final class StandardTest extends TestCase
     {
         $reflector = new \ReflectionClass(Standard::class);
         $this->assertTrue($reflector->isFinal());
+    }
+
+    public function testToArrayWithArray(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            1,
+            2,
+        ], $pipeline->toArray());
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+        ], $pipeline->toArray(true));
+    }
+
+    public function testToArrayWithIterator(): void
+    {
+        $pipeline = map(function () {
+            yield 'a' => 1;
+            yield 'b' => 2;
+        });
+
+        $this->assertSame([
+            1,
+            2,
+        ], $pipeline->toArray());
+
+        $pipeline = map(function () {
+            yield 'a' => 1;
+            yield 'b' => 2;
+        });
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+        ], $pipeline->toArray(true));
     }
 }

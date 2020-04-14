@@ -27,7 +27,7 @@ namespace Pipeline;
 abstract class Principal implements Interfaces\PrincipalPipeline
 {
     /**
-     * Pre-primed pipeline.
+     * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      *
      * @var ?iterable
      */
@@ -158,7 +158,7 @@ abstract class Principal implements Interfaces\PrincipalPipeline
     /**
      * {@inheritdoc}
      */
-    public function toArray(): array
+    public function toArray(bool $useKeys = false): array
     {
         if (null === $this->pipeline) {
             // With non-primed pipeline just return an empty array
@@ -172,12 +172,16 @@ abstract class Principal implements Interfaces\PrincipalPipeline
 
         // We got what we need, moving along
         if (\is_array($this->pipeline)) {
+            if ($useKeys) {
+                return $this->pipeline;
+            }
+
             return \array_values($this->pipeline);
         }
 
-        // Because `yield from` does not reset keys we have to ignore them on export to return every item.
+        // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return \iterator_to_array($this, false);
+        return \iterator_to_array($this, $useKeys);
     }
 
     public function count(): int
