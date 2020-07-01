@@ -517,6 +517,8 @@ What else is out there:
 
 - [Simple pipes with PHP generators](https://www.hughgrigg.com/posts/simple-pipes-php-generators/) by Hugh Grigg. Rationale and explanation for an exceptionally close concept. Probably one can use this library as a drop-in replacement, short of different method names.
 
+- If you're familiar with Java, [package java.util.stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html) offers an implementation of the same concept.
+
 - Submit a PR to add yours.
 
 # More badges
