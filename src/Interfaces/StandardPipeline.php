@@ -45,6 +45,17 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function unpack(?callable $func = null);
 
     /**
+     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
+     *
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @param ?callable $func a callback must return a value
+     *
+     * @return $this
+     */
+    public function cast(?callable $func = null);
+
+    /**
      * Removes elements unless a callback returns true.
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
@@ -56,7 +67,7 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function filter(?callable $func = null);
 
     /**
-     * Reduces input values to a single value. Defaults to summation.
+     * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
      * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      * @param ?mixed    $initial initial value for a $carry
@@ -66,9 +77,7 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function reduce(?callable $func = null, $initial = null);
 
     /**
-     * Reduces input values to a single value.
-     *
-     * Defaults to summation.
+     * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
      *
      * @param mixed     $initial initial value for a $carry
      * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
@@ -86,7 +95,7 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function zip(iterable ...$inputs);
 
     /**
-     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys.
+     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
      */
     public function toArray(bool $useKeys = false): array;
 }

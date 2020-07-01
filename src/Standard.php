@@ -63,6 +63,24 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
     /**
      * {@inheritdoc}
      *
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @param ?callable $func {@inheritdoc}
+     *
+     * @return $this
+     */
+    public function cast(callable $func = null): self
+    {
+        if (null === $func) {
+            return $this;
+        }
+
+        return parent::cast($func);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param ?callable $func {@inheritdoc}
      *
      * @return $this

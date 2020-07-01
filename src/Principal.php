@@ -54,7 +54,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
      */
     protected function map(callable $func)
     {
-        // That's the standard case for any next stages
+        // That's the standard case for any next stages.
         if (\is_iterable($this->pipeline)) {
             /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
@@ -62,7 +62,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
             return $this;
         }
 
-        // Let's check what we got for a start
+        // Let's check what we got for a start.
         $this->pipeline = $func();
 
         // Generator is a generator, moving along
@@ -75,9 +75,9 @@ abstract class Principal implements \IteratorAggregate, \Countable
             return $this;
         }
 
-        // Not a generator means we were given a simple value to be treated as an array
+        // Not a generator means we were given a simple value to be treated as an array.
         // We do not cast to an array here because casting a null to an array results in
-        // an empty array; that's surprising and not how map() works for other values
+        // an empty array; that's surprising and not how it works for other values.
         $this->pipeline = [
             $this->pipeline,
         ];
@@ -97,6 +97,35 @@ abstract class Principal implements \IteratorAggregate, \Countable
 
             // Case of a plain old mapping function
             yield $result;
+        }
+    }
+
+    /**
+     * @return $this
+     */
+    protected function cast(callable $func)
+    {
+        if (\is_iterable($this->pipeline)) {
+            /** @phan-suppress-next-line PhanTypeMismatchArgument */
+            $this->pipeline = self::applyOnce($this->pipeline, $func);
+
+            return $this;
+        }
+
+        // Else get the seed value.
+        // We do not cast to an array here because casting a null to an array results in
+        // an empty array; that's surprising and not how it works for other values.
+        $this->pipeline = [
+            $func(),
+        ];
+
+        return $this;
+    }
+
+    private static function applyOnce(iterable $previous, callable $func): iterable
+    {
+        foreach ($previous as $value) {
+            yield $func($value);
         }
     }
 
@@ -147,7 +176,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
     public function toArray(bool $useKeys = false): array
     {
         if (null === $this->pipeline) {
-            // With non-primed pipeline just return an empty array
+            // With non-primed pipeline just return an empty array.
             return [];
         }
 
@@ -156,7 +185,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
             return [];
         }
 
-        // We got what we need, moving along
+        // We got what we need, moving along.
         if (\is_array($this->pipeline)) {
             if ($useKeys) {
                 return $this->pipeline;
@@ -170,10 +199,17 @@ abstract class Principal implements \IteratorAggregate, \Countable
         return \iterator_to_array($this, $useKeys);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * This is a terminal operation.
+     *
+     * @see Countable::count()
+     */
     public function count(): int
     {
         if (null === $this->pipeline) {
-            // With non-primed pipeline just return zero
+            // With non-primed pipeline just return zero.
             return 0;
         }
 
@@ -183,7 +219,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
         }
 
         if (!\is_array($this->pipeline)) {
-            // Count values for an iterator
+            // Count values for an iterator.
             $this->pipeline = \iterator_to_array($this, false);
         }
 
@@ -226,7 +262,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
         });
 
         foreach (self::toIterators(...$inputs) as $iterator) {
-            // MultipleIterator won't work here because it'll stop at first invalid iterator
+            // MultipleIterator won't work here because it'll stop at first invalid iterator.
             $this->map(static function (array $current) use ($iterator) {
                 if (!$iterator->valid()) {
                     $current[] = null;
@@ -256,7 +292,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
                 return $input;
             }
 
-            // IteratorAggregate and Iterator are out of picture, which leaves... an array
+            // IteratorAggregate and Iterator are out of picture, which leaves... an array.
 
             /** @var array $input */
             return new \ArrayIterator($input);

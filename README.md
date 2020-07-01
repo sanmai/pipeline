@@ -105,19 +105,22 @@ All entry points always return an instance of a standard pipeline.
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `array_map`, `Select`, `SelectMany`                  |
+| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `SelectMany`                  |
+| `cast()`    | Takes a callback that for each input value expected to return another single value. Unlike `map()`, it assumes no special treatment for generators. Provided no callback does nothing. | `array_map`, `Select`                  |
 | `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
-| `reduce()`  | Reduces input values to a single value. Defaults to summation. | `array_reduce`, `Aggregate`, `Sum` |
+| `reduce()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface. |     |
+| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface as per LSP. |     |
 
-Pipeline is an iterator and can be used as any other iterable. Implements `JsonSerializable`.
+Pipeline is an iterator and can be used as any other iterable. 
 
-Pipeline is a final class. It comes with a pair of interfaces to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
+Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
 
-In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not.
+Pipeline is a final class. It comes with an interface to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
+
+In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
 
 # Caveats
 
@@ -168,6 +171,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     var_dump($pipeline->toArray());
     /* ['bar', 'baz'] */
     ```
+  This method also takes an optional argument to keep the keys.
 
 - The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
 
@@ -198,19 +202,14 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 - `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
-- Interface `PrincipalPipeline` defines three main functions all pipelines must bear.
-- Interface `StandardPipeline` defines `unpack()` from the standard pipeline.
+- Interface `StandardPipeline` defines all public methods from the standard pipeline, most useful for mocking in tests.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
 ## Class inheritance diagram
 
 - `\Pipeline\Standard` extends `\Pipeline\Principal` and implements `StandardPipeline`.
-- Abstract `\Pipeline\Principal` implements `PrincipalPipeline`.
-- Interface `PrincipalPipeline` extends `StandardPipeline`.
-- Interface `PrincipalPipeline` extends `\IteratorAggregate`.
-
-![](classes.svg)
+- Interface `StandardPipeline` extends `\IteratorAggregate` and `\Countable`.
 
 # Methods
 
