@@ -51,7 +51,7 @@ $pipeline->map(function ($i) {
 });
 
 // simple one-to-one mapper
-$pipeline->map(function ($i) {
+$pipeline->cast(function ($i) {
     return $i - 1;
 });
 
