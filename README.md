@@ -206,7 +206,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
-## Class inheritance diagram
+## Inheritance diagram
 
 - `\Pipeline\Standard` extends `\Pipeline\Principal` and implements `StandardPipeline`.
 - Interface `StandardPipeline` extends `\IteratorAggregate` and `\Countable`.
@@ -226,6 +226,11 @@ $pipeline->map(function (Customer $customer) {
     foreach ($customer->allPayments() as $item) {
         yield $item;
     }
+});
+
+// Now process all and every payment
+$pipeline->map(function (Payment $payment) {
+    return $payment->amount;
 });
 ```
 
@@ -276,6 +281,24 @@ $pipeline->map(function () {
 // [1, 2, 3]
 ```
 
+## `$pipeline->cast()`
+
+Works similarly to map, but does not have a special treatment for generators. Think of `array_map`.
+
+```php
+$pipeline->cast(function (Customer $customer) {
+    foreach ($customer->allPayments() as $item) {
+        yield $item;
+    }
+});
+
+$pipeline->map(function (\Generator $paymentGenerator) {
+    // Keeps grouping as per customer
+});
+```
+
+For this example, where `map()` would have filled the pipeline with a series of payments, `cast()` will add a generator for each customer.
+
 ## `$pipeline->zip()`
 
 Sequence-joins several iterables together, forming a feed with elements side by side:
@@ -288,7 +311,7 @@ $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
 });
 ```
 
-Behavior with iterators with unequal number of elements is undefined.
+With iterators with unequal number of elements, missing elements are left as nulls.
 
 ## `$pipeline->filter()`
 

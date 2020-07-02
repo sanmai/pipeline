@@ -105,6 +105,13 @@ abstract class Principal implements \IteratorAggregate, \Countable
      */
     protected function cast(callable $func)
     {
+        // We got an array, that's what we need. Moving along.
+        if (\is_array($this->pipeline)) {
+            $this->pipeline = \array_map($func, $this->pipeline);
+
+            return $this;
+        }
+
         if (\is_iterable($this->pipeline)) {
             /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::applyOnce($this->pipeline, $func);

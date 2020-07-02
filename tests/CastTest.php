@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use function Pipeline\map;
 use Pipeline\Standard;
 use function Pipeline\take;
 
@@ -52,6 +53,17 @@ final class CastTest extends TestCase
         $this->assertSame([1, 2, 3], take([1, 2, 3])->cast()->toArray());
     }
 
+    public function testCastIterator(): void
+    {
+        $this->assertSame([2, 4, 6], map(function () {
+            yield 1;
+            yield 2;
+            yield 3;
+        })->cast(function (int $a) {
+            return $a * 2;
+        })->toArray());
+    }
+
     public function testCastSeedValue(): void
     {
         $pipeline = new Standard();
@@ -59,5 +71,21 @@ final class CastTest extends TestCase
         $this->assertSame([M_PI], $pipeline->cast(function () {
             return M_PI;
         })->toArray());
+    }
+
+    public function testCastUnpack(): void
+    {
+        $pipeline = take([1, 2, 3]);
+
+        $pipeline->cast(function (int $i) {
+            yield $i;
+            yield $i * $i;
+        });
+
+        $pipeline->unpack(function (int $a, int $b) {
+            return $b - $a;
+        });
+
+        $this->assertSame([0, 2, 6], $pipeline->toArray());
     }
 }
