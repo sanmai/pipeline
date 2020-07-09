@@ -16,7 +16,6 @@
         "friendsofphp/php-cs-fixer": "^2.13",
         "infection/infection": ">=0.10.5",
         "league/pipeline": "^1.0 || ^0.3",
-        "mockery/mockery": "^1.0",
         "phan/phan": "^1.1 || ^2.0",
         "php-coveralls/php-coveralls": "^2.0",
         "phpstan/phpstan": ">=0.10",

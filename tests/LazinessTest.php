@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 /**
@@ -27,7 +28,7 @@ use Pipeline\Standard;
  *
  * @internal
  */
-final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
+final class LazinessTest extends TestCase
 {
     private function yieldFail(): bool
     {
@@ -102,7 +103,11 @@ final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 
     public function testLazyIterator(): void
     {
-        $spy = \Mockery::spy(\ArrayIterator::class);
+        $spy = $this->createMock(\ArrayIterator::class);
+        $spy
+            ->expects($this->never())
+            ->method('rewind')
+        ;
 
         $pipeline = new Standard($spy);
         $pipeline->map(function ($value) {
@@ -110,13 +115,15 @@ final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         })->map(function ($value) {
             return $value;
         })->filter();
-
-        $spy->shouldNotReceive('rewind');
     }
 
     public function testLazyIteratorYieldFrom(): void
     {
-        $spy = \Mockery::spy(\ArrayIterator::class);
+        $spy = $this->createMock(\ArrayIterator::class);
+        $spy
+            ->expects($this->never())
+            ->method('rewind')
+        ;
 
         $pipeline = new Standard();
         $pipeline->map(function () use ($spy) {
@@ -126,13 +133,15 @@ final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         })->map(function ($value) {
             return $value;
         })->filter();
-
-        $spy->shouldNotReceive('rewind');
     }
 
     public function testLazyIteratorReturn(): void
     {
-        $spy = \Mockery::spy(\ArrayIterator::class);
+        $spy = $this->createMock(\ArrayIterator::class);
+        $spy
+            ->expects($this->never())
+            ->method('rewind')
+        ;
 
         $pipeline = new Standard();
         $pipeline->map(function () use ($spy) {
@@ -142,8 +151,6 @@ final class LazinessTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
         })->map(function ($value) {
             return $value;
         })->filter();
-
-        $spy->shouldNotReceive('rewind');
     }
 
     public function testMapLazyOnce(): void
