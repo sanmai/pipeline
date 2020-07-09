@@ -68,7 +68,10 @@ final class ErrorsTest extends TestCase
         })->unpack();
 
         $this->expectException(\TypeError::class);
-        $this->expectExceptionMessageMatches('/must .* iterable/');
+        // Older PHPUnit on 7.1 does not have this method
+        if (\is_callable([$this, 'expectExceptionMessageMatches'])) {
+            $this->expectExceptionMessageMatches('/must .* iterable/');
+        }
         $pipeline->toArray();
     }
 }
