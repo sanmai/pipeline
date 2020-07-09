@@ -68,7 +68,7 @@ final class ErrorsTest extends TestCase
         })->unpack();
 
         $this->expectException(\TypeError::class);
-        $this->expectExceptionMessage('must be iterable');
+        $this->expectExceptionMessageMatches('/must .* iterable/');
         $pipeline->toArray();
     }
 }
