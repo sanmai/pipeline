@@ -88,4 +88,18 @@ final class CastTest extends TestCase
 
         $this->assertSame([0, 2, 6], $pipeline->toArray());
     }
+
+    public function testCastPreservesKeys(): void
+    {
+        $this->assertSame([
+            'a' => 2,
+            'b' => 6,
+        ], map(function () {
+            yield 'a' => 1;
+            yield 'b' => 2;
+            yield 'b' => 3;
+        })->cast(function (int $a) {
+            return $a * 2;
+        })->toArray(true));
+    }
 }

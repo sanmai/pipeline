@@ -87,16 +87,18 @@ abstract class Principal implements \IteratorAggregate, \Countable
 
     private static function apply(iterable $previous, callable $func): iterable
     {
-        foreach ($previous as $value) {
+        foreach ($previous as $key => $value) {
             $result = $func($value);
+
+            // For generators we use keys they provide
             if ($result instanceof \Generator) {
                 yield from $result;
 
                 continue;
             }
 
-            // Case of a plain old mapping function
-            yield $result;
+            // In case of a plain old mapping function we use the original key
+            yield $key => $result;
         }
     }
 
@@ -131,8 +133,8 @@ abstract class Principal implements \IteratorAggregate, \Countable
 
     private static function applyOnce(iterable $previous, callable $func): iterable
     {
-        foreach ($previous as $value) {
-            yield $func($value);
+        foreach ($previous as $key => $value) {
+            yield $key => $func($value);
         }
     }
 
