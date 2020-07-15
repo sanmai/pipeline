@@ -1,5 +1,5 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
-[![Build Status](https://travis-ci.org/sanmai/pipeline.svg?branch=v5.x)](https://travis-ci.org/sanmai/pipeline)
+[![Build Status](https://travis-ci.com/sanmai/pipeline.svg?branch=v5.x)](https://travis-ci.com/sanmai/pipeline)
 ![CI](https://github.com/sanmai/pipeline/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
@@ -15,7 +15,9 @@ This rigorously tested library just works. Pipeline neither defines nor throws a
 
     composer require sanmai/pipeline
 
-The latest version requires at least PHP 7.1. There are earlier versions that work under PHP 5.6 and above, but they are not as feature complete.
+The latest version requires PHP 7.1 or above, including PHP 8.0.
+
+There are earlier versions that work under PHP 5.6 and above, but they are not as feature complete.
 
 # Use
 
