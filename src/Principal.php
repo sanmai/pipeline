@@ -21,8 +21,6 @@ namespace Pipeline;
 
 /**
  * Principal abstract pipeline with no defaults.
- *
- * @internal
  */
 abstract class Principal implements \IteratorAggregate, \Countable
 {
