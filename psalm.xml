@@ -7,6 +7,7 @@
 >
     <projectFiles>
         <directory name="src" />
+        <file name="example.php" />
     </projectFiles>
 
     <issueHandlers>
@@ -38,5 +39,12 @@
 
         <MixedAssignment errorLevel="info" />
         <MixedOperand errorLevel="info" />
+
+       <ForbiddenCode>
+           <errorLevel type="suppress">
+               <file name="example.php" />
+           </errorLevel>
+       </ForbiddenCode>
+
     </issueHandlers>
 </psalm>
