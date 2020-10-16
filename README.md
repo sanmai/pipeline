@@ -387,7 +387,7 @@ API is expected to stay as simple as it is, though.
 
 About [collection pipelines programming pattern](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler. 
 
-In a more general sense this library implements a subset of [CSP](https://en.wikipedia.org/wiki/Communicating_sequential_processes) paradingm, as opposed to [Actor model](https://en.wikipedia.org/wiki/Actor_model).
+In a more general sense this library implements a subset of [CSP](https://en.wikipedia.org/wiki/Communicating_sequential_processes) paradigm, as opposed to [Actor model](https://en.wikipedia.org/wiki/Actor_model).
 
 What else is out there:
 
