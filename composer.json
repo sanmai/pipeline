@@ -13,6 +13,7 @@
         "php": "^7.1 || ^8.0"
     },
     "require-dev": {
+        "ergebnis/composer-normalize": "^2.8",
         "friendsofphp/php-cs-fixer": "^2.13",
         "infection/infection": ">=0.10.5",
         "league/pipeline": "^1.0 || ^0.3",
