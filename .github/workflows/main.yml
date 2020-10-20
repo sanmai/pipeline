@@ -10,6 +10,7 @@ on:
 
 jobs:
   tests:
+    name: Test with PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -19,11 +20,9 @@ jobs:
         include:
           - { php-version: '8.0', dependencies: '--ignore-platform-req=php' }
 
-    name: CI on PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -60,8 +59,10 @@ jobs:
     name: Coding Standards
     runs-on: ubuntu-latest
 
-    env:
-      PHP_CS_FIXER_VERSION: v2.16.4
+    strategy:
+      matrix:
+        php-version: ['7.4']
+        cs-fixer-version: ['v2.16.4']
 
     steps:
       - name: Checkout
@@ -70,8 +71,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
-          tools: php-cs-fixer:${{ env.PHP_CS_FIXER_VERSION }}
+          php-version: ${{ matrix.php-version }}
+          tools: php-cs-fixer:${{ matrix.cs-fixer-version }}
 
       - name: Restore PHP-CS-Fixer cache
         uses: actions/cache@v2
@@ -80,6 +81,51 @@ jobs:
           key: "php-cs-fixer"
           restore-keys: "php-cs-fixer"
 
-      - name: Run PHP-CS-Fixer, version ${{ env.PHP_CS_FIXER_VERSION }}
+      - name: Run PHP-CS-Fixer, version ${{ matrix.cs-fixer-version }}
         run: |
           php-cs-fixer fix --diff --dry-run --verbose
+
+  analyze:
+    name: Static Analysis and Validation
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['7.4']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: ast
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.*') }}
+          restore-keys: |
+            composer-${{ matrix.php-version }}-
+            composer-
+
+      - name: Install dependencies
+        run: |
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Validate composer.json
+        run: |
+          make composer-validate
+
+      - name: Lint YAML files
+        run: |
+          make yamllint
+
+      - name: Static Analysis
+        run: |
+          make ci-analyze --keep-going
