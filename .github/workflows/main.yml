@@ -59,10 +59,9 @@ jobs:
     name: Coding Standards
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        php-version: ['7.4']
-        cs-fixer-version: ['v2.16.4']
+    env:
+      PHP_VERSION: 7.4
+      PHP_CS_FIXER_VERSION: v2.16.4
 
     steps:
       - name: Checkout
@@ -71,8 +70,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          tools: php-cs-fixer:${{ matrix.cs-fixer-version }}
+          php-version: ${{ env.PHP_VERSION }}
+          tools: php-cs-fixer:${{ env.PHP_CS_FIXER_VERSION }}
 
       - name: Restore PHP-CS-Fixer cache
         uses: actions/cache@v2
@@ -81,7 +80,7 @@ jobs:
           key: "php-cs-fixer"
           restore-keys: "php-cs-fixer"
 
-      - name: Run PHP-CS-Fixer, version ${{ matrix.cs-fixer-version }}
+      - name: Run PHP-CS-Fixer, version ${{ env.PHP_CS_FIXER_VERSION }}
         run: |
           php-cs-fixer fix --diff --dry-run --verbose
 
