@@ -21,3 +21,6 @@ install:
 
 script:
   - make ci-test --keep-going
+
+after_success:
+  - travis_retry php vendor/bin/php-coveralls
