@@ -87,6 +87,7 @@ test: phpunit analyze composer-validate
 .PHONY: composer-validate
 composer-validate: test-prerequisites
 	$(SILENT) $(COMPOSER) validate --strict
+	$(SILENT) $(COMPOSER) normalize --diff --dry-run
 
 test-prerequisites: prerequisites composer.lock
 
