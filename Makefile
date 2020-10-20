@@ -1,8 +1,8 @@
 .PHONY: ci test prerequisites
 
 # Use any most recent PHP version
-PHP=$(shell which php)
-PHPDBG=phpdbg -qrr
+PHP=$(shell which php7.4 || which php7.3 || which php7.2 || which php7.1 || which php)
+PHPDBG=$(shell which phpdbg && echo -qrr || echo php)
 
 # Default parallelism
 JOBS=$(shell nproc)
@@ -53,14 +53,13 @@ all: test
 
 ci-test: SILENT=
 ci-test: prerequisites
-	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP)
+	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --verbose --group=$(PHPUNIT_GROUP)
 
 ci-analyze: SILENT=
 ci-analyze: prerequisites ci-phpunit ci-infection ci-phan ci-phpstan ci-psalm
 
 ci-phpunit: ci-cs
 	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_ARGS)
-	cp build/logs/junit.xml build/logs/phpunit.junit.xml
 
 ci-infection: ci-phpunit
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
@@ -68,9 +67,9 @@ ci-infection: ci-phpunit
 ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 
-ci-phpstan: ci-cs .phpstan.neon
-	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
-	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
+ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon
+       $(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
+       $(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
 
 ci-psalm: ci-cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
@@ -82,15 +81,18 @@ ci-cs: prerequisites
 # Development Workflow                                       #
 ##############################################################
 
-test: phpunit analyze composer-validate
+.PHONY: test
+test: analyze phpunit composer-validate yamllint
 
 .PHONY: composer-validate
 composer-validate: test-prerequisites
 	$(SILENT) $(COMPOSER) validate --strict
 	$(SILENT) $(COMPOSER) normalize --diff --dry-run
 
+.PHONY: test-prerequisites
 test-prerequisites: prerequisites composer.lock
 
+.PHONY: phpunit
 phpunit: cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
 	cp build/logs/junit.xml build/logs/phpunit.junit.xml
@@ -131,6 +133,10 @@ build/cache:
 .PHONY: report-php-version
 report-php-version:
 	# Using $(PHP)
+
+.PHONY: yamllint
+yamllint:
+	find .github/workflows/ -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
 
 ##############################################################
 # Quick development testing procedure                        #
