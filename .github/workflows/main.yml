@@ -13,9 +13,12 @@ jobs:
 
     strategy:
       matrix:
-        php-version: ['7.1', '7.2', '7.3', '7.4', '8.0']
+        php-version: ['7.1', '7.2', '7.3', '7.4']
+        dependencies: ['']
+        include:
+          - { php-version: '8.0', dependencies: '--ignore-platform-req=php' }
 
-    name: CI on PHP ${{ matrix.php-version }}
+    name: CI on PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
 
     steps:
       - name: Checkout code
@@ -39,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer update --prefer-dist --no-interaction --no-progress
+          composer update --prefer-dist --no-interaction --no-progress ${{ matrix.dependencies }}
 
       - name: Execute tests
         run: |

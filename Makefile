@@ -68,8 +68,8 @@ ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 
 ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon
-       $(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
-       $(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
 
 ci-psalm: ci-cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
