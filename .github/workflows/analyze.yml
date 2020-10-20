@@ -42,10 +42,14 @@ jobs:
         run: |
           composer update --prefer-dist --no-interaction --no-progress
 
-      - name: Static Analysis
-        run: |
-          make ci-analyze --keep-going
-
       - name: Validate composer.json
         run: |
           make composer-validate
+
+      - name: Validate YAML files
+        run: |
+          make yamllint
+
+      - name: Static Analysis
+        run: |
+          make ci-analyze --keep-going

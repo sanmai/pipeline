@@ -1,3 +1,5 @@
+# yamllint disable rule:line-length
+
 language: php
 php:
   - 7.1

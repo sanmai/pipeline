@@ -82,7 +82,7 @@ ci-cs: prerequisites
 ##############################################################
 
 .PHONY: test
-test: analyze phpunit composer-validate yamllint
+test: analyze phpunit infection composer-validate yamllint
 
 .PHONY: composer-validate
 composer-validate: test-prerequisites
@@ -95,15 +95,28 @@ test-prerequisites: prerequisites composer.lock
 .PHONY: phpunit
 phpunit: cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
-	cp build/logs/junit.xml build/logs/phpunit.junit.xml
+
+.PHONY: infection
+infection: phpunit
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
-analyze: cs .phpstan.neon psalm.xml
+.PHONY: analyze
+analyze: phan phpstan psalm
+
+.PHONY: phan
+phan: cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
+
+.PHONY: phpstan
+phpstan: cs .phpstan.src.neon .phpstan.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC)
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS)
+
+.PHONY: psalm
+psalm: cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
 
+.PHONY: cs
 cs: test-prerequisites
 	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --diff fix
 
@@ -136,13 +149,14 @@ report-php-version:
 
 .PHONY: yamllint
 yamllint:
-	find .github/workflows/ -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
+	@find .github/ -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
+	@find . -maxdepth 1 -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
 
 ##############################################################
 # Quick development testing procedure                        #
 ##############################################################
 
-PHP_VERSIONS=php7.0 php7.2
+PHP_VERSIONS=php7.1 php7.2 php7.3 php7.4
 
 .PHONY: quick
 quick:
@@ -153,4 +167,8 @@ test-all: $(PHP_VERSIONS)
 
 .PHONY: $(PHP_VERSIONS)
 $(PHP_VERSIONS): cs
-	@make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true
+	@if command -v $@; then make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true phpunit; fi
+
+.PHONY: docs
+docs:
+	mkdocs serve
