@@ -1,28 +1,11 @@
+# yamllint disable rule:line-length
+
 language: php
 php:
   - 7.1
-  - 7.2
-  - 7.3
-  - 7.4
-  - nightly
-
-stages:
-  - analyze
-  - test
 
 jobs:
   fast_finish: true
-  allow_failures:
-  include:
-    - stage: analyze
-      php: 7.3
-      install:
-        - pecl install ast
-        - phpenv config-rm xdebug.ini
-        - composer install --prefer-dist
-      script:
-        - make ci-analyze --keep-going
-        - composer validate
 
 cache:
   directories:
@@ -31,12 +14,10 @@ cache:
     - build/cache
 
 install:
-  - phpenv config-rm xdebug.ini || true
   - composer remove --no-update --dev
       phan/phan phpstan/phpstan vimeo/psalm
       infection/infection friendsofphp/php-cs-fixer
-  - if [[ $TRAVIS_PHP_VERSION = nightly ]]; then export COMPOSER_FLAGS="--ignore-platform-reqs"; fi
-  - travis_retry composer install --prefer-dist $COMPOSER_FLAGS
+  - travis_retry composer install --prefer-dist --no-interaction --no-progress
 
 script:
   - make ci-test --keep-going

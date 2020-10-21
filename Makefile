@@ -1,8 +1,8 @@
 .PHONY: ci test prerequisites
 
 # Use any most recent PHP version
-PHP=$(shell which php)
-PHPDBG=phpdbg -qrr
+PHP=$(shell which php7.4 || which php7.3 || which php7.2 || which php7.1 || which php)
+PHPDBG=$(shell which phpdbg && echo -qrr || echo php)
 
 # Default parallelism
 JOBS=$(shell nproc)
@@ -53,14 +53,13 @@ all: test
 
 ci-test: SILENT=
 ci-test: prerequisites
-	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP)
+	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --verbose --group=$(PHPUNIT_GROUP)
 
 ci-analyze: SILENT=
 ci-analyze: prerequisites ci-phpunit ci-infection ci-phan ci-phpstan ci-psalm
 
 ci-phpunit: ci-cs
-	$(SILENT) $(PHPDBG) $(PHPUNIT) $(PHPUNIT_ARGS)
-	cp build/logs/junit.xml build/logs/phpunit.junit.xml
+	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
 
 ci-infection: ci-phpunit
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
@@ -68,7 +67,7 @@ ci-infection: ci-phpunit
 ci-phan: ci-cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS)
 
-ci-phpstan: ci-cs .phpstan.neon
+ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
 
@@ -82,25 +81,42 @@ ci-cs: prerequisites
 # Development Workflow                                       #
 ##############################################################
 
-test: phpunit analyze composer-validate
+.PHONY: test
+test: analyze phpunit infection composer-validate yamllint
 
 .PHONY: composer-validate
 composer-validate: test-prerequisites
 	$(SILENT) $(COMPOSER) validate --strict
+	$(SILENT) $(COMPOSER) normalize --diff --dry-run
 
+.PHONY: test-prerequisites
 test-prerequisites: prerequisites composer.lock
 
+.PHONY: phpunit
 phpunit: cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
-	cp build/logs/junit.xml build/logs/phpunit.junit.xml
+
+.PHONY: infection
+infection: phpunit
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
-analyze: cs .phpstan.neon psalm.xml
+.PHONY: analyze
+analyze: phan phpstan psalm
+
+.PHONY: phan
+phan: cs
 	$(SILENT) $(PHP) $(PHAN) $(PHAN_ARGS) --color
+
+.PHONY: phpstan
+phpstan: cs .phpstan.src.neon .phpstan.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC)
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS)
+
+.PHONY: psalm
+psalm: cs psalm.xml
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
 
+.PHONY: cs
 cs: test-prerequisites
 	$(SILENT) $(PHP) $(PHP_CS_FIXER) $(PHP_CS_FIXER_ARGS) --diff fix
 
@@ -131,11 +147,16 @@ build/cache:
 report-php-version:
 	# Using $(PHP)
 
+.PHONY: yamllint
+yamllint:
+	@find .github/ -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
+	@find . -maxdepth 1 -name \*.y*ml -print0 | xargs -n 1 -0 yamllint --no-warnings
+
 ##############################################################
 # Quick development testing procedure                        #
 ##############################################################
 
-PHP_VERSIONS=php7.0 php7.2
+PHP_VERSIONS=php7.1 php7.2 php7.3 php7.4
 
 .PHONY: quick
 quick:
@@ -146,4 +167,8 @@ test-all: $(PHP_VERSIONS)
 
 .PHONY: $(PHP_VERSIONS)
 $(PHP_VERSIONS): cs
-	@make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true
+	@if command -v $@; then make --no-print-directory PHP=$@ PHP_CS_FIXER=/bin/true phpunit; fi
+
+.PHONY: docs
+docs:
+	mkdocs serve
