@@ -26,6 +26,11 @@
     "config": {
         "sort-packages": true
     },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "5.x-dev"
+        }
+    },
     "autoload": {
         "psr-4": {
             "Pipeline\\": "src/"
