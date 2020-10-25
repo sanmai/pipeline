@@ -101,9 +101,6 @@ final class LazinessTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    /**
-     * @requires PHP < 8.0
-     */
     public function testLazyIterator(): void
     {
         $spy = $this->createMock(\ArrayIterator::class);
@@ -120,9 +117,6 @@ final class LazinessTest extends TestCase
         })->filter();
     }
 
-    /**
-     * @requires PHP < 8.0
-     */
     public function testLazyIteratorYieldFrom(): void
     {
         $spy = $this->createMock(\ArrayIterator::class);
@@ -141,9 +135,6 @@ final class LazinessTest extends TestCase
         })->filter();
     }
 
-    /**
-     * @requires PHP < 8.0
-     */
     public function testLazyIteratorReturn(): void
     {
         $spy = $this->createMock(\ArrayIterator::class);
