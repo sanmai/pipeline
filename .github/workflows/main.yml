@@ -20,6 +20,7 @@ jobs:
         dependencies: ['']
         include:
           - { php-version: '8.0', dependencies: '--ignore-platform-req=php' }
+          - { php-version: '8.1', dependencies: '--ignore-platform-req=php' }
 
     steps:
       - name: Checkout code
