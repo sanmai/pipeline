@@ -16,11 +16,13 @@ jobs:
 
     strategy:
       matrix:
-        php-version: ['7.1', '7.2', '7.3', '7.4', 'latest']
+        php-version: ['7.2', '7.3', '7.4', 'latest']
+        coverage: ['pcov']
         dependencies: ['']
         include:
-          - { php-version: '8.0', dependencies: '--ignore-platform-req=php' }
-          - { php-version: '8.1', dependencies: '--ignore-platform-req=php' }
+          - { php-version: '7.1', coverage: 'xdebug', dependencies: '--ignore-platform-req=php' }
+          - { php-version: '8.0', coverage: 'pcov', dependencies: '--ignore-platform-req=php' }
+          - { php-version: '8.1', coverage: 'pcov', dependencies: '--ignore-platform-req=php' }
 
     steps:
       - name: Checkout code
@@ -30,14 +32,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: pcov
+          coverage: ${{ matrix.coverage }}
           tools: composer:v2
 
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: ~/.cache/composer
-          key: composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.*') }}
+          key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
           restore-keys: |
             composer-${{ matrix.php-version }}-
             composer-
@@ -109,7 +111,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/composer
-          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('**/composer.*') }}
+          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
           restore-keys: |
             composer-${{ env.PHP_VERSION }}-
             composer-
