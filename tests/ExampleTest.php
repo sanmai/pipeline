@@ -37,6 +37,7 @@ final class ExampleTest extends TestCase
         $arrayResult = null;
 
         \ob_start();
+
         include 'example.php';
         \ob_end_clean();
 
