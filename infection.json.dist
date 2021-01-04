@@ -11,7 +11,6 @@
         "NotIdenticalNotEqual": false
     },
     "logs": {
-        "text": "infection-log.txt",
         "badge": {"branch": "v5.x"}
     }
 }
