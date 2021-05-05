@@ -28,6 +28,7 @@ final class Standard extends Principal implements Interfaces\StandardPipeline
      * {@inheritdoc}
      *
      * @param ?callable $func {@inheritdoc}
+     * @psalm-suppress InvalidArgument
      *
      * @return $this
      */

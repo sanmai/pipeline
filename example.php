@@ -24,14 +24,14 @@ use function Pipeline\take;
 
 // iterable corresponds to arrays, generators, iterators
 // we use an array here simplicity sake
-$iterable = \range(5, 7);
+$iterable = range(5, 7);
 
 // wrap the initial iterable with a pipeline
 $pipeline = take($iterable);
 
 // join side by side with other iterables of any type
 $pipeline->zip(
-    \range(1, 3),
+    range(1, 3),
     map(function () {
         yield 1;
         yield 2;
@@ -84,11 +84,11 @@ $value = $pipeline->reduce(function ($carry, $valuetem) {
     return $carry + $valuetem;
 }, 0);
 
-\var_dump($value);
+var_dump($value);
 // int(104)
 
 $sum = take([1, 2, 3])->reduce();
-\var_dump($sum);
+var_dump($sum);
 // int(6)
 
 // now with League\Pipeline
@@ -101,8 +101,8 @@ $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
 $pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
-$result = \iterator_to_array($pipeline);
-\var_dump($result);
+$result = iterator_to_array($pipeline);
+var_dump($result);
 // array(3) {
 //   [0] =>
 //     int(22)
@@ -126,7 +126,7 @@ $pipeline->map(function ($value) {
 });
 
 $arrayResult = $pipeline->toArray();
-\var_dump($arrayResult);
+var_dump($arrayResult);
 // Since keys are discarded we get:
 // array(4) {
 //     [0] =>

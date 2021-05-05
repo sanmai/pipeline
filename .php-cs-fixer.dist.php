@@ -33,16 +33,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 EOF;
 
-return PhpCsFixer\Config::create()
+$config = new PhpCsFixer\Config();
+$config
     ->setRiskyAllowed(true)
     ->setRules([
-        'header_comment' => ['commentType' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
+        'header_comment' => ['comment_type' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
 
-        '@Symfony' => true,
         '@Symfony:risky' => true,
-        '@PHP71Migration' => true,
         '@PHP71Migration:risky' => true,
-        '@PHPUnit60Migration:risky' => true,
         '@PHPUnit75Migration:risky' => true,
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
@@ -51,7 +49,7 @@ return PhpCsFixer\Config::create()
         'phpdoc_to_comment' => false,
         'strict_comparison' => true,
         'comment_to_phpdoc' => true,
-        'native_function_invocation' => true,
+        'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'namespaced'],
         'php_unit_test_case_static_method_calls' => false,
         'yoda_style' => true,
     ])
@@ -61,3 +59,5 @@ return PhpCsFixer\Config::create()
             ->append([__FILE__])
     )
 ;
+
+return $config;

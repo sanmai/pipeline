@@ -31,7 +31,7 @@ use function Pipeline\fromArray;
  */
 final class BenchTest extends TestCase
 {
-    const ITER_MAX = 100;
+    public const ITER_MAX = 100;
 
     /**
      * @dataProvider provideCases
