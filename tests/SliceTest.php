@@ -71,7 +71,7 @@ final class SliceTest extends TestCase
 
         $this->assertSame(
             [2, 3, 4, 5],
-            $example()->slice(1, -1)->toArray(true)
+            $example()->slice(1, -1)->toArray()
         );
     }
 
