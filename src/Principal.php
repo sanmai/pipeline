@@ -211,7 +211,7 @@ abstract class Principal implements \IteratorAggregate, \Countable
      *
      * This is a terminal operation.
      *
-     * @see Countable::count()
+     * @see \Countable::count()
      */
     public function count(): int
     {
