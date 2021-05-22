@@ -45,7 +45,7 @@ jobs:
             composer-
 
       - name: Set package version for Composer
-        uses: "ergebnis/composer-root-version-action@main"
+        uses: ergebnis/composer-root-version-action@0.2.1
         with:
           branch: "main"
 
@@ -123,6 +123,11 @@ jobs:
           restore-keys: |
             composer-${{ env.PHP_VERSION }}-
             composer-
+
+      - name: Set package version for Composer
+        uses: ergebnis/composer-root-version-action@0.2.1
+        with:
+          branch: "main"
 
       - name: Install dependencies
         run: |
