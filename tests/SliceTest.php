@@ -201,6 +201,8 @@ final class SliceTest extends TestCase
 
             [0, PHP_INT_MAX],
             [0, -PHP_INT_MAX],
+            [PHP_INT_MAX, 0],
+            [-PHP_INT_MAX, 0],
         ];
 
         foreach ($inputs as $array) {
