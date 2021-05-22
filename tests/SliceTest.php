@@ -31,6 +31,91 @@ use Pipeline\Standard;
  */
 final class SliceTest extends TestCase
 {
+    public function testSliceExample(): void
+    {
+        $example = static function () {
+            return map(static function () {
+                yield from [1, 2, 3, 4, 5, 6];
+            });
+        };
+
+        $this->assertSame(
+            [3, 4, 5],
+            $example()->slice(2, 3)->toArray()
+        );
+
+        $this->assertSame(
+            [6],
+            $example()->slice(5, 200)->toArray()
+        );
+
+        $this->assertSame(
+            [],
+            $example()->slice(15, 200)->toArray()
+        );
+
+        $this->assertSame(
+            [5, 6],
+            $example()->slice(-2)->toArray()
+        );
+
+        $this->assertSame(
+            [2, 3, 4],
+            $example()->slice(-5, -2)->toArray()
+        );
+
+        $this->assertSame(
+            [1, 2, 3],
+            $example()->slice(0, -3)->toArray()
+        );
+    }
+
+    public function testSliceExampleWithKeys(): void
+    {
+        $example = static function () {
+            return map(static function () {
+                yield from ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6];
+            });
+        };
+
+        $this->assertSame(
+            ['c' => 3, 'd' => 4, 'e' => 5],
+            $example()->slice(2, 3)->toArray(true)
+        );
+
+        $this->assertSame(
+            ['f' => 6],
+            $example()->slice(5, 200)->toArray(true)
+        );
+
+        $this->assertSame(
+            [],
+            $example()->slice(15, 200)->toArray(true)
+        );
+
+        $this->assertSame(
+            ['e' => 5, 'f' => 6],
+            $example()->slice(-2)->toArray(true)
+        );
+
+        $this->assertSame(
+            ['b' => 2, 'c' => 3, 'd' => 4],
+            $example()->slice(-5, -2)->toArray(true)
+        );
+
+        $this->assertSame(
+            ['a' => 1, 'b' => 2, 'c' => 3],
+            $example()->slice(0, -3)->toArray(true)
+        );
+    }
+
+    public function testSliceNil(): void
+    {
+        $pipeline = new Standard();
+
+        $this->assertSame([], $pipeline->slice(0)->toArray());
+    }
+
     public static function specimens(): iterable
     {
         yield [
@@ -110,6 +195,7 @@ final class SliceTest extends TestCase
 
         foreach ($inputs as $array) {
             foreach ($argsList as $args) {
+                // First with keys:
                 $args = $args + [null, null, true];
 
                 yield \array_merge(
@@ -117,6 +203,7 @@ final class SliceTest extends TestCase
                     $args
                 );
 
+                // Now without keys:
                 $args[2] = false;
 
                 yield \array_merge(
@@ -161,70 +248,6 @@ final class SliceTest extends TestCase
                 $this->markTestIncomplete();
             }
         }
-    }
-
-    public function testSliceExample(): void
-    {
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [3, 4, 5],
-            $pipeline->slice(2, 3)->toArray()
-        );
-
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [6],
-            $pipeline->slice(5, 200)->toArray()
-        );
-
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [],
-            $pipeline->slice(15, 200)->toArray()
-        );
-
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [5, 6],
-            $pipeline->slice(-2)->toArray()
-        );
-
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [2, 3, 4],
-            $pipeline->slice(-5, -2)->toArray()
-        );
-
-        $pipeline = map(static function () {
-            yield from [1, 2, 3, 4, 5, 6];
-        });
-
-        $this->assertSame(
-            [1, 2, 3],
-            $pipeline->slice(0, -3)->toArray()
-        );
-    }
-
-    public function testSliceNil(): void
-    {
-        $pipeline = new Standard();
-
-        $this->assertSame([], $pipeline->slice(0)->toArray());
     }
 
     public function testNoopZeroOffset(): void
