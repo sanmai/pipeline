@@ -67,6 +67,18 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function filter(?callable $func = null);
 
     /**
+     * Extracts a slice from the inputs. Keys are not discarded intentionally.
+     *
+     * @see \array_slice()
+     *
+     * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
+     * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
+     *
+     * @return $this
+     */
+    public function slice(int $offset, ?int $length = null);
+
+    /**
      * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
      * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
