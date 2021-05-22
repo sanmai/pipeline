@@ -68,6 +68,11 @@ final class SliceTest extends TestCase
             [1, 2, 3],
             $example()->slice(0, -3)->toArray()
         );
+
+        $this->assertSame(
+            [2, 3, 4, 5],
+            $example()->slice(1, -1)->toArray(true)
+        );
     }
 
     public function testSliceExampleWithKeys(): void
@@ -106,6 +111,11 @@ final class SliceTest extends TestCase
         $this->assertSame(
             ['a' => 1, 'b' => 2, 'c' => 3],
             $example()->slice(0, -3)->toArray(true)
+        );
+
+        $this->assertSame(
+            ['b' => 2, 'c' => 3, 'd' => 4, 'e' => 5],
+            $example()->slice(1, -1)->toArray(true)
         );
     }
 
