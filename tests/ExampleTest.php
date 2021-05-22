@@ -44,6 +44,6 @@ final class ExampleTest extends TestCase
         $this->assertSame(104, $value);
         $this->assertSame(6, $sum);
         $this->assertSame([22, 42, 62], $result);
-        $this->assertSame([2, 3, 3, 4], $arrayResult);
+        $this->assertSame([3, 3], $arrayResult);
     }
 }

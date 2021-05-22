@@ -125,16 +125,15 @@ $pipeline->map(function ($value) {
     yield $value + 2;
 });
 
+// remove first and last elements
+$pipeline->slice(1, -1);
+
 $arrayResult = $pipeline->toArray();
 var_dump($arrayResult);
 // Since keys are discarded we get:
 // array(4) {
 //     [0] =>
-//     int(2)
+//     int(3)
 //     [1] =>
 //     int(3)
-//     [2] =>
-//     int(3)
-//     [3] =>
-//     int(4)
 // }
