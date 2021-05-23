@@ -234,6 +234,133 @@ abstract class Principal implements \IteratorAggregate, \Countable
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return $this
+     */
+    public function slice(int $offset, ?int $length = null)
+    {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just move along.
+            return $this;
+        }
+
+        if (0 === $length) {
+            // We're not consuming anything assuming total laziness.
+            $this->pipeline = null;
+
+            return $this;
+        }
+
+        // Shortcut to array_slice() for actual arrays.
+        if (\is_array($this->pipeline)) {
+            $this->pipeline = \array_slice($this->pipeline, $offset, $length, true);
+
+            return $this;
+        }
+
+        if ($offset < 0) {
+            // If offset is negative, the sequence will start that far from the end of the array.
+            $this->pipeline = self::tail($this->pipeline, -$offset);
+        }
+
+        if ($offset > 0) {
+            // @infection-ignore-all
+            \assert($this->pipeline instanceof \Iterator);
+
+            // If offset is non-negative, the sequence will start at that offset in the array.
+            $this->pipeline = self::skip($this->pipeline, $offset);
+        }
+
+        if ($length < 0) {
+            // If length is given and is negative then the sequence will stop that many elements from the end of the array.
+            $this->pipeline = self::head($this->pipeline, -$length);
+        }
+
+        if ($length > 0) {
+            // If length is given and is positive, then the sequence will have up to that many elements in it.
+            $this->pipeline = self::take($this->pipeline, $length);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @psalm-param positive-int $skip
+     */
+    private static function skip(\Iterator $input, int $skip): iterable
+    {
+        // Consume until seen enough.
+        foreach ($input as $_) {
+            if (0 === $skip--) {
+                break;
+            }
+        }
+
+        // Avoid yielding from an exhausted generator. Gives error:
+        // Generator passed to yield from was aborted without proper return and is unable to continue
+        if (!$input->valid()) {
+            return;
+        }
+
+        yield from $input;
+    }
+
+    /**
+     * @psalm-param positive-int $take
+     */
+    private static function take(iterable $input, int $take): iterable
+    {
+        foreach ($input as $key => $value) {
+            yield $key => $value;
+
+            // Stop once taken enough.
+            if (0 === --$take) {
+                break;
+            }
+        }
+    }
+
+    private static function tail(iterable $input, int $length): iterable
+    {
+        $buffer = [];
+
+        foreach ($input as $key => $value) {
+            if (\count($buffer) < $length) {
+                // Read at most N records.
+                $buffer[] = [$key, $value];
+
+                continue;
+            }
+
+            // Remove and add one record each time.
+            \array_shift($buffer);
+            $buffer[] = [$key, $value];
+        }
+
+        foreach ($buffer as list($key, $value)) {
+            yield $key => $value;
+        }
+    }
+
+    /**
+     * Allocates a buffer of $length, and reads records into it, proceeding with FIFO when buffer is full.
+     */
+    private static function head(iterable $input, int $length): iterable
+    {
+        $buffer = [];
+
+        foreach ($input as $key => $value) {
+            $buffer[] = [$key, $value];
+
+            if (\count($buffer) > $length) {
+                [$key, $value] = \array_shift($buffer);
+                yield $key => $value;
+            }
+        }
+    }
+
+    /**
      * @param mixed $initial
      *
      * @return ?mixed

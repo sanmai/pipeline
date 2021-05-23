@@ -112,6 +112,7 @@ All entry points always return an instance of a standard pipeline.
 | `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
 | `reduce()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface as per LSP. |     |
@@ -327,6 +328,17 @@ $pipeline->filter(function ($item) {
 
 Standard pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
+## `$pipeline->slice()`
+
+Takes offset and length arguments, functioning in a very similar fashion to how `array_slice` does with `$preserve_keys` set to true.
+
+```php
+$pipeline->slice(1, -1);
+```
+This example will remove first and last elements of the sequence.
+
+Implementation uses a rolling window buffer for negative values of offset and length, and falls back on plain old `array_slice` for input arrays.
+
 ## `$pipeline->reduce()`
 
 Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item.
@@ -393,7 +405,7 @@ What else is out there:
 
 - [Pipe operator from Hack](https://docs.hhvm.com/hack/operators/pipe-operator) is about same, only won't work for generators, and not under the regular PHP. [See a proposal for a similar operator for JavaScript.](https://github.com/tc39/proposal-pipeline-operator)
 
-- [Iteration primitives using generators](https://github.com/nikic/iter) provide functions like array_map and such, but returning lazy generators. You'll need quite some glue to accomplish the same thing Pipeline does out of box.
+- [`nikic/iter`](https://github.com/nikic/iter) provides functions like array_map and such, but returning lazy generators. You'll need quite some glue to accomplish the same thing Pipeline does out of box, not to mention some missing features.
 
 - [League\Pipeline](https://github.com/thephpleague/pipeline) is good for single values only. Similar name, but very different purpose. Not supposed to work with sequences of values. Each stage may return only one value.
 
