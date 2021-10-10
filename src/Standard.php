@@ -23,14 +23,13 @@ namespace Pipeline;
  * Concrete pipeline with sensible default callbacks.
  *
  * @final
- * @phan-suppress PhanAccessClassInternal
  */
-class Standard extends Principal implements Interfaces\StandardPipeline
+class Standard extends Principal
 {
     /**
-     * {@inheritdoc}
+     * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func
      * @psalm-suppress InvalidArgument
      *
      * @return $this
@@ -47,11 +46,11 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func a callback must either return a value or yield values (return a generator)
      *
      * @return $this
      */
@@ -65,11 +64,11 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func a callback must return a value
      *
      * @return $this
      */
@@ -83,7 +82,9 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Removes elements unless a callback returns true.
+     *
+     * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @param ?callable $func {@inheritdoc}
      *
@@ -107,12 +108,12 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
-     * @param ?callable $func    {@inheritdoc}
-     * @param ?mixed    $initial {@inheritdoc}
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param ?mixed    $initial initial value for a $carry
      *
-     * @return mixed
+     * @return ?mixed
      */
     public function reduce(?callable $func = null, $initial = null)
     {
@@ -120,10 +121,10 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
      *
-     * @param mixed     $initial {@inheritdoc}
-     * @param ?callable $func    {@inheritdoc}
+     * @param mixed     $initial initial value for a $carry
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
      * @return ?mixed
      */
