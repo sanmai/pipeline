@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -49,7 +50,7 @@ final class CountTest extends TestCase
 
     public function testCountNonEmptyIterator(): void
     {
-        $this->assertCount(3, take(new \ArrayIterator([1, 2, 3])));
+        $this->assertCount(3, take(new ArrayIterator([1, 2, 3])));
     }
 
     public function testCountValues(): void

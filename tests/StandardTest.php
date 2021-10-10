@@ -19,10 +19,18 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use BadMethodCallException;
+use function call_user_func;
+use function iterator_count;
+use function iterator_to_array;
+use function max;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
+use function range;
+use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
@@ -33,19 +41,19 @@ final class StandardTest extends TestCase
 {
     public function testEmpty(): void
     {
-        $this->assertSame([], \iterator_to_array(new Standard()));
+        $this->assertSame([], iterator_to_array(new Standard()));
 
         $pipeline = new Standard();
         $this->assertSame([], $pipeline->toArray());
 
-        $this->assertSame(0, \iterator_count(new Standard()));
+        $this->assertSame(0, iterator_count(new Standard()));
     }
 
     public function testEmptyPHPUnitWise(): void
     {
         try {
             $this->assertCount(0, new Standard());
-        } catch (\BadMethodCallException $e) {
+        } catch (BadMethodCallException $e) {
             $this->markTestIncomplete($e->getMessage());
         }
     }
@@ -55,12 +63,12 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 3) as $i) {
+            foreach (range(1, 3) as $i) {
                 yield $i;
             }
         });
 
-        $this->assertSame([1, 2, 3], \iterator_to_array($pipeline));
+        $this->assertSame([1, 2, 3], iterator_to_array($pipeline));
     }
 
     public function testDouble(): void
@@ -68,7 +76,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 3) as $i) {
+            foreach (range(1, 3) as $i) {
                 yield $i;
             }
         });
@@ -84,7 +92,7 @@ final class StandardTest extends TestCase
 
     public function testTriple(): void
     {
-        $pipeline = new Standard(new \ArrayIterator(\range(1, 3)));
+        $pipeline = new Standard(new ArrayIterator(range(1, 3)));
 
         $pipeline->map(function ($i) {
             yield $i ** 2;
@@ -114,7 +122,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 100) as $i) {
+            foreach (range(1, 100) as $i) {
                 yield $i;
             }
         });
@@ -124,7 +132,7 @@ final class StandardTest extends TestCase
         });
 
         $pipeline->map(function ($i) {
-            yield \max(0, $i - 50);
+            yield max(0, $i - 50);
         });
 
         $pipeline->filter();
@@ -137,7 +145,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 10) as $i) {
+            foreach (range(1, 10) as $i) {
                 yield $i;
             }
         });
@@ -152,7 +160,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 10) as $i) {
+            foreach (range(1, 10) as $i) {
                 yield $i * 1.05;
             }
         });
@@ -182,7 +190,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            foreach (\range(1, 10) as $i) {
+            foreach (range(1, 10) as $i) {
                 yield $i;
             }
         });
@@ -215,7 +223,7 @@ final class StandardTest extends TestCase
 
     public function testMeaningless(): void
     {
-        $pipeline = new Standard(new \ArrayIterator([]));
+        $pipeline = new Standard(new ArrayIterator([]));
 
         $pipeline->map(function ($i) {
             $this->fail();
@@ -228,7 +236,7 @@ final class StandardTest extends TestCase
 
     public function testPipelineInPipeline(): void
     {
-        $pipeline1 = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $pipeline1 = new Standard(new ArrayIterator([2, 3, 5, 7, 11]));
         $pipeline1->map(function ($prime) {
             yield $prime;
             yield $prime * 2;
@@ -244,7 +252,7 @@ final class StandardTest extends TestCase
 
     public function testFiltersPipeline(): void
     {
-        $input = new Standard(new \ArrayIterator([2, 3, 5, 7, 11]));
+        $input = new Standard(new ArrayIterator([2, 3, 5, 7, 11]));
         $input->map(function ($prime) {
             yield $prime;
             yield $prime * 2;
@@ -279,17 +287,17 @@ final class StandardTest extends TestCase
             return $value * 2;
         };
 
-        $this->assertSame(8, \call_user_func($this->double, 4));
+        $this->assertSame(8, call_user_func($this->double, 4));
 
         $this->plusone = function ($value) {
             yield $value;
             yield $value + 1;
         };
 
-        $this->assertSame([4, 5], \iterator_to_array(\call_user_func($this->plusone, 4)));
+        $this->assertSame([4, 5], iterator_to_array(call_user_func($this->plusone, 4)));
 
         // initial generator
-        $sourceData = new \ArrayIterator(\range(1, 5));
+        $sourceData = new ArrayIterator(range(1, 5));
 
         $pipeline = new \Pipeline\Standard($sourceData);
         $pipeline->map($this->double);
@@ -304,7 +312,7 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            return \range(1, 3);
+            return range(1, 3);
         })->unpack(function ($a, $b, $c) {
             yield $a;
             yield $b;
@@ -323,7 +331,7 @@ final class StandardTest extends TestCase
             return $i;
         });
 
-        $this->assertSame([52, 104], \iterator_to_array($pipeline));
+        $this->assertSame([52, 104], iterator_to_array($pipeline));
     }
 
     public function testMapNoop(): void
@@ -331,15 +339,15 @@ final class StandardTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->map(function () {
-            return \range(1, 3);
+            return range(1, 3);
         })->unpack()->map()->map()->map();
 
-        $this->assertSame(\range(1, 3), \iterator_to_array($pipeline));
+        $this->assertSame(range(1, 3), iterator_to_array($pipeline));
     }
 
     public function testNotFinal(): void
     {
-        $reflector = new \ReflectionClass(Standard::class);
+        $reflector = new ReflectionClass(Standard::class);
         $this->assertFalse($reflector->isFinal());
     }
 

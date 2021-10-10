@@ -19,10 +19,12 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use Generator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use Pipeline\Standard;
 use function Pipeline\take;
+use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
@@ -31,7 +33,7 @@ use function Pipeline\take;
  */
 final class EagerWithArraysTest extends TestCase
 {
-    public static function specimens(): \Generator
+    public static function specimens(): Generator
     {
         yield 'take' => [take([0, 0, 1, 2, 3])];
         yield 'fromArray' => [fromArray([0, 0, 1, 2, 3])];
@@ -42,7 +44,7 @@ final class EagerWithArraysTest extends TestCase
      */
     public function testEagerArrayFilter(Standard $pipeline): void
     {
-        $reflectionClass = new \ReflectionClass(Standard::class);
+        $reflectionClass = new ReflectionClass(Standard::class);
         $reflectionProperty = $reflectionClass->getProperty('pipeline');
         $reflectionProperty->setAccessible(true);
 

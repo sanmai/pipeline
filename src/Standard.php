@@ -19,10 +19,31 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use function array_filter;
+use function array_map;
+use function array_reduce;
+use function array_shift;
+use function array_slice;
+use function array_values;
+use ArrayIterator;
+use function assert;
+use CallbackFilterIterator;
+use function count;
+use Countable;
+use EmptyIterator;
+use Generator;
+use function is_array;
+use function is_iterable;
+use function is_string;
+use Iterator;
+use function iterator_to_array;
+use IteratorAggregate;
+use Traversable;
+
 /**
  * Concrete pipeline with sensible default callbacks.
  */
-class Standard implements \IteratorAggregate, \Countable
+class Standard implements IteratorAggregate, Countable
 {
     /**
      * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
@@ -40,7 +61,7 @@ class Standard implements \IteratorAggregate, \Countable
     {
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
-        while ($input instanceof \IteratorAggregate) {
+        while ($input instanceof IteratorAggregate) {
             $input = $input->getIterator();
         }
 
@@ -82,7 +103,7 @@ class Standard implements \IteratorAggregate, \Countable
         }
 
         // That's the standard case for any next stages.
-        if (\is_iterable($this->pipeline)) {
+        if (is_iterable($this->pipeline)) {
             /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
 
@@ -93,7 +114,7 @@ class Standard implements \IteratorAggregate, \Countable
         $this->pipeline = $func();
 
         // Generator is a generator, moving along
-        if ($this->pipeline instanceof \Generator) {
+        if ($this->pipeline instanceof Generator) {
             // It is possible to detect if callback is a generator like so:
             // (new \ReflectionFunction($func))->isGenerator();
             // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
@@ -118,7 +139,7 @@ class Standard implements \IteratorAggregate, \Countable
             $result = $func($value);
 
             // For generators we use keys they provide
-            if ($result instanceof \Generator) {
+            if ($result instanceof Generator) {
                 yield from $result;
 
                 continue;
@@ -145,13 +166,13 @@ class Standard implements \IteratorAggregate, \Countable
         }
 
         // We got an array, that's what we need. Moving along.
-        if (\is_array($this->pipeline)) {
-            $this->pipeline = \array_map($func, $this->pipeline);
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_map($func, $this->pipeline);
 
             return $this;
         }
 
-        if (\is_iterable($this->pipeline)) {
+        if (is_iterable($this->pipeline)) {
             /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
@@ -199,17 +220,17 @@ class Standard implements \IteratorAggregate, \Countable
         $func = self::resolvePredicate($func);
 
         // We got an array, that's what we need. Moving along.
-        if (\is_array($this->pipeline)) {
-            $this->pipeline = \array_filter($this->pipeline, $func);
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_filter($this->pipeline, $func);
 
             return $this;
         }
 
-        /** @var \Iterator $iterator */
+        /** @var Iterator $iterator */
         $iterator = $this->pipeline;
 
         /** @phan-suppress-next-line PhanTypeMismatchArgumentInternal */
-        $this->pipeline = new \CallbackFilterIterator($iterator, $func);
+        $this->pipeline = new CallbackFilterIterator($iterator, $func);
 
         return $this;
     }
@@ -227,7 +248,7 @@ class Standard implements \IteratorAggregate, \Countable
         }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
-        if (\is_string($func)) {
+        if (is_string($func)) {
             return static function ($value) use ($func) {
                 return $func($value);
             };
@@ -261,8 +282,8 @@ class Standard implements \IteratorAggregate, \Countable
     {
         $func = self::resolveReducer($func);
 
-        if (\is_array($this->pipeline)) {
-            return \array_reduce($this->pipeline, $func, $initial);
+        if (is_array($this->pipeline)) {
+            return array_reduce($this->pipeline, $func, $initial);
         }
 
         foreach ($this as $value) {
@@ -288,17 +309,17 @@ class Standard implements \IteratorAggregate, \Countable
         };
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): Traversable
     {
-        if ($this->pipeline instanceof \Traversable) {
+        if ($this->pipeline instanceof Traversable) {
             return $this->pipeline;
         }
 
         if (null !== $this->pipeline) {
-            return new \ArrayIterator($this->pipeline);
+            return new ArrayIterator($this->pipeline);
         }
 
-        return new \EmptyIterator();
+        return new EmptyIterator();
     }
 
     /**
@@ -317,17 +338,17 @@ class Standard implements \IteratorAggregate, \Countable
         }
 
         // We got what we need, moving along.
-        if (\is_array($this->pipeline)) {
+        if (is_array($this->pipeline)) {
             if ($useKeys) {
                 return $this->pipeline;
             }
 
-            return \array_values($this->pipeline);
+            return array_values($this->pipeline);
         }
 
         // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return \iterator_to_array($this, $useKeys);
+        return iterator_to_array($this, $useKeys);
     }
 
     /**
@@ -349,12 +370,12 @@ class Standard implements \IteratorAggregate, \Countable
             return 0;
         }
 
-        if (!\is_array($this->pipeline)) {
+        if (!is_array($this->pipeline)) {
             // Count values for an iterator.
-            $this->pipeline = \iterator_to_array($this, false);
+            $this->pipeline = iterator_to_array($this, false);
         }
 
-        return \count($this->pipeline);
+        return count($this->pipeline);
     }
 
     /**
@@ -382,8 +403,8 @@ class Standard implements \IteratorAggregate, \Countable
         }
 
         // Shortcut to array_slice() for actual arrays.
-        if (\is_array($this->pipeline)) {
-            $this->pipeline = \array_slice($this->pipeline, $offset, $length, true);
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_slice($this->pipeline, $offset, $length, true);
 
             return $this;
         }
@@ -395,7 +416,7 @@ class Standard implements \IteratorAggregate, \Countable
 
         if ($offset > 0) {
             // @infection-ignore-all
-            \assert($this->pipeline instanceof \Iterator);
+            assert($this->pipeline instanceof Iterator);
 
             // If offset is non-negative, the sequence will start at that offset in the array.
             $this->pipeline = self::skip($this->pipeline, $offset);
@@ -417,7 +438,7 @@ class Standard implements \IteratorAggregate, \Countable
     /**
      * @psalm-param positive-int $skip
      */
-    private static function skip(\Iterator $input, int $skip): iterable
+    private static function skip(Iterator $input, int $skip): iterable
     {
         // Consume until seen enough.
         foreach ($input as $_) {
@@ -455,7 +476,7 @@ class Standard implements \IteratorAggregate, \Countable
         $buffer = [];
 
         foreach ($input as $key => $value) {
-            if (\count($buffer) < $length) {
+            if (count($buffer) < $length) {
                 // Read at most N records.
                 $buffer[] = [$key, $value];
 
@@ -463,7 +484,7 @@ class Standard implements \IteratorAggregate, \Countable
             }
 
             // Remove and add one record each time.
-            \array_shift($buffer);
+            array_shift($buffer);
             $buffer[] = [$key, $value];
         }
 
@@ -482,8 +503,8 @@ class Standard implements \IteratorAggregate, \Countable
         foreach ($input as $key => $value) {
             $buffer[] = [$key, $value];
 
-            if (\count($buffer) > $length) {
-                [$key, $value] = \array_shift($buffer);
+            if (count($buffer) > $length) {
+                [$key, $value] = array_shift($buffer);
                 yield $key => $value;
             }
         }
@@ -498,7 +519,7 @@ class Standard implements \IteratorAggregate, \Countable
     public function zip(iterable ...$inputs)
     {
         if (null === $this->pipeline) {
-            $this->pipeline = \array_shift($inputs);
+            $this->pipeline = array_shift($inputs);
         }
 
         if ([] === $inputs) {
@@ -529,23 +550,23 @@ class Standard implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return \Iterator[]
+     * @return Iterator[]
      */
     private static function toIterators(iterable ...$inputs): array
     {
-        return \array_map(static function (iterable $input): \Iterator {
-            while ($input instanceof \IteratorAggregate) {
+        return array_map(static function (iterable $input): Iterator {
+            while ($input instanceof IteratorAggregate) {
                 $input = $input->getIterator();
             }
 
-            if ($input instanceof \Iterator) {
+            if ($input instanceof Iterator) {
                 return $input;
             }
 
             // IteratorAggregate and Iterator are out of picture, which leaves... an array.
 
             /** @var array $input */
-            return new \ArrayIterator($input);
+            return new ArrayIterator($input);
         }, $inputs);
     }
 }

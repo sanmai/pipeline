@@ -19,8 +19,11 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use Traversable;
 
 /**
  * @covers \Pipeline\Standard
@@ -38,25 +41,25 @@ final class LazinessTest extends TestCase
 
     public function testEagerReturn(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
 
         $pipeline = new Standard();
         $pipeline->map(function (): void {
             // Executed on spot
-            throw new \Exception();
+            throw new Exception();
         });
     }
 
     private function veryExpensiveMethod(): bool
     {
-        throw new \Exception();
+        throw new Exception();
 
         return true;
     }
 
     public function testExpensiveMethod(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
 
         $pipeline = new Standard();
         $pipeline->map(function () {
@@ -68,7 +71,7 @@ final class LazinessTest extends TestCase
     private function failingGenerator()
     {
         // Should never throw if used lazily
-        throw new \Exception();
+        throw new Exception();
         yield;
     }
 
@@ -90,7 +93,7 @@ final class LazinessTest extends TestCase
     {
         $pipeline = new Standard();
         $pipeline->map(function () {
-            throw new \Exception();
+            throw new Exception();
             yield from $this->failingGenerator();
         })->map(function ($value) {
             return $value;
@@ -102,7 +105,7 @@ final class LazinessTest extends TestCase
 
     public function testLazyIterator(): void
     {
-        $spy = $this->createMock(\ArrayIterator::class);
+        $spy = $this->createMock(ArrayIterator::class);
         $spy
             ->expects($this->never())
             ->method('rewind')
@@ -118,7 +121,7 @@ final class LazinessTest extends TestCase
 
     public function testLazyIteratorYieldFrom(): void
     {
-        $spy = $this->createMock(\ArrayIterator::class);
+        $spy = $this->createMock(ArrayIterator::class);
         $spy
             ->expects($this->never())
             ->method('rewind')
@@ -136,7 +139,7 @@ final class LazinessTest extends TestCase
 
     public function testLazyIteratorReturn(): void
     {
-        $spy = $this->createMock(\ArrayIterator::class);
+        $spy = $this->createMock(ArrayIterator::class);
         $spy
             ->expects($this->never())
             ->method('rewind')
@@ -160,7 +163,7 @@ final class LazinessTest extends TestCase
             yield $this->yieldFail();
         });
 
-        $this->assertInstanceOf(\Traversable::class, $pipeline);
+        $this->assertInstanceOf(Traversable::class, $pipeline);
 
         foreach ($pipeline as $value) {
             $this->assertTrue($value);
@@ -171,13 +174,13 @@ final class LazinessTest extends TestCase
 
     public function testFilterLazyOnce(): void
     {
-        $pipeline = new Standard(new \ArrayIterator([true]));
+        $pipeline = new Standard(new ArrayIterator([true]));
         $pipeline->filter(function (): void {
             $this->fail();
         });
 
         $iterator = $pipeline->getIterator();
-        $this->assertInstanceOf(\Traversable::class, $iterator);
+        $this->assertInstanceOf(Traversable::class, $iterator);
     }
 
     public function testUnpackLazyOnce(): void
@@ -188,7 +191,7 @@ final class LazinessTest extends TestCase
             yield $this->yieldFail();
         });
 
-        $this->assertInstanceOf(\Traversable::class, $pipeline);
+        $this->assertInstanceOf(Traversable::class, $pipeline);
 
         foreach ($pipeline as $value) {
             $this->assertTrue($value);

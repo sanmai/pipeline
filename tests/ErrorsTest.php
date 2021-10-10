@@ -19,9 +19,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArgumentCountError;
+use function class_exists;
+use function is_callable;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use TypeError;
 
 /**
  * @covers \Pipeline\Standard
@@ -32,7 +36,7 @@ final class ErrorsTest extends TestCase
 {
     private function expectExceptionFallback(string $exception, string $php70fallback): void
     {
-        if (\class_exists($exception)) {
+        if (class_exists($exception)) {
             $this->expectException($exception);
         } else {
             // fallback for PHP 7.0
@@ -45,7 +49,7 @@ final class ErrorsTest extends TestCase
         // PHP 7.1+ fails with: Too few arguments to function...
         // PHP 7.0 fails with: Missing argument 1 for...
         $this->expectExceptionMessage('argument');
-        $this->expectExceptionFallback(\ArgumentCountError::class, Warning::class);
+        $this->expectExceptionFallback(ArgumentCountError::class, Warning::class);
 
         $pipeline = new Standard();
         $pipeline->map(function ($unused) {
@@ -67,9 +71,9 @@ final class ErrorsTest extends TestCase
             yield [2, 3];
         })->unpack();
 
-        $this->expectException(\TypeError::class);
+        $this->expectException(TypeError::class);
         // Older PHPUnit on 7.1 does not have this method
-        if (\is_callable([$this, 'expectExceptionMessageMatches'])) {
+        if (is_callable([$this, 'expectExceptionMessageMatches'])) {
             $this->expectExceptionMessageMatches('/must .* iterable/');
         }
         $pipeline->toArray();

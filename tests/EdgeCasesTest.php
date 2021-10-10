@@ -19,9 +19,15 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use Iterator;
+use function iterator_to_array;
+use IteratorIterator;
+use NoRewindIterator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
 use Pipeline\Standard;
+use function range;
 
 /**
  * @covers \Pipeline\Standard
@@ -32,10 +38,10 @@ final class EdgeCasesTest extends TestCase
 {
     public function testStandardStringFunctions(): void
     {
-        $pipeline = new Standard(new \ArrayIterator([1, 2, 'foo', 'bar']));
+        $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
         $pipeline->filter('is_int');
 
-        $this->assertSame([1, 2], \iterator_to_array($pipeline));
+        $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
 
     /**
@@ -89,7 +95,7 @@ final class EdgeCasesTest extends TestCase
 
         $this->assertSame([
             'foo' => 'baz',
-        ], \iterator_to_array($pipeline));
+        ], iterator_to_array($pipeline));
 
         $pipeline = \Pipeline\map(function () {
             yield 'foo' => 'bar';
@@ -135,10 +141,10 @@ final class EdgeCasesTest extends TestCase
         $pipeline = new Standard();
         $pipeline->map($this);
 
-        $this->assertSame([null], \iterator_to_array($pipeline));
+        $this->assertSame([null], iterator_to_array($pipeline));
     }
 
-    private function firstValueFromIterator(\Iterator $iterator)
+    private function firstValueFromIterator(Iterator $iterator)
     {
         $iterator->rewind();
 
@@ -152,12 +158,12 @@ final class EdgeCasesTest extends TestCase
             return 42;
         });
 
-        $iterator = new \IteratorIterator($pipeline);
+        $iterator = new IteratorIterator($pipeline);
         // @var $iterator \Iterator
         $this->assertSame(42, $this->firstValueFromIterator($iterator));
 
-        $pipeline = new Standard(new \ArrayIterator([42]));
-        $iterator = new \IteratorIterator($pipeline);
+        $pipeline = new Standard(new ArrayIterator([42]));
+        $iterator = new IteratorIterator($pipeline);
         $this->assertSame(42, $this->firstValueFromIterator($iterator));
     }
 
@@ -179,7 +185,7 @@ final class EdgeCasesTest extends TestCase
 
     public function testIteratorToArrayWithSameKeys(): void
     {
-        $this->assertSame([3, 4], \iterator_to_array($this->pipelineWithNonUniqueKeys()));
+        $this->assertSame([3, 4], iterator_to_array($this->pipelineWithNonUniqueKeys()));
     }
 
     public function testIteratorToArrayWithAllValues(): void
@@ -189,10 +195,10 @@ final class EdgeCasesTest extends TestCase
 
     public function testInvokeMaps(): void
     {
-        $pipeline = new Standard(new \ArrayIterator(\range(1, 5)));
+        $pipeline = new Standard(new ArrayIterator(range(1, 5)));
         $pipeline->map($this);
 
-        $this->assertSame(\range(1, 5), \iterator_to_array($pipeline));
+        $this->assertSame(range(1, 5), iterator_to_array($pipeline));
     }
 
     public function __invoke($default = null)
@@ -202,17 +208,17 @@ final class EdgeCasesTest extends TestCase
 
     public function testIterateAgainDoesNotFail(): void
     {
-        $pipeline = new Standard(new \ArrayIterator(\range(1, 5)));
+        $pipeline = new Standard(new ArrayIterator(range(1, 5)));
         $pipeline->map(function ($value) {
             yield $value;
         });
 
         // NoRewindIterator works around the exception: Cannot traverse an already closed generator
-        $iterator = new \NoRewindIterator($pipeline->getIterator());
+        $iterator = new NoRewindIterator($pipeline->getIterator());
 
-        $this->assertSame(\range(1, 5), \iterator_to_array($iterator, false));
+        $this->assertSame(range(1, 5), iterator_to_array($iterator, false));
 
-        $this->assertSame([], \iterator_to_array($iterator, false));
+        $this->assertSame([], iterator_to_array($iterator, false));
     }
 
     public function testReplaceGenerator(): void

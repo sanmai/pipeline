@@ -19,12 +19,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function array_map;
+use ArrayIterator;
+use function iterator_to_array;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function Pipeline\take;
 use function Pipeline\zip;
+use function range;
 
 /**
  * @covers \Pipeline\fromArray
@@ -43,7 +47,7 @@ final class FunctionsTest extends TestCase
     {
         $pipeline = map();
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame([], \iterator_to_array($pipeline));
+        $this->assertSame([], iterator_to_array($pipeline));
 
         $pipeline = map(function () {
             yield 1;
@@ -62,9 +66,9 @@ final class FunctionsTest extends TestCase
     {
         $pipeline = take();
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame([], \iterator_to_array($pipeline));
+        $this->assertSame([], iterator_to_array($pipeline));
 
-        $pipeline = take(new \ArrayIterator([1, 2, 3]));
+        $pipeline = take(new ArrayIterator([1, 2, 3]));
         $this->assertInstanceOf(Standard::class, $pipeline);
         $this->assertSame(6, $pipeline->reduce());
     }
@@ -82,9 +86,9 @@ final class FunctionsTest extends TestCase
      */
     public function testFromArray(): void
     {
-        $pipeline = fromArray(\range(0, 100));
+        $pipeline = fromArray(range(0, 100));
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame(\range(0, 100), $pipeline->toArray());
+        $this->assertSame(range(0, 100), $pipeline->toArray());
     }
 
     /**
@@ -100,6 +104,6 @@ final class FunctionsTest extends TestCase
         $pipeline = zip(...$array);
         $this->assertInstanceOf(Standard::class, $pipeline);
 
-        $this->assertSame(\array_map(null, ...$array), $pipeline->toArray());
+        $this->assertSame(array_map(null, ...$array), $pipeline->toArray());
     }
 }

@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use Generator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
 use Pipeline\Standard;
@@ -38,7 +39,7 @@ final class CastTest extends TestCase
         foreach (take([1, 2, 3])->cast(function (int $i) {
             yield $i;
         }) as $generator) {
-            $this->assertInstanceOf(\Generator::class, $generator);
+            $this->assertInstanceOf(Generator::class, $generator);
             foreach ($generator as $item) {
                 $result[] = $item;
             }

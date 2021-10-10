@@ -50,6 +50,11 @@ $config
         'strict_comparison' => true,
         'comment_to_phpdoc' => true,
         'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'namespaced'],
+        'global_namespace_import' => [
+            'import_classes' => true,
+            'import_constants' => true,
+            'import_functions' => true,
+        ],
         'php_unit_test_case_static_method_calls' => false,
         'yoda_style' => true,
     ])
