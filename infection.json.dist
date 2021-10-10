@@ -11,6 +11,6 @@
         "NotIdenticalNotEqual": false
     },
     "logs": {
-        "badge": {"branch": "v5.x"}
+        "badge": {"branch": "main"}
     }
 }
