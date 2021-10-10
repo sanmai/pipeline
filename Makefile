@@ -71,7 +71,7 @@ ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
 
-ci-psalm: ci-cs psalm.xml
+ci-psalm: ci-cs psalm.xml.dist
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
 
 ci-cs: prerequisites
@@ -113,7 +113,7 @@ phpstan: cs .phpstan.src.neon .phpstan.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS)
 
 .PHONY: psalm
-psalm: cs psalm.xml
+psalm: cs psalm.xml.dist
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS)
 
 .PHONY: cs
