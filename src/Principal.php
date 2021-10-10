@@ -34,9 +34,11 @@ abstract class Principal implements \IteratorAggregate, \Countable
     /**
      * Contructor with an optional source of data.
      *
+     * @final
+     *
      * @param ?iterable $input
      */
-    final public function __construct(iterable $input = null)
+    public function __construct(iterable $input = null)
     {
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
@@ -234,7 +236,12 @@ abstract class Principal implements \IteratorAggregate, \Countable
     }
 
     /**
-     * {@inheritdoc}
+     * Extracts a slice from the inputs. Keys are not discarded intentionally.
+     *
+     * @see \array_slice()
+     *
+     * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
+     * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
      * @return $this
      */
@@ -414,7 +421,9 @@ abstract class Principal implements \IteratorAggregate, \Countable
         return $this;
     }
 
-    /** @return \Iterator[] */
+    /**
+     * @return \Iterator[]
+     */
     private static function toIterators(iterable ...$inputs): array
     {
         return \array_map(static function (iterable $input): \Iterator {

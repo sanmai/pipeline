@@ -21,8 +21,10 @@ namespace Pipeline;
 
 /**
  * Concrete pipeline with sensible default callbacks.
+ *
+ * @final
  */
-final class Standard extends Principal implements Interfaces\StandardPipeline
+class Standard extends Principal implements Interfaces\StandardPipeline
 {
     /**
      * {@inheritdoc}

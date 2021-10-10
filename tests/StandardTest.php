@@ -338,10 +338,10 @@ final class StandardTest extends TestCase
         $this->assertSame(\range(1, 3), \iterator_to_array($pipeline));
     }
 
-    public function testFinal(): void
+    public function testNotFinal(): void
     {
         $reflector = new \ReflectionClass(Standard::class);
-        $this->assertTrue($reflector->isFinal());
+        $this->assertFalse($reflector->isFinal());
     }
 
     public function testToArrayWithArray(): void
