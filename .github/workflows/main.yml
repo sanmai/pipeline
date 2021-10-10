@@ -73,7 +73,7 @@ jobs:
 
     env:
       PHP_VERSION: 7.4
-      PHP_CS_FIXER_VERSION: v3.0.0
+      PHP_CS_FIXER_VERSION: v3.2.1
 
     steps:
       - name: Checkout
