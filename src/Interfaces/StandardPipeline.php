@@ -79,6 +79,18 @@ interface StandardPipeline extends \IteratorAggregate, \Countable
     public function slice(int $offset, ?int $length = null);
 
     /**
+     * Remove a portion of the inputs and replace it with something else.
+     *
+     * @see \array_splice()
+     *
+     * @param ?int      $length
+     * @param ?iterable $replacement
+     *
+     * @return $this
+     */
+    public function splice(int $offset, ?int $length = null, ?iterable $replacement = null);
+
+    /**
      * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
      * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
