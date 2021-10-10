@@ -23,7 +23,6 @@ use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

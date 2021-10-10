@@ -23,7 +23,6 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

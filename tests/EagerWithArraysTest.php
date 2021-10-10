@@ -21,12 +21,11 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
-use Pipeline\Principal;
 use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
@@ -43,7 +42,7 @@ final class EagerWithArraysTest extends TestCase
      */
     public function testEagerArrayFilter(Standard $pipeline): void
     {
-        $reflectionClass = new \ReflectionClass(Principal::class);
+        $reflectionClass = new \ReflectionClass(Standard::class);
         $reflectionProperty = $reflectionClass->getProperty('pipeline');
         $reflectionProperty->setAccessible(true);
 

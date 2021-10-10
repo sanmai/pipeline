@@ -25,6 +25,7 @@ namespace Pipeline\Interfaces;
  * @final
  *
  * @internal
+ * @final
  *
  * @deprecated
  */

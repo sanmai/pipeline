@@ -25,7 +25,6 @@ use function Pipeline\map;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

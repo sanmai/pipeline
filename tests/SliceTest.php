@@ -25,7 +25,7 @@ use function Pipeline\map;
 use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
@@ -228,7 +228,7 @@ final class SliceTest extends TestCase
 
     /**
      * @dataProvider specimens
-     * @covers \Pipeline\Principal::slice()
+     * @covers \Pipeline\Standard::slice()
      */
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void
     {
@@ -242,7 +242,7 @@ final class SliceTest extends TestCase
 
     /**
      * @dataProvider specimens
-     * @covers \Pipeline\Principal::slice()
+     * @covers \Pipeline\Standard::slice()
      */
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void
     {
@@ -273,7 +273,7 @@ final class SliceTest extends TestCase
             $pipeline->slice(0)->toArray();
         } catch (\RuntimeException $e) {
             // We must not have any static methods called.
-            $this->assertStringNotContainsString('Principal::', (string) $e);
+            $this->assertStringNotContainsString('Standard::', (string) $e);
         }
     }
 }

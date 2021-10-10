@@ -27,14 +27,14 @@ use function Pipeline\take;
 use function Pipeline\zip;
 
 /**
- * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
 final class ZipTest extends TestCase
 {
     /**
-     * @covers \Pipeline\Principal::zip()
+     * @covers \Pipeline\Standard::zip()
      */
     public function testZipArray(): void
     {
@@ -53,7 +53,7 @@ final class ZipTest extends TestCase
     }
 
     /**
-     * @covers \Pipeline\Principal::zip()
+     * @covers \Pipeline\Standard::zip()
      */
     public function testZipSelf(): void
     {
@@ -65,7 +65,7 @@ final class ZipTest extends TestCase
     }
 
     /**
-     * @covers \Pipeline\Principal::zip()
+     * @covers \Pipeline\Standard::zip()
      */
     public function testZipGenerator(): void
     {
@@ -83,7 +83,7 @@ final class ZipTest extends TestCase
     }
 
     /**
-     * @covers \Pipeline\Principal::zip()
+     * @covers \Pipeline\Standard::zip()
      */
     public function testNoop(): void
     {
