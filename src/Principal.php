@@ -34,8 +34,6 @@ abstract class Principal implements \IteratorAggregate, \Countable
     /**
      * Contructor with an optional source of data.
      *
-     * @final
-     *
      * @param ?iterable $input
      */
     public function __construct(iterable $input = null)

@@ -21,8 +21,6 @@ namespace Pipeline;
 
 /**
  * Concrete pipeline with sensible default callbacks.
- *
- * @final
  */
 class Standard extends Principal
 {
