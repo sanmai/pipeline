@@ -23,6 +23,7 @@ namespace Pipeline;
  * Concrete pipeline with sensible default callbacks.
  *
  * @final
+ * @phan-suppress PhanAccessClassInternal
  */
 class Standard extends Principal implements Interfaces\StandardPipeline
 {
