@@ -22,12 +22,10 @@ namespace Pipeline\Interfaces;
 /**
  * Interface definitions for the standard pipeline. Will be removed in a next major version.
  *
- * @final
- *
  * @internal
  *
  * @deprecated
  */
-class StandardPipeline extends \Pipeline\Standard
+final class StandardPipeline extends \Pipeline\Standard
 {
 }
