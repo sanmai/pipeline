@@ -28,7 +28,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "v5.x-dev"
+            "dev-main": "v6.x-dev"
         }
     },
     "autoload": {
