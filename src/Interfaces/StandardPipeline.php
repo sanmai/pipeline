@@ -25,6 +25,7 @@ namespace Pipeline\Interfaces;
  * @internal
  *
  * @deprecated
+ * @psalm-suppress InvalidExtendClass
  */
 final class StandardPipeline extends \Pipeline\Standard
 {
