@@ -182,9 +182,6 @@ abstract class Principal implements \IteratorAggregate, \Countable
         return new \EmptyIterator();
     }
 
-    /**
-     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
-     */
     public function toArray(bool $useKeys = false): array
     {
         if (null === $this->pipeline) {
@@ -389,9 +386,6 @@ abstract class Principal implements \IteratorAggregate, \Countable
     }
 
     /**
-     * Performs a lazy zip operation on iterables, not unlike that of
-     * array_map with first argument set to null. Also known as transposition.
-     *
      * @return $this
      */
     public function zip(iterable ...$inputs)
