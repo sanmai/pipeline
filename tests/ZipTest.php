@@ -19,12 +19,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function array_map;
+use ArrayIterator;
+use function max;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function Pipeline\take;
 use function Pipeline\zip;
+use function range;
 
 /**
  * @covers \Pipeline\Principal
@@ -49,7 +53,7 @@ final class ZipTest extends TestCase
 
         $pipeline->zip(...$array);
 
-        $this->assertSame(\array_map(null, ...$array), $pipeline->toArray());
+        $this->assertSame(array_map(null, ...$array), $pipeline->toArray());
     }
 
     /**
@@ -129,7 +133,7 @@ final class ZipTest extends TestCase
     public function testZipOverShortIndex(): void
     {
         $actual = take(['a', 'b', 'c'])
-            ->zip(\range(1, 10), \range(10, 100, 10))
+            ->zip(range(1, 10), range(10, 100, 10))
             ->toArray()
         ;
 
@@ -149,10 +153,10 @@ final class ZipTest extends TestCase
 
     public function testExample(): void
     {
-        $iterable = \range(5, 7);
+        $iterable = range(5, 7);
         $pipeline = take($iterable);
         $pipeline->zip(
-            \range(1, 3),
+            range(1, 3),
             map(function () {
                 yield 1;
                 yield 2;
@@ -169,14 +173,14 @@ final class ZipTest extends TestCase
 
     public function testExampleFromReadme(): void
     {
-        $iterableA = new \ArrayIterator([1, 2, 3]);
-        $iterableB = new \ArrayIterator([3, 2, 1]);
-        $iterableC = new \ArrayIterator([2, 3, 1]);
+        $iterableA = new ArrayIterator([1, 2, 3]);
+        $iterableB = new ArrayIterator([3, 2, 1]);
+        $iterableC = new ArrayIterator([2, 3, 1]);
 
         $pipeline = take($iterableA);
         $pipeline->zip($iterableB, $iterableC);
         $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
-            return \max($elementOfA, $elementOfB, $elementOfC);
+            return max($elementOfA, $elementOfB, $elementOfC);
         });
 
         $this->assertSame(9, $pipeline->reduce());
@@ -184,13 +188,13 @@ final class ZipTest extends TestCase
 
     public function testAnotherExampleForReadme(): void
     {
-        $iterableA = new \ArrayIterator([1, 2, 3]);
-        $iterableB = new \ArrayIterator([3, 2, 1]);
-        $iterableC = new \ArrayIterator([2, 3, 1]);
+        $iterableA = new ArrayIterator([1, 2, 3]);
+        $iterableB = new ArrayIterator([3, 2, 1]);
+        $iterableC = new ArrayIterator([2, 3, 1]);
 
         $pipeline = zip($iterableA, $iterableB, $iterableC);
         $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
-            return \max($elementOfA, $elementOfB, $elementOfC);
+            return max($elementOfA, $elementOfB, $elementOfC);
         });
 
         $this->assertSame(9, $pipeline->reduce());

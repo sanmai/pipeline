@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function ob_end_clean;
+use function ob_start;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -36,10 +38,10 @@ final class ExampleTest extends TestCase
         $result = null;
         $arrayResult = null;
 
-        \ob_start();
+        ob_start();
 
         include 'example.php';
-        \ob_end_clean();
+        ob_end_clean();
 
         $this->assertSame(104, $value);
         $this->assertSame(6, $sum);

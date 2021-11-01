@@ -19,8 +19,11 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
+use function round;
+use function sqrt;
 
 /**
  * @covers \Pipeline\Standard
@@ -44,10 +47,10 @@ final class UnpackTest extends TestCase
         });
 
         $pipeline->unpack(function ($x, $y) {
-            return \sqrt($x ** 2 + $y ** 2);
+            return sqrt($x ** 2 + $y ** 2);
         });
 
-        $this->assertSame(37.0, \round($pipeline->reduce()));
+        $this->assertSame(37.0, round($pipeline->reduce()));
     }
 
     /**
@@ -73,7 +76,7 @@ final class UnpackTest extends TestCase
     public function testWithIterator(): void
     {
         $this->assertSame([1, 2, 3], fromArray([
-            new \ArrayIterator([1]),
+            new ArrayIterator([1]),
             fromArray([2]),
             [3],
         ])->unpack()->toArray());

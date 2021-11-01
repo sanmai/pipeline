@@ -19,8 +19,10 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function iterator_to_array;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use ReflectionObject;
 
 /**
  * @covers \Pipeline\Principal
@@ -37,7 +39,7 @@ final class ArraysTest extends TestCase
             return PHP_INT_MAX;
         });
 
-        $this->assertSame([PHP_INT_MAX], \iterator_to_array($pipeline));
+        $this->assertSame([PHP_INT_MAX], iterator_to_array($pipeline));
     }
 
     public function testArrayToArray(): void
@@ -74,7 +76,7 @@ final class ArraysTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $reflectionClass = new \ReflectionObject($pipeline);
+        $reflectionClass = new ReflectionObject($pipeline);
         $reflectionProperty = $reflectionClass->getParentClass()->getProperty('pipeline');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($pipeline, [

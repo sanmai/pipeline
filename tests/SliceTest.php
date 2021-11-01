@@ -19,10 +19,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function array_merge;
+use function array_slice;
+use function array_values;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
+use function range;
+use RuntimeException;
 
 /**
  * @covers \Pipeline\Principal
@@ -154,13 +160,13 @@ final class SliceTest extends TestCase
             'offset' => 2,
         ];
 
-        yield [\range(1, 3), \range(1, 3), 0];
+        yield [range(1, 3), range(1, 3), 0];
 
-        yield [[], \range(1, 3), 0, 0];
+        yield [[], range(1, 3), 0, 0];
 
-        yield [[3], \range(1, 3), -1];
+        yield [[3], range(1, 3), -1];
 
-        yield [[2 => 3], \range(1, 3), -1, null, true];
+        yield [[2 => 3], range(1, 3), -1, null, true];
 
         $inputs = [
             [],
@@ -210,16 +216,16 @@ final class SliceTest extends TestCase
                 // First with keys:
                 $args = $args + [null, null, true];
 
-                yield \array_merge(
-                    [\array_slice($array, ...$args), $array],
+                yield array_merge(
+                    [array_slice($array, ...$args), $array],
                     $args
                 );
 
                 // Now without keys:
                 $args[2] = false;
 
-                yield \array_merge(
-                    [\array_values(\array_slice($array, ...$args)), $array],
+                yield array_merge(
+                    [array_values(array_slice($array, ...$args)), $array],
                     $args
                 );
             }
@@ -255,7 +261,7 @@ final class SliceTest extends TestCase
                 $expected,
                 $pipeline->slice($offset, $length)->toArray($useKeys)
             );
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             if ('Not implemented yet' === $e->getMessage()) {
                 $this->markTestIncomplete();
             }
@@ -265,13 +271,13 @@ final class SliceTest extends TestCase
     public function testNoopZeroOffset(): void
     {
         $pipeline = map(function () {
-            throw new \RuntimeException();
+            throw new RuntimeException();
             yield;
         });
 
         try {
             $pipeline->slice(0)->toArray();
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             // We must not have any static methods called.
             $this->assertStringNotContainsString('Principal::', (string) $e);
         }

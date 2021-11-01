@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use function is_string;
+
 /**
  * Concrete pipeline with sensible default callbacks.
  *
@@ -97,7 +99,7 @@ class Standard extends Principal implements Interfaces\StandardPipeline
         };
 
         // Strings usually are internal functions, which typically require exactly one parameter.
-        if (\is_string($func)) {
+        if (is_string($func)) {
             $func = static function ($value) use ($func) {
                 return $func($value);
             };

@@ -19,8 +19,11 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Benchmarks;
 
+use function array_map;
+use function array_sum;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
+use function random_int;
 
 /**
  * @covers \Pipeline\Principal
@@ -51,17 +54,17 @@ final class BenchTest extends TestCase
 
         for ($i = 1; $i <= self::ITER_MAX; ++$i) {
             $products[] = [
-                'quantity' => \random_int(1, 100),
+                'quantity' => random_int(1, 100),
             ];
         }
 
         yield 'Aggregating arrays' => [
             function () use ($products) {
-                $qtys = \array_map(function ($p) {
+                $qtys = array_map(function ($p) {
                     return $p['quantity'];
                 }, $products);
 
-                return \array_sum($qtys);
+                return array_sum($qtys);
             },
             function () use ($products) {
                 return fromArray($products)->map(function ($p) {

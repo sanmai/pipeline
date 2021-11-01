@@ -19,12 +19,14 @@ declare(strict_types=1);
 
 namespace Pipeline\Interfaces;
 
+use IteratorAggregate;
+
 /**
  * Interface definitions for the standard pipeline. Will be removed in a next major version.
  *
  * @internal
  */
-interface StandardPipeline extends \IteratorAggregate, \Countable
+interface StandardPipeline extends IteratorAggregate, \Countable
 {
     /**
      * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
