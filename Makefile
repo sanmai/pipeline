@@ -60,7 +60,6 @@ ci-analyze: SILENT=
 ci-analyze: prerequisites ci-phpunit ci-infection ci-phan ci-phpstan ci-psalm
 
 ci-phpunit: ci-cs
-	rm -fr build/logs/*
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
 
 ci-infection: ci-phpunit
@@ -96,6 +95,7 @@ test-prerequisites: prerequisites composer.lock
 
 .PHONY: phpunit
 phpunit: cs
+	rm -fr build/logs/*
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
 
 .PHONY: infection
