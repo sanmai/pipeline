@@ -97,6 +97,7 @@ jobs:
 
     env:
       PHP_VERSION: 7.4
+      COMPOSER_ROOT_VERSION: v5.99
 
     steps:
       - name: Checkout code
