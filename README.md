@@ -1,5 +1,4 @@
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
-[![Build Status](https://travis-ci.com/sanmai/pipeline.svg?branch=v5.x)](https://travis-ci.com/sanmai/pipeline)
 ![CI](https://github.com/sanmai/pipeline/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=master)](https://coveralls.io/github/sanmai/pipeline?branch=master)
 [![Mutation testing badge](https://badge.stryker-mutator.io/github.com/sanmai/pipeline/master)](https://infection.github.io/)
@@ -93,13 +92,13 @@ var_dump($value);
 
 # API entry points
 
-All entry points always return an instance of a standard pipeline.
+All entry points always return an instance of the pipeline.
 
 |  Method     | Details                       | Use with       |
 | ----------- | ----------------------------- | ----------- |
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
-| `take()`  | Takes any iterable, including arrays, initializes a standard pipeline with it.  | `use function Pipeline\take;` |
-| `fromArray()`  | Takes an array, initializes a standard pipeline with it.  | `use function Pipeline\fromArray;` |
+| `take()`  | Takes any iterable, including arrays, initializes a pipeline with it.  | `use function Pipeline\take;` |
+| `fromArray()`  | Takes an array, initializes a pipeline with it.  | `use function Pipeline\fromArray;` |
 | `zip()`  | Takes an iterable, and several more, merging them together.  | `use function Pipeline\zip;` |
 
 
@@ -115,13 +114,11 @@ All entry points always return an instance of a standard pipeline.
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
 | `reduce()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above. Not part of any interface as per LSP. |     |
+| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
 
 Pipeline is an iterator and can be used as any other iterable. 
 
 Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
-
-Pipeline is a final class. It comes with an interface to aid you with [composition over inheritance](https://stackoverflow.com/questions/30683432/inheritance-over-composition).
 
 In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
 
@@ -204,21 +201,14 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 # Classes and interfaces: overview
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
-- `\Pipeline\Principal` is an abstract class you may want to extend if you're not satisfied with defaults from the class above. E.g. `getIterator()` can have different error handling.
-- Interface `StandardPipeline` defines all public methods from the standard pipeline, most useful for mocking in tests.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
-
-## Inheritance diagram
-
-- `\Pipeline\Standard` extends `\Pipeline\Principal` and implements `StandardPipeline`.
-- Interface `StandardPipeline` extends `\IteratorAggregate` and `\Countable`.
 
 # Methods
 
 ## `__construct()`
 
-Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. This method is not part to any interface, as per LSP.
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. 
 
 ## `$pipeline->map()`
 
@@ -326,7 +316,7 @@ $pipeline->filter(function ($item) {
 });
 ```
 
-Standard pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
+The pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
 ## `$pipeline->slice()`
 
@@ -350,7 +340,7 @@ $total = $pipeline->reduce(function ($curry, $item) {
 }, 0);
 ```
 
-Standard pipeline has a default callback that sums all values.
+The pipeline has a default callback that sums all values.
 
 ## `$pipeline->toArray()`
 

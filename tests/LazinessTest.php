@@ -26,7 +26,6 @@ use Pipeline\Standard;
 use Traversable;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

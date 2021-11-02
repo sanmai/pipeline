@@ -27,7 +27,7 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Principal
+ * @covers \Pipeline\Standard
  *
  * @internal
  */

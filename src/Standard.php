@@ -19,20 +19,59 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use function array_filter;
+use function array_map;
+use function array_reduce;
+use function array_shift;
+use function array_slice;
+use function array_values;
+use ArrayIterator;
+use function assert;
+use CallbackFilterIterator;
+use function count;
+use Countable;
+use EmptyIterator;
+use Generator;
+use function is_array;
+use function is_iterable;
 use function is_string;
+use Iterator;
+use function iterator_to_array;
+use IteratorAggregate;
+use Traversable;
 
 /**
  * Concrete pipeline with sensible default callbacks.
- *
- * @final
- * @phan-suppress PhanAccessClassInternal
  */
-class Standard extends Principal implements Interfaces\StandardPipeline
+class Standard implements IteratorAggregate, Countable
 {
     /**
-     * {@inheritdoc}
+     * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      *
-     * @param ?callable $func {@inheritdoc}
+     * @var ?iterable
+     */
+    private $pipeline;
+
+    /**
+     * Contructor with an optional source of data.
+     *
+     * @param ?iterable $input
+     */
+    public function __construct(iterable $input = null)
+    {
+        // IteratorAggregate is a nuance best we avoid dealing with.
+        // For example, CallbackFilterIterator needs a plain Iterator.
+        while ($input instanceof IteratorAggregate) {
+            $input = $input->getIterator();
+        }
+
+        $this->pipeline = $input;
+    }
+
+    /**
+     * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
+     *
+     * @param ?callable $func
      * @psalm-suppress InvalidArgument
      *
      * @return $this
@@ -49,11 +88,11 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func a callback must either return a value or yield values (return a generator)
      *
      * @return $this
      */
@@ -63,15 +102,60 @@ class Standard extends Principal implements Interfaces\StandardPipeline
             return $this;
         }
 
-        return parent::map($func);
+        // That's the standard case for any next stages.
+        if (is_iterable($this->pipeline)) {
+            /** @phan-suppress-next-line PhanTypeMismatchArgument */
+            $this->pipeline = self::apply($this->pipeline, $func);
+
+            return $this;
+        }
+
+        // Let's check what we got for a start.
+        $this->pipeline = $func();
+
+        // Generator is a generator, moving along
+        if ($this->pipeline instanceof Generator) {
+            // It is possible to detect if callback is a generator like so:
+            // (new \ReflectionFunction($func))->isGenerator();
+            // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
+            // But, again, we could add a direct internal method to replace the pipeline, e.g. as done by unpack()
+
+            return $this;
+        }
+
+        // Not a generator means we were given a simple value to be treated as an array.
+        // We do not cast to an array here because casting a null to an array results in
+        // an empty array; that's surprising and not how it works for other values.
+        $this->pipeline = [
+            $this->pipeline,
+        ];
+
+        return $this;
+    }
+
+    private static function apply(iterable $previous, callable $func): iterable
+    {
+        foreach ($previous as $key => $value) {
+            $result = $func($value);
+
+            // For generators we use keys they provide
+            if ($result instanceof Generator) {
+                yield from $result;
+
+                continue;
+            }
+
+            // In case of a plain old mapping function we use the original key
+            yield $key => $result;
+        }
     }
 
     /**
-     * {@inheritdoc}
+     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func a callback must return a value
      *
      * @return $this
      */
@@ -81,11 +165,41 @@ class Standard extends Principal implements Interfaces\StandardPipeline
             return $this;
         }
 
-        return parent::cast($func);
+        // We got an array, that's what we need. Moving along.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_map($func, $this->pipeline);
+
+            return $this;
+        }
+
+        if (is_iterable($this->pipeline)) {
+            /** @phan-suppress-next-line PhanTypeMismatchArgument */
+            $this->pipeline = self::applyOnce($this->pipeline, $func);
+
+            return $this;
+        }
+
+        // Else get the seed value.
+        // We do not cast to an array here because casting a null to an array results in
+        // an empty array; that's surprising and not how it works for other values.
+        $this->pipeline = [
+            $func(),
+        ];
+
+        return $this;
+    }
+
+    private static function applyOnce(iterable $previous, callable $func): iterable
+    {
+        foreach ($previous as $key => $value) {
+            yield $key => $func($value);
+        }
     }
 
     /**
-     * {@inheritdoc}
+     * Removes elements unless a callback returns true.
+     *
+     * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @param ?callable $func {@inheritdoc}
      *
@@ -93,28 +207,63 @@ class Standard extends Principal implements Interfaces\StandardPipeline
      */
     public function filter(?callable $func = null): self
     {
-        $func = $func ?? static function ($value) {
-            // Cast is unnecessary
-            return $value;
-        };
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $this;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
+            return $this;
+        }
+
+        $func = self::resolvePredicate($func);
+
+        // We got an array, that's what we need. Moving along.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_filter($this->pipeline, $func);
+
+            return $this;
+        }
+
+        /** @var Iterator $iterator */
+        $iterator = $this->pipeline;
+
+        /** @phan-suppress-next-line PhanTypeMismatchArgumentInternal */
+        $this->pipeline = new CallbackFilterIterator($iterator, $func);
+
+        return $this;
+    }
+
+    /**
+     * Resolves a nullable predicate into a sensible non-null callable.
+     */
+    private static function resolvePredicate(?callable $func): callable
+    {
+        if (null === $func) {
+            return static function ($value) {
+                // Cast is unnecessary for non-stict filtering
+                return $value;
+            };
+        }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
         if (is_string($func)) {
-            $func = static function ($value) use ($func) {
+            return static function ($value) use ($func) {
                 return $func($value);
             };
         }
 
-        return parent::filter($func);
+        return $func;
     }
 
     /**
-     * {@inheritdoc}
+     * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
-     * @param ?callable $func    {@inheritdoc}
-     * @param ?mixed    $initial {@inheritdoc}
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param ?mixed    $initial initial value for a $carry
      *
-     * @return mixed
+     * @return ?mixed
      */
     public function reduce(?callable $func = null, $initial = null)
     {
@@ -122,26 +271,302 @@ class Standard extends Principal implements Interfaces\StandardPipeline
     }
 
     /**
-     * {@inheritdoc}
+     * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
      *
-     * @param mixed     $initial {@inheritdoc}
-     * @param ?callable $func    {@inheritdoc}
+     * @param mixed     $initial initial value for a $carry
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
      * @return ?mixed
      */
     public function fold($initial, ?callable $func = null)
     {
-        if (null !== $func) {
-            return parent::fold($initial, $func);
+        $func = self::resolveReducer($func);
+
+        if (is_array($this->pipeline)) {
+            return array_reduce($this->pipeline, $func, $initial);
         }
 
-        return parent::fold(
-            $initial,
-            static function ($carry, $item) {
-                $carry += $item;
+        foreach ($this as $value) {
+            $initial = $func($initial, $value);
+        }
 
-                return $carry;
+        return $initial;
+    }
+
+    /**
+     * Resolves a nullable reducer into a sensible callable.
+     */
+    private static function resolveReducer(?callable $func): callable
+    {
+        if (null !== $func) {
+            return $func;
+        }
+
+        return static function ($carry, $item) {
+            $carry += $item;
+
+            return $carry;
+        };
+    }
+
+    public function getIterator(): Traversable
+    {
+        if ($this->pipeline instanceof Traversable) {
+            return $this->pipeline;
+        }
+
+        if (null !== $this->pipeline) {
+            return new ArrayIterator($this->pipeline);
+        }
+
+        return new EmptyIterator();
+    }
+
+    /**
+     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
+     */
+    public function toArray(bool $useKeys = false): array
+    {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just return an empty array.
+            return [];
+        }
+
+        if ([] === $this->pipeline) {
+            // Empty array is empty.
+            return [];
+        }
+
+        // We got what we need, moving along.
+        if (is_array($this->pipeline)) {
+            if ($useKeys) {
+                return $this->pipeline;
             }
-        );
+
+            return array_values($this->pipeline);
+        }
+
+        // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
+        // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
+        return iterator_to_array($this, $useKeys);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * This is a terminal operation.
+     *
+     * @see \Countable::count()
+     */
+    public function count(): int
+    {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just return zero.
+            return 0;
+        }
+
+        if ([] === $this->pipeline) {
+            // Empty array is empty.
+            return 0;
+        }
+
+        if (!is_array($this->pipeline)) {
+            // Count values for an iterator.
+            $this->pipeline = iterator_to_array($this, false);
+        }
+
+        return count($this->pipeline);
+    }
+
+    /**
+     * Extracts a slice from the inputs. Keys are not discarded intentionally.
+     *
+     * @see \array_slice()
+     *
+     * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
+     * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
+     *
+     * @return $this
+     */
+    public function slice(int $offset, ?int $length = null)
+    {
+        if (null === $this->pipeline) {
+            // With non-primed pipeline just move along.
+            return $this;
+        }
+
+        if (0 === $length) {
+            // We're not consuming anything assuming total laziness.
+            $this->pipeline = null;
+
+            return $this;
+        }
+
+        // Shortcut to array_slice() for actual arrays.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_slice($this->pipeline, $offset, $length, true);
+
+            return $this;
+        }
+
+        if ($offset < 0) {
+            // If offset is negative, the sequence will start that far from the end of the array.
+            $this->pipeline = self::tail($this->pipeline, -$offset);
+        }
+
+        if ($offset > 0) {
+            // @infection-ignore-all
+            assert($this->pipeline instanceof Iterator);
+
+            // If offset is non-negative, the sequence will start at that offset in the array.
+            $this->pipeline = self::skip($this->pipeline, $offset);
+        }
+
+        if ($length < 0) {
+            // If length is given and is negative then the sequence will stop that many elements from the end of the array.
+            $this->pipeline = self::head($this->pipeline, -$length);
+        }
+
+        if ($length > 0) {
+            // If length is given and is positive, then the sequence will have up to that many elements in it.
+            $this->pipeline = self::take($this->pipeline, $length);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @psalm-param positive-int $skip
+     */
+    private static function skip(Iterator $input, int $skip): iterable
+    {
+        // Consume until seen enough.
+        foreach ($input as $_) {
+            if (0 === $skip--) {
+                break;
+            }
+        }
+
+        // Avoid yielding from an exhausted generator. Gives error:
+        // Generator passed to yield from was aborted without proper return and is unable to continue
+        if (!$input->valid()) {
+            return;
+        }
+
+        yield from $input;
+    }
+
+    /**
+     * @psalm-param positive-int $take
+     */
+    private static function take(iterable $input, int $take): iterable
+    {
+        foreach ($input as $key => $value) {
+            yield $key => $value;
+
+            // Stop once taken enough.
+            if (0 === --$take) {
+                break;
+            }
+        }
+    }
+
+    private static function tail(iterable $input, int $length): iterable
+    {
+        $buffer = [];
+
+        foreach ($input as $key => $value) {
+            if (count($buffer) < $length) {
+                // Read at most N records.
+                $buffer[] = [$key, $value];
+
+                continue;
+            }
+
+            // Remove and add one record each time.
+            array_shift($buffer);
+            $buffer[] = [$key, $value];
+        }
+
+        foreach ($buffer as list($key, $value)) {
+            yield $key => $value;
+        }
+    }
+
+    /**
+     * Allocates a buffer of $length, and reads records into it, proceeding with FIFO when buffer is full.
+     */
+    private static function head(iterable $input, int $length): iterable
+    {
+        $buffer = [];
+
+        foreach ($input as $key => $value) {
+            $buffer[] = [$key, $value];
+
+            if (count($buffer) > $length) {
+                [$key, $value] = array_shift($buffer);
+                yield $key => $value;
+            }
+        }
+    }
+
+    /**
+     * Performs a lazy zip operation on iterables, not unlike that of
+     * array_map with first argument set to null. Also known as transposition.
+     *
+     * @return $this
+     */
+    public function zip(iterable ...$inputs)
+    {
+        if (null === $this->pipeline) {
+            $this->pipeline = array_shift($inputs);
+        }
+
+        if ([] === $inputs) {
+            return $this;
+        }
+
+        $this->map(static function ($item): array {
+            return [$item];
+        });
+
+        foreach (self::toIterators(...$inputs) as $iterator) {
+            // MultipleIterator won't work here because it'll stop at first invalid iterator.
+            $this->map(static function (array $current) use ($iterator) {
+                if (!$iterator->valid()) {
+                    $current[] = null;
+
+                    return $current;
+                }
+
+                $current[] = $iterator->current();
+                $iterator->next();
+
+                return $current;
+            });
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Iterator[]
+     */
+    private static function toIterators(iterable ...$inputs): array
+    {
+        return array_map(static function (iterable $input): Iterator {
+            while ($input instanceof IteratorAggregate) {
+                $input = $input->getIterator();
+            }
+
+            if ($input instanceof Iterator) {
+                return $input;
+            }
+
+            // IteratorAggregate and Iterator are out of picture, which leaves... an array.
+
+            /** @var array $input */
+            return new ArrayIterator($input);
+        }, $inputs);
     }
 }

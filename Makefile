@@ -20,6 +20,7 @@ PHPUNIT=vendor/bin/phpunit
 PHPUNIT_COVERAGE_CLOVER=--coverage-clover=build/logs/clover.xml
 PHPUNIT_GROUP=default
 PHPUNIT_ARGS=--coverage-xml=build/logs/coverage-xml --log-junit=build/logs/junit.xml $(PHPUNIT_COVERAGE_CLOVER)
+export XDEBUG_MODE=coverage
 
 # Phan
 PHAN=vendor/bin/phan
@@ -94,6 +95,7 @@ test-prerequisites: prerequisites composer.lock
 
 .PHONY: phpunit
 phpunit: cs
+	rm -fr build/logs/*
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS) --verbose
 
 .PHONY: infection

@@ -30,7 +30,6 @@ use Pipeline\Standard;
 use function range;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

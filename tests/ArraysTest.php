@@ -25,7 +25,6 @@ use Pipeline\Standard;
 use ReflectionObject;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal
@@ -77,7 +76,7 @@ final class ArraysTest extends TestCase
         $pipeline = new Standard();
 
         $reflectionClass = new ReflectionObject($pipeline);
-        $reflectionProperty = $reflectionClass->getParentClass()->getProperty('pipeline');
+        $reflectionProperty = $reflectionClass->getProperty('pipeline');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($pipeline, [
             1 => 1,

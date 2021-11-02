@@ -33,7 +33,6 @@ use function range;
 use ReflectionClass;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal
