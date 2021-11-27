@@ -27,6 +27,7 @@ use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
 use function Pipeline\take;
 use function range;
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard
@@ -50,9 +51,15 @@ final class ReservoirTest extends TestCase
         );
     }
 
+    public function testNoop(): void
+    {
+        $pipeline = new Standard();
+        $this->assertSame([], $pipeline->reservoir(1000));
+    }
+
     public function provideInputs(): iterable
     {
-        yield 'no change case' => [['a', 'b', 'c'], 3, ['a', 'b', 'c']];
+        yield 'no change expected' => [['a', 'b', 'c'], 3, ['a', 'b', 'c']];
 
         yield [['a', 'b', 'c'], -1, []];
 

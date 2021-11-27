@@ -650,6 +650,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
      *
+     * @codeCoverageIgnore
      * @deprecated not in use yet
      */
     private static function random(): float
