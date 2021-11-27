@@ -472,8 +472,10 @@ class Standard implements IteratorAggregate, Countable
             }
         }
 
-        // the break above will leave the generator in an inconsistent state
-        $input->next();
+        if ($input instanceof Generator) {
+            // the break above will leave the generator in an inconsistent state
+            $input->next();
+        }
     }
 
     private static function tail(iterable $input, int $length): Generator
@@ -585,6 +587,14 @@ class Standard implements IteratorAggregate, Countable
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
+        if (null === $this->pipeline) {
+            return [];
+        }
+
+        if ($size <= 0) {
+            return [];
+        }
+
         // Algorithms below assume inputs are non-rewindable, which generators are
         if (!$this->pipeline instanceof Generator) {
             $this->pipeline = (static function (iterable $inputs) {
@@ -604,24 +614,27 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Simple and slow algorithm, commonly known as Algorithm R.
+     *
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Simple_algorithm
+     * @psalm-param positive-int $size
      */
     private static function reservoirRandom(Generator $input, int $size): Generator
     {
         $counter = 0;
 
-        // fill the reservoir array
+        // Take an initial sample (AKA fill the reservoir array)
         foreach (self::take($input, $size) as $output) {
             yield $counter => $output;
 
             ++$counter;
         }
 
-        // return if there's nothing more to fetch
+        // Return if there's nothing more to fetch
         if (!$input->valid()) {
             return;
         }
 
-        // replace elements with gradually decreasing probability
+        // Produce replacement elements with gradually decreasing probability
         foreach ($input as $value) {
             $key = mt_rand(0, $counter);
 
