@@ -593,7 +593,10 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (null === $weightFunc) {
-            return self::reservoirRandom($this->pipeline, $size);
+            return iterator_to_array(
+                self::reservoirRandom($this->pipeline, $size),
+                true
+            );
         }
 
         return []; // TODO
@@ -602,30 +605,32 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Simple and slow algorithm, commonly known as Algorithm R.
      */
-    private static function reservoirRandom(Generator $input, int $size): array
+    private static function reservoirRandom(Generator $input, int $size): Generator
     {
+        $counter = 0;
+
         // fill the reservoir array
-        $reservoir = iterator_to_array(self::take($input, $size), false);
+        foreach (self::take($input, $size) as $output) {
+            yield $counter => $output;
+
+            ++$counter;
+        }
 
         // return if there's nothing more to fetch
         if (!$input->valid()) {
-            return $reservoir;
+            return;
         }
-
-        $counter = $size;
 
         // replace elements with gradually decreasing probability
         foreach ($input as $value) {
             $key = mt_rand(0, $counter);
 
             if ($key < $size) {
-                $reservoir[$key] = $value;
+                yield $key => $value;
             }
 
             ++$counter;
         }
-
-        return $reservoir;
     }
 
     /**
