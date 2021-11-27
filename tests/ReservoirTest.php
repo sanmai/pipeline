@@ -54,6 +54,10 @@ final class ReservoirTest extends TestCase
     {
         yield 'no change case' => [['a', 'b', 'c'], 3, ['a', 'b', 'c']];
 
+        yield [['a', 'b', 'c'], -1, []];
+
+        yield [['a', 'b', 'c'], 0, []];
+
         yield [['a', 'b', 'c'], 1, ['c']];
 
         yield [['a', 'b', 'c'], 2, ['a', 'b']];

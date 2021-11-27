@@ -22,11 +22,15 @@ namespace Tests\Pipeline;
 use function array_merge;
 use function array_slice;
 use function array_values;
+use ArrayIterator;
+use Closure;
+use Generator;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
+use function Pipeline\take;
 use function range;
 use RuntimeException;
 
@@ -37,14 +41,38 @@ use RuntimeException;
  */
 final class SliceTest extends TestCase
 {
-    public function testSliceExample(): void
+    public function provideCallback(): iterable
     {
-        $example = static function () {
-            return map(static function () {
-                yield from [1, 2, 3, 4, 5, 6];
-            });
-        };
+        $array = [1, 2, 3, 4, 5, 6];
 
+        yield Generator::class => [
+            static function () use ($array) {
+                return map(static function () use ($array) {
+                    yield from $array;
+                });
+            },
+        ];
+
+        yield 'array' => [
+            static function () use ($array) {
+                return take($array);
+            },
+        ];
+
+        yield ArrayIterator::class => [
+            static function () use ($array) {
+                return take(new ArrayIterator($array));
+            },
+        ];
+    }
+
+    /**
+     * @dataProvider provideCallback
+     *
+     * @param Closure():Standard $example
+     */
+    public function testSliceExample(Closure $example): void
+    {
         $this->assertSame(
             [3, 4, 5],
             $example()->slice(2, 3)->toArray()
@@ -73,6 +101,11 @@ final class SliceTest extends TestCase
         $this->assertSame(
             [1, 2, 3],
             $example()->slice(0, -3)->toArray()
+        );
+
+        $this->assertSame(
+            [1, 2, 3],
+            $example()->slice(0, 3)->toArray()
         );
 
         $this->assertSame(

@@ -26,7 +26,6 @@ use function array_shift;
 use function array_slice;
 use function array_values;
 use ArrayIterator;
-use function assert;
 use CallbackFilterIterator;
 use function count;
 use Countable;
@@ -380,6 +379,17 @@ class Standard implements IteratorAggregate, Countable
         return count($this->pipeline);
     }
 
+    private static function makeNonRewindable(iterable $input): Generator
+    {
+        if ($input instanceof Generator) {
+            return $input;
+        }
+
+        return (static function (iterable $input) {
+            yield from $input;
+        })($input);
+    }
+
     /**
      * Extracts a slice from the inputs. Keys are not discarded intentionally.
      *
@@ -411,15 +421,14 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
         if ($offset < 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
             $this->pipeline = self::tail($this->pipeline, -$offset);
         }
 
         if ($offset > 0) {
-            // @infection-ignore-all
-            assert($this->pipeline instanceof Iterator);
-
             // If offset is non-negative, the sequence will start at that offset in the array.
             $this->pipeline = self::skip($this->pipeline, $offset);
         }
@@ -461,7 +470,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $take
      */
-    private static function take(iterable $input, int $take): Generator
+    private static function take(Generator $input, int $take): Generator
     {
         foreach ($input as $key => $value) {
             yield $key => $value;
@@ -472,10 +481,8 @@ class Standard implements IteratorAggregate, Countable
             }
         }
 
-        if ($input instanceof Generator) {
-            // the break above will leave the generator in an inconsistent state
-            $input->next();
-        }
+        // the break above will leave the generator in an inconsistent state
+        $input->next();
     }
 
     private static function tail(iterable $input, int $length): Generator
@@ -595,12 +602,8 @@ class Standard implements IteratorAggregate, Countable
             return [];
         }
 
-        // Algorithms below assume inputs are non-rewindable, which generators are
-        if (!$this->pipeline instanceof Generator) {
-            $this->pipeline = (static function (iterable $inputs) {
-                yield from $inputs;
-            })($this->pipeline);
-        }
+        // Algorithms below assume inputs are non-rewindable
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
 
         if (null === $weightFunc) {
             return iterator_to_array(
@@ -620,19 +623,17 @@ class Standard implements IteratorAggregate, Countable
      */
     private static function reservoirRandom(Generator $input, int $size): Generator
     {
-        $counter = 0;
-
         // Take an initial sample (AKA fill the reservoir array)
         foreach (self::take($input, $size) as $output) {
-            yield $counter => $output;
-
-            ++$counter;
+            yield $output;
         }
 
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
             return;
         }
+
+        $counter = $size;
 
         // Produce replacement elements with gradually decreasing probability
         foreach ($input as $value) {
