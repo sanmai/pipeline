@@ -648,6 +648,7 @@ class Standard implements IteratorAggregate, Countable
      * Weighted random sampling.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
+     * @psalm-param positive-int $size
      */
     private static function reservoirWeighted(Generator $input, int $size, callable $weightFunc): Generator
     {
@@ -671,6 +672,7 @@ class Standard implements IteratorAggregate, Countable
             // probability for this item
             $probability = $weight / $sum;
 
+            // @infection-ignore-all
             if (self::random() <= $probability) {
                 yield mt_rand(0, $size - 1) => $value;
             }
@@ -679,6 +681,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
+     *
+     * @infection-ignore-all
      */
     private static function random(): float
     {
