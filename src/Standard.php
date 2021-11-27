@@ -40,7 +40,6 @@ use function iterator_to_array;
 use IteratorAggregate;
 use function mt_getrandmax;
 use function mt_rand;
-use NoRewindIterator;
 use Traversable;
 
 /**
@@ -586,18 +585,15 @@ class Standard implements IteratorAggregate, Countable
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
-        $input = $this->pipeline;
-
-        if (!$input instanceof Generator || !$input instanceof NoRewindIterator) {
-            if (is_array($input)) {
-                $input = new ArrayIterator($input);
-            }
-
-            $input = new NoRewindIterator($input);
+        // Algorithms below assume inputs are non-rewindable, which generators are
+        if (!$this->pipeline instanceof Generator) {
+            $this->pipeline = (static function (iterable $inputs) {
+                yield from $inputs;
+            })($this->pipeline);
         }
 
         if (null === $weightFunc) {
-            return self::reservoirRandom($input, $size);
+            return self::reservoirRandom($this->pipeline, $size);
         }
 
         return []; // TODO
@@ -606,7 +602,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Simple and slow algorithm, commonly known as Algorithm R.
      */
-    private static function reservoirRandom(Iterator $input, int $size): array
+    private static function reservoirRandom(Generator $input, int $size): array
     {
         // fill the reservoir array
         $reservoir = iterator_to_array(self::take($input, $size), false);

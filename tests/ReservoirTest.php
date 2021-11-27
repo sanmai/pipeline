@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use IteratorIterator;
 use function mt_rand;
 use function mt_srand;
 use PHPUnit\Framework\TestCase;
@@ -93,6 +95,16 @@ final class ReservoirTest extends TestCase
      */
     public function testSampleFromArray(array $input, int $size, array $expected): void
     {
+        $this->assertSame($expected, take($input)->reservoir($size));
+    }
+
+    /**
+     * @dataProvider provideInputs
+     */
+    public function testSampleFromIterator(array $input, int $size, array $expected): void
+    {
+        $input = new IteratorIterator(new ArrayIterator($input));
+
         $this->assertSame($expected, take($input)->reservoir($size));
     }
 }
