@@ -19,15 +19,18 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function abs;
 use ArrayIterator;
 use IteratorIterator;
 use function mt_rand;
 use function mt_srand;
+use function ord;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
+use Pipeline\Standard;
 use function Pipeline\take;
 use function range;
-use Pipeline\Standard;
+use function sin;
 
 /**
  * @covers \Pipeline\Standard
@@ -117,5 +120,64 @@ final class ReservoirTest extends TestCase
         $input = new IteratorIterator(new ArrayIterator($input));
 
         $this->assertSame($expected, take($input)->reservoir($size));
+    }
+
+    public function provideWeightedInputs(): iterable
+    {
+        $weightFn = static function (string $input): float {
+            return abs(sin(ord($input[0])));
+        };
+
+        yield 'no change expected' => [['a', 'b', 'c'], 3, $weightFn, ['a', 'b', 'c']];
+
+        yield [['a', 'b', 'c'], -1, $weightFn, []];
+
+        yield [['a', 'b', 'c'], 0, $weightFn, []];
+
+        yield [['a', 'b', 'c'], 1, $weightFn, ['c']];
+
+        yield [['a', 'b', 'c'], 2, $weightFn, ['a', 'c']];
+
+        yield [['a', 'b', 'c'], 4, $weightFn, ['a', 'b', 'c']];
+
+        $weightFnInt = static function (int $input): float {
+            return abs(sin($input / 1000));
+        };
+
+        yield [range(0, 1000), 5, $weightFnInt, [
+            437,
+            1,
+            358,
+            240,
+            197,
+        ]];
+    }
+
+    /**
+     * @dataProvider provideWeightedInputs
+     */
+    public function testWeightedSampleFromGenerator(array $input, int $size, callable $weightFn, array $expected): void
+    {
+        $this->assertSame($expected, map(static function () use ($input) {
+            yield from $input;
+        })->reservoir($size, $weightFn));
+    }
+
+    /**
+     * @dataProvider provideWeightedInputs
+     */
+    public function testWeightedSampleFromArray(array $input, int $size, callable $weightFn, array $expected): void
+    {
+        $this->assertSame($expected, take($input)->reservoir($size, $weightFn));
+    }
+
+    /**
+     * @dataProvider provideWeightedInputs
+     */
+    public function testWeightedSampleFromIterator(array $input, int $size, callable $weightFn, array $expected): void
+    {
+        $input = new IteratorIterator(new ArrayIterator($input));
+
+        $this->assertSame($expected, take($input)->reservoir($size, $weightFn));
     }
 }

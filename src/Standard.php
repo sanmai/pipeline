@@ -605,14 +605,11 @@ class Standard implements IteratorAggregate, Countable
         // Algorithms below assume inputs are non-rewindable
         $this->pipeline = self::makeNonRewindable($this->pipeline);
 
-        if (null === $weightFunc) {
-            return iterator_to_array(
-                self::reservoirRandom($this->pipeline, $size),
-                true
-            );
-        }
+        $result = null === $weightFunc ?
+            self::reservoirRandom($this->pipeline, $size) :
+            self::reservoirWeighted($this->pipeline, $size, $weightFunc);
 
-        return []; // TODO
+        return iterator_to_array($result, true);
     }
 
     /**
@@ -648,10 +645,40 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
+     * Weighted random sampling.
      *
-     * @codeCoverageIgnore
-     * @deprecated not in use yet
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
+     */
+    private static function reservoirWeighted(Generator $input, int $size, callable $weightFunc): Generator
+    {
+        $sum = 0.0;
+
+        // Take an initial sample (AKA fill the reservoir array)
+        foreach (self::take($input, $size) as $output) {
+            yield $output;
+            $sum += $weightFunc($output);
+        }
+
+        // Return if there's nothing more to fetch
+        if (!$input->valid()) {
+            return;
+        }
+
+        foreach ($input as $value) {
+            $weight = $weightFunc($value);
+            $sum += $weight;
+
+            // probability for this item
+            $probability = $weight / $sum;
+
+            if (self::random() <= $probability) {
+                yield mt_rand(0, $size - 1) => $value;
+            }
+        }
+    }
+
+    /**
+     * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
      */
     private static function random(): float
     {
