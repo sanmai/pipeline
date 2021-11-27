@@ -80,7 +80,7 @@ final class ReservoirTest extends TestCase
 
         yield [['a', 'b', 'c', 'd', 'e', 'f'], 4, ['a', 'b', 'c', 'f']];
 
-        yield 'thousand number' => [range(0, 1000), 10, [
+        yield 'a thousand of numbers' => [range(0, 1000), 10, [
             838,
             96,
             381,
@@ -144,7 +144,7 @@ final class ReservoirTest extends TestCase
             return abs(sin($input / 1000));
         };
 
-        yield 'thousand number' => [range(0, 1000), 5, $weightFnInt, [
+        yield 'a thousand of numbers' => [range(0, 1000), 5, $weightFnInt, [
             437,
             1,
             358,
