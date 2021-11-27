@@ -610,6 +610,14 @@ class Standard implements IteratorAggregate, Countable
         return iterator_to_array($result, true);
     }
 
+    private static function drainValues(Generator $input): Generator
+    {
+        while ($input->valid()) {
+            yield $input->current();
+            $input->next();
+        }
+    }
+
     /**
      * Simple and slow algorithm, commonly known as Algorithm R.
      *
@@ -631,7 +639,7 @@ class Standard implements IteratorAggregate, Countable
         $counter = $size;
 
         // Produce replacement elements with gradually decreasing probability
-        foreach ($input as $value) {
+        foreach (self::drainValues($input) as $value) {
             $key = mt_rand(0, $counter);
 
             if ($key < $size) {
@@ -663,7 +671,7 @@ class Standard implements IteratorAggregate, Countable
             return;
         }
 
-        foreach ($input as $value) {
+        foreach (self::drainValues($input) as $value) {
             $weight = $weightFunc($value);
             $sum += $weight;
 
