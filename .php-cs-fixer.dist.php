@@ -57,6 +57,7 @@ $config
         ],
         'php_unit_test_case_static_method_calls' => false,
         'yoda_style' => true,
+        'random_api_migration' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

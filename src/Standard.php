@@ -38,6 +38,9 @@ use function is_string;
 use Iterator;
 use function iterator_to_array;
 use IteratorAggregate;
+use function mt_getrandmax;
+use function mt_rand;
+use NoRewindIterator;
 use Traversable;
 
 /**
@@ -438,7 +441,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $skip
      */
-    private static function skip(Iterator $input, int $skip): iterable
+    private static function skip(Iterator $input, int $skip): Generator
     {
         // Consume until seen enough.
         foreach ($input as $_) {
@@ -459,7 +462,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $take
      */
-    private static function take(iterable $input, int $take): iterable
+    private static function take(iterable $input, int $take): Generator
     {
         foreach ($input as $key => $value) {
             yield $key => $value;
@@ -469,9 +472,12 @@ class Standard implements IteratorAggregate, Countable
                 break;
             }
         }
+
+        // the break above will leave the generator in an inconsistent state
+        $input->next();
     }
 
-    private static function tail(iterable $input, int $length): iterable
+    private static function tail(iterable $input, int $length): Generator
     {
         $buffer = [];
 
@@ -496,7 +502,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Allocates a buffer of $length, and reads records into it, proceeding with FIFO when buffer is full.
      */
-    private static function head(iterable $input, int $length): iterable
+    private static function head(iterable $input, int $length): Generator
     {
         $buffer = [];
 
@@ -568,5 +574,71 @@ class Standard implements IteratorAggregate, Countable
             /** @var array $input */
             return new ArrayIterator($input);
         }, $inputs);
+    }
+
+    /**
+     * Reservoir sampling method with an optional weighting function. Uses the most optimal algorithm.
+     *
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling
+     *
+     * @param int       $size       The desired sample size
+     * @param ?callable $weightFunc The optional weighting function
+     */
+    public function reservoir(int $size, ?callable $weightFunc = null): array
+    {
+        $input = $this->pipeline;
+
+        if (!$input instanceof Generator || !$input instanceof NoRewindIterator) {
+            if (is_array($input)) {
+                $input = new ArrayIterator($input);
+            }
+
+            $input = new NoRewindIterator($input);
+        }
+
+        if (null === $weightFunc) {
+            return self::reservoirRandom($input, $size);
+        }
+
+        return []; // TODO
+    }
+
+    /**
+     * Simple and slow algorithm, commonly known as Algorithm R.
+     */
+    private static function reservoirRandom(Iterator $input, int $size): array
+    {
+        // fill the reservoir array
+        $reservoir = iterator_to_array(self::take($input, $size), false);
+
+        // return if there's nothing more to fetch
+        if (!$input->valid()) {
+            return $reservoir;
+        }
+
+        $counter = $size;
+
+        // replace elements with gradually decreasing probability
+        foreach ($input as $value) {
+            $key = mt_rand(0, $counter);
+
+            if ($key < $size) {
+                $reservoir[$key] = $value;
+            }
+
+            ++$counter;
+        }
+
+        return $reservoir;
+    }
+
+    /**
+     * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
+     *
+     * @deprecated not in use yet
+     */
+    private static function random(): float
+    {
+        return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
     }
 }
