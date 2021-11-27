@@ -472,18 +472,14 @@ class Standard implements IteratorAggregate, Countable
      */
     private static function take(Generator $input, int $take): Generator
     {
-        foreach ($input as $key => $value) {
-            yield $key => $value;
+        while ($input->valid()) {
+            yield $input->key() => $input->current();
+            $input->next();
 
             // Stop once taken enough.
             if (0 === --$take) {
                 break;
             }
-        }
-
-        // the break above will leave the generator in an inconsistent state
-        if ($input->valid()) {
-            $input->next();
         }
     }
 
