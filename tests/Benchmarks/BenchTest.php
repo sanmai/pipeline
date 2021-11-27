@@ -26,7 +26,6 @@ use function Pipeline\fromArray;
 use function random_int;
 
 /**
- * @covers \Pipeline\Principal
  * @covers \Pipeline\Standard
  *
  * @internal

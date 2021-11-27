@@ -26,7 +26,6 @@ use function array_shift;
 use function array_slice;
 use function array_values;
 use ArrayIterator;
-use function assert;
 use CallbackFilterIterator;
 use function count;
 use Countable;
@@ -378,6 +377,17 @@ class Standard implements IteratorAggregate, Countable
         return count($this->pipeline);
     }
 
+    private static function makeNonRewindable(iterable $input): Generator
+    {
+        if ($input instanceof Generator) {
+            return $input;
+        }
+
+        return (static function (iterable $input) {
+            yield from $input;
+        })($input);
+    }
+
     /**
      * Extracts a slice from the inputs. Keys are not discarded intentionally.
      *
@@ -409,15 +419,14 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
         if ($offset < 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
             $this->pipeline = self::tail($this->pipeline, -$offset);
         }
 
         if ($offset > 0) {
-            // @infection-ignore-all
-            assert($this->pipeline instanceof Iterator);
-
             // If offset is non-negative, the sequence will start at that offset in the array.
             $this->pipeline = self::skip($this->pipeline, $offset);
         }
@@ -438,7 +447,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $skip
      */
-    private static function skip(Iterator $input, int $skip): iterable
+    private static function skip(Iterator $input, int $skip): Generator
     {
         // Consume until seen enough.
         foreach ($input as $_) {
@@ -459,7 +468,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $take
      */
-    private static function take(iterable $input, int $take): iterable
+    private static function take(Generator $input, int $take): Generator
     {
         foreach ($input as $key => $value) {
             yield $key => $value;
@@ -471,7 +480,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private static function tail(iterable $input, int $length): iterable
+    private static function tail(iterable $input, int $length): Generator
     {
         $buffer = [];
 
@@ -496,7 +505,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Allocates a buffer of $length, and reads records into it, proceeding with FIFO when buffer is full.
      */
-    private static function head(iterable $input, int $length): iterable
+    private static function head(iterable $input, int $length): Generator
     {
         $buffer = [];
 
