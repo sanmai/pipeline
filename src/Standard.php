@@ -39,6 +39,7 @@ use function iterator_to_array;
 use IteratorAggregate;
 use function mt_getrandmax;
 use function mt_rand;
+use const PHP_VERSION_ID;
 use Traversable;
 
 /**
@@ -481,8 +482,11 @@ class Standard implements IteratorAggregate, Countable
             }
         }
 
-        // the break above will leave the generator in an inconsistent state
-        $input->next();
+        // @infection-ignore-all
+        if (PHP_VERSION_ID < 80000) {
+            // the break above will leave the generator in an inconsistent state
+            $input->next();
+        }
     }
 
     private static function tail(iterable $input, int $length): Generator
