@@ -1,5 +1,5 @@
 parameters:
-    excludes_analyse:
+    excludePaths:
         - %currentWorkingDirectory%/tests/ErrorsTest.php
         - %currentWorkingDirectory%/tests/Benchmarks/
     level: 4
