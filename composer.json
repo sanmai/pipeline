@@ -1,8 +1,8 @@
 {
     "name": "sanmai/pipeline",
-    "type": "library",
     "description": "General-purpose collections pipeline",
     "license": "Apache-2.0",
+    "type": "library",
     "authors": [
         {
             "name": "Alexey Kopytko",
@@ -23,14 +23,6 @@
         "phpunit/phpunit": "^7.4 || ^8.1 || ^9.4",
         "vimeo/psalm": ">=2"
     },
-    "config": {
-        "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-main": "v6.x-dev"
-        }
-    },
     "autoload": {
         "psr-4": {
             "Pipeline\\": "src/"
@@ -42,6 +34,14 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\Pipeline\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "v6.x-dev"
         }
     }
 }
