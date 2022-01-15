@@ -20,10 +20,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use function iterator_to_array;
-use const PHP_VERSION_ID;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
