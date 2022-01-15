@@ -20,10 +20,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use function iterator_to_array;
-use const PHP_VERSION_ID;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
@@ -32,28 +30,6 @@ use ReflectionClass;
  */
 final class IterableTest extends TestCase
 {
-    private static $usesIterable;
-
-    public static function setUpBeforeClass(): void
-    {
-        if (PHP_VERSION_ID < 70100) {
-            self::$usesIterable = false;
-
-            return;
-        }
-
-        $reflection = new ReflectionClass(Standard::class);
-        $type = $reflection->getConstructor()->getParameters()[0]->getType();
-        self::$usesIterable = $type->isBuiltin(); // Traversable isn't builtin
-    }
-
-    protected function setUp(): void
-    {
-        if (!self::$usesIterable) {
-            $this->markTestSkipped('Not testing iterables: not yet supported by the interface');
-        }
-    }
-
     public function testArrayToArray(): void
     {
         $pipeline = new Standard([1, 2, 3]);
