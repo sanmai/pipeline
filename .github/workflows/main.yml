@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: 7.4
+      PHP_VERSION: 8.0
       PHP_CS_FIXER_VERSION: v3.2.1
 
     steps:
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: 7.4
+      PHP_VERSION: 8.0
       COMPOSER_ROOT_VERSION: v5.99
 
     steps:
