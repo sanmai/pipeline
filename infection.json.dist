@@ -9,8 +9,5 @@
         "@default": true,
         "IdenticalEqual": false,
         "NotIdenticalNotEqual": false
-    },
-    "logs": {
-        "badge": {"branch": "main"}
     }
 }
