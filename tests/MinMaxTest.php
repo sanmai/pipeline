@@ -41,8 +41,14 @@ final class MinMaxTest extends TestCase
     private function provideInputs(): iterable
     {
         yield [];
+        yield [null];
         yield [M_E];
         yield [1, 2, 3];
+        yield [1, 2, 3, null];
+        yield [-1, -2, -3];
+        yield [-1, -2, -3, null];
+        yield [1, null];
+        yield [-1, null];
         yield [-1, 0, 1];
         yield ['a', 'b', 'c'];
         yield [2, 1, 2];
@@ -70,6 +76,12 @@ final class MinMaxTest extends TestCase
             yield $input;
 
             if ([] === $input) {
+                continue;
+            }
+
+            yield array_reverse($input);
+
+            if (count($input) <= 2) {
                 continue;
             }
 

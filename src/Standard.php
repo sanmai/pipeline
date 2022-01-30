@@ -761,16 +761,8 @@ class Standard implements IteratorAggregate, Countable
 
         $this->pipeline = self::makeNonRewindable($this->pipeline);
 
+        // Everything is greater than null
         $max = null;
-
-        foreach ($this->pipeline as $max) {
-            break;
-        }
-
-        // Return if there's nothing more to fetch
-        if (!$this->pipeline->valid()) {
-            return $max;
-        }
 
         foreach ($this->pipeline as $value) {
             if ($value > $max) {
