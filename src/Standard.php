@@ -37,6 +37,8 @@ use function is_string;
 use Iterator;
 use function iterator_to_array;
 use IteratorAggregate;
+use function mt_getrandmax;
+use function mt_rand;
 use Traversable;
 
 /**
@@ -578,5 +580,118 @@ class Standard implements IteratorAggregate, Countable
             /** @var array $input */
             return new ArrayIterator($input);
         }, $inputs);
+    }
+
+    /**
+     * Reservoir sampling method with an optional weighting function. Uses the most optimal algorithm.
+     *
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling
+     *
+     * @param int       $size       The desired sample size
+     * @param ?callable $weightFunc The optional weighting function
+     */
+    public function reservoir(int $size, ?callable $weightFunc = null): array
+    {
+        if (null === $this->pipeline) {
+            return [];
+        }
+
+        if ($size <= 0) {
+            return [];
+        }
+
+        // Algorithms below assume inputs are non-rewindable
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        $result = null === $weightFunc ?
+            self::reservoirRandom($this->pipeline, $size) :
+            self::reservoirWeighted($this->pipeline, $size, $weightFunc);
+
+        return iterator_to_array($result, true);
+    }
+
+    private static function drainValues(Generator $input): Generator
+    {
+        while ($input->valid()) {
+            yield $input->current();
+            $input->next();
+        }
+    }
+
+    /**
+     * Simple and slow algorithm, commonly known as Algorithm R.
+     *
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Simple_algorithm
+     * @psalm-param positive-int $size
+     */
+    private static function reservoirRandom(Generator $input, int $size): Generator
+    {
+        // Take an initial sample (AKA fill the reservoir array)
+        foreach (self::take($input, $size) as $output) {
+            yield $output;
+        }
+
+        // Return if there's nothing more to fetch
+        if (!$input->valid()) {
+            return;
+        }
+
+        $counter = $size;
+
+        // Produce replacement elements with gradually decreasing probability
+        foreach (self::drainValues($input) as $value) {
+            $key = mt_rand(0, $counter);
+
+            if ($key < $size) {
+                yield $key => $value;
+            }
+
+            ++$counter;
+        }
+    }
+
+    /**
+     * Weighted random sampling.
+     *
+     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
+     * @psalm-param positive-int $size
+     */
+    private static function reservoirWeighted(Generator $input, int $size, callable $weightFunc): Generator
+    {
+        $sum = 0.0;
+
+        // Take an initial sample (AKA fill the reservoir array)
+        foreach (self::take($input, $size) as $output) {
+            yield $output;
+            $sum += $weightFunc($output);
+        }
+
+        // Return if there's nothing more to fetch
+        if (!$input->valid()) {
+            return;
+        }
+
+        foreach (self::drainValues($input) as $value) {
+            $weight = $weightFunc($value);
+            $sum += $weight;
+
+            // probability for this item
+            $probability = $weight / $sum;
+
+            // @infection-ignore-all
+            if (self::random() <= $probability) {
+                yield mt_rand(0, $size - 1) => $value;
+            }
+        }
+    }
+
+    /**
+     * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
+     *
+     * @infection-ignore-all
+     */
+    private static function random(): float
+    {
+        return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
     }
 }
