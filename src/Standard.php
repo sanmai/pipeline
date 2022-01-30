@@ -616,6 +616,7 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield $input->current();
+            // @infection-ignore-all
             $input->next();
         }
     }
