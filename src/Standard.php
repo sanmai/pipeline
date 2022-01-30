@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Pipeline;
 
 use function array_filter;
+use function array_flip;
 use function array_map;
 use function array_reduce;
 use function array_shift;
@@ -772,5 +773,38 @@ class Standard implements IteratorAggregate, Countable
         }
 
         return $max;
+    }
+
+    /**
+     * @return $this
+     */
+    public function flip()
+    {
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $this;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
+            return $this;
+        }
+
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_flip($this->pipeline);
+
+            return $this;
+        }
+
+        $this->pipeline = self::flipKeysAndValues($this->pipeline);
+
+        return $this;
+    }
+
+    private static function flipKeysAndValues(iterable $previous): iterable
+    {
+        foreach ($previous as $key => $value) {
+            yield $value => $key;
+        }
     }
 }
