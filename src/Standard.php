@@ -374,12 +374,13 @@ class Standard implements IteratorAggregate, Countable
             return 0;
         }
 
-        if (!is_array($this->pipeline)) {
-            // Count values for an iterator.
-            $this->pipeline = iterator_to_array($this, false);
+        $result = 0;
+
+        foreach ($this->pipeline as $value) {
+            ++$result;
         }
 
-        return count($this->pipeline);
+        return $result;
     }
 
     private static function makeNonRewindable(iterable $input): Generator
