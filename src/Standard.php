@@ -713,6 +713,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (is_array($this->pipeline)) {
+            /** @psalm-suppress ArgumentTypeCoercion */
             return min($this->pipeline);
         }
 
@@ -754,6 +755,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (is_array($this->pipeline)) {
+            /** @psalm-suppress ArgumentTypeCoercion */
             return max($this->pipeline);
         }
 
