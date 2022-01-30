@@ -37,6 +37,8 @@ use function is_string;
 use Iterator;
 use function iterator_to_array;
 use IteratorAggregate;
+use function max;
+use function min;
 use function mt_getrandmax;
 use function mt_rand;
 use Traversable;
@@ -693,5 +695,87 @@ class Standard implements IteratorAggregate, Countable
     private static function random(): float
     {
         return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
+    }
+
+    /**
+     * Find lowest value using the standard comparison rules. Returns null for empty sequences.
+     *
+     * @return null|mixed
+     */
+    public function min()
+    {
+        if (null === $this->pipeline) {
+            return null;
+        }
+
+        if ([] === $this->pipeline) {
+            return null;
+        }
+
+        if (is_array($this->pipeline)) {
+            return min($this->pipeline);
+        }
+
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        $min = null;
+
+        foreach ($this->pipeline as $min) {
+            break;
+        }
+
+        // Return if there's nothing more to fetch
+        if (!$this->pipeline->valid()) {
+            return $min;
+        }
+
+        foreach ($this->pipeline as $value) {
+            if ($value < $min) {
+                $min = $value;
+            }
+        }
+
+        return $min;
+    }
+
+    /**
+     * Find highest value using the standard comparison rules. Returns null for empty sequences.
+     *
+     * @return null|mixed
+     */
+    public function max()
+    {
+        if (null === $this->pipeline) {
+            return null;
+        }
+
+        if ([] === $this->pipeline) {
+            return null;
+        }
+
+        if (is_array($this->pipeline)) {
+            return max($this->pipeline);
+        }
+
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        $max = null;
+
+        foreach ($this->pipeline as $max) {
+            break;
+        }
+
+        // Return if there's nothing more to fetch
+        if (!$this->pipeline->valid()) {
+            return $max;
+        }
+
+        foreach ($this->pipeline as $value) {
+            if ($value > $max) {
+                $max = $value;
+            }
+        }
+
+        return $max;
     }
 }
