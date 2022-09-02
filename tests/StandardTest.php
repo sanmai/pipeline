@@ -30,9 +30,8 @@ use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function range;
-use ReflectionClass;
 
-use function round;
+use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
@@ -169,7 +168,7 @@ final class StandardTest extends TestCase
 
         $result = $pipeline->reduce();
 
-        $this->assertSame(55 * 1.05, round($result, 2));
+        $this->assertEqualsWithDelta(55 * 1.05, $result, 0.0001);
     }
 
     public function testReduceArrays(): void
