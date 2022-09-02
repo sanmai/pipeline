@@ -76,6 +76,7 @@ class Standard implements IteratorAggregate, Countable
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
      * @param ?callable $func
+     *
      * @psalm-suppress InvalidArgument
      *
      * @return $this
@@ -627,6 +628,7 @@ class Standard implements IteratorAggregate, Countable
      * Simple and slow algorithm, commonly known as Algorithm R.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Simple_algorithm
+     *
      * @psalm-param positive-int $size
      */
     private static function reservoirRandom(Generator $input, int $size): Generator
@@ -659,6 +661,7 @@ class Standard implements IteratorAggregate, Countable
      * Weighted random sampling.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
+     *
      * @psalm-param positive-int $size
      */
     private static function reservoirWeighted(Generator $input, int $size, callable $weightFunc): Generator

@@ -30,7 +30,6 @@ use function Pipeline\fromArray;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function range;
-
 use ReflectionClass;
 
 /**
