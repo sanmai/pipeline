@@ -29,6 +29,7 @@ use function random_int;
  * @covers \Pipeline\Standard
  *
  * @internal
+ *
  * @long
  */
 final class BenchTest extends TestCase

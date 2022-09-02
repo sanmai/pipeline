@@ -267,6 +267,7 @@ final class SliceTest extends TestCase
 
     /**
      * @dataProvider specimens
+     *
      * @covers \Pipeline\Standard::slice()
      */
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void
@@ -281,6 +282,7 @@ final class SliceTest extends TestCase
 
     /**
      * @dataProvider specimens
+     *
      * @covers \Pipeline\Standard::slice()
      */
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void

@@ -167,7 +167,7 @@ final class StandardTest extends TestCase
 
         $result = $pipeline->reduce();
 
-        $this->assertSame(55 * 1.05, $result);
+        $this->assertEqualsWithDelta(55 * 1.05, $result, 0.0001);
     }
 
     public function testReduceArrays(): void
