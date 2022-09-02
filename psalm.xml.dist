@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <psalm
-    totallyTyped="true"
-    errorLevel="3"
+    errorLevel="2"
     resolveFromConfigFile="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
@@ -21,5 +20,7 @@
                 <file name="example.php" />
             </errorLevel>
         </ForbiddenCode>
+        <MissingClosureParamType errorLevel="suppress" />
+        <MissingClosureReturnType errorLevel="suppress" />
     </issueHandlers>
 </psalm>
