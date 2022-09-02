@@ -58,6 +58,8 @@ $config
         'php_unit_test_case_static_method_calls' => false,
         'yoda_style' => true,
         'random_api_migration' => false,
+        'blank_line_between_import_groups' => false,
+        'blank_line_before_statement' => ['statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try']],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
