@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        php-version: 
+        php-version:
           - '7.2'
           - '7.3'
           - '7.4'
@@ -73,7 +73,7 @@ jobs:
 
     env:
       PHP_VERSION: 8.0
-      PHP_CS_FIXER_VERSION: v3.2.1
+      PHP_CS_FIXER_VERSION: v3.11.0
 
     steps:
       - name: Checkout
