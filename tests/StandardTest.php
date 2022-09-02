@@ -32,6 +32,8 @@ use Pipeline\Standard;
 use function range;
 use ReflectionClass;
 
+use function round;
+
 /**
  * @covers \Pipeline\Standard
  *
@@ -167,7 +169,7 @@ final class StandardTest extends TestCase
 
         $result = $pipeline->reduce();
 
-        $this->assertSame(55 * 1.05, $result);
+        $this->assertSame(55 * 1.05, round($result, 2));
     }
 
     public function testReduceArrays(): void
