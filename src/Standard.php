@@ -22,6 +22,7 @@ namespace Pipeline;
 use function array_filter;
 use function array_flip;
 use function array_map;
+use function array_merge;
 use function array_reduce;
 use function array_shift;
 use function array_slice;
@@ -70,6 +71,83 @@ class Standard implements IteratorAggregate, Countable
         }
 
         $this->pipeline = $input;
+    }
+
+    public function append(iterable $values = null): self
+    {
+        // Do we need to do anything here?
+        if ($this->willReplace($values)) {
+            return $this;
+        }
+
+        return $this->join($this->pipeline, $values);
+    }
+
+    public function push(...$vector): self
+    {
+        return $this->append($vector);
+    }
+
+    public function prepend(iterable $values = null): self
+    {
+        // Do we need to do anything here?
+        if ($this->willReplace($values)) {
+            return $this;
+        }
+
+        return $this->join($values, $this->pipeline);
+    }
+
+    public function unshift(...$vector): self
+    {
+        return $this->prepend($vector);
+    }
+
+    /**
+     * Utility method for appending/prepending methods.
+     */
+    private function willReplace(iterable $values = null): bool
+    {
+        // Nothing needs to be done here.
+        if (null === $values || [] === $values) {
+            return true;
+        }
+
+        // No shortcuts are applicable if the pipeline was initialized.
+        if ([] !== $this->pipeline && null !== $this->pipeline) {
+            return false;
+        }
+
+        // Install an array as it is.
+        if (is_array($values)) {
+            $this->pipeline = $values;
+
+            return true;
+        }
+
+        // Else we use ownself to handle edge cases.
+        $this->pipeline = new self($values);
+
+        return true;
+    }
+
+    /**
+     * Utility method for appending/prepending methods.
+     */
+    private function join(iterable $left, iterable $right): self
+    {
+        // We got two arrays, that's what we will use.
+        if (is_array($left) && is_array($right)) {
+            $this->pipeline = array_merge($left, $right);
+
+            return $this;
+        }
+
+        // Last, join the hard way.
+        return $this->map(function () use ($left, $right) {
+            yield from $left;
+            yield from $right;
+        });
     }
 
     /**
