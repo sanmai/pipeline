@@ -26,6 +26,7 @@ use function key;
 use const PHP_VERSION_ID;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\take;
+use function reset;
 
 /**
  * @covers \Pipeline\Standard
@@ -76,10 +77,7 @@ final class AppendPrependTest extends TestCase
      */
     public function testPush(array $expected, ?array $initialValue, ...$iterables): void
     {
-        $useKeys = !is_numeric(key($expected));
-        if ($useKeys && PHP_VERSION_ID < 80000) {
-            $this->markTestIncomplete('PHP 7 fails with an error: Cannot unpack array with string keys');
-        }
+        $this->skipOnPHP7($expected);
 
         $pipeline = take($initialValue);
 
@@ -87,6 +85,7 @@ final class AppendPrependTest extends TestCase
             $pipeline->push(...$iterable ?? []);
         }
 
+        $useKeys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($useKeys));
     }
 
@@ -138,10 +137,7 @@ final class AppendPrependTest extends TestCase
      */
     public function testUnshift(array $expected, ?array $initialValue, ...$iterables): void
     {
-        $useKeys = !is_numeric(key($expected));
-        if ($useKeys && PHP_VERSION_ID < 80000) {
-            $this->markTestIncomplete('PHP 7 fails with an error: Cannot unpack array with string keys');
-        }
+        $this->skipOnPHP7($expected);
 
         $pipeline = take($initialValue);
 
@@ -149,6 +145,7 @@ final class AppendPrependTest extends TestCase
             $pipeline->unshift(...$iterable ?? []);
         }
 
+        $useKeys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($useKeys));
     }
 
@@ -174,5 +171,12 @@ final class AppendPrependTest extends TestCase
 
         $useKeys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($useKeys));
+    }
+
+    private function skipOnPHP7(array $expected): void
+    {
+        if (!is_numeric(reset($expected)) && PHP_VERSION_ID < 80000) {
+            $this->markTestSkipped('PHP 7 fails with an error: Cannot unpack array with string keys');
+        }
     }
 }
