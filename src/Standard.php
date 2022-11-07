@@ -223,7 +223,6 @@ class Standard implements IteratorAggregate, Countable
 
         // That's the standard case for any next stages.
         if (is_iterable($this->pipeline)) {
-            /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -292,7 +291,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (is_iterable($this->pipeline)) {
-            /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
             return $this;
@@ -348,7 +346,6 @@ class Standard implements IteratorAggregate, Countable
         /** @var Iterator $iterator */
         $iterator = $this->pipeline;
 
-        /** @phan-suppress-next-line PhanTypeMismatchArgumentInternal */
         $this->pipeline = new CallbackFilterIterator($iterator, $func);
 
         return $this;
