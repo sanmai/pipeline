@@ -28,6 +28,7 @@ use function array_shift;
 use function array_slice;
 use function array_values;
 use ArrayIterator;
+use function assert;
 use CallbackFilterIterator;
 use function count;
 use Countable;
@@ -73,6 +74,11 @@ class Standard implements IteratorAggregate, Countable
         $this->pipeline = $input;
     }
 
+    /**
+     * Appends the contents of an interable to the end of the pipeline.
+     *
+     * @param ?iterable $values
+     */
     public function append(iterable $values = null): self
     {
         // Do we need to do anything here?
@@ -80,14 +86,28 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
+        // Static analyzer hints
+        assert(null !== $this->pipeline);
+        assert(null !== $values);
+
         return $this->join($this->pipeline, $values);
     }
 
+    /**
+     * Appends a list of values to the end of the pipeline.
+     *
+     * @param mixed ...$vector
+     */
     public function push(...$vector): self
     {
         return $this->append($vector);
     }
 
+    /**
+     * Prepends the pipeline with the contents of an iterable.
+     *
+     * @param ?iterable $values
+     */
     public function prepend(iterable $values = null): self
     {
         // Do we need to do anything here?
@@ -95,20 +115,32 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
+        // Static analyzer hints
+        assert(null !== $this->pipeline);
+        assert(null !== $values);
+
         return $this->join($values, $this->pipeline);
     }
 
+    /**
+     * Prepends the pipeline with a list of values.
+     *
+     * @param mixed ...$vector
+     */
     public function unshift(...$vector): self
     {
         return $this->prepend($vector);
     }
 
     /**
+     * Determine if the internal pipeline will be replaced when appending/prepending.
+     *
      * Utility method for appending/prepending methods.
      */
     private function willReplace(iterable $values = null): bool
     {
         // Nothing needs to be done here.
+        /** @phan-suppress-next-line PhanTypeComparisonFromArray */
         if (null === $values || [] === $values) {
             return true;
         }
@@ -132,6 +164,8 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Replace the internal pipeline with a combination of two non-empty iterables.
+     *
      * Utility method for appending/prepending methods.
      */
     private function join(iterable $left, iterable $right): self
@@ -144,10 +178,12 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Last, join the hard way.
-        return $this->map(function () use ($left, $right) {
+        $this->pipeline = (static function () use ($left, $right) {
             yield from $left;
             yield from $right;
-        });
+        })();
+
+        return $this;
     }
 
     /**

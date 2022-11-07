@@ -46,6 +46,9 @@ function fromArray(array $input): Standard
     return new Standard($input);
 }
 
+/**
+ * @param mixed ...$values
+ */
 function fromValues(...$values): Standard
 {
     return new Standard($values);
