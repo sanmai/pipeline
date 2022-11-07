@@ -23,6 +23,7 @@ use ArrayIterator;
 use function count;
 use function is_numeric;
 use function key;
+use const PHP_VERSION_ID;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\take;
 
@@ -75,13 +76,17 @@ final class AppendPrependTest extends TestCase
      */
     public function testPush(array $expected, ?array $initialValue, ...$iterables): void
     {
+        $useKeys = !is_numeric(key($expected));
+        if ($useKeys && PHP_VERSION_ID < 80000) {
+            $this->markTestIncomplete('PHP 7 fails with an error: Cannot unpack array with string keys');
+        }
+
         $pipeline = take($initialValue);
 
         foreach ($iterables as $iterable) {
             $pipeline->push(...$iterable ?? []);
         }
 
-        $useKeys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($useKeys));
     }
 
@@ -133,13 +138,17 @@ final class AppendPrependTest extends TestCase
      */
     public function testUnshift(array $expected, ?array $initialValue, ...$iterables): void
     {
+        $useKeys = !is_numeric(key($expected));
+        if ($useKeys && PHP_VERSION_ID < 80000) {
+            $this->markTestIncomplete('PHP 7 fails with an error: Cannot unpack array with string keys');
+        }
+
         $pipeline = take($initialValue);
 
         foreach ($iterables as $iterable) {
             $pipeline->unshift(...$iterable ?? []);
         }
 
-        $useKeys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($useKeys));
     }
 
