@@ -41,12 +41,14 @@ final class LazinessTest extends TestCase
 
     public function testEagerReturn(): void
     {
-        $this->expectException(Exception::class);
-
         $pipeline = new Standard();
-        $pipeline->map(function (): void {
+
+        $exception = new Exception();
+        $this->expectExceptionObject($exception);
+
+        $pipeline->map(function () use ($exception): void {
             // Executed on spot
-            throw new Exception();
+            throw $exception;
         });
     }
 

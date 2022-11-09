@@ -24,6 +24,7 @@ use ArrayIterator;
 use function iterator_to_array;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
+use function Pipeline\fromValues;
 use function Pipeline\map;
 use Pipeline\Standard;
 use function Pipeline\take;
@@ -79,6 +80,25 @@ final class FunctionsTest extends TestCase
     public function testTakeArray(): void
     {
         $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toArray());
+    }
+
+    /**
+     * @covers \Pipeline\take
+     */
+    public function testTakeMany(): void
+    {
+        $this->assertSame([1, 2, 3, 4, 5], take([1, 2], [3, 4], [5])->toArray());
+
+        $this->assertSame([1, 2, 3, 4, 5], take(take([1, 2]), take([3, 4]), fromValues(5))->toArray());
+    }
+
+    /**
+     * @covers \Pipeline\fromValues
+     */
+    public function testFromValues(): void
+    {
+        $this->assertSame([1, 2, 3, 4, 5], fromValues(1, 2, 3, 4, 5)->toArray());
+        $this->assertSame([1, 2, 3], fromValues(...[1, 2, 3])->toArray());
     }
 
     /**

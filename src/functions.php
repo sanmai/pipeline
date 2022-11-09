@@ -30,14 +30,28 @@ function map(callable $func = null): Standard
     return $pipeline->map($func);
 }
 
-function take(iterable $input = null): Standard
+function take(iterable $input = null, iterable ...$inputs): Standard
 {
-    return new Standard($input);
+    $pipeline = new Standard($input);
+
+    foreach ($inputs as $input) {
+        $pipeline->append($input);
+    }
+
+    return $pipeline;
 }
 
 function fromArray(array $input): Standard
 {
     return new Standard($input);
+}
+
+/**
+ * @param mixed ...$values
+ */
+function fromValues(...$values): Standard
+{
+    return new Standard($values);
 }
 
 function zip(iterable $base, iterable ...$inputs): Standard

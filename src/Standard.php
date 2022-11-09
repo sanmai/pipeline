@@ -22,11 +22,13 @@ namespace Pipeline;
 use function array_filter;
 use function array_flip;
 use function array_map;
+use function array_merge;
 use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
 use ArrayIterator;
+use function assert;
 use CallbackFilterIterator;
 use function count;
 use Countable;
@@ -73,11 +75,127 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Appends the contents of an interable to the end of the pipeline.
+     *
+     * @param ?iterable $values
+     */
+    public function append(iterable $values = null): self
+    {
+        // Do we need to do anything here?
+        if ($this->willReplace($values)) {
+            return $this;
+        }
+
+        // Static analyzer hints
+        assert(null !== $this->pipeline);
+        assert(null !== $values);
+
+        return $this->join($this->pipeline, $values);
+    }
+
+    /**
+     * Appends a list of values to the end of the pipeline.
+     *
+     * @param mixed ...$vector
+     */
+    public function push(...$vector): self
+    {
+        return $this->append($vector);
+    }
+
+    /**
+     * Prepends the pipeline with the contents of an iterable.
+     *
+     * @param ?iterable $values
+     */
+    public function prepend(iterable $values = null): self
+    {
+        // Do we need to do anything here?
+        if ($this->willReplace($values)) {
+            return $this;
+        }
+
+        // Static analyzer hints
+        assert(null !== $this->pipeline);
+        assert(null !== $values);
+
+        return $this->join($values, $this->pipeline);
+    }
+
+    /**
+     * Prepends the pipeline with a list of values.
+     *
+     * @param mixed ...$vector
+     */
+    public function unshift(...$vector): self
+    {
+        return $this->prepend($vector);
+    }
+
+    /**
+     * Determine if the internal pipeline will be replaced when appending/prepending.
+     *
+     * Utility method for appending/prepending methods.
+     */
+    private function willReplace(iterable $values = null): bool
+    {
+        // Nothing needs to be done here.
+        /** @phan-suppress-next-line PhanTypeComparisonFromArray */
+        if (null === $values || [] === $values) {
+            return true;
+        }
+
+        // No shortcuts are applicable if the pipeline was initialized.
+        if ([] !== $this->pipeline && null !== $this->pipeline) {
+            return false;
+        }
+
+        // Install an array as it is.
+        if (is_array($values)) {
+            $this->pipeline = $values;
+
+            return true;
+        }
+
+        // Else we use ownself to handle edge cases.
+        $this->pipeline = new self($values);
+
+        return true;
+    }
+
+    /**
+     * Replace the internal pipeline with a combination of two non-empty iterables, array-optimized.
+     *
+     * Utility method for appending/prepending methods.
+     */
+    private function join(iterable $left, iterable $right): self
+    {
+        // We got two arrays, that's what we will use.
+        if (is_array($left) && is_array($right)) {
+            $this->pipeline = array_merge($left, $right);
+
+            return $this;
+        }
+
+        // Last, join the hard way.
+        $this->pipeline = self::joinYield($left, $right);
+
+        return $this;
+    }
+
+    /**
+     * Replace the internal pipeline with a combination of two non-empty iterables, generator-way.
+     */
+    private static function joinYield(iterable $left, iterable $right): iterable
+    {
+        yield from $left;
+        yield from $right;
+    }
+
+    /**
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
      * @param ?callable $func
-     *
-     * @psalm-suppress InvalidArgument
      *
      * @return $this
      */
@@ -88,6 +206,7 @@ class Standard implements IteratorAggregate, Countable
         };
 
         return $this->map(static function (iterable $args = []) use ($func) {
+            /** @psalm-suppress InvalidArgument */
             return $func(...$args);
         });
     }
@@ -109,7 +228,6 @@ class Standard implements IteratorAggregate, Countable
 
         // That's the standard case for any next stages.
         if (is_iterable($this->pipeline)) {
-            /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -178,7 +296,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (is_iterable($this->pipeline)) {
-            /** @phan-suppress-next-line PhanTypeMismatchArgument */
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
             return $this;
@@ -231,11 +348,10 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        /** @var Iterator $iterator */
-        $iterator = $this->pipeline;
+        assert($this->pipeline instanceof Iterator);
 
-        /** @phan-suppress-next-line PhanTypeMismatchArgumentInternal */
-        $this->pipeline = new CallbackFilterIterator($iterator, $func);
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
@@ -390,9 +506,12 @@ class Standard implements IteratorAggregate, Countable
             return $input;
         }
 
-        return (static function (iterable $input) {
-            yield from $input;
-        })($input);
+        return self::generatorFromIterable($input);
+    }
+
+    private static function generatorFromIterable(iterable $input): Generator
+    {
+        yield from $input;
     }
 
     /**
