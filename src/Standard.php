@@ -206,6 +206,7 @@ class Standard implements IteratorAggregate, Countable
         };
 
         return $this->map(static function (iterable $args = []) use ($func) {
+            /** @psalm-suppress InvalidArgument */
             return $func(...$args);
         });
     }
