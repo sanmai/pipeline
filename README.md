@@ -97,7 +97,7 @@ All entry points always return an instance of the pipeline.
 |  Method     | Details                       | Use with       |
 | ----------- | ----------------------------- | ----------- |
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
-| `take()`  | Takes any iterable, including arrays, initializes a pipeline with it.  | `use function Pipeline\take;` |
+| `take()`  | Takes any iterables, including arrays, joining them together in succession.  | `use function Pipeline\take;` |
 | `fromArray()`  | Takes an array, initializes a pipeline with it.  | `use function Pipeline\fromArray;` |
 | `zip()`  | Takes an iterable, and several more, merging them together.  | `use function Pipeline\zip;` |
 
@@ -108,6 +108,10 @@ All entry points always return an instance of the pipeline.
 | ----------- | ----------------------------- | ----------------- |
 | `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `SelectMany`                  |
 | `cast()`    | Takes a callback that for each input value expected to return another single value. Unlike `map()`, it assumes no special treatment for generators. Provided no callback does nothing. | `array_map`, `Select`                  |
+| `append()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
+| `push()` | Appends the arguments to the end of the pipeline. | `array_push` |
+| `prepend()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
+| `unshift()` | Prepends the pipeline with a list of values. | `array_unshift` |
 | `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
