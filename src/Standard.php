@@ -197,8 +197,6 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func
      *
-     * @psalm-suppress InvalidArgument
-     *
      * @return $this
      */
     public function unpack(?callable $func = null): self
@@ -349,10 +347,10 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        /** @var Iterator $iterator */
-        $iterator = $this->pipeline;
+        assert($this->pipeline instanceof Iterator);
 
-        $this->pipeline = new CallbackFilterIterator($iterator, $func);
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
@@ -507,9 +505,12 @@ class Standard implements IteratorAggregate, Countable
             return $input;
         }
 
-        return (static function (iterable $input) {
-            yield from $input;
-        })($input);
+        return self::generatorFromIterable($input);
+    }
+
+    private static function generatorFromIterable(iterable $input): Generator
+    {
+        yield from $input;
     }
 
     /**
