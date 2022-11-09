@@ -164,7 +164,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Replace the internal pipeline with a combination of two non-empty iterables.
+     * Replace the internal pipeline with a combination of two non-empty iterables, array-optimized.
      *
      * Utility method for appending/prepending methods.
      */
@@ -178,12 +178,18 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Last, join the hard way.
-        $this->pipeline = (static function () use ($left, $right) {
-            yield from $left;
-            yield from $right;
-        })();
+        $this->pipeline = self::joinYield($left, $right);
 
         return $this;
+    }
+
+    /**
+     * Replace the internal pipeline with a combination of two non-empty iterables, generator-way.
+     */
+    private static function joinYield(iterable $left, iterable $right): iterable
+    {
+        yield from $left;
+        yield from $right;
     }
 
     /**
