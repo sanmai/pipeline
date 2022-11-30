@@ -181,7 +181,7 @@ final class SliceTest extends TestCase
             'input' => ['one' => 1, 'two' => 2, 3, 23 => 4],
             'offset' => 2,
             'length' => 2,
-            'useKeys' => true,
+            'preserve_keys' => true,
         ];
 
         yield [
@@ -270,13 +270,13 @@ final class SliceTest extends TestCase
      *
      * @covers \Pipeline\Standard::slice()
      */
-    public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void
+    public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = fromArray($input);
 
         $this->assertSame(
             $expected,
-            $pipeline->slice($offset, $length)->toArray($useKeys)
+            $pipeline->slice($offset, $length)->toArray($preserve_keys)
         );
     }
 
@@ -285,7 +285,7 @@ final class SliceTest extends TestCase
      *
      * @covers \Pipeline\Standard::slice()
      */
-    public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $useKeys = false): void
+    public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = map(static function () use ($input) {
             yield from $input;
@@ -294,7 +294,7 @@ final class SliceTest extends TestCase
         try {
             $this->assertSame(
                 $expected,
-                $pipeline->slice($offset, $length)->toArray($useKeys)
+                $pipeline->slice($offset, $length)->toArray($preserve_keys)
             );
         } catch (InvalidArgumentException $e) {
             if ('Not implemented yet' === $e->getMessage()) {

@@ -85,8 +85,8 @@ final class AppendPrependTest extends TestCase
             $pipeline->push(...$iterable ?? []);
         }
 
-        $useKeys = !is_numeric(key($expected));
-        $this->assertSame($expected, $pipeline->toArray($useKeys));
+        $preserve_keys = !is_numeric(key($expected));
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
     public function provideAppend(): iterable
@@ -109,8 +109,8 @@ final class AppendPrependTest extends TestCase
             $pipeline->append($iterable);
         }
 
-        $useKeys = !is_numeric(key($expected));
-        $this->assertSame($expected, $pipeline->toArray($useKeys));
+        $preserve_keys = !is_numeric(key($expected));
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
     public function providePrependArrays(): iterable
@@ -145,8 +145,8 @@ final class AppendPrependTest extends TestCase
             $pipeline->unshift(...$iterable ?? []);
         }
 
-        $useKeys = !is_numeric(key($expected));
-        $this->assertSame($expected, $pipeline->toArray($useKeys));
+        $preserve_keys = !is_numeric(key($expected));
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
     public function providePrepend(): iterable
@@ -169,8 +169,8 @@ final class AppendPrependTest extends TestCase
             $pipeline->prepend($iterable);
         }
 
-        $useKeys = !is_numeric(key($expected));
-        $this->assertSame($expected, $pipeline->toArray($useKeys));
+        $preserve_keys = !is_numeric(key($expected));
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
     private function skipOnPHP7(array $expected): void

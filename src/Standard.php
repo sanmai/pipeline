@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use function array_chunk;
 use function array_filter;
 use function array_flip;
 use function array_map;
@@ -209,6 +210,52 @@ class Standard implements IteratorAggregate, Countable
             /** @psalm-suppress InvalidArgument */
             return $func(...$args);
         });
+    }
+
+    /**
+     * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
+     *
+     * @param int<1, max> $length        the size of each chunk
+     * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     *
+     * @return $this
+     */
+    public function chunk(int $length, bool $preserve_keys = false): self
+    {
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $this;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
+            return $this;
+        }
+
+        // Array shortcut
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_chunk($this->pipeline, $length, $preserve_keys);
+
+            return $this;
+        }
+
+        $this->pipeline = self::toChunks(
+            self::makeNonRewindable($this->pipeline),
+            $length,
+            $preserve_keys
+        );
+
+        return $this;
+    }
+
+    /**
+     * @psalm-param positive-int  $length
+     */
+    private static function toChunks(Generator $input, int $length, bool $preserve_keys): iterable
+    {
+        while ($input->valid()) {
+            yield iterator_to_array(self::take($input, $length), $preserve_keys);
+        }
     }
 
     /**
@@ -446,7 +493,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
      */
-    public function toArray(bool $useKeys = false): array
+    public function toArray(bool $preserve_keys = false): array
     {
         if (null === $this->pipeline) {
             // With non-primed pipeline just return an empty array.
@@ -460,7 +507,7 @@ class Standard implements IteratorAggregate, Countable
 
         // We got what we need, moving along.
         if (is_array($this->pipeline)) {
-            if ($useKeys) {
+            if ($preserve_keys) {
                 return $this->pipeline;
             }
 
@@ -469,7 +516,7 @@ class Standard implements IteratorAggregate, Countable
 
         // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return iterator_to_array($this, $useKeys);
+        return iterator_to_array($this, $preserve_keys);
     }
 
     /**
