@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
+use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
@@ -34,6 +35,12 @@ final class ChunkTest extends TestCase
     public function provideArrays(): iterable
     {
         yield [false, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [4, 5]]];
+
+        yield [true, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [3 => 4, 4 => 5]]];
+
+        yield [true, 2, ['a' => 1, 'b' => 2, 'c' => 3], [['a' => 1, 'b' => 2], ['c' => 3]]];
+
+        yield [false, 2, ['a' => 1, 'b' => 2, 'c' => 3], [[1, 2], [3]]];
     }
 
     public function provideIterables(): iterable
@@ -48,6 +55,11 @@ final class ChunkTest extends TestCase
 
             $iteratorItem = $item;
             $iteratorItem[2] = new IteratorIterator(new ArrayIterator($iteratorItem[2]));
+
+            yield $iteratorItem;
+
+            $iteratorItem = $item;
+            $iteratorItem[2] = fromArray($iteratorItem[2]);
 
             yield $iteratorItem;
         }
