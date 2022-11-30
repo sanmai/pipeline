@@ -23,8 +23,8 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
-use function Pipeline\take;
 use Pipeline\Standard;
+use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard
