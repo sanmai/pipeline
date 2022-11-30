@@ -39,6 +39,8 @@ final class ChunkTest extends TestCase
 
         yield [false, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [4, 5]]];
 
+        yield [false, 1, [1, 2, 3, 4, 5], [[1], [2], [3], [4], [5]]];
+
         yield [true, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [3 => 4, 4 => 5]]];
 
         yield [true, 2, ['a' => 1, 'b' => 2, 'c' => 3], [['a' => 1, 'b' => 2], ['c' => 3]]];
