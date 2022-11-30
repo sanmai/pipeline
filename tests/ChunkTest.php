@@ -24,6 +24,7 @@ use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\take;
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard
@@ -34,6 +35,8 @@ final class ChunkTest extends TestCase
 {
     public function provideArrays(): iterable
     {
+        yield [false, 3, [], []];
+
         yield [false, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [4, 5]]];
 
         yield [true, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [3 => 4, 4 => 5]]];
@@ -75,5 +78,14 @@ final class ChunkTest extends TestCase
         $pipeline->chunk($length, $preserve_keys);
 
         $this->assertSame($expected, $pipeline->toArray($preserve_keys));
+    }
+
+    public function testChunkNoop(): void
+    {
+        $pipeline = new Standard();
+
+        $pipeline->chunk(100);
+
+        $this->assertSame([], $pipeline->toArray());
     }
 }
