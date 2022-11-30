@@ -215,8 +215,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
      *
-     * @param int  $length        the size of each chunk
-     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     * @param int<1, max> $length        the size of each chunk
+     * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
      * @return $this
      */
@@ -248,6 +248,9 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
+    /**
+     * @psalm-param positive-int  $length
+     */
     private static function toChunks(Generator $input, int $length, bool $preserve_keys): iterable
     {
         while ($input->valid()) {
