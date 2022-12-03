@@ -49,6 +49,8 @@ use Traversable;
 
 /**
  * Concrete pipeline with sensible default callbacks.
+ *
+ * @template-implements IteratorAggregate<mixed, mixed>
  */
 class Standard implements IteratorAggregate, Countable
 {
@@ -624,6 +626,7 @@ class Standard implements IteratorAggregate, Countable
     {
         // Consume until seen enough.
         foreach ($input as $_) {
+            /** @psalm-suppress DocblockTypeContradiction */
             if (0 === $skip--) {
                 break;
             }
