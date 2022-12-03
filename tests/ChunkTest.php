@@ -39,7 +39,7 @@ final class ChunkTest extends TestCase
 
         yield [false, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [4, 5]]];
 
-        yield [false, 1, [1, 2, 3, 4, 5], [[1], [2], [3], [4], [5]]];
+        yield [null, 1, [1, 2, 3, 4, 5], [[1], [2], [3], [4], [5]]];
 
         yield [true, 3, [1, 2, 3, 4, 5], [[1, 2, 3], [3 => 4, 4 => 5]]];
 
@@ -73,13 +73,17 @@ final class ChunkTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
-    public function testChunk(bool $preserve_keys, int $length, iterable $input, array $expected): void
+    public function testChunk(?bool $preserve_keys, int $length, iterable $input, array $expected): void
     {
         $pipeline = take($input);
 
-        $pipeline->chunk($length, $preserve_keys);
+        if (null === $preserve_keys) {
+            $pipeline->chunk($length);
+        } else {
+            $pipeline->chunk($length, $preserve_keys);
+        }
 
-        $this->assertSame($expected, $pipeline->toArray($preserve_keys));
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys ?? false));
     }
 
     public function testChunkNoop(): void
