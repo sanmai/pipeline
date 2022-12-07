@@ -99,7 +99,7 @@ All entry points always return an instance of the pipeline.
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
 | `take()`  | Takes any iterables, including arrays, joining them together in succession.  | `use function Pipeline\take;` |
 | `fromArray()`  | Takes an array, initializes a pipeline with it.  | `use function Pipeline\fromArray;` |
-| `zip()`  | Takes an iterable, and several more, merging them together.  | `use function Pipeline\zip;` |
+| `zip()`  | Takes an iterable, and several more, transposing them together.  | `use function Pipeline\zip;` |
 
 
 # Instance methods in a nutshell
@@ -112,7 +112,7 @@ All entry points always return an instance of the pipeline.
 | `push()` | Appends the arguments to the end of the pipeline. | `array_push` |
 | `prepend()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
 | `unshift()` | Prepends the pipeline with a list of values. | `array_unshift` |
-| `zip()`  | Takes a number of iterables, merging them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
+| `zip()`  | Takes a number of iterables, transposing them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
