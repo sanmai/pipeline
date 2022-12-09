@@ -23,7 +23,7 @@ jobs:
           - '8.0'
           - '8.1'
           - '8.2'
-          - 'latest'
+          - '8.3'
         coverage: ['pcov']
         dependencies: ['']
         include:
@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -41,7 +41,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/composer
           key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
@@ -72,12 +72,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: 8.0
-      PHP_CS_FIXER_VERSION: v3.11.0
+      PHP_VERSION: '8.1'
+      PHP_CS_FIXER_VERSION: v3.13.0
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -86,7 +86,7 @@ jobs:
           tools: php-cs-fixer:${{ env.PHP_CS_FIXER_VERSION }}
 
       - name: Restore PHP-CS-Fixer cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .php_cs.cache
           key: "php-cs-fixer"
@@ -106,7 +106,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -117,7 +117,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/composer
           key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
