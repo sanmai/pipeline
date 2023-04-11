@@ -19,15 +19,15 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use function abs;
 use ArrayIterator;
 use IteratorIterator;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
+use function abs;
 use function mt_rand;
 use function mt_srand;
 use function ord;
-use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
-use Pipeline\Standard;
 use function Pipeline\take;
 use function range;
 use function sin;

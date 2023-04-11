@@ -19,9 +19,9 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\TestCase;
 use function ob_end_clean;
 use function ob_start;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
