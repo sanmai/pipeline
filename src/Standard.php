@@ -204,9 +204,9 @@ class Standard implements IteratorAggregate, Countable
      */
     public function unpack(?callable $func = null): self
     {
-        $func = $func ?? static function (...$args) {
-            yield from $args;
-        };
+        if (null === $func) {
+            return $this->flatten();
+        }
 
         return $this->map(static function (iterable $args = []) use ($func) {
             /** @psalm-suppress InvalidArgument */
@@ -219,7 +219,9 @@ class Standard implements IteratorAggregate, Countable
      */
     public function flatten(): self
     {
-        return $this->unpack();
+        return $this->map(static function (iterable $args = []) {
+            yield from $args;
+        });
     }
 
     /**
