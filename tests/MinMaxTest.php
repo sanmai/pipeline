@@ -19,16 +19,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use function array_merge;
-use function array_reverse;
 use ArrayIterator;
-use function call_user_func;
-use function count;
 use IteratorIterator;
-use function max;
-use function min;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use function array_merge;
+use function array_reverse;
+use function call_user_func;
+use function count;
+use function max;
+use function min;
 use function Pipeline\take;
 use function range;
 use function shuffle;

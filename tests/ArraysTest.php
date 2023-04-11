@@ -19,10 +19,10 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use function iterator_to_array;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionObject;
+use function iterator_to_array;
 
 /**
  * @covers \Pipeline\Standard

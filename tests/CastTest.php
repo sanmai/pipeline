@@ -21,8 +21,8 @@ namespace Tests\Pipeline;
 
 use Generator;
 use PHPUnit\Framework\TestCase;
-use function Pipeline\map;
 use Pipeline\Standard;
+use function Pipeline\map;
 use function Pipeline\take;
 
 /**

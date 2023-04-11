@@ -20,8 +20,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use function iterator_to_array;
 use PHPUnit\Framework\TestCase;
+use function iterator_to_array;
 
 /**
  * @coversNothing
