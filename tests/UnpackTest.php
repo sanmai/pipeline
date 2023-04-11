@@ -81,4 +81,16 @@ final class UnpackTest extends TestCase
             [3],
         ])->unpack()->toArray());
     }
+
+    /**
+     * @covers \Pipeline\Standard::flatten()
+     */
+    public function testFlatten(): void
+    {
+        $this->assertSame([1, 2, 3], fromArray([
+            new ArrayIterator([1]),
+            fromArray([2]),
+            [3],
+        ])->flatten()->toArray());
+    }
 }

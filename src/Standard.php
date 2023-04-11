@@ -215,6 +215,16 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Flattens inputs: arrays become lists.
+     *
+     * @return self
+     */
+    public function flatten(): self
+    {
+        return $this->unpack();
+    }
+
+    /**
      * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
      *
      * @param int<1, max> $length        the size of each chunk
