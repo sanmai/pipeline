@@ -19,6 +19,14 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use ArrayIterator;
+use CallbackFilterIterator;
+use Countable;
+use EmptyIterator;
+use Generator;
+use Iterator;
+use IteratorAggregate;
+use Traversable;
 use function array_chunk;
 use function array_filter;
 use function array_flip;
@@ -28,24 +36,16 @@ use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
-use ArrayIterator;
 use function assert;
-use CallbackFilterIterator;
 use function count;
-use Countable;
-use EmptyIterator;
-use Generator;
 use function is_array;
 use function is_iterable;
 use function is_string;
-use Iterator;
 use function iterator_to_array;
-use IteratorAggregate;
 use function max;
 use function min;
 use function mt_getrandmax;
 use function mt_rand;
-use Traversable;
 
 /**
  * Concrete pipeline with sensible default callbacks.

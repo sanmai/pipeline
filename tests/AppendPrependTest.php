@@ -20,13 +20,13 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
+use PHPUnit\Framework\TestCase;
 use function count;
 use function is_numeric;
 use function key;
-use const PHP_VERSION_ID;
-use PHPUnit\Framework\TestCase;
 use function Pipeline\take;
 use function reset;
+use const PHP_VERSION_ID;
 
 /**
  * @covers \Pipeline\Standard

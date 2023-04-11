@@ -20,12 +20,12 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArgumentCountError;
-use function class_exists;
-use function is_callable;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use TypeError;
+use function class_exists;
+use function is_callable;
 
 /**
  * @covers \Pipeline\Standard

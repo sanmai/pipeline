@@ -19,16 +19,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use IteratorIterator;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 use function array_flip;
 use function array_reverse;
-use ArrayIterator;
 use function call_user_func;
 use function chr;
 use function count;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
-use Pipeline\Standard;
 use function Pipeline\take;
 use function shuffle;
 

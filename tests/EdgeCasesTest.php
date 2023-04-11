@@ -21,12 +21,12 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use Iterator;
-use function iterator_to_array;
 use IteratorIterator;
 use NoRewindIterator;
 use PHPUnit\Framework\TestCase;
-use function Pipeline\map;
 use Pipeline\Standard;
+use function iterator_to_array;
+use function Pipeline\map;
 use function range;
 
 /**

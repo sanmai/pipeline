@@ -19,13 +19,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use function array_map;
 use ArrayIterator;
-use function max;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
+use function array_map;
+use function max;
 use function Pipeline\fromArray;
 use function Pipeline\map;
-use Pipeline\Standard;
 use function Pipeline\take;
 use function Pipeline\zip;
 use function range;
@@ -106,8 +106,7 @@ final class ZipTest extends TestCase
     {
         $actual = take(['a', 'b', 'c'])
             ->zip([1, 2], [3])
-            ->toArray()
-        ;
+            ->toArray();
 
         $this->assertSame([
             ['a', 1, 3],
@@ -120,8 +119,7 @@ final class ZipTest extends TestCase
     {
         $actual = take(['a', 'b', 'c'])
             ->zip([1], [2, 3])
-            ->toArray()
-        ;
+            ->toArray();
 
         $this->assertSame([
             ['a', 1, 2],
@@ -134,8 +132,7 @@ final class ZipTest extends TestCase
     {
         $actual = take(['a', 'b', 'c'])
             ->zip(range(1, 10), range(10, 100, 10))
-            ->toArray()
-        ;
+            ->toArray();
 
         $this->assertSame([
             ['a', 1, 10],

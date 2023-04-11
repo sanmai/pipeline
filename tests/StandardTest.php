@@ -21,16 +21,16 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use BadMethodCallException;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
+use ReflectionClass;
 use function call_user_func;
 use function iterator_count;
 use function iterator_to_array;
 use function max;
-use PHPUnit\Framework\TestCase;
 use function Pipeline\fromArray;
 use function Pipeline\map;
-use Pipeline\Standard;
 use function range;
-use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard
