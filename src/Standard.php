@@ -216,6 +216,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Flattens inputs: arrays become lists.
+     *
+     * @return $this
      */
     public function flatten(): self
     {
