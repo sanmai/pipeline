@@ -113,7 +113,8 @@ All entry points always return an instance of the pipeline.
 | `prepend()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
 | `unshift()` | Prepends the pipeline with a list of values. | `array_unshift` |
 | `zip()`  | Takes a number of iterables, transposing them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
-| `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |  `flat_map`, `flatten`                 |
+| `flatten()` |  Flattens inputs: `[[1, 2], [3, 4]]` becomes `[1, 2, 3, 4]`. |  `flat_map`, `flatten`, `collect_concat`      |
+| `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
@@ -242,6 +243,18 @@ $pipeline->map(function () {
 });
 ```
 
+## `$pipeline->flatten()`
+
+Flatten inputs:
+
+```php
+$pipeline->map(function () {
+    yield [1];
+    yield [2, 3];
+})->unpack()->toArray();
+// [1, 2, 3]
+```
+
 ## `$pipeline->unpack()`
 
 An extra variant of `map` which unpacks arrays into arguments for a callback.
@@ -269,15 +282,7 @@ $pipeline->unpack(function ($a, array $b, \DateTime ...$dates) {
 
 You can have all kinds of standard type checks with ease too.
 
-With no callback, the default callback for `unpack()` will flatten inputs:
-
-```php
-$pipeline->map(function () {
-    yield [1];
-    yield [2, 3];
-})->unpack()->toArray();
-// [1, 2, 3]
-```
+With no callback, the default callback for `unpack()` will flatten inputs as in `flatten()`.
 
 ## `$pipeline->cast()`
 
