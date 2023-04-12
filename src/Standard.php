@@ -196,6 +196,18 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Flattens inputs: arrays become lists.
+     *
+     * @return $this
+     */
+    public function flatten(): self
+    {
+        return $this->map(static function (iterable $args = []) {
+            yield from $args;
+        });
+    }
+
+    /**
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
      * @param ?callable $func
@@ -204,9 +216,9 @@ class Standard implements IteratorAggregate, Countable
      */
     public function unpack(?callable $func = null): self
     {
-        $func = $func ?? static function (...$args) {
-            yield from $args;
-        };
+        if (null === $func) {
+            return $this->flatten();
+        }
 
         return $this->map(static function (iterable $args = []) use ($func) {
             /** @psalm-suppress InvalidArgument */
