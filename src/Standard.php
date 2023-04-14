@@ -26,6 +26,7 @@ use EmptyIterator;
 use Generator;
 use Iterator;
 use IteratorAggregate;
+use Pipeline\Helper\RunningVariance;
 use Traversable;
 use function array_chunk;
 use function array_filter;
@@ -63,10 +64,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Contructor with an optional source of data.
-     *
-     * @param ?iterable $input
      */
-    public function __construct(iterable $input = null)
+    public function __construct(?iterable $input = null)
     {
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
@@ -79,10 +78,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Appends the contents of an interable to the end of the pipeline.
-     *
-     * @param ?iterable $values
      */
-    public function append(iterable $values = null): self
+    public function append(?iterable $values = null): self
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -108,10 +105,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Prepends the pipeline with the contents of an iterable.
-     *
-     * @param ?iterable $values
      */
-    public function prepend(iterable $values = null): self
+    public function prepend(?iterable $values = null): self
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -140,7 +135,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * Utility method for appending/prepending methods.
      */
-    private function willReplace(iterable $values = null): bool
+    private function willReplace(?iterable $values = null): bool
     {
         // Nothing needs to be done here.
         /** @phan-suppress-next-line PhanTypeComparisonFromArray */
@@ -263,7 +258,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @psalm-param positive-int  $length
+     * @psalm-param positive-int $length
      */
     private static function toChunks(Generator $input, int $length, bool $preserve_keys): iterable
     {
@@ -991,5 +986,68 @@ class Standard implements IteratorAggregate, Countable
         foreach ($previous as $key => $value) {
             yield $value => $key;
         }
+    }
+
+    /**
+     * Feeds in an instance of RunningVariance.
+     *
+     * @param RunningVariance $variance the instance of RunningVariance
+     * @param ?callable       $castFunc the cast callback, returning ?float; null values are not counted
+     *
+     * @return $this
+     */
+    public function feedRunningVariance(RunningVariance $variance, ?callable $castFunc = null)
+    {
+        if (null === $castFunc) {
+            $castFunc = 'floatval';
+        }
+
+        return $this->cast(static function ($value) use ($variance, $castFunc) {
+            $float = $castFunc($value);
+
+            if (null !== $float) {
+                $variance->observe($float);
+            }
+
+            // Returning the original value here
+            return $value;
+        });
+    }
+
+    public function onlineVariance(?callable $castFunc = null): RunningVariance
+    {
+        $variance = new RunningVariance();
+
+        $this->feedRunningVariance($variance, $castFunc);
+
+        return $variance;
+    }
+
+    public function variance(?callable $castFunc = null): RunningVariance
+    {
+        $variance = new RunningVariance();
+
+        if (null === $this->pipeline) {
+            // No-op: null.
+            return $variance;
+        }
+
+        if ([] === $this->pipeline) {
+            // No-op: an empty array.
+            return $variance;
+        }
+
+        $this->feedRunningVariance($variance, $castFunc);
+
+        if (is_array($this->pipeline)) {
+            // We are done!
+            return $variance;
+        }
+
+        foreach ($this->pipeline as $_) {
+            // Discard
+        }
+
+        return $variance;
     }
 }
