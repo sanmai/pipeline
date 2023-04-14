@@ -35,10 +35,10 @@ class RunningVariance
     /** The number of observed values. */
     private int $count = 0;
 
-    /** The mean value. */
+    /** First moment: the mean value. */
     private float $mean = 0.0;
 
-    /** The aggregated squared distance from the mean. */
+    /** Second moment: the aggregated squared distance from the mean. */
     private float $m2 = 0.0;
 
     public function __construct(self ...$spiesToMerge)

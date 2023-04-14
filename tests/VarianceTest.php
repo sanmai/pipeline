@@ -37,24 +37,24 @@ final class VarianceTest extends TestCase
     {
         $pipeline = new \Pipeline\Standard();
 
-        $this->assertSame(0, $pipeline->variance()->getCount());
+        $this->assertSame(0, $pipeline->statistics()->getCount());
     }
 
     public function testVarianceEmptyArray(): void
     {
-        $this->assertSame(0, fromArray([])->variance()->getCount());
+        $this->assertSame(0, fromArray([])->statistics()->getCount());
     }
 
     public function testVarianceNANPassThrough(): void
     {
-        $this->assertNan(fromArray([1.0, 2.0, 3.0, NAN])->variance()->getStandardDeviation());
+        $this->assertNan(fromArray([1.0, 2.0, 3.0, NAN])->statistics()->getStandardDeviation());
     }
 
     public function testVarianceArray(): void
     {
         $this->assertEqualsWithDelta(
             2.2913,
-            fromArray([5, 5, 9, 9, 9, 10, 5, 10, 10])->variance()->getStandardDeviation(),
+            fromArray([5, 5, 9, 9, 9, 10, 5, 10, 10])->statistics()->getStandardDeviation(),
             0.0001
         );
     }
@@ -65,7 +65,7 @@ final class VarianceTest extends TestCase
 
         $this->assertEqualsWithDelta(
             2.2913,
-            map(fn () => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10])->variance()->getStandardDeviation(),
+            map(fn () => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10])->statistics()->getStandardDeviation(),
             0.0001
         );
     }
@@ -74,7 +74,7 @@ final class VarianceTest extends TestCase
     {
         $pipeline = map(fn () => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
 
-        $variance = $pipeline->variance(static function (int $number): ?float {
+        $variance = $pipeline->statistics(static function (int $number): ?float {
             if ($number < 0 || $number > 10) {
                 return null;
             }

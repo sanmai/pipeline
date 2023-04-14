@@ -182,7 +182,7 @@ final class RunningVarianceTest extends TestCase
 
         $benchmark = self::standard_deviation($numbers);
 
-        $variance = take($numbers)->variance();
+        $variance = take($numbers)->statistics();
 
         $this->assertEqualsWithDelta($benchmark, $variance->getStandardDeviation(), $sigma / 100); // 1%
     }

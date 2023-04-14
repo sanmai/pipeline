@@ -1023,7 +1023,7 @@ class Standard implements IteratorAggregate, Countable
         return $variance;
     }
 
-    public function variance(?callable $castFunc = null): RunningVariance
+    public function statistics(?callable $castFunc = null): RunningVariance
     {
         $variance = new RunningVariance();
 
