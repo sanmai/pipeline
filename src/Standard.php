@@ -39,7 +39,6 @@ use function array_values;
 use function assert;
 use function count;
 use function is_array;
-use function is_iterable;
 use function is_string;
 use function iterator_to_array;
 use function max;
@@ -88,14 +87,20 @@ class Standard implements IteratorAggregate, Countable
         $this->pipeline = $input;
     }
 
+    /**
+     * @psalm-suppress TypeDoesNotContainType
+     */
     private function empty(): bool
     {
         return !isset($this->pipeline) || [] === $this->pipeline;
     }
 
+    /**
+     * @phan-suppress PhanTypeObjectUnsetDeclaredProperty
+     */
     private function discard(): void
     {
-        $this->pipeline = null;
+        unset($this->pipeline);
     }
 
     /**
@@ -249,9 +254,6 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
-
         // Array shortcut
         if (is_array($this->pipeline)) {
             $this->pipeline = array_chunk($this->pipeline, $length, $preserve_keys);
@@ -294,7 +296,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // That's the standard case for any next stages.
-        if (isset($this->pipeline) && is_iterable($this->pipeline)) {
+        if (isset($this->pipeline)) {
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -348,6 +350,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func a callback must return a value
      *
+     * @psalm-suppress RedundantCondition
+     *
      * @return $this
      */
     public function cast(?callable $func = null): self
@@ -357,13 +361,13 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // We got an array, that's what we need. Moving along.
-        if (is_array($this->pipeline ?? null)) {
+        if (isset($this->pipeline) && is_array($this->pipeline)) {
             $this->pipeline = array_map($func, $this->pipeline);
 
             return $this;
         }
 
-        if (is_iterable($this->pipeline ?? null)) {
+        if (isset($this->pipeline)) {
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
             return $this;
@@ -413,7 +417,7 @@ class Standard implements IteratorAggregate, Countable
 
         assert($this->pipeline instanceof Iterator);
 
-        /** @psalm-suppress1 ArgumentTypeCoercion */
+        /** @psalm-suppress ArgumentTypeCoercion */
         $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
@@ -548,9 +552,6 @@ class Standard implements IteratorAggregate, Countable
             return 0;
         }
 
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
-
         $result = 0;
 
         foreach ($this->pipeline as $value) {
@@ -590,9 +591,6 @@ class Standard implements IteratorAggregate, Countable
             // With non-primed pipeline just move along.
             return $this;
         }
-
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
 
         if (0 === $length) {
             // We're not consuming anything assuming total laziness.
@@ -718,8 +716,14 @@ class Standard implements IteratorAggregate, Countable
      */
     public function zip(iterable ...$inputs)
     {
+        if ([] === $inputs) {
+            return $this;
+        }
+
         if (!isset($this->pipeline)) {
-            $this->pipeline = array_shift($inputs);
+            $input = array_shift($inputs);
+            /** @var iterable $input */
+            $this->pipeline = $input;
         }
 
         if ([] === $inputs) {
@@ -783,9 +787,6 @@ class Standard implements IteratorAggregate, Countable
         if ($this->empty()) {
             return [];
         }
-
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
 
         if ($size <= 0) {
             // Discard the state to emulate full consumption
@@ -903,9 +904,6 @@ class Standard implements IteratorAggregate, Countable
             return null;
         }
 
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
-
         if (is_array($this->pipeline)) {
             /** @psalm-suppress ArgumentTypeCoercion */
             return min($this->pipeline);
@@ -944,9 +942,6 @@ class Standard implements IteratorAggregate, Countable
             return null;
         }
 
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
-
         if (is_array($this->pipeline)) {
             /** @psalm-suppress ArgumentTypeCoercion */
             return max($this->pipeline);
@@ -975,9 +970,6 @@ class Standard implements IteratorAggregate, Countable
             // No-op: null.
             return $this;
         }
-
-        // Static analyzer hint
-        assert(null !== $this->pipeline && [] !== $this->pipeline);
 
         if (is_array($this->pipeline)) {
             $this->pipeline = array_flip($this->pipeline);
