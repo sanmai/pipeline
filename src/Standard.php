@@ -778,6 +778,9 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if ($size <= 0) {
+            // Discard the state to emulate full consumption
+            $this->pipeline = null;
+
             return [];
         }
 
