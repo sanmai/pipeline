@@ -775,7 +775,7 @@ class Standard implements IteratorAggregate, Countable
         assert(null !== $this->pipeline && [] !== $this->pipeline);
 
         if ($size <= 0) {
-            // Discard the state to emulate a full consumption
+            // Discard the state to emulate full consumption
             $this->pipeline = null;
 
             return [];
