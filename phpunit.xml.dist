@@ -1,23 +1,27 @@
+<?xml version="1.0"?>
 <phpunit bootstrap="vendor/autoload.php"
          executionOrder="random"
          resolveDependencies="true"
-         forceCoversAnnotation="true"
-         colors="true">
-
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         requireCoverageMetadata="true"
+>
     <testsuites>
         <testsuite name="Main">
             <directory>tests/</directory>
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist>
+    <source>
+        <include>
             <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </source>
 
-    <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-        <log type="coverage-text" target="php://stdout"/>
-    </logging>
+    <coverage>
+        <report>
+          <clover outputFile="build/logs/clover.xml"/>
+          <text outputFile="php://stdout"/>
+        </report>
+    </coverage>
 </phpunit>
