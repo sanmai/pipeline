@@ -990,7 +990,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private function feedRunningVariance(RunningVariance $variance, ?callable $castFunc)
+    private function feedRunningVariance(RunningVariance $variance, ?callable $castFunc): self
     {
         if (null === $castFunc) {
             $castFunc = 'floatval';
@@ -1011,8 +1011,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Feeds in an instance of RunningVariance.
      *
-     * @param RunningVariance $variance the instance of RunningVariance; initialized unless provided
-     * @param ?callable       $castFunc the cast callback, returning ?float; null values are not counted
+     * @param ?RunningVariance &$variance the instance of RunningVariance; initialized unless provided
+     * @param ?callable        $castFunc  the cast callback, returning ?float; null values are not counted
      *
      * @return $this
      */
