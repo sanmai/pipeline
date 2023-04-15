@@ -63,7 +63,7 @@ final class FlipTest extends TestCase
         $this->assertSame([1 => 'a', 'c', 'd'], $keys);
     }
 
-    private function provideInputs(): iterable
+    private static function provideInputs(): iterable
     {
         yield [];
 
@@ -90,9 +90,9 @@ final class FlipTest extends TestCase
         yield ['key1' => 'value1', 'key2' => '2', 'key3' => 'value1'];
     }
 
-    private function provideRandomizedInputs(): iterable
+    private static function provideRandomizedInputs(): iterable
     {
-        foreach ($this->provideInputs() as $input) {
+        foreach (self::provideInputs() as $input) {
             yield $input;
 
             if ([] === $input) {
@@ -111,9 +111,9 @@ final class FlipTest extends TestCase
         }
     }
 
-    public function provideFlipInputs(): iterable
+    public static function provideFlipInputs(): iterable
     {
-        foreach ($this->provideRandomizedInputs() as $input) {
+        foreach (self::provideRandomizedInputs() as $input) {
             $expected = array_flip($input);
 
             yield [$expected, $input];

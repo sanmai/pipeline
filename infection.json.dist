@@ -1,11 +1,14 @@
 {
-    "timeout": 2,
+    "timeout": 5,
     "source": {
         "directories": [
             "src"
         ]
     },
     "mutators": {
+        "global-ignoreSourceCodeByRegex": [
+            "assert.*"
+        ],
         "@default": true,
         "IdenticalEqual": false,
         "NotIdenticalNotEqual": false

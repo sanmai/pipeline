@@ -22,5 +22,8 @@
         </ForbiddenCode>
         <MissingClosureParamType errorLevel="suppress" />
         <MissingClosureReturnType errorLevel="suppress" />
+
+        <RedundantPropertyInitializationCheck errorLevel="suppress" />
+        <PropertyNotSetInConstructor errorLevel="suppress" />
     </issueHandlers>
 </psalm>
