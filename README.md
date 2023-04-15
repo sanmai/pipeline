@@ -14,7 +14,7 @@ This rigorously tested library just works. Pipeline neither defines nor throws a
 
     composer require sanmai/pipeline
 
-The latest version requires PHP 7.1 or above, including PHP 8.0 and later.
+The latest version requires PHP 7.4 or above, including PHP 8.0 and later.
 
 There are earlier versions that work under PHP 5.6 and above, but they are not as feature complete.
 
