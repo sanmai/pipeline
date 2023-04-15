@@ -60,6 +60,7 @@ $config
         'random_api_migration' => false,
         'blank_line_between_import_groups' => false,
         'blank_line_before_statement' => ['statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try']],
+        'no_unset_on_property' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

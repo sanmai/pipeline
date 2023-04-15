@@ -39,7 +39,6 @@ use function array_values;
 use function assert;
 use function count;
 use function is_array;
-use function is_iterable;
 use function is_string;
 use function iterator_to_array;
 use function max;
@@ -55,17 +54,30 @@ use function mt_rand;
 class Standard implements IteratorAggregate, Countable
 {
     /**
-     * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
+     * Pre-primed pipeline.
      *
-     * @var ?iterable
+     * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      */
-    private ?iterable $pipeline;
+    private iterable $pipeline;
 
     /**
      * Contructor with an optional source of data.
      */
     public function __construct(?iterable $input = null)
     {
+        if (null !== $input) {
+            $this->replace($input);
+        }
+    }
+
+    private function replace(iterable $input): void
+    {
+        if (is_array($input)) {
+            $this->pipeline = $input;
+
+            return;
+        }
+
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
         while ($input instanceof IteratorAggregate) {
@@ -73,6 +85,22 @@ class Standard implements IteratorAggregate, Countable
         }
 
         $this->pipeline = $input;
+    }
+
+    /**
+     * @psalm-suppress TypeDoesNotContainType
+     */
+    private function empty(): bool
+    {
+        return !isset($this->pipeline) || [] === $this->pipeline;
+    }
+
+    /**
+     * @phan-suppress PhanTypeObjectUnsetDeclaredProperty
+     */
+    private function discard(): void
+    {
+        unset($this->pipeline);
     }
 
     /**
@@ -86,7 +114,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Static analyzer hints
-        assert(null !== $this->pipeline);
         assert(null !== $values);
 
         return $this->join($this->pipeline, $values);
@@ -113,7 +140,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Static analyzer hints
-        assert(null !== $this->pipeline);
         assert(null !== $values);
 
         return $this->join($values, $this->pipeline);
@@ -143,19 +169,12 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // No shortcuts are applicable if the pipeline was initialized.
-        if ([] !== $this->pipeline && null !== $this->pipeline) {
+        if (!$this->empty()) {
             return false;
         }
 
-        // Install an array as it is.
-        if (is_array($values)) {
-            $this->pipeline = $values;
-
-            return true;
-        }
-
-        // Else we use ownself to handle edge cases.
-        $this->pipeline = new self($values);
+        // Handle edge cases there
+        $this->replace($values);
 
         return true;
     }
@@ -230,13 +249,8 @@ class Standard implements IteratorAggregate, Countable
      */
     public function chunk(int $length, bool $preserve_keys = false): self
     {
-        if (null === $this->pipeline) {
-            // No-op: null.
-            return $this;
-        }
-
-        if ([] === $this->pipeline) {
-            // No-op: an empty array.
+        // No-op: an empty array or null.
+        if ($this->empty()) {
             return $this;
         }
 
@@ -282,7 +296,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // That's the standard case for any next stages.
-        if (is_iterable($this->pipeline)) {
+        if (isset($this->pipeline)) {
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -336,6 +350,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func a callback must return a value
      *
+     * @psalm-suppress RedundantCondition
+     *
      * @return $this
      */
     public function cast(?callable $func = null): self
@@ -345,13 +361,13 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // We got an array, that's what we need. Moving along.
-        if (is_array($this->pipeline)) {
+        if (isset($this->pipeline) && is_array($this->pipeline)) {
             $this->pipeline = array_map($func, $this->pipeline);
 
             return $this;
         }
 
-        if (is_iterable($this->pipeline)) {
+        if (isset($this->pipeline)) {
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
             return $this;
@@ -385,13 +401,8 @@ class Standard implements IteratorAggregate, Countable
      */
     public function filter(?callable $func = null): self
     {
-        if (null === $this->pipeline) {
-            // No-op: null.
-            return $this;
-        }
-
-        if ([] === $this->pipeline) {
-            // No-op: an empty array.
+        // No-op: an empty array or null.
+        if ($this->empty()) {
             return $this;
         }
 
@@ -457,13 +468,17 @@ class Standard implements IteratorAggregate, Countable
      */
     public function fold($initial, ?callable $func = null)
     {
+        if ($this->empty()) {
+            return $initial;
+        }
+
         $func = self::resolveReducer($func);
 
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
         }
 
-        foreach ($this as $value) {
+        foreach ($this->pipeline as $value) {
             $initial = $func($initial, $value);
         }
 
@@ -488,15 +503,15 @@ class Standard implements IteratorAggregate, Countable
 
     public function getIterator(): Traversable
     {
+        if (!isset($this->pipeline)) {
+            return new EmptyIterator();
+        }
+
         if ($this->pipeline instanceof Traversable) {
             return $this->pipeline;
         }
 
-        if (null !== $this->pipeline) {
-            return new ArrayIterator($this->pipeline);
-        }
-
-        return new EmptyIterator();
+        return new ArrayIterator($this->pipeline);
     }
 
     /**
@@ -504,13 +519,8 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toArray(bool $preserve_keys = false): array
     {
-        if (null === $this->pipeline) {
-            // With non-primed pipeline just return an empty array.
-            return [];
-        }
-
-        if ([] === $this->pipeline) {
-            // Empty array is empty.
+        // No-op: an empty array or null.
+        if ($this->empty()) {
             return [];
         }
 
@@ -537,13 +547,8 @@ class Standard implements IteratorAggregate, Countable
      */
     public function count(): int
     {
-        if (null === $this->pipeline) {
+        if ($this->empty()) {
             // With non-primed pipeline just return zero.
-            return 0;
-        }
-
-        if ([] === $this->pipeline) {
-            // Empty array is empty.
             return 0;
         }
 
@@ -582,14 +587,14 @@ class Standard implements IteratorAggregate, Countable
      */
     public function slice(int $offset, ?int $length = null)
     {
-        if (null === $this->pipeline) {
+        if ($this->empty()) {
             // With non-primed pipeline just move along.
             return $this;
         }
 
         if (0 === $length) {
             // We're not consuming anything assuming total laziness.
-            $this->pipeline = null;
+            $this->discard();
 
             return $this;
         }
@@ -711,8 +716,14 @@ class Standard implements IteratorAggregate, Countable
      */
     public function zip(iterable ...$inputs)
     {
-        if (null === $this->pipeline) {
-            $this->pipeline = array_shift($inputs);
+        if ([] === $inputs) {
+            return $this;
+        }
+
+        if (!isset($this->pipeline)) {
+            $input = array_shift($inputs);
+            /** @var iterable $input */
+            $this->pipeline = $input;
         }
 
         if ([] === $inputs) {
@@ -773,13 +784,13 @@ class Standard implements IteratorAggregate, Countable
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
-        if (null === $this->pipeline) {
+        if ($this->empty()) {
             return [];
         }
 
         if ($size <= 0) {
             // Discard the state to emulate full consumption
-            $this->pipeline = null;
+            $this->discard();
 
             return [];
         }
@@ -889,11 +900,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function min()
     {
-        if (null === $this->pipeline) {
-            return null;
-        }
-
-        if ([] === $this->pipeline) {
+        if ($this->empty()) {
             return null;
         }
 
@@ -931,11 +938,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function max()
     {
-        if (null === $this->pipeline) {
-            return null;
-        }
-
-        if ([] === $this->pipeline) {
+        if ($this->empty()) {
             return null;
         }
 
@@ -963,13 +966,8 @@ class Standard implements IteratorAggregate, Countable
      */
     public function flip()
     {
-        if (null === $this->pipeline) {
+        if ($this->empty()) {
             // No-op: null.
-            return $this;
-        }
-
-        if ([] === $this->pipeline) {
-            // No-op: an empty array.
             return $this;
         }
 
