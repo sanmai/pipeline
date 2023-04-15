@@ -26,8 +26,8 @@ use function Pipeline\map;
 
 /**
  * @covers \Pipeline\Standard::feedRunningVariance()
- * @covers \Pipeline\Standard::onlineVariance()
- * @covers \Pipeline\Standard::variance()
+ * @covers \Pipeline\Standard::finalVariance()
+ * @covers \Pipeline\Standard::runningVariance()
  *
  * @internal
  */
@@ -37,24 +37,24 @@ final class VarianceTest extends TestCase
     {
         $pipeline = new \Pipeline\Standard();
 
-        $this->assertSame(0, $pipeline->statistics()->getCount());
+        $this->assertSame(0, $pipeline->finalVariance()->getCount());
     }
 
     public function testVarianceEmptyArray(): void
     {
-        $this->assertSame(0, fromArray([])->statistics()->getCount());
+        $this->assertSame(0, fromArray([])->finalVariance()->getCount());
     }
 
     public function testVarianceNANPassThrough(): void
     {
-        $this->assertNan(fromArray([1.0, 2.0, 3.0, NAN])->statistics()->getStandardDeviation());
+        $this->assertNan(fromArray([1.0, 2.0, 3.0, NAN])->finalVariance()->getStandardDeviation());
     }
 
     public function testVarianceArray(): void
     {
         $this->assertEqualsWithDelta(
             2.2913,
-            fromArray([5, 5, 9, 9, 9, 10, 5, 10, 10])->statistics()->getStandardDeviation(),
+            fromArray([5, 5, 9, 9, 9, 10, 5, 10, 10])->finalVariance()->getStandardDeviation(),
             0.0001
         );
     }
@@ -65,7 +65,37 @@ final class VarianceTest extends TestCase
 
         $this->assertEqualsWithDelta(
             2.2913,
-            map(fn () => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10])->statistics()->getStandardDeviation(),
+            $pipeline->finalVariance()->getStandardDeviation(),
+            0.0001
+        );
+    }
+
+    public function testFinalVarianceReuse(): void
+    {
+        $a = map(fn () => yield from [5, 5, 9, 9]);
+        $variance = $a->finalVariance();
+
+        $b = map(fn () => yield from [9, 10, 5, 10, 10]);
+        $variance = $b->finalVariance(null, $variance);
+
+        $this->assertEqualsWithDelta(
+            2.2913,
+            $variance->getStandardDeviation(),
+            0.0001
+        );
+    }
+
+    public function testRunningVarianceReuse(): void
+    {
+        $a = map(fn () => yield from [5, 5, 9, 9]);
+        $this->assertSame(28, $a->runningVariance($variance)->fold(0));
+
+        $b = map(fn () => yield from [9, 10, 5, 10, 10]);
+        $this->assertSame(44, $b->runningVariance($variance)->fold(0));
+
+        $this->assertEqualsWithDelta(
+            2.2913,
+            $variance->getStandardDeviation(),
             0.0001
         );
     }
@@ -74,7 +104,7 @@ final class VarianceTest extends TestCase
     {
         $pipeline = map(fn () => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
 
-        $variance = $pipeline->statistics(static function (int $number): ?float {
+        $variance = $pipeline->finalVariance(static function (int $number): ?float {
             if ($number < 0 || $number > 10) {
                 return null;
             }
@@ -93,7 +123,7 @@ final class VarianceTest extends TestCase
     {
         $pipeline = map(fn () => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
 
-        $variance = $pipeline->onlineVariance(static function (int $number): ?float {
+        $pipeline->runningVariance($variance, static function (int $number): ?float {
             if ($number < 0 || $number > 10) {
                 return null;
             }
@@ -122,7 +152,7 @@ final class VarianceTest extends TestCase
 
         $variance = new RunningVariance();
 
-        $pipeline->feedRunningVariance($variance, 'floatval');
+        $pipeline->runningVariance($variance, 'floatval');
 
         $this->assertSame(0, $variance->getCount());
 
@@ -142,7 +172,7 @@ final class VarianceTest extends TestCase
 
         $variance = new RunningVariance();
 
-        $pipeline->feedRunningVariance($variance, 'floatval');
+        $pipeline->runningVariance($variance, 'floatval');
 
         // Arrays are eagerly processed
         $this->assertSame(9, $variance->getCount());

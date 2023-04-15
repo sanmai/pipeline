@@ -990,15 +990,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    /**
-     * Feeds in an instance of RunningVariance.
-     *
-     * @param RunningVariance $variance the instance of RunningVariance
-     * @param ?callable       $castFunc the cast callback, returning ?float; null values are not counted
-     *
-     * @return $this
-     */
-    public function feedRunningVariance(RunningVariance $variance, ?callable $castFunc = null)
+    private function feedRunningVariance(RunningVariance $variance, ?callable $castFunc)
     {
         if (null === $castFunc) {
             $castFunc = 'floatval';
@@ -1016,25 +1008,28 @@ class Standard implements IteratorAggregate, Countable
         });
     }
 
-    public function onlineVariance(?callable $castFunc = null): RunningVariance
+    /**
+     * Feeds in an instance of RunningVariance.
+     *
+     * @param RunningVariance $variance the instance of RunningVariance; initialized unless provided
+     * @param ?callable       $castFunc the cast callback, returning ?float; null values are not counted
+     *
+     * @return $this
+     */
+    public function runningVariance(RunningVariance &$variance = null, ?callable $castFunc = null): self
     {
-        $variance = new RunningVariance();
+        $variance ??= new RunningVariance();
 
         $this->feedRunningVariance($variance, $castFunc);
 
-        return $variance;
+        return $this;
     }
 
-    public function statistics(?callable $castFunc = null): RunningVariance
+    public function finalVariance(?callable $castFunc = null, RunningVariance $variance = null): RunningVariance
     {
-        $variance = new RunningVariance();
+        $variance ??= new RunningVariance();
 
-        if (null === $this->pipeline) {
-            // No-op: null.
-            return $variance;
-        }
-
-        if ([] === $this->pipeline) {
+        if ($this->empty()) {
             // No-op: an empty array.
             return $variance;
         }
