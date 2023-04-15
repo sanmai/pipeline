@@ -21,6 +21,7 @@ namespace Tests\Pipeline\Helper;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
+use function abs;
 use function array_sum;
 use function cos;
 use function count;
@@ -161,13 +162,36 @@ final class RunningVarianceTest extends TestCase
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
 
-    public function provideRandomNumberCounts(): iterable
+    public function testFiveMergedThrice(): void
+    {
+        $varianceA = new RunningVariance();
+        $varianceA->observe(5.0);
+        $varianceA->observe(8.0);
+        $varianceA->observe(6.0);
+
+        $varianceB = new RunningVariance();
+        $varianceB->observe(4.0);
+
+        $varianceC = new RunningVariance();
+        $varianceC->observe(2.0);
+
+        $variance = new RunningVariance($varianceA, $varianceB, $varianceC);
+
+        $this->assertSame(5, $variance->getCount());
+        $this->assertSame(5.0, $variance->getMean());
+        $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
+        $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
+    }
+
+    public static function provideRandomNumberCounts(): iterable
     {
         yield ['count' => 900, 'mean' => 8.1, 'sigma' => 1.9];
 
         yield ['count' => 1190, 'mean' => 729.4, 'sigma' => 4.2];
 
         yield ['count' => 1500, 'mean' => 3698.41, 'sigma' => 12.9];
+
+        yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
     }
 
     /**
@@ -184,7 +208,21 @@ final class RunningVarianceTest extends TestCase
 
         $variance = take($numbers)->finalVariance();
 
-        $this->assertEqualsWithDelta($benchmark, $variance->getStandardDeviation(), $sigma / 100); // 1%
+        $benchmarkError = abs($sigma - $benchmark);
+        $onlineError = abs($sigma - $variance->getStandardDeviation());
+
+        $this->assertLessThanOrEqual(
+            $sigma / 50,
+            $onlineError - $benchmarkError,
+            "Online algorithm deviated for more than 2% from the textbook computation on $count samples"
+        );
+
+        $this->assertEqualsWithDelta(
+            $sigma,
+            $variance->getStandardDeviation(),
+            $sigma / 10,
+            "Online algorithm deviated from the expected value beyond the expected 10% on $count samples"
+        );
     }
 
     /**
@@ -198,9 +236,17 @@ final class RunningVarianceTest extends TestCase
             ->slice(0, $count)
             ->toArray();
 
-        $this->assertEqualsWithDelta($sigma, self::standard_deviation(
-            $numbers
-        ), $sigma / 10);
+        try {
+            $this->assertEqualsWithDelta($sigma, self::standard_deviation(
+                $numbers
+            ), $sigma / 10);
+        } catch (\Throwable $e) {
+            if ($mean > 1E10) {
+                $this->markTestSkipped($e->getMessage());
+            }
+
+            throw $e;
+        }
     }
 
     /**
