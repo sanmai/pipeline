@@ -60,7 +60,7 @@ final class ReservoirTest extends TestCase
         $this->assertSame([], $pipeline->reservoir(1000));
     }
 
-    public function provideInputs(): iterable
+    public static function provideInputs(): iterable
     {
         yield 'no change expected' => [['a', 'b', 'c'], 3, ['a', 'b', 'c']];
 
@@ -122,7 +122,7 @@ final class ReservoirTest extends TestCase
         $this->assertSame($expected, take($input)->reservoir($size));
     }
 
-    public function provideWeightedInputs(): iterable
+    public static function provideWeightedInputs(): iterable
     {
         $weightFn = static function (string $input): float {
             return abs(sin(ord($input[0])));

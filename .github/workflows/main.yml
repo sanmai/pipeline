@@ -63,35 +63,6 @@ jobs:
         run: |
           php vendor/bin/php-coveralls -v
 
-  coding-standards:
-    name: Coding Standards
-    runs-on: ubuntu-latest
-
-    env:
-      PHP_VERSION: '8.2'
-      PHP_CS_FIXER_VERSION: v3.16.0
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ env.PHP_VERSION }}
-          tools: php-cs-fixer:${{ env.PHP_CS_FIXER_VERSION }}
-
-      - name: Restore PHP-CS-Fixer cache
-        uses: actions/cache@v3
-        with:
-          path: .php_cs.cache
-          key: "php-cs-fixer"
-          restore-keys: "php-cs-fixer"
-
-      - name: Run PHP-CS-Fixer, version ${{ env.PHP_CS_FIXER_VERSION }}
-        run: |
-          php-cs-fixer fix --diff --dry-run --verbose
-
   analyze:
     name: Static Analysis and Validation
     runs-on: ubuntu-latest
@@ -120,6 +91,15 @@ jobs:
           restore-keys: |
             composer-${{ env.PHP_VERSION }}-
             composer-
+
+      - name: Restore PHP-CS-Fixer cache
+        uses: actions/cache@v3
+        with:
+          path: .php_cs.cache
+          key: php-cs-fixer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
+          restore-keys: |
+            php-cs-fixer-${{ env.PHP_VERSION }}-
+            php-cs-fixer-
 
       - name: Install dependencies
         run: |
