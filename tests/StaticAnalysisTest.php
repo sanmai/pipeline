@@ -40,7 +40,7 @@ final class StaticAnalysisTest extends TestCase
         $this->assertFalse($pipelineClass->isFinal());
     }
 
-    public function provideMethods(): iterable
+    public static function provideMethods(): iterable
     {
         $pipelineClass = new ReflectionClass(Standard::class);
 

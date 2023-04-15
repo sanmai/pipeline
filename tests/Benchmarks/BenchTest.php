@@ -48,7 +48,7 @@ final class BenchTest extends TestCase
         }
     }
 
-    public function provideCases(): iterable
+    public static function provideCases(): iterable
     {
         $products = [];
 

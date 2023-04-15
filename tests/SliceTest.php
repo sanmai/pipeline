@@ -41,7 +41,7 @@ use function range;
  */
 final class SliceTest extends TestCase
 {
-    public function provideCallback(): iterable
+    public static function provideCallback(): iterable
     {
         $array = [1, 2, 3, 4, 5, 6];
 
