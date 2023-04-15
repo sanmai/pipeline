@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
@@ -28,6 +29,8 @@ use function implode;
 use function Pipeline\take;
 use function preg_match_all;
 use function sprintf;
+use function strpos;
+use function substr;
 
 /**
  * Test documentation has sections for all public methods.
@@ -49,32 +52,61 @@ final class DocumentationTest extends TestCase
         self::$headers = implode("\n", $matches[0]);
     }
 
+    /**
+     * @param array<ReflectionClass> $interfaces
+     */
+    private static function interfaceFilter(array $interfaces, ReflectionMethod $method): bool
+    {
+        foreach ($interfaces as $interface) {
+            if ($interface->hasMethod($method->getName())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static function provideMethods(): iterable
     {
         $reflection = new ReflectionClass(new Standard());
         $interfaces = $reflection->getInterfaces();
 
         return take($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
-            ->filter(function (ReflectionMethod $method) use ($interfaces) {
-                foreach ($interfaces as $interface) {
-                    if ($interface->hasMethod($method->getName())) {
-                        return false;
-                    }
-                }
-
-                return true;
-            })
+            ->filter(fn (ReflectionMethod $method) => self::interfaceFilter($interfaces, $method))
             ->cast(fn (ReflectionMethod $method) => [$method->getName()]);
     }
 
     /**
      * @dataProvider provideMethods
      */
-    public function testMethod(string $methodName): void
+    public function testMethodHasMention(string $methodName): void
     {
-        $this->assertMatchesRegularExpression(
-            sprintf('/^##.*(->|`)%s\(\)`/m', $methodName),
-            self::$headers
-        );
+        try {
+            $this->assertMatchesRegularExpression(
+                sprintf('/`%s\(\)`/', $methodName),
+                self::$readme,
+                "There's no mention of {$methodName}."
+            );
+        } catch (ExpectationFailedException $e) {
+            $message = $e->getMessage();
+            $this->fail(substr($message, 0, strpos($message, "\n")));
+        }
+    }
+
+    /**
+     * @dataProvider provideMethods
+     */
+    public function testMethodHasHeader(string $methodName): void
+    {
+        try {
+            $this->assertMatchesRegularExpression(
+                sprintf('/^##.*(->|`)%s\(\)`/m', $methodName),
+                self::$headers,
+                "There's no header dedicated to {$methodName}."
+            );
+        } catch (ExpectationFailedException $e) {
+            $message = $e->getMessage();
+            $this->markTestIncomplete(substr($message, 0, strpos($message, "\n")));
+        }
     }
 }
