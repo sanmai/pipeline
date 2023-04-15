@@ -158,9 +158,15 @@ final class ReservoirTest extends TestCase
      */
     public function testWeightedSampleFromGenerator(array $input, int $size, callable $weightFn, array $expected): void
     {
-        $this->assertSame($expected, map(static function () use ($input) {
+        $pipeline = map(static function () use ($input) {
             yield from $input;
-        })->reservoir($size, $weightFn));
+        });
+
+        $this->assertSame($expected, $pipeline->reservoir($size, $weightFn));
+
+        if ($size <= 0) {
+            $this->assertSame([], $pipeline->toArray());
+        }
     }
 
     /**
