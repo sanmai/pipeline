@@ -41,6 +41,7 @@ use function assert;
 use function count;
 use function is_array;
 use function is_string;
+use function iterator_count;
 use function iterator_to_array;
 use function max;
 use function min;
@@ -1041,9 +1042,8 @@ class Standard implements IteratorAggregate, Countable
             return $variance;
         }
 
-        foreach ($this->pipeline as $_) {
-            // Discard
-        }
+        // Consume every available item
+        $_ = iterator_count($this->pipeline);
 
         return $variance;
     }
