@@ -33,7 +33,7 @@ use function Pipeline\take;
  */
 final class ChunkTest extends TestCase
 {
-    public function provideArrays(): iterable
+    public static function provideArrays(): iterable
     {
         yield [false, 3, [], []];
 
@@ -48,9 +48,9 @@ final class ChunkTest extends TestCase
         yield [false, 2, ['a' => 1, 'b' => 2, 'c' => 3], [[1, 2], [3]]];
     }
 
-    public function provideIterables(): iterable
+    public static function provideIterables(): iterable
     {
-        foreach ($this->provideArrays() as $item) {
+        foreach (self::provideArrays() as $item) {
             yield $item;
 
             $iteratorItem = $item;

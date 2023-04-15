@@ -40,7 +40,7 @@ use function shuffle;
  */
 final class MinMaxTest extends TestCase
 {
-    private function provideInputs(): iterable
+    private static function provideInputs(): iterable
     {
         yield [];
         yield [null];
@@ -72,9 +72,9 @@ final class MinMaxTest extends TestCase
         yield range(-10, 10, 0.1);
     }
 
-    private function provideRandomizedInputs(): iterable
+    private static function provideRandomizedInputs(): iterable
     {
-        foreach ($this->provideInputs() as $input) {
+        foreach (self::provideInputs() as $input) {
             yield $input;
 
             if ([] === $input) {
@@ -95,9 +95,9 @@ final class MinMaxTest extends TestCase
         }
     }
 
-    public function provideMinInputs(): iterable
+    public static function provideMinInputs(): iterable
     {
-        foreach ($this->provideRandomizedInputs() as $input) {
+        foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : min($input);
 
             yield [$expected, $input];
@@ -128,9 +128,9 @@ final class MinMaxTest extends TestCase
         $this->assertSame($expected, take($input)->min());
     }
 
-    public function provideMaxInputs(): iterable
+    public static function provideMaxInputs(): iterable
     {
-        foreach ($this->provideRandomizedInputs() as $input) {
+        foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : max($input);
 
             yield [$expected, $input];

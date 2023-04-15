@@ -35,7 +35,7 @@ use const PHP_VERSION_ID;
  */
 final class AppendPrependTest extends TestCase
 {
-    private function generateIterableCombinations(array $arrays): iterable
+    private static function generateIterableCombinations(array $arrays): iterable
     {
         yield $arrays;
 
@@ -53,7 +53,7 @@ final class AppendPrependTest extends TestCase
         yield $iterableSubjects;
     }
 
-    public function provideAppendArrays(): iterable
+    public static function provideAppendArrays(): iterable
     {
         yield [[1, 2, 3, 4, 5], [1, 2, 3], [4, 5]];
 
@@ -89,10 +89,10 @@ final class AppendPrependTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
-    public function provideAppend(): iterable
+    public static function provideAppend(): iterable
     {
-        foreach ($this->provideAppendArrays() as $arrays) {
-            foreach ($this->generateIterableCombinations($arrays) as $sample) {
+        foreach (self::provideAppendArrays() as $arrays) {
+            foreach (self::generateIterableCombinations($arrays) as $sample) {
                 yield $sample;
             }
         }
@@ -113,7 +113,7 @@ final class AppendPrependTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
-    public function providePrependArrays(): iterable
+    public static function providePrependArrays(): iterable
     {
         yield [[1, 2, 3, 4, 5], [4, 5], [1, 2, 3]];
 
@@ -149,10 +149,10 @@ final class AppendPrependTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys));
     }
 
-    public function providePrepend(): iterable
+    public static function providePrepend(): iterable
     {
-        foreach ($this->providePrependArrays() as $arrays) {
-            foreach ($this->generateIterableCombinations($arrays) as $sample) {
+        foreach (self::providePrependArrays() as $arrays) {
+            foreach (self::generateIterableCombinations($arrays) as $sample) {
                 yield $sample;
             }
         }
