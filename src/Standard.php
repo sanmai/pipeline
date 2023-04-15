@@ -59,14 +59,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * @var ?iterable
      */
-    private $pipeline;
+    private ?iterable $pipeline;
 
     /**
      * Contructor with an optional source of data.
-     *
-     * @param ?iterable $input
      */
-    public function __construct(iterable $input = null)
+    public function __construct(?iterable $input = null)
     {
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
@@ -79,10 +77,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Appends the contents of an interable to the end of the pipeline.
-     *
-     * @param ?iterable $values
      */
-    public function append(iterable $values = null): self
+    public function append(?iterable $values = null): self
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -108,10 +104,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Prepends the pipeline with the contents of an iterable.
-     *
-     * @param ?iterable $values
      */
-    public function prepend(iterable $values = null): self
+    public function prepend(?iterable $values = null): self
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -140,7 +134,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * Utility method for appending/prepending methods.
      */
-    private function willReplace(iterable $values = null): bool
+    private function willReplace(?iterable $values = null): bool
     {
         // Nothing needs to be done here.
         /** @phan-suppress-next-line PhanTypeComparisonFromArray */
@@ -263,7 +257,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @psalm-param positive-int  $length
+     * @psalm-param positive-int $length
      */
     private static function toChunks(Generator $input, int $length, bool $preserve_keys): iterable
     {
@@ -295,14 +289,15 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Let's check what we got for a start.
-        $this->pipeline = $func();
+        $value = $func();
 
         // Generator is a generator, moving along
-        if ($this->pipeline instanceof Generator) {
+        if ($value instanceof Generator) {
             // It is possible to detect if callback is a generator like so:
             // (new \ReflectionFunction($func))->isGenerator();
             // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
             // But, again, we could add a direct internal method to replace the pipeline, e.g. as done by unpack()
+            $this->pipeline = $value;
 
             return $this;
         }
@@ -311,7 +306,7 @@ class Standard implements IteratorAggregate, Countable
         // We do not cast to an array here because casting a null to an array results in
         // an empty array; that's surprising and not how it works for other values.
         $this->pipeline = [
-            $this->pipeline,
+            $value,
         ];
 
         return $this;
@@ -343,7 +338,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return $this
      */
-    public function cast(callable $func = null): self
+    public function cast(?callable $func = null): self
     {
         if (null === $func) {
             return $this;

@@ -17,8 +17,6 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - '7.2'
-          - '7.3'
           - '7.4'
           - '8.0'
           - '8.1'
@@ -26,8 +24,6 @@ jobs:
           - '8.3'
         coverage: ['pcov']
         dependencies: ['']
-        include:
-          - { php-version: '7.1', coverage: 'xdebug', dependencies: '' }
 
     steps:
       - name: Checkout code
@@ -67,41 +63,12 @@ jobs:
         run: |
           php vendor/bin/php-coveralls -v
 
-  coding-standards:
-    name: Coding Standards
-    runs-on: ubuntu-latest
-
-    env:
-      PHP_VERSION: '8.1'
-      PHP_CS_FIXER_VERSION: v3.16.0
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ env.PHP_VERSION }}
-          tools: php-cs-fixer:${{ env.PHP_CS_FIXER_VERSION }}
-
-      - name: Restore PHP-CS-Fixer cache
-        uses: actions/cache@v3
-        with:
-          path: .php_cs.cache
-          key: "php-cs-fixer"
-          restore-keys: "php-cs-fixer"
-
-      - name: Run PHP-CS-Fixer, version ${{ env.PHP_CS_FIXER_VERSION }}
-        run: |
-          php-cs-fixer fix --diff --dry-run --verbose
-
   analyze:
     name: Static Analysis and Validation
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: '8.1'
+      PHP_VERSION: '8.2'
       COMPOSER_ROOT_VERSION: v5.99
 
     steps:
@@ -124,6 +91,15 @@ jobs:
           restore-keys: |
             composer-${{ env.PHP_VERSION }}-
             composer-
+
+      - name: Restore PHP-CS-Fixer cache
+        uses: actions/cache@v3
+        with:
+          path: .php_cs.cache
+          key: php-cs-fixer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
+          restore-keys: |
+            php-cs-fixer-${{ env.PHP_VERSION }}-
+            php-cs-fixer-
 
       - name: Install dependencies
         run: |
