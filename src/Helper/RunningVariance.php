@@ -96,6 +96,7 @@ class RunningVariance
             return 0.0;
         }
 
+        // https://en.wikipedia.org/wiki/Bessel%27s_correction
         return $this->m2 / ($this->count - 1);
     }
 
