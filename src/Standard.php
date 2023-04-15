@@ -55,17 +55,30 @@ use function mt_rand;
 class Standard implements IteratorAggregate, Countable
 {
     /**
-     * Pre-primed pipeline. This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
+     * Pre-primed pipeline.
      *
-     * @var ?iterable
+     * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      */
-    private ?iterable $pipeline;
+    private iterable $pipeline;
 
     /**
      * Contructor with an optional source of data.
      */
     public function __construct(?iterable $input = null)
     {
+        if (null !== $input) {
+            $this->replace($input);
+        }
+    }
+
+    private function replace(iterable $input): void
+    {
+        if (is_array($input)) {
+            $this->pipeline = $input;
+
+            return;
+        }
+
         // IteratorAggregate is a nuance best we avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
         while ($input instanceof IteratorAggregate) {
@@ -77,7 +90,12 @@ class Standard implements IteratorAggregate, Countable
 
     private function empty(): bool
     {
-        return [] === $this->pipeline || null === $this->pipeline;
+        return !isset($this->pipeline) || [] === $this->pipeline;
+    }
+
+    private function discard(): void
+    {
+        $this->pipeline = null;
     }
 
     /**
@@ -91,7 +109,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Static analyzer hints
-        assert(null !== $this->pipeline);
         assert(null !== $values);
 
         return $this->join($this->pipeline, $values);
@@ -118,7 +135,6 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Static analyzer hints
-        assert(null !== $this->pipeline);
         assert(null !== $values);
 
         return $this->join($values, $this->pipeline);
@@ -152,15 +168,8 @@ class Standard implements IteratorAggregate, Countable
             return false;
         }
 
-        // Install an array as it is.
-        if (is_array($values)) {
-            $this->pipeline = $values;
-
-            return true;
-        }
-
-        // Else we use ownself to handle edge cases.
-        $this->pipeline = new self($values);
+        // Handle edge cases
+        $this->replace($values);
 
         return true;
     }
@@ -285,7 +294,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // That's the standard case for any next stages.
-        if (is_iterable($this->pipeline)) {
+        if (isset($this->pipeline) && is_iterable($this->pipeline)) {
             $this->pipeline = self::apply($this->pipeline, $func);
 
             return $this;
@@ -348,13 +357,13 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // We got an array, that's what we need. Moving along.
-        if (is_array($this->pipeline)) {
+        if (is_array($this->pipeline ?? null)) {
             $this->pipeline = array_map($func, $this->pipeline);
 
             return $this;
         }
 
-        if (is_iterable($this->pipeline)) {
+        if (is_iterable($this->pipeline ?? null)) {
             $this->pipeline = self::applyOnce($this->pipeline, $func);
 
             return $this;
@@ -404,7 +413,7 @@ class Standard implements IteratorAggregate, Countable
 
         assert($this->pipeline instanceof Iterator);
 
-        /** @psalm-suppress ArgumentTypeCoercion */
+        /** @psalm-suppress1 ArgumentTypeCoercion */
         $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
@@ -455,13 +464,17 @@ class Standard implements IteratorAggregate, Countable
      */
     public function fold($initial, ?callable $func = null)
     {
+        if ($this->empty()) {
+            return $initial;
+        }
+
         $func = self::resolveReducer($func);
 
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
         }
 
-        foreach ($this as $value) {
+        foreach ($this->pipeline as $value) {
             $initial = $func($initial, $value);
         }
 
@@ -486,15 +499,15 @@ class Standard implements IteratorAggregate, Countable
 
     public function getIterator(): Traversable
     {
+        if (!isset($this->pipeline)) {
+            return new EmptyIterator();
+        }
+
         if ($this->pipeline instanceof Traversable) {
             return $this->pipeline;
         }
 
-        if (null !== $this->pipeline) {
-            return new ArrayIterator($this->pipeline);
-        }
-
-        return new EmptyIterator();
+        return new ArrayIterator($this->pipeline);
     }
 
     /**
@@ -583,7 +596,7 @@ class Standard implements IteratorAggregate, Countable
 
         if (0 === $length) {
             // We're not consuming anything assuming total laziness.
-            $this->pipeline = null;
+            $this->discard();
 
             return $this;
         }
@@ -705,7 +718,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function zip(iterable ...$inputs)
     {
-        if (null === $this->pipeline) {
+        if (!isset($this->pipeline)) {
             $this->pipeline = array_shift($inputs);
         }
 
@@ -776,7 +789,7 @@ class Standard implements IteratorAggregate, Countable
 
         if ($size <= 0) {
             // Discard the state to emulate full consumption
-            $this->pipeline = null;
+            $this->discard();
 
             return [];
         }
