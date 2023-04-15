@@ -113,12 +113,17 @@ All entry points always return an instance of the pipeline.
 | `prepend()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
 | `unshift()` | Prepends the pipeline with a list of values. | `array_unshift` |
 | `zip()`  | Takes a number of iterables, transposing them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
+| `reservoir()` | Reservoir sampling with an optional weighting function. |  |
 | `flatten()` |  Flattens inputs: `[[1, 2], [3, 4]]` becomes `[1, 2, 3, 4]`. |  `flat_map`, `flatten`, `collect_concat`      |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
-| `reduce()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
+| `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
+| `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
+| `flip()`    | Swaps keys and values. | `array_flip` |
+| `max()`     | Finds the highest value. | `max` |
+| `min()`     | Finds the lowest value. | `min` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
 
