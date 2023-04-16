@@ -1013,6 +1013,8 @@ class Standard implements IteratorAggregate, Countable
      * @param ?RunningVariance &$variance the instance of RunningVariance; initialized unless provided
      * @param ?callable        $castFunc  the cast callback, returning ?float; null values are not counted
      *
+     * @param-out RunningVariance $variance
+     *
      * @return $this
      */
     public function runningVariance(?RunningVariance &$variance, ?callable $castFunc = null): self
