@@ -396,13 +396,9 @@ This allows to skip type checks for return values if one has no results to retur
 
 ## `$pipeline->runningVariance()`
 
-Computes online statistics for the sequence: counts, sample  mean, sample variance, standard deviation. 
-- You can access these numbers on the fly with methods such as `getCount()`, `getMean()`, `getVariance()`, `getStandardDeviation()`.
-- This computation uses [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm), therefore it can handle very large numbers of data points.   
+Computes online statistics for the sequence: counts, sample  mean, sample variance, standard deviation. You can access these numbers on the fly with methods such as `getCount()`, `getMean()`, `getVariance()`, `getStandardDeviation()`.
 
-Accepts an optional cast method that should return `float|null`: `null` values are discarded.
-
-You can also have several running variances computing numbers for different parts of the data.
+This method also accepts an optional cast callback that should return `float|null`: `null` values are discarded. Therefore you can have several running variances computing numbers for different parts of the data.
 
 ```php
 $pipeline->runningVariance($varianceForShippedOrders, static function (order $order): ?float {
@@ -424,9 +420,13 @@ $pipeline->runningVariance($varianceForPaidOrders, static function (order $order
 });
 ```
 
+As you process orders, you will be able to access `$varianceForShippedOrders->getMean()` and `$varianceForPaidOrders->getMean()`.
+
+This computation uses [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm), therefore it can handle very large numbers of data points.
+
 ## `$pipeline->finalVariance()`
 
-Computes final statistics for the sequence. Accepts an optional cast method.
+A convenience method to computes the final statistics for the sequence. Accepts an optional cast method, else assumes the sequence countains valid numbers.
 
 ```php
 // Fibonacci numbers generator
@@ -442,7 +442,7 @@ $fibonacci = map(function () {
     }
 });
 
-// Statistics for the second hundred Fibonacci numbers
+// Statistics for the second hundred Fibonacci numbers.
 $variance = $fibonacci->slice(101, 100)->finalVariance();
 
 $variance->getStandardDeviation();
