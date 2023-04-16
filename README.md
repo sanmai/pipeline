@@ -394,6 +394,64 @@ foreach ($pipeline as $value) {
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
 
+## `$pipeline->runningVariance()`
+
+Computes online statistics for the sequence: counts, sample  mean, sample variance, standard deviation. 
+- You can access these numbers on the fly with methods such as `getCount()`, `getMean()`, `getVariance()`, `getStandardDeviation()`.
+- This computation uses [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm), therefore it can handle very large numbers of data points.   
+
+Accepts an optional cast method that should return `float|null`: `null` values are discarded.
+
+You can also have several running variances computing numbers for different parts of the data.
+
+```php
+$pipeline->runningVariance($varianceForShippedOrders, static function (order $order): ?float {
+    if (!$order->isShipped()) {
+        // This order will be excluded from the computation.
+        return null;
+    }
+
+    return $order->getTotal();
+});
+
+$pipeline->runningVariance($varianceForPaidOrders, static function (order $order): ?float {
+    if ($order->isUnpaid()) {
+        // This order will be excluded from the computation.
+        return null;
+    }
+
+    return $order->getTotal();
+});
+```
+
+## `$pipeline->finalVariance()`
+
+Computes final statistics for the sequence. Accepts an optional cast method.
+
+```php
+// Fibonacci numbers generator
+$fibonacci = map(function () {
+    $prev = 0;
+    $current = 1;
+
+    while (true) {
+        yield $current;
+        $next = $prev + $current;
+        $prev = $current;
+        $current = $next;
+    }
+});
+
+// Statistics for the second hundred Fibonacci numbers
+$variance = $fibonacci->slice(101, 100)->finalVariance();
+
+$variance->getStandardDeviation();
+// float(5.67947112319114E+40)
+
+$variance->getCount();
+// int(100)
+```
+
 # Contributions
 
 Contributions to documentation and test cases are welcome. Bug reports are welcome too. 
