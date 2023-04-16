@@ -18,10 +18,9 @@
         </include>
     </source>
 
-    <coverage>
-        <report>
-          <clover outputFile="build/logs/clover.xml"/>
-          <text outputFile="php://stdout"/>
-        </report>
-    </coverage>
+    <groups>
+        <exclude>
+            <group>documentation</group>
+        </exclude>
+    </groups>
 </phpunit>
