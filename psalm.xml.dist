@@ -20,6 +20,13 @@
                 <file name="example.php" />
             </errorLevel>
         </ForbiddenCode>
+
+        <PossiblyNullReference>
+            <errorLevel type="suppress">
+                <file name="example.php" />
+            </errorLevel>
+        </PossiblyNullReference>
+
         <MissingClosureParamType errorLevel="suppress" />
         <MissingClosureReturnType errorLevel="suppress" />
 

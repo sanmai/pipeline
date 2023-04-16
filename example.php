@@ -66,6 +66,9 @@ $pipeline->unpack(function ($i, $j) {
     yield $i * $j;
 });
 
+// Collect online statistics
+$pipeline->runningVariance($variance);
+
 // one way to filter
 $pipeline->map(function ($i) {
     if ($i > 50) {
@@ -86,6 +89,13 @@ $value = $pipeline->reduce(function ($carry, $valuetem) {
 
 var_dump($value);
 // int(104)
+
+var_dump($variance->getCount());
+// int(12)
+var_dump($variance->getMean());
+// float(22)
+var_dump($variance->getStandardDeviation());
+// float(30.3794188704967)
 
 $sum = take([1, 2, 3])->reduce();
 var_dump($sum);
@@ -137,3 +147,25 @@ var_dump($arrayResult);
 //     [1] =>
 //     int(3)
 // }
+
+// Fibonacci numbers generator
+$fibonacci = map(function () {
+    $prev = 0;
+    $current = 1;
+
+    while (true) {
+        yield $current;
+        $next = $prev + $current;
+        $prev = $current;
+        $current = $next;
+    }
+});
+
+// Statistics for the second hundred Fibonacci numbers
+$variance = $fibonacci->slice(101, 100)->finalVariance();
+
+var_dump($variance->getStandardDeviation());
+// float(5.67947112319114E+40)
+
+var_dump($variance->getCount());
+// int(100)

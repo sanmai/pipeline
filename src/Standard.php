@@ -1015,7 +1015,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return $this
      */
-    public function runningVariance(RunningVariance &$variance = null, ?callable $castFunc = null): self
+    public function runningVariance(?RunningVariance &$variance, ?callable $castFunc = null): self
     {
         $variance ??= new RunningVariance();
 

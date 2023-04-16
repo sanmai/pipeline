@@ -21,6 +21,7 @@ namespace Tests\Pipeline\Helper;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
+use Throwable;
 use function abs;
 use function array_sum;
 use function cos;
@@ -214,14 +215,14 @@ final class RunningVarianceTest extends TestCase
         $this->assertLessThanOrEqual(
             $sigma / 50,
             $onlineError - $benchmarkError,
-            "Online algorithm deviated for more than 2% from the textbook computation on $count samples"
+            "Online algorithm deviated for more than 2% from the textbook computation on {$count} samples"
         );
 
         $this->assertEqualsWithDelta(
             $sigma,
             $variance->getStandardDeviation(),
             $sigma / 10,
-            "Online algorithm deviated from the expected value beyond the expected 10% on $count samples"
+            "Online algorithm deviated from the expected value beyond the expected 10% on {$count} samples"
         );
     }
 
@@ -240,7 +241,7 @@ final class RunningVarianceTest extends TestCase
             $this->assertEqualsWithDelta($sigma, self::standard_deviation(
                 $numbers
             ), $sigma / 10);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             if ($mean > 1E10) {
                 $this->markTestSkipped($e->getMessage());
             }
