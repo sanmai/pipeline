@@ -317,4 +317,29 @@ final class SliceTest extends TestCase
             $this->assertStringNotContainsString('Standard::', (string) $e);
         }
     }
+
+    /**
+     * @see https://en.wikipedia.org/wiki/Fibonacci_sequence
+     */
+    public function testFibonacci(): void
+    {
+        // Fibonacci numbers generator
+        $fibonacci = map(function () {
+            yield 0;
+
+            $prev = 0;
+            $current = 1;
+
+            while (true) {
+                yield $current;
+                $next = $prev + $current;
+                $prev = $current;
+                $current = $next;
+            }
+        });
+
+        $this->assertSame([
+            0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181,
+        ], $fibonacci->slice(0, 20)->toArray());
+    }
 }

@@ -150,6 +150,8 @@ var_dump($arrayResult);
 
 // Fibonacci numbers generator
 $fibonacci = map(function () {
+    yield 0;
+
     $prev = 0;
     $current = 1;
 
@@ -165,7 +167,7 @@ $fibonacci = map(function () {
 $variance = $fibonacci->slice(101, 100)->finalVariance();
 
 var_dump($variance->getStandardDeviation());
-// float(5.67947112319114E+40)
+// float(3.5101061922557E+40)
 
 var_dump($variance->getCount());
 // int(100)
