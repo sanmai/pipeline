@@ -20,6 +20,7 @@
                 <file name="example.php" />
             </errorLevel>
         </ForbiddenCode>
+
         <MissingClosureParamType errorLevel="suppress" />
         <MissingClosureReturnType errorLevel="suppress" />
 

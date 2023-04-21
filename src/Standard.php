@@ -987,4 +987,73 @@ class Standard implements IteratorAggregate, Countable
             yield $value => $key;
         }
     }
+
+    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
+    {
+        if (null === $castFunc) {
+            $castFunc = 'floatval';
+        }
+
+        return $this->cast(static function ($value) use ($variance, $castFunc) {
+            $float = $castFunc($value);
+
+            if (null !== $float) {
+                $variance->observe($float);
+            }
+
+            // Returning the original value here
+            return $value;
+        });
+    }
+
+    /**
+     * Feeds in an instance of RunningVariance.
+     *
+     * @param ?Helper\RunningVariance &$variance the instance of RunningVariance; initialized unless provided
+     * @param ?callable               $castFunc  the cast callback, returning ?float; null values are not counted
+     *
+     * @param-out Helper\RunningVariance $variance
+     *
+     * @return $this
+     */
+    public function runningVariance(
+        ?Helper\RunningVariance &$variance,
+        ?callable $castFunc = null
+    ): self {
+        $variance ??= new Helper\RunningVariance();
+
+        $this->feedRunningVariance($variance, $castFunc);
+
+        return $this;
+    }
+
+    /**
+     * Computes final statistics for the sequence.
+     *
+     * @param ?callable               $castFunc the cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance $variance the optional instance of RunningVariance
+     */
+    public function finalVariance(
+        ?callable $castFunc = null,
+        ?Helper\RunningVariance $variance = null
+    ): Helper\RunningVariance {
+        $variance ??= new Helper\RunningVariance();
+
+        if ($this->empty()) {
+            // No-op: an empty array.
+            return $variance;
+        }
+
+        $this->feedRunningVariance($variance, $castFunc);
+
+        if (is_array($this->pipeline)) {
+            // We are done!
+            return $variance;
+        }
+
+        // Consume every available item
+        $_ = iterator_count($this->pipeline);
+
+        return $variance;
+    }
 }

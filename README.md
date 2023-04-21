@@ -125,6 +125,8 @@ All entry points always return an instance of the pipeline.
 | `max()`     | Finds the highest value. | `max` |
 | `min()`     | Finds the lowest value. | `min` |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
+| `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
+| `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
 
 Pipeline is an iterator and can be used as any other iterable. 
@@ -393,6 +395,66 @@ foreach ($pipeline as $value) {
 ```
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
+
+## `$pipeline->runningVariance()`
+
+Computes online statistics for the sequence: counts, sample  mean, sample variance, standard deviation. You can access these numbers on the fly with methods such as `getCount()`, `getMean()`, `getVariance()`, `getStandardDeviation()`.
+
+This method also accepts an optional cast callback that should return `float|null`: `null` values are discarded. Therefore you can have several running variances computing numbers for different parts of the data.
+
+```php
+$pipeline->runningVariance($varianceForShippedOrders, static function (order $order): ?float {
+    if (!$order->isShipped()) {
+        // This order will be excluded from the computation.
+        return null;
+    }
+
+    return $order->getTotal();
+});
+
+$pipeline->runningVariance($varianceForPaidOrders, static function (order $order): ?float {
+    if ($order->isUnpaid()) {
+        // This order will be excluded from the computation.
+        return null;
+    }
+
+    return $order->getProjectedTotal();
+});
+```
+
+As you process orders, you will be able to access `$varianceForShippedOrders->getMean()` and `$varianceForPaidOrders->getMean()`.
+
+This computation uses [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm), therefore it can handle very large numbers of data points.
+
+## `$pipeline->finalVariance()`
+
+A convenience method to computes the final statistics for the sequence. Accepts an optional cast method, else assumes the sequence countains valid numbers.
+
+```php
+// Fibonacci numbers generator
+$fibonacci = map(function () {
+    yield 0;
+
+    $prev = 0;
+    $current = 1;
+
+    while (true) {
+        yield $current;
+        $next = $prev + $current;
+        $prev = $current;
+        $current = $next;
+    }
+});
+
+// Statistics for the second hundred Fibonacci numbers.
+$variance = $fibonacci->slice(101, 100)->finalVariance();
+
+$variance->getStandardDeviation();
+// float(3.5101061922557E+40)
+
+$variance->getCount();
+// int(100)
+```
 
 # Contributions
 

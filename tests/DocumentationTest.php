@@ -35,6 +35,8 @@ use function substr;
 /**
  * Test documentation has sections for all public methods.
  *
+ * @group documentation
+ *
  * @coversNothing
  *
  * @internal

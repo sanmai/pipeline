@@ -113,6 +113,10 @@ jobs:
         run: |
           make yamllint
 
+      - name: Non-code tests
+        run: |
+          php vendor/bin/phpunit --group=documentation
+
       - name: Static Analysis
         run: |
           make ci-analyze --keep-going
