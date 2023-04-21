@@ -30,9 +30,9 @@ use function sqrt;
  */
 class RunningVariance
 {
-
     /**
      * The number of observed values.
+     *
      * @var int<0, max>
      */
     private int $count = 0;
