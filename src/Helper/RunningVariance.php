@@ -116,12 +116,12 @@ class RunningVariance
     private function merge(self $other): void
     {
         // Shortcut a no-op
-        if (self::ZERO === $other->count) {
+        if (0 === $other->count) {
             return;
         }
 
         // Avoid division by zero by copying values
-        if (self::ZERO === $this->count) {
+        if (0 === $this->count) {
             $this->count = $other->count;
             $this->mean = $other->mean;
             $this->m2 = $other->m2;

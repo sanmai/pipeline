@@ -26,7 +26,6 @@ use EmptyIterator;
 use Generator;
 use Iterator;
 use IteratorAggregate;
-use Pipeline\Helper\RunningVariance;
 use Traversable;
 use function array_chunk;
 use function array_filter;
@@ -989,7 +988,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private function feedRunningVariance(RunningVariance $variance, ?callable $castFunc): self
+    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
     {
         if (null === $castFunc) {
             $castFunc = 'floatval';
@@ -1010,25 +1009,35 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Feeds in an instance of RunningVariance.
      *
-     * @param ?RunningVariance &$variance the instance of RunningVariance; initialized unless provided
-     * @param ?callable        $castFunc  the cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance &$variance the instance of RunningVariance; initialized unless provided
+     * @param ?callable               $castFunc  the cast callback, returning ?float; null values are not counted
      *
-     * @param-out RunningVariance $variance
+     * @param-out Helper\RunningVariance $variance
      *
      * @return $this
      */
-    public function runningVariance(?RunningVariance &$variance, ?callable $castFunc = null): self
-    {
-        $variance ??= new RunningVariance();
+    public function runningVariance(
+        ?Helper\RunningVariance &$variance,
+        ?callable $castFunc = null
+    ): self {
+        $variance ??= new Helper\RunningVariance();
 
         $this->feedRunningVariance($variance, $castFunc);
 
         return $this;
     }
 
-    public function finalVariance(?callable $castFunc = null, RunningVariance $variance = null): RunningVariance
-    {
-        $variance ??= new RunningVariance();
+    /**
+     * Computes final statistics for the sequence.
+     *
+     * @param callable               $castFunc the cast callback, returning ?float; null values are not counted
+     * @param Helper\RunningVariance $variance the optional instance of RunningVariance
+     */
+    public function finalVariance(
+        ?callable $castFunc = null,
+        Helper\RunningVariance $variance = null
+    ): Helper\RunningVariance {
+        $variance ??= new Helper\RunningVariance();
 
         if ($this->empty()) {
             // No-op: an empty array.
