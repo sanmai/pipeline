@@ -418,7 +418,7 @@ $pipeline->runningVariance($varianceForPaidOrders, static function (order $order
         return null;
     }
 
-    return $order->getTotal();
+    return $order->getProjectedTotal();
 });
 ```
 
