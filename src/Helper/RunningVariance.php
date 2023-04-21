@@ -133,7 +133,7 @@ class RunningVariance
         $delta = $other->mean - $this->mean;
 
         $this->mean = ($this->count * $this->mean) / $count + ($other->count * $other->mean) / $count;
-        $this->m2 = $this->m2 + $other->m2 + ($delta * $delta * $this->count * $other->count / $count);
+        $this->m2 = $this->m2 + $other->m2 + ($delta ** 2 * $this->count * $other->count / $count);
         $this->count = $count;
     }
 }
