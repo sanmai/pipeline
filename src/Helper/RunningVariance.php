@@ -30,9 +30,11 @@ use function sqrt;
  */
 class RunningVariance
 {
-    private const ZERO = 0;
 
-    /** The number of observed values. */
+    /**
+     * The number of observed values.
+     * @var int<0, max>
+     */
     private int $count = 0;
 
     /** First moment: the mean value. */
@@ -73,7 +75,7 @@ class RunningVariance
      */
     public function getMean(): float
     {
-        if (self::ZERO === $this->count) {
+        if (0 === $this->count) {
             // For no values the variance is undefined.
             return NAN;
         }
@@ -86,7 +88,7 @@ class RunningVariance
      */
     public function getVariance(): float
     {
-        if (self::ZERO === $this->count) {
+        if (0 === $this->count) {
             // For no values the variance is undefined.
             return NAN;
         }
