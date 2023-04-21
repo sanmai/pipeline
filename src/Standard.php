@@ -1030,12 +1030,12 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Computes final statistics for the sequence.
      *
-     * @param callable               $castFunc the cast callback, returning ?float; null values are not counted
-     * @param Helper\RunningVariance $variance the optional instance of RunningVariance
+     * @param ?callable               $castFunc the cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance $variance the optional instance of RunningVariance
      */
     public function finalVariance(
         ?callable $castFunc = null,
-        Helper\RunningVariance $variance = null
+        ?Helper\RunningVariance $variance = null
     ): Helper\RunningVariance {
         $variance ??= new Helper\RunningVariance();
 
