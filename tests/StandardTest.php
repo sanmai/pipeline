@@ -369,6 +369,19 @@ final class StandardTest extends TestCase
         ], $pipeline->toArray(true));
     }
 
+    public function testToArrayWithArrayPreservingKeys(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+        ], $pipeline->toArrayPreservingKeys());
+    }
+
     public function testToArrayWithIterator(): void
     {
         $pipeline = map(function () {
@@ -390,5 +403,19 @@ final class StandardTest extends TestCase
             'a' => 1,
             'b' => 2,
         ], $pipeline->toArray(true));
+    }
+
+    public function testToArrayWithIteratorPreservingKeys(): void
+    {
+        $pipeline = map(function () {
+            yield 'a' => 1;
+            yield 'b' => 2;
+            yield 'b' => 3;
+        });
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 3,
+        ], $pipeline->toArrayPreservingKeys());
     }
 }
