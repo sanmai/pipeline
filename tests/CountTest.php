@@ -65,19 +65,20 @@ final class CountTest extends TestCase
 
     public function testRunningCount(): void
     {
-        $countEvent = 1;
+        $countEven = 1;
 
         $pipeline = map(fn () => yield from range(0, 100))
             ->runningCount($countAll)
             ->filter(fn (int $n) => $n % 2)
-            ->runningCount($countEvent)
+            ->runningCount($countEven)
             ->filter(fn (int $n) => $n % 3);
 
         $this->assertSame(0, $countAll);
-        $this->assertSame(1, $countEvent);
+        $this->assertSame(1, $countEven);
 
         $this->assertSame(33, $pipeline->count());
+
         $this->assertSame(101, $countAll);
-        $this->assertSame(50, $countEvent - 1);
+        $this->assertSame(50, $countEven - 1);
     }
 }
