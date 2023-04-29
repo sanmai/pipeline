@@ -540,6 +540,14 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Returns all values preserving keys. This is a terminal operation.
+     */
+    public function toArrayPreservingKeys(): array
+    {
+        return $this->toArray(true);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * This is a terminal operation.
