@@ -25,6 +25,7 @@ use Pipeline\Standard;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use function Pipeline\take;
+use function range;
 
 /**
  * @covers \Pipeline\Standard
@@ -60,5 +61,21 @@ final class CountTest extends TestCase
             yield 1 => 2;
             yield 2 => 3;
         }));
+    }
+
+    public function testRunningCount(): void
+    {
+        $pipeline = map(fn () => yield from range(0, 100))
+            ->runningCount($countAll)
+            ->filter(fn (int $n) => $n % 2)
+            ->runningCount($countEvent)
+            ->filter(fn (int $n) => $n % 3);
+
+        $this->assertSame(0, $countAll);
+        $this->assertSame(0, $countEvent);
+
+        $this->assertSame(33, $pipeline->count());
+        $this->assertSame(101, $countAll);
+        $this->assertSame(50, $countEvent);
     }
 }
