@@ -548,6 +548,29 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Counts seen values online.
+     *
+     * @param ?int &$count the current count; initialized unless provided
+     *
+     * @param-out int $count
+     *
+     * @return $this
+     */
+    public function runningCount(
+        ?int &$count
+    ): self {
+        $count ??= 0;
+
+        $this->cast(static function ($input) use (&$count) {
+            ++$count;
+
+            return $input;
+        });
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * This is a terminal operation.

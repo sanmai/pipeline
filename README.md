@@ -124,6 +124,8 @@ All entry points always return an instance of the pipeline.
 | `flip()`    | Swaps keys and values. | `array_flip` |
 | `max()`     | Finds the highest value. | `max` |
 | `min()`     | Finds the lowest value. | `min` |
+| `count()`     | Counts values. Eagerly executed.| `array_count` |
+| `runningCount()` | Counts seen values using a reference argument. | |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `toArrayPreservingKeys()` | Returns an array with all values and keys. Eagerly executed. |  |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
