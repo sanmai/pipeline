@@ -451,7 +451,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param callable $predicate a callback returning boolean value
      */
-    public function skipWhile(?callable $predicate = null): self
+    public function skipWhile(callable $predicate): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
