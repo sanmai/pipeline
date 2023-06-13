@@ -447,7 +447,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Removes elements while the predicate returns true, and keeps everything after the predicate return false just once.
+     * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
      * @param callable $predicate a callback returning boolean value
      */
