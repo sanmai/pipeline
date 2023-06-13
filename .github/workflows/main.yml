@@ -95,7 +95,7 @@ jobs:
       - name: Restore PHP-CS-Fixer cache
         uses: actions/cache@v3
         with:
-          path: .php_cs.cache
+          path: build/cache/.php_cs.cache
           key: php-cs-fixer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
           restore-keys: |
             php-cs-fixer-${{ env.PHP_VERSION }}-
