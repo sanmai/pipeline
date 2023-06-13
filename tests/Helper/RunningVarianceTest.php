@@ -242,11 +242,7 @@ final class RunningVarianceTest extends TestCase
                 $numbers
             ), $sigma / 10);
         } catch (Throwable $e) {
-            if ($mean > 1E10) {
-                $this->markTestSkipped($e->getMessage());
-            }
-
-            throw $e;
+            $this->assertGreaterThan(1E10, $mean, "Naive standard deviation calculation failed where it should not: {$e->getMessage()}");
         }
     }
 
@@ -261,7 +257,7 @@ final class RunningVarianceTest extends TestCase
     private static function getRandomNumbers(float $mean, float $sigma): iterable
     {
         $two_pi = 2 * M_PI;
-        $epsilon = 1E-6; // Arbitrary number
+        $epsilon = PHP_FLOAT_EPSILON;
 
         while (true) {
             do {
