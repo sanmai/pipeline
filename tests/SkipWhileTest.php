@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 use function Pipeline\map;
 use function Pipeline\take;
 
@@ -30,6 +31,26 @@ use function Pipeline\take;
  */
 final class SkipWhileTest extends TestCase
 {
+    public function testSkipEmpty(): void
+    {
+        $pipeline = new Standard();
+
+        $result = $pipeline
+            ->skipWhile(fn ($number) => 1 === $number)
+            ->toArray();
+
+        $this->assertSame([], $result);
+    }
+
+    public function testSkipNever(): void
+    {
+        $result = take([2])
+            ->skipWhile(fn ($number) => 1 === $number)
+            ->toArray();
+
+        $this->assertSame([2], $result);
+    }
+
     public function testSkipWhileOnce(): void
     {
         $result = take([1, 1, 1, 2, 3, 4, 1, 2, 3])
