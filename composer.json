@@ -14,7 +14,7 @@
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.8",
-        "friendsofphp/php-cs-fixer": "^3",
+        "friendsofphp/php-cs-fixer": "^3.17",
         "infection/infection": ">=0.10.5",
         "league/pipeline": "^0.3 || ^1.0",
         "phan/phan": ">=1.1",

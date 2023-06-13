@@ -61,6 +61,7 @@ $config
         'blank_line_between_import_groups' => false,
         'blank_line_before_statement' => ['statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try']],
         'no_unset_on_property' => false,
+        'multiline_whitespace_before_semicolons' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

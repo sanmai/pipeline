@@ -396,7 +396,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable $func {@inheritdoc}
+     * @param ?callable $func
      *
      * @return $this
      */
