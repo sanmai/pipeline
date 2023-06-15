@@ -478,10 +478,12 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
-     * @param ?mixed    $initial initial value for a $carry
+     * @template T
      *
-     * @return ?mixed
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T         $initial The initial initial value for a $carry
+     *
+     * @return int|T
      */
     public function reduce(?callable $func = null, $initial = null)
     {
@@ -491,10 +493,12 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
      *
-     * @param mixed     $initial initial value for a $carry
+     * @template T
+     *
+     * @param T         $initial initial value for a $carry
      * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
-     * @return ?mixed
+     * @return T
      */
     public function fold($initial, ?callable $func = null)
     {
