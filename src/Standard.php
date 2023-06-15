@@ -447,6 +447,35 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
+     *
+     * @param callable $predicate a callback returning boolean value
+     */
+    public function skipWhile(callable $predicate): self
+    {
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $predicate = self::resolvePredicate($predicate);
+
+        $this->filter(static function ($value) use ($predicate): bool {
+            static $done = false;
+
+            if ($predicate($value) && !$done) {
+                return false;
+            }
+
+            $done = true;
+
+            return true;
+        });
+
+        return $this;
+    }
+
+    /**
      * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
      *
      * @template T
