@@ -1121,4 +1121,19 @@ class Standard implements IteratorAggregate, Countable
 
         return $variance;
     }
+
+    public function each(callable $func): void
+    {
+        if ($this->empty()) {
+            return;
+        }
+
+        try {
+            foreach ($this->pipeline as $item) {
+                $func($item);
+            }
+        } finally {
+            $this->discard();
+        }
+    }
 }
