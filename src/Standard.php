@@ -1122,6 +1122,11 @@ class Standard implements IteratorAggregate, Countable
         return $variance;
     }
 
+    /**
+     * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
+     *
+     * @param callable $func
+     */
     public function each(callable $func): void
     {
         if ($this->empty()) {
