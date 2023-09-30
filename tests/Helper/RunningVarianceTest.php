@@ -22,6 +22,7 @@ namespace Tests\Pipeline\Helper;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
 use Throwable;
+
 use function abs;
 use function array_sum;
 use function cos;
@@ -32,6 +33,10 @@ use function mt_rand;
 use function Pipeline\take;
 use function sin;
 use function sqrt;
+
+use const NAN;
+use const M_PI;
+use const PHP_FLOAT_EPSILON;
 
 /**
  * @internal

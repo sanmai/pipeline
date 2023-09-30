@@ -25,6 +25,7 @@ use IteratorIterator;
 use NoRewindIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function iterator_to_array;
 use function Pipeline\map;
 use function range;

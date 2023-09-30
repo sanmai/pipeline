@@ -23,6 +23,7 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function abs;
 use function mt_rand;
 use function mt_srand;

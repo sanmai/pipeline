@@ -21,6 +21,8 @@ namespace Pipeline\Helper;
 
 use function sqrt;
 
+use const NAN;
+
 /**
  * Computes statistics (such as standard deviation) in real time.
  *

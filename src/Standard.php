@@ -27,6 +27,7 @@ use Generator;
 use Iterator;
 use IteratorAggregate;
 use Traversable;
+
 use function array_chunk;
 use function array_filter;
 use function array_flip;
@@ -749,7 +750,7 @@ class Standard implements IteratorAggregate, Countable
             $buffer[] = [$key, $value];
         }
 
-        foreach ($buffer as list($key, $value)) {
+        foreach ($buffer as [$key, $value]) {
             yield $key => $value;
         }
     }

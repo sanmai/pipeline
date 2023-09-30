@@ -23,6 +23,7 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function array_flip;
 use function array_reverse;
 use function call_user_func;
@@ -80,7 +81,7 @@ final class FlipTest extends TestCase
             'two' => 'string_key2',
             '' => 'string_key3',
             ' ' => 'string_key4',
-            'a'.chr(0).'b' => 'binary_key1',
+            'a' . chr(0) . 'b' => 'binary_key1',
         ];
 
         yield [1 => 'value', 2 => 'VALUE', 3 => 4];

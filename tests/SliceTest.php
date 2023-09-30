@@ -26,6 +26,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use RuntimeException;
+
 use function array_merge;
 use function array_slice;
 use function array_values;
@@ -33,6 +34,8 @@ use function Pipeline\fromArray;
 use function Pipeline\map;
 use function Pipeline\take;
 use function range;
+
+use const PHP_INT_MAX;
 
 /**
  * @covers \Pipeline\Standard

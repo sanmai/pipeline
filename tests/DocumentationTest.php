@@ -24,6 +24,7 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
+
 use function file_get_contents;
 use function implode;
 use function Pipeline\take;
@@ -48,7 +49,7 @@ final class DocumentationTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$readme = file_get_contents(__DIR__.'/../README.md');
+        self::$readme = file_get_contents(__DIR__ . '/../README.md');
 
         preg_match_all('/^#.*/m', self::$readme, $matches);
         self::$headers = implode("\n", $matches[0]);
