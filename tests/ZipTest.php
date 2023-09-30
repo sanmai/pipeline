@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function array_map;
 use function max;
 use function Pipeline\fromArray;

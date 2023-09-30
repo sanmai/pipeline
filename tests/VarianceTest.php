@@ -21,8 +21,11 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
+
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use const NAN;
 
 /**
  * @covers \Pipeline\Standard::feedRunningVariance()

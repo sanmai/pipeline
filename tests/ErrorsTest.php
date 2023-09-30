@@ -24,6 +24,7 @@ use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use TypeError;
+
 use function class_exists;
 use function is_callable;
 

@@ -71,7 +71,7 @@ final class StaticAnalysisTest extends TestCase
      */
     public function testInterfaceCompatibilityPHP71(): void
     {
-        $example = new class() extends Standard {
+        $example = new class () extends Standard {
             private $input;
 
             public function __construct(iterable $input = null)

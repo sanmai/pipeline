@@ -21,6 +21,7 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function iterator_to_array;
 
 /**

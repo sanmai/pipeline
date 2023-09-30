@@ -23,6 +23,7 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function array_merge;
 use function array_reverse;
 use function call_user_func;
@@ -32,6 +33,8 @@ use function min;
 use function Pipeline\take;
 use function range;
 use function shuffle;
+
+use const M_E;
 
 /**
  * @covers \Pipeline\Standard

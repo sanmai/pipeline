@@ -24,6 +24,7 @@ use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
+
 use function call_user_func;
 use function iterator_count;
 use function iterator_to_array;

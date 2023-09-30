@@ -18,50 +18,49 @@
 declare(strict_types=1);
 
 $header = <<<'EOF'
-Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
+    Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-EOF;
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    EOF;
 
 $config = new PhpCsFixer\Config();
 $config
     ->setRiskyAllowed(true)
     ->setRules([
         'header_comment' => ['comment_type' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
+        '@PER-CS' => true,
+        '@PER-CS:risky' => true,
 
-        '@Symfony:risky' => true,
-        '@PHP71Migration:risky' => true,
-        '@PHPUnit75Migration:risky' => true,
-        '@PhpCsFixer' => true,
-        '@PhpCsFixer:risky' => true,
+        '@PHPUnit100Migration:risky' => true,
+        '@PHP74Migration' => true,
 
-        'ordered_class_elements' => false,
-        'phpdoc_to_comment' => false,
-        'strict_comparison' => true,
-        'comment_to_phpdoc' => true,
-        'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'namespaced'],
+        'native_constant_invocation' => [
+            'strict' => false,
+            'scope' => 'namespaced',
+        ],
+        'native_function_invocation' => [
+            'include' => ['@internal'],
+            'scope' => 'namespaced',
+        ],
         'global_namespace_import' => [
             'import_classes' => true,
             'import_constants' => true,
             'import_functions' => true,
         ],
-        'php_unit_test_case_static_method_calls' => false,
+
+        'strict_comparison' => true,
         'yoda_style' => true,
-        'random_api_migration' => false,
-        'blank_line_between_import_groups' => false,
-        'blank_line_before_statement' => ['statements' => ['break', 'continue', 'declare', 'return', 'throw', 'try']],
-        'no_unset_on_property' => false,
-        'multiline_whitespace_before_semicolons' => false,
+        'array_indentation' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

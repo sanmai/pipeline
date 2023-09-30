@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Benchmarks;
 
 use PHPUnit\Framework\TestCase;
+
 use function array_map;
 use function array_sum;
 use function Pipeline\fromArray;
