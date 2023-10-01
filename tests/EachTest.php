@@ -23,8 +23,11 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
+use ArrayIterator;
+
 use function Pipeline\map;
 use function Pipeline\take;
+use function Pipeline\fromArray;
 
 /**
  * @covers \Pipeline\Standard
@@ -41,16 +44,21 @@ final class EachTest extends TestCase
         $this->output = [];
     }
 
-    protected function spy($value): void
+    protected function observeValue($value): void
     {
         $this->output[] = $value;
+    }
+
+    protected function observeKeyValue($key, $value): void
+    {
+        $this->output[$key] = $value;
     }
 
     public function testUninitialized(): void
     {
         $pipeline = new Standard();
 
-        $pipeline->each(fn ($value) => $this->spy($value));
+        $pipeline->each(fn ($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
@@ -59,7 +67,7 @@ final class EachTest extends TestCase
     {
         $pipeline = take([]);
 
-        $pipeline->each(fn ($value) => $this->spy($value));
+        $pipeline->each(fn ($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
@@ -68,7 +76,7 @@ final class EachTest extends TestCase
     {
         $pipeline = map(static fn () => yield from []);
 
-        $pipeline->each(fn ($value) => $this->spy($value));
+        $pipeline->each(fn ($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
@@ -77,15 +85,32 @@ final class EachTest extends TestCase
     {
         $pipeline = take([1, 2, 3, 4]);
 
-        $pipeline->each(fn (int $value) => $this->spy($value));
+        $pipeline->each(fn (int $value) => $this->observeValue($value));
 
         $this->assertSame([1, 2, 3, 4], $this->output);
     }
 
-    public function testInterrupt(): void
+    public function testKeyValue(): void
     {
-        $pipeline = map(fn () => yield from [1, 2, 3, 4]);
+        $pipeline = take([5 => 1, 2, 3, 4]);
 
+        $pipeline->each(fn (int $value, int $key) => $this->observeKeyValue($key, $value));
+
+        $this->assertSame([5 => 1, 2, 3, 4], $this->output);
+    }
+
+
+    public static function provideInterrupt(): iterable
+    {
+        yield [map(fn () => yield from [1, 2, 3, 4])];
+        yield [take(new ArrayIterator([1, 2, 3, 4]))];
+    }
+
+    /**
+     * @dataProvider provideInterrupt
+     */
+    public function testInterrupt(Standard $pipeline): void
+    {
         $pipeline->cast(function (int $value) {
             if (3 === $value) {
                 throw new LogicException();
@@ -96,14 +121,14 @@ final class EachTest extends TestCase
 
         try {
             $pipeline->each(function (int $value): void {
-                $this->spy($value);
+                $this->observeValue($value);
             });
         } catch (LogicException $_) {
             $this->assertSame([1, 2], $this->output);
         }
 
         $pipeline->each(function (int $value): void {
-            $this->spy($value);
+            $this->fail();
         });
 
         $this->assertSame([1, 2], $this->output);

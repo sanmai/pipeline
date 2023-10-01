@@ -1134,10 +1134,11 @@ class Standard implements IteratorAggregate, Countable
         }
 
         try {
-            foreach ($this->pipeline as $item) {
-                $func($item);
+            foreach ($this->pipeline as $key => $value) {
+                $func($value, $key);
             }
         } finally {
+            // Generators are unusable if an exception gets thrown from one.
             $this->discard();
         }
     }
