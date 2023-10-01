@@ -126,7 +126,7 @@ All entry points always return an instance of the pipeline.
 | `max()`     | Finds the highest value. | `max` |
 | `min()`     | Finds the lowest value. | `min` |
 | `count()`     | Counts values. Eagerly executed.| `array_count` |
-| `each()`     | Iterates over the sequence.| `foreach` |
+| `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `toArrayPreservingKeys()` | Returns an array with all values and keys. Eagerly executed. |  |
