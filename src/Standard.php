@@ -1126,8 +1126,9 @@ class Standard implements IteratorAggregate, Countable
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
      * @param callable $func
+     * @param bool $discard Whenever to discard the pipeline's interator.
      */
-    public function each(callable $func): void
+    public function each(callable $func, bool $discard = true): void
     {
         if ($this->empty()) {
             return;
@@ -1138,8 +1139,9 @@ class Standard implements IteratorAggregate, Countable
                 $func($value, $key);
             }
         } finally {
-            // Generators are unusable if an exception gets thrown from one.
-            $this->discard();
+            if ($discard) {
+                $this->discard();
+            }
         }
     }
 }

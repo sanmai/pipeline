@@ -134,4 +134,21 @@ final class EachTest extends TestCase
         $this->assertSame([1, 2], $this->output);
         $this->assertSame([], $pipeline->toArray());
     }
+
+    public function testNoDiscard(): void
+    {
+        $pipeline = fromArray([1, 2, 3]);
+
+        $pipeline->each(function (int $value): void {
+            $this->observeValue($value);
+        }, false);
+
+        $pipeline->each(function (int $value): void {
+            $this->observeValue($value);
+        });
+
+        $this->assertSame([1, 2, 3, 1, 2, 3], $this->output);
+        $this->assertSame([], $pipeline->toArray());
+    }
+
 }
