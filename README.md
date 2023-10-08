@@ -398,7 +398,7 @@ $pipeline->each(function ($i) {
 });
 ```
 
-Discards the sequence after iteration.
+Discards the sequence after iteration unless instructed otherwise by the second argument.
 
 ## `$pipeline->getIterator()`
 
