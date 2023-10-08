@@ -126,6 +126,7 @@ All entry points always return an instance of the pipeline.
 | `max()`     | Finds the highest value. | `max` |
 | `min()`     | Finds the lowest value. | `min` |
 | `count()`     | Counts values. Eagerly executed.| `array_count` |
+| `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `toArrayPreservingKeys()` | Returns an array with all values and keys. Eagerly executed. |  |
@@ -386,6 +387,18 @@ $result = $pipeline->toArray();
 ```
 
 If in the example about one would use `iterator_to_array($result)` they would get just `[3, 4]`.
+
+## `$pipeline->each()`
+
+Eagerly iterates over the sequence using the provided callback.
+
+```php
+$pipeline->each(function ($i) {
+    $this->log("Saw $i");
+});
+```
+
+Discards the sequence after iteration unless instructed otherwise by the second argument.
 
 ## `$pipeline->getIterator()`
 

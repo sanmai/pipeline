@@ -1121,4 +1121,27 @@ class Standard implements IteratorAggregate, Countable
 
         return $variance;
     }
+
+    /**
+     * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
+     *
+     * @param callable $func
+     * @param bool $discard Whenever to discard the pipeline's interator.
+     */
+    public function each(callable $func, bool $discard = true): void
+    {
+        if ($this->empty()) {
+            return;
+        }
+
+        try {
+            foreach ($this->pipeline as $key => $value) {
+                $func($value, $key);
+            }
+        } finally {
+            if ($discard) {
+                $this->discard();
+            }
+        }
+    }
 }
