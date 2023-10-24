@@ -32,7 +32,6 @@ use function array_chunk;
 use function array_filter;
 use function array_flip;
 use function array_map;
-use function array_merge;
 use function array_reduce;
 use function array_shift;
 use function array_slice;
@@ -190,7 +189,15 @@ class Standard implements IteratorAggregate, Countable
     {
         // We got two arrays, that's what we will use.
         if (is_array($left) && is_array($right)) {
-            $this->pipeline = array_merge($left, $right);
+            $this->pipeline = [];
+
+            foreach ($left as $key => $value) {
+                $this->pipeline[$key] = $value;
+            }
+
+            foreach ($right as $key => $value) {
+                $this->pipeline[$key] = $value;
+            }
 
             return $this;
         }
