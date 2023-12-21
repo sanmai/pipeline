@@ -64,7 +64,7 @@ final class VarianceTest extends TestCase
 
     public function testVarianceIterable(): void
     {
-        $pipeline = map(fn () => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10]);
+        $pipeline = map(fn() => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10]);
 
         $this->assertEqualsWithDelta(
             2.2913,
@@ -75,10 +75,10 @@ final class VarianceTest extends TestCase
 
     public function testFinalVarianceReuse(): void
     {
-        $a = map(fn () => yield from [5, 5, 9, 9]);
+        $a = map(fn() => yield from [5, 5, 9, 9]);
         $variance = $a->finalVariance();
 
-        $b = map(fn () => yield from [9, 10, 5, 10, 10]);
+        $b = map(fn() => yield from [9, 10, 5, 10, 10]);
         $variance = $b->finalVariance(null, $variance);
 
         $this->assertEqualsWithDelta(
@@ -90,10 +90,10 @@ final class VarianceTest extends TestCase
 
     public function testRunningVarianceReuse(): void
     {
-        $a = map(fn () => yield from [5, 5, 9, 9]);
+        $a = map(fn() => yield from [5, 5, 9, 9]);
         $this->assertSame(28, $a->runningVariance($variance)->fold(0));
 
-        $b = map(fn () => yield from [9, 10, 5, 10, 10]);
+        $b = map(fn() => yield from [9, 10, 5, 10, 10]);
         $this->assertSame(44, $b->runningVariance($variance)->fold(0));
 
         $this->assertEqualsWithDelta(
@@ -105,7 +105,7 @@ final class VarianceTest extends TestCase
 
     public function testVarianceCast(): void
     {
-        $pipeline = map(fn () => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
+        $pipeline = map(fn() => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
 
         $variance = $pipeline->finalVariance(static function (int $number): ?float {
             if ($number < 0 || $number > 10) {
@@ -124,7 +124,7 @@ final class VarianceTest extends TestCase
 
     public function testOnlineVariance(): void
     {
-        $pipeline = map(fn () => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
+        $pipeline = map(fn() => yield from [-10, -20, 5, 5, 9, 9, 9, 10, 5, 10, 10, 100, 200]);
 
         $pipeline->runningVariance($variance, static function (int $number): ?float {
             if ($number < 0 || $number > 10) {
@@ -151,7 +151,7 @@ final class VarianceTest extends TestCase
 
     public function testFeedVariance(): void
     {
-        $pipeline = map(fn () => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10]);
+        $pipeline = map(fn() => yield from [5, 5, 9, 9, 9, 10, 5, 10, 10]);
 
         $variance = new RunningVariance();
 

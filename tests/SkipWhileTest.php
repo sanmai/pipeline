@@ -37,7 +37,7 @@ final class SkipWhileTest extends TestCase
         $pipeline = new Standard();
 
         $result = $pipeline
-            ->skipWhile(fn ($number) => 1 === $number)
+            ->skipWhile(fn($number) => 1 === $number)
             ->toArray();
 
         $this->assertSame([], $result);
@@ -46,7 +46,7 @@ final class SkipWhileTest extends TestCase
     public function testSkipNever(): void
     {
         $result = take([2])
-            ->skipWhile(fn ($number) => 1 === $number)
+            ->skipWhile(fn($number) => 1 === $number)
             ->toArray();
 
         $this->assertSame([2], $result);
@@ -55,7 +55,7 @@ final class SkipWhileTest extends TestCase
     public function testSkipWhileOnce(): void
     {
         $result = take([1, 1, 1, 2, 3, 4, 1, 2, 3])
-            ->skipWhile(fn ($number) => 1 === $number)
+            ->skipWhile(fn($number) => 1 === $number)
             ->toArray();
 
         $this->assertSame([2, 3, 4, 1, 2, 3], $result);
@@ -63,10 +63,10 @@ final class SkipWhileTest extends TestCase
 
     public function testSkipWhileTwice()
     {
-        $result = map(fn () => yield from [1, 1, 1, 2, 2, 3, 4, 5, 1, 2])
-            ->skipWhile(fn ($number) => 1 === $number)
-            ->skipWhile(fn ($number) => 2 === $number)
-            ->filter(fn ($number) => 1 === $number % 2)
+        $result = map(fn() => yield from [1, 1, 1, 2, 2, 3, 4, 5, 1, 2])
+            ->skipWhile(fn($number) => 1 === $number)
+            ->skipWhile(fn($number) => 2 === $number)
+            ->filter(fn($number) => 1 === $number % 2)
             ->toArray();
 
         $this->assertSame([3, 5, 1], $result);

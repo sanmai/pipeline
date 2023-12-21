@@ -282,7 +282,7 @@ final class RunningVarianceTest extends TestCase
     {
         $mean = array_sum($input) / count($input);
 
-        $carry = take($input)->cast(fn (float $val) => ($val - $mean) ** 2)->reduce();
+        $carry = take($input)->cast(fn(float $val) => ($val - $mean) ** 2)->reduce();
 
         return sqrt($carry / count($input));
     }

@@ -36,11 +36,11 @@ final class RunningCountTest extends TestCase
     {
         $countEven = 1;
 
-        $pipeline = map(fn () => yield from range(0, 100))
+        $pipeline = map(fn() => yield from range(0, 100))
             ->runningCount($countAll)
-            ->filter(fn (int $n) => 0 === $n % 2)
+            ->filter(fn(int $n) => 0 === $n % 2)
             ->runningCount($countEven)
-            ->filter(fn (int $n) => $n % 3);
+            ->filter(fn(int $n) => $n % 3);
 
         $this->assertSame(0, $countAll);
         $this->assertSame(1, $countEven);
@@ -55,11 +55,11 @@ final class RunningCountTest extends TestCase
     {
         $countEven = 1;
 
-        $pipeline = map(fn () => yield from range(0, 100))
+        $pipeline = map(fn() => yield from range(0, 100))
             ->runningCount($countAll)
-            ->filter(fn (int $n) => 0 === $n % 2)
+            ->filter(fn(int $n) => 0 === $n % 2)
             ->runningCount($countEven)
-            ->filter(fn (int $n) => $n % 3);
+            ->filter(fn(int $n) => $n % 3);
 
         $this->assertSame(0, $countAll);
         $this->assertSame(1, $countEven);
@@ -81,9 +81,9 @@ final class RunningCountTest extends TestCase
 
         $pipeline = take(range(0, 100))
             ->runningCount($countAll)
-            ->filter(fn (int $n) => 0 === $n % 2)
+            ->filter(fn(int $n) => 0 === $n % 2)
             ->runningCount($countEven)
-            ->filter(fn (int $n) => $n % 3);
+            ->filter(fn(int $n) => $n % 3);
 
         $this->assertSame(101, $countAll);
         $this->assertSame(51, $countEven - 1);

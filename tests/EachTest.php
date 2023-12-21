@@ -58,7 +58,7 @@ final class EachTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $pipeline->each(fn ($value) => $this->observeValue($value));
+        $pipeline->each(fn($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
@@ -67,16 +67,16 @@ final class EachTest extends TestCase
     {
         $pipeline = take([]);
 
-        $pipeline->each(fn ($value) => $this->observeValue($value));
+        $pipeline->each(fn($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
 
     public function testEmptyGenerator(): void
     {
-        $pipeline = map(static fn () => yield from []);
+        $pipeline = map(static fn() => yield from []);
 
-        $pipeline->each(fn ($value) => $this->observeValue($value));
+        $pipeline->each(fn($value) => $this->observeValue($value));
 
         $this->assertSame([], $this->output);
     }
@@ -85,7 +85,7 @@ final class EachTest extends TestCase
     {
         $pipeline = take([1, 2, 3, 4]);
 
-        $pipeline->each(fn (int $value) => $this->observeValue($value));
+        $pipeline->each(fn(int $value) => $this->observeValue($value));
 
         $this->assertSame([1, 2, 3, 4], $this->output);
     }
@@ -94,7 +94,7 @@ final class EachTest extends TestCase
     {
         $pipeline = take([5 => 1, 2, 3, 4]);
 
-        $pipeline->each(fn (int $value, int $key) => $this->observeKeyValue($key, $value));
+        $pipeline->each(fn(int $value, int $key) => $this->observeKeyValue($key, $value));
 
         $this->assertSame([5 => 1, 2, 3, 4], $this->output);
     }
@@ -102,7 +102,7 @@ final class EachTest extends TestCase
 
     public static function provideInterrupt(): iterable
     {
-        yield [map(fn () => yield from [1, 2, 3, 4])];
+        yield [map(fn() => yield from [1, 2, 3, 4])];
         yield [take(new ArrayIterator([1, 2, 3, 4]))];
     }
 

@@ -75,8 +75,8 @@ final class DocumentationTest extends TestCase
         $interfaces = $reflection->getInterfaces();
 
         return take($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
-            ->filter(fn (ReflectionMethod $method) => self::interfaceFilter($interfaces, $method))
-            ->cast(fn (ReflectionMethod $method) => [$method->getName()]);
+            ->filter(fn(ReflectionMethod $method) => self::interfaceFilter($interfaces, $method))
+            ->cast(fn(ReflectionMethod $method) => [$method->getName()]);
     }
 
     /**
