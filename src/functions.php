@@ -23,7 +23,7 @@ function map(callable $func = null): Standard
 {
     $pipeline = new Standard();
 
-    if (!$func) {
+    if ($func === null) {
         return $pipeline;
     }
 
