@@ -20,4 +20,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           shuf -n 1 -e ${{ env.LINES }} |
-          gh pr review ${{ github.event.pull_request.html_url }} --approve --body -
+          gh pr review ${{ github.event.pull_request.html_url }} --approve --body-file -
