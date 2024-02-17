@@ -6,7 +6,10 @@ on:
   pull_request:
 
 env:
-  LINES: "'Cool' 'Nice'"
+  LINES: >
+    "Whatever you say!"
+    "Isn't this exciting? I know I'm excited!"
+    "I have a good feeling about this! It's going to be great!"
 
 jobs:
   approve_pr:
