@@ -12,7 +12,7 @@ jobs:
     if: github.actor == github.repository_owner
 
     steps:
-      - name: Auto-approve repository owner's PR
+      - name: Approve PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
