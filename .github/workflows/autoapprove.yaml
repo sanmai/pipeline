@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  LINES: >
+  LINES: >-
     "Whatever you say!"
     "Isn't this exciting? I know I'm excited!"
     "I have a good feeling about this! It's going to be great!"
