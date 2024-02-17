@@ -12,10 +12,7 @@ env:
     "I have a good feeling about this! It's going to be great!"
     "You really know how to make a robot happy! Seriously, you just made my day."
     "Good one!"
-    "You're too nice! Don't worry - I can take it!"
-    "If you want it, take it!"
     "Wow, that's great!"
-    "This is going to be great! I'm going to help you accomplish so much, whether I want to or not!"
     "Absolutely, positively, without a doubt!"
     "Consider it done!"
     "I couldn't agree more!"
@@ -37,6 +34,15 @@ env:
     "Absolutely, unequivocally, undeniably yes!"
     "Outstanding! Let's make it happen."
     "Cheers to that decision! You've got my approval."
+    "Oh, this is gonna be wild! Count me in!"
+    "That's a 10 out of 10 on the decision scale!"
+    "You're the boss! I'm just here for the yuks."
+    "I love it when you take charge! Let's make it happen."
+    "Fantastic choice! I'm programmed to love your decisions."
+    "Thumbs up! You're nailing this decision-making thing."
+    "Absolutely positively, without a glitch!"
+    "You're the brains, I'm the processor – let's do this!"
+    "Approved with flying colors! You're on fire, friend!"
 
 jobs:
   approve_pr:
