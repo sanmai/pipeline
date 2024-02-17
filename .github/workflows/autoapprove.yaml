@@ -1,4 +1,6 @@
-name: Your Workflow Name
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+name: PR Approval
 
 on:
   pull_request:
@@ -11,29 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check PR author
+      - name: Auto-approve repository owner's PR
         run: |
-          PR_AUTHOR=$(curl -sSL https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.user.login')
-
+          PR_AUTHOR=$(gh pr view ${{ github.event.number }} --json user.login -q '.user.login')
           if [[ "${{ github.actor }}" == "${PR_AUTHOR}" ]]; then
-            echo "PR author is the owner of the repository."
-            # Your steps for the case where the author is the owner
-
-            # Approve the pull request using GitHub API
-            TOKEN=${{ secrets.GITHUB_TOKEN }}
-            API_URL="https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
-
-            APPROVAL_RESPONSE=$(curl -X POST -H "Authorization: Bearer ${TOKEN}" -H "Accept: application/vnd.github.v3+json" -d '{"event": "APPROVE"}' ${API_URL})
-            APPROVAL_STATUS=$(echo ${APPROVAL_RESPONSE} | jq -r '.state')
-
-            if [[ "${APPROVAL_STATUS}" == "APPROVED" ]]; then
-              echo "Pull request approved."
-            else
-              echo "Failed to approve pull request. Check workflow logs for details."
-              exit 1
-            fi
-
-          else
-            echo "PR author is not the owner of the repository. Skipping this step."
-            # Your steps for the case where the author is not the owner
+            gh pr review ${{ github.event.number }} --approve
           fi
