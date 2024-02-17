@@ -1,0 +1,19 @@
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+name: PR Approval
+
+on:
+  pull_request:
+
+jobs:
+  approve_pr:
+    name: Automatic Approval
+    runs-on: ubuntu-latest
+    if: github.actor == github.repository_owner
+
+    steps:
+      - name: Approve PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review ${{ github.event.pull_request.html_url }} --approve
