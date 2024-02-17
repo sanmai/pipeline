@@ -5,6 +5,9 @@ name: PR Approval
 on:
   pull_request:
 
+env:
+  LINES: ("Cool" "Nice")
+
 jobs:
   approve_pr:
     name: Automatic Approval
@@ -16,4 +19,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          fortune | gh pr review ${{ github.event.pull_request.html_url }} --approve --body -
+          gh pr review ${{ github.event.pull_request.html_url }} --approve --body "${LINES[RANDOM%${#LINES[@]}]}"
