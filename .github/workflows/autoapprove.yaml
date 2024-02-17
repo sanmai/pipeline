@@ -19,4 +19,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr review ${{ github.event.pull_request.html_url }} --approve --body "${LINES[RANDOM%${#LINES[@]}]}"
+          shuf -n1 -e ${LINES[@]} |
+          gh pr review ${{ github.event.pull_request.html_url }} --approve --body -
