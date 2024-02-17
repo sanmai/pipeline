@@ -6,16 +6,14 @@ on:
   pull_request:
 
 jobs:
-  your_job_name:
+  approve_pr:
+    name: Automatic Approval
     runs-on: ubuntu-latest
-    if: github.actor == github.repository_owner
+    if: github.actor != github.repository_owner
 
     steps:
       - name: Auto-approve repository owner's PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          PR_AUTHOR=$(gh pr view ${{ github.event.number }} --json user.login -q '.user.login')
-          if [[ "${{ github.actor }}" == "${PR_AUTHOR}" ]]; then
-            gh pr review ${{ github.event.number }} --approve
-          fi
+          gh pr review ${{ github.event.number }} --approve
