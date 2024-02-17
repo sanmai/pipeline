@@ -4,9 +4,6 @@ name: PR Approval
 
 on:
   pull_request:
-    types:
-      - opened
-      - synchronize
 
 jobs:
   your_job_name:
@@ -14,6 +11,8 @@ jobs:
 
     steps:
       - name: Auto-approve repository owner's PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           PR_AUTHOR=$(gh pr view ${{ github.event.number }} --json user.login -q '.user.login')
           if [[ "${{ github.actor }}" == "${PR_AUTHOR}" ]]; then
