@@ -8,6 +8,7 @@ on:
 jobs:
   your_job_name:
     runs-on: ubuntu-latest
+    if: github.actor == github.repository_owner
 
     steps:
       - name: Auto-approve repository owner's PR
