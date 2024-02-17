@@ -19,7 +19,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          shuf -n 1 -e "${{ env.LINES }}"
+          shuf -n 1 -e ${{ env.LINES }}
           shuf -n 1 -e "${LINES[@]}"
           shuf -n 1 -e "${LINES[@]}" |
           gh pr review ${{ github.event.pull_request.html_url }} --approve --body -
