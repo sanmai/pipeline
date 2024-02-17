@@ -9,7 +9,7 @@ jobs:
   approve_pr:
     name: Automatic Approval
     runs-on: ubuntu-latest
-    if: github.actor != github.repository_owner
+    if: github.actor == github.repository_owner
 
     steps:
       - name: Auto-approve repository owner's PR
