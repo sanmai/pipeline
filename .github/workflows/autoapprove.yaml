@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  LINES: ('Cool' 'Nice')
+  LINES: 'Cool' 'Nice'
 
 jobs:
   approve_pr:
