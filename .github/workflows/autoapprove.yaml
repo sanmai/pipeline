@@ -48,7 +48,7 @@ jobs:
   approve_pr:
     name: Automatic Approval
     runs-on: ubuntu-latest
-    if: github.actor == github.repository_owner
+    if: github.event.pull_request.user.login == github.repository_owner
 
     steps:
       - name: Approve PR
