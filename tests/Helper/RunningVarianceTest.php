@@ -51,6 +51,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(0, $variance->getCount());
         $this->assertNan($variance->getMean());
+        $this->assertNan($variance->getMin());
+        $this->assertNan($variance->getMax());
         $this->assertNan($variance->getVariance());
         $this->assertNan($variance->getStandardDeviation());
     }
@@ -72,9 +74,25 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(1, $variance->getCount());
         $this->assertSame(M_PI, $variance->getMean());
+        $this->assertSame(M_PI, $variance->getMin());
+        $this->assertSame(M_PI, $variance->getMax());
         $this->assertSame(0.0, $variance->getVariance());
         $this->assertSame(0.0, $variance->getStandardDeviation());
     }
+
+    public function testOneNegative(): void
+    {
+        $variance = new RunningVariance();
+        $variance->observe(-1.01);
+
+        $this->assertSame(1, $variance->getCount());
+        $this->assertSame(-1.01, $variance->getMean());
+        $this->assertSame(-1.01, $variance->getMin());
+        $this->assertSame(-1.01, $variance->getMax());
+        $this->assertSame(0.0, $variance->getVariance());
+        $this->assertSame(0.0, $variance->getStandardDeviation());
+    }
+
 
     public function testTwo(): void
     {
@@ -84,6 +102,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(2, $variance->getCount());
         $this->assertSame(M_PI, $variance->getMean());
+        $this->assertSame(M_PI, $variance->getMin());
+        $this->assertSame(M_PI, $variance->getMax());
         $this->assertSame(0.0, $variance->getVariance());
         $this->assertSame(0.0, $variance->getStandardDeviation());
     }
@@ -96,6 +116,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(2, $variance->getCount());
         $this->assertNan($variance->getMean());
+        $this->assertSame(M_PI, $variance->getMin());
+        $this->assertSame(M_PI, $variance->getMax());
         $this->assertNan($variance->getVariance());
         $this->assertNan($variance->getStandardDeviation());
     }
@@ -111,6 +133,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(5, $variance->getCount());
         $this->assertSame(5.0, $variance->getMean());
+        $this->assertSame(2.0, $variance->getMin());
+        $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
@@ -128,6 +152,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(5, $variance->getCount());
         $this->assertSame(5.0, $variance->getMean());
+        $this->assertSame(2.0, $variance->getMin());
+        $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
@@ -145,6 +171,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(5, $variance->getCount());
         $this->assertSame(5.0, $variance->getMean());
+        $this->assertSame(2.0, $variance->getMin());
+        $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
@@ -164,6 +192,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(5, $variance->getCount());
         $this->assertSame(5.0, $variance->getMean());
+        $this->assertSame(2.0, $variance->getMin());
+        $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
@@ -185,6 +215,8 @@ final class RunningVarianceTest extends TestCase
 
         $this->assertSame(5, $variance->getCount());
         $this->assertSame(5.0, $variance->getMean());
+        $this->assertSame(2.0, $variance->getMin());
+        $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
     }
