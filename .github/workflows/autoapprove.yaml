@@ -5,6 +5,9 @@ name: PR Approval
 on:
   pull_request:
 
+permissions:
+  pull-requests: write
+
 env:
   LINES: >-
     "Whatever you say!"
