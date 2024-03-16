@@ -39,6 +39,12 @@ class RunningVariance
      */
     private int $count = 0;
 
+    /** The smallest observed value */
+    private float $min = NAN;
+
+    /** The largest observed value */
+    private float $max = NAN;
+
     /** First moment: the mean value. */
     private float $mean = 0.0;
 
@@ -61,6 +67,19 @@ class RunningVariance
         $this->mean += $delta / $this->count;
         $this->m2 += $delta * ($value - $this->mean);
 
+        if (1 === $this->count) {
+            $this->min = $value;
+            $this->max = $value;
+        } else {
+            if ($value < $this->min) {
+                $this->min = $value;
+            }
+
+            if ($value > $this->max) {
+                $this->max = $value;
+            }
+        }
+
         return $value;
     }
 
@@ -70,6 +89,18 @@ class RunningVariance
     public function getCount(): int
     {
         return $this->count;
+    }
+
+    /** The smallest observed value */
+    public function getMin(): float
+    {
+        return $this->min;
+    }
+
+    /** The largest observed value */
+    public function getMax(): float
+    {
+        return $this->max;
     }
 
     /**
@@ -129,6 +160,8 @@ class RunningVariance
             $this->count = $other->count;
             $this->mean = $other->mean;
             $this->m2 = $other->m2;
+            $this->min = $other->min;
+            $this->max = $other->max;
 
             return;
         }
@@ -139,5 +172,13 @@ class RunningVariance
         $this->mean = ($this->count * $this->mean) / $count + ($other->count * $other->mean) / $count;
         $this->m2 = $this->m2 + $other->m2 + ($delta ** 2 * $this->count * $other->count / $count);
         $this->count = $count;
+
+        if ($other->min < $this->min) {
+            $this->min = $other->min;
+        }
+
+        if ($other->max > $this->max) {
+            $this->max = $other->max;
+        }
     }
 }
