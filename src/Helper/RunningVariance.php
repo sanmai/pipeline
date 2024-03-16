@@ -91,11 +91,13 @@ class RunningVariance
         return $this->count;
     }
 
+    /** The smallest observed value */
     public function getMin(): float
     {
         return $this->min;
     }
 
+    /** The largest observed value */
     public function getMax(): float
     {
         return $this->max;
