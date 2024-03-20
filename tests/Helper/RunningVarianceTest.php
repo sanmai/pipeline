@@ -202,14 +202,14 @@ final class RunningVarianceTest extends TestCase
     {
         $varianceA = new RunningVariance();
         $varianceA->observe(5.0);
-        $varianceA->observe(8.0);
+        $varianceA->observe(2.0);
         $varianceA->observe(6.0);
 
         $varianceB = new RunningVariance();
         $varianceB->observe(4.0);
 
         $varianceC = new RunningVariance();
-        $varianceC->observe(2.0);
+        $varianceC->observe(8.0);
 
         $variance = new RunningVariance($varianceA, $varianceB, $varianceC);
 
