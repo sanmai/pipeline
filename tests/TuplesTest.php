@@ -90,11 +90,11 @@ final class TuplesTest extends TestCase
     {
         $pipeline = take($input);
 
-        $pipeline->tuples();
+        $actual = $pipeline->tuples()->toArray($preserve_keys);
 
         $this->assertSame(
             $expected,
-            $pipeline->toArray($preserve_keys)
+            $actual
         );
     }
 
@@ -102,8 +102,11 @@ final class TuplesTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $pipeline->tuples();
+        $actual = $pipeline->tuples()->toArray();
 
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame(
+            [],
+            $actual
+        );
     }
 }
