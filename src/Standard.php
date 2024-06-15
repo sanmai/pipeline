@@ -47,6 +47,7 @@ use function max;
 use function min;
 use function mt_getrandmax;
 use function mt_rand;
+use function array_keys;
 
 /**
  * Concrete pipeline with sensible default callbacks.
@@ -1050,6 +1051,39 @@ class Standard implements IteratorAggregate, Countable
     {
         foreach ($previous as $key => $value) {
             yield $value => $key;
+        }
+    }
+
+    /**
+     * @return $this
+     */
+    public function tuples()
+    {
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
+        }
+
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_map(
+                fn($key, $value) => [$key, $value],
+                array_keys($this->pipeline),
+                $this->pipeline
+            );
+
+            return $this;
+        }
+
+
+        $this->pipeline = self::toTuples($this->pipeline);
+
+        return $this;
+    }
+
+    private static function toTuples(iterable $previous): iterable
+    {
+        foreach ($previous as $key => $value) {
+            yield [$key, $value];
         }
     }
 
