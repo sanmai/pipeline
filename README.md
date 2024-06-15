@@ -4,6 +4,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=main)](https://coveralls.io/github/sanmai/pipeline?branch=main)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
+Pipeline is a PHP library that brings the power of streaming pipelines to your code. Inspired by the pipe operator (`|>`), common in functional programming languages, Pipeline lets you chain together a series of operations on your data in a clear, concise, and readable way. This approach not only simplifies complex data transformations but also makes your code more maintainable and easier to test.
+
 Pipeline makes dealing with `iterable` types as easy as it can be, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses output of another in succession, this library does just that but for PHP functions, generators, arrays, and iterators.
 
 Pipeline comes with the most important yet basic building blocks. It boasts methods to map, filter, reduce, zip, and unpack data from arbitrary generators and from all kinds of standard iterators.
