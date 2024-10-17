@@ -1,4 +1,4 @@
-[![Total Downloads](http://poser.pugx.org/sanmai/pipeline/downloads)](https://packagist.org/packages/sanmai/pipeline)
+[![Total Downloads](https://poser.pugx.org/sanmai/pipeline/downloads)](https://packagist.org/packages/sanmai/pipeline)
 [![Latest Stable Version](https://poser.pugx.org/sanmai/pipeline/v/stable)](https://packagist.org/packages/sanmai/pipeline)
 ![CI](https://github.com/sanmai/pipeline/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=main)](https://coveralls.io/github/sanmai/pipeline?branch=main)
