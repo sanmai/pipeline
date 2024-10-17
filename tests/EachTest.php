@@ -22,7 +22,6 @@ namespace Tests\Pipeline;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-
 use ArrayIterator;
 
 use function Pipeline\map;

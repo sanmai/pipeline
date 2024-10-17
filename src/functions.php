@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
-function map(callable $func = null): Standard
+function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
 
@@ -30,7 +30,7 @@ function map(callable $func = null): Standard
     return $pipeline->map($func);
 }
 
-function take(iterable $input = null, iterable ...$inputs): Standard
+function take(?iterable $input = null, iterable ...$inputs): Standard
 {
     $pipeline = new Standard($input);
 
