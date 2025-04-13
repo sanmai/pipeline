@@ -4,9 +4,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=main)](https://coveralls.io/github/sanmai/pipeline?branch=main)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
-Pipeline is a PHP library that brings the power of streaming pipelines to your code. Inspired by the pipe operator (`|>`), typical in functional programming languages, Pipeline lets you chain a series of operations on your data concisely, clearly, and readably. This approach simplifies complex data transformations and makes your code more maintainable and easier to test. 
+Pipeline is a PHP library that brings the power of streaming pipelines to your code. Inspired by the pipe operator (`|>`), typical in functional programming languages, Pipeline lets you chain a series of operations on your data concisely, clearly, and readably. This approach simplifies complex data transformations and makes your code more maintainable and easier to test.
 
-The pipeline uses lazy evaluation to optimize performance, especially for large datasets. This means operations are not executed immediately but deferred until the final result is needed. The pipeline is built as a chain of generator functions, processing data iteratively without loading the entire dataset into memory. 
+The pipeline uses lazy evaluation to optimize performance, especially for large datasets. This means operations are not executed immediately but deferred until the final result is needed. The pipeline is built as a chain of generator functions, processing data iteratively without loading the entire dataset into memory.
 
 This means the actual computation is deferred until the final result is needed. This approach offers the benefits of reduced memory usage, making it suitable for handling massive datasets, improved performance by avoiding unnecessary computations, and efficiency for large datasets or even infinite sequences. For example, if you have an array with a million numbers and want to find the first five even numbers multiplied by 2, thanks to the lazy evaluation, it will only process the first few necessary numbers.
 
@@ -126,7 +126,7 @@ All entry points always return an instance of the pipeline.
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
-| `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
+| `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  |
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
@@ -143,7 +143,7 @@ All entry points always return an instance of the pipeline.
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
 
-Pipeline is an iterator and can be used as any other iterable. 
+Pipeline is an iterator and can be used as any other iterable.
 
 Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
 
@@ -161,7 +161,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     ```
 
   Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
-  
+
 - That said, if a non-generator used to seed the pipeline, it will be executed eagerly.
 
     ```php
@@ -172,28 +172,28 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     })->filter();
     ```
   In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly whenever possible. Ergo, *when in doubt, use a generator.*
-  
+
     ```php
     $pipeline->map(function () {
         // will be executed only as needed, when needed
         yield $this->veryExpensiveMethod();
     })->filter();
-    ```  
+    ```
 
 - Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned.
-    
+
     ```php
-	$pipeline = \Pipeline\map(function () {
-	    yield 'foo' => 'bar';
-	    yield 'foo' => 'baz';
-	});
-	
-	var_dump(iterator_to_array($pipeline));
-	/* ['foo' => 'baz'] */
+    $pipeline = \Pipeline\map(function () {
+        yield 'foo' => 'bar';
+        yield 'foo' => 'baz';
+    });
+
+    var_dump(iterator_to_array($pipeline));
+    /* ['foo' => 'baz'] */
     ```
-  
+
   Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
-  
+
     ```php
     var_dump($pipeline->toArray());
     /* ['bar', 'baz'] */
@@ -202,20 +202,20 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 - The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
 
-	```php
-	$pipeline = \Pipeline\map(function () {
-	    yield 1;
-	});
-	
-	$sum = $pipeline->reduce();
-	
-	// Won't work the second time though
-	$pipeline->reduce();
-	// Exception: Cannot traverse an already closed generator
-	```
- 
-  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.   
- 
+    ```php
+    $pipeline = \Pipeline\map(function () {
+        yield 1;
+    });
+
+    $sum = $pipeline->reduce();
+
+    // Won't work the second time though
+    $pipeline->reduce();
+    // Exception: Cannot traverse an already closed generator
+    ```
+
+  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.
+
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
     ```php
@@ -235,7 +235,7 @@ This library is built to last. There's not a single place where an exception is 
 
 ## `__construct()`
 
-Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. 
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
 
 ## `$pipeline->map()`
 
@@ -331,7 +331,7 @@ Sequence-joins several iterables together, forming a feed with elements side by 
 $pipeline = take($iterableA);
 $pipeline->zip($iterableB, $iterableC);
 $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
-    // ... 
+    // ...
 });
 ```
 
@@ -484,13 +484,13 @@ $variance->getCount();
 
 # Contributions
 
-Contributions to documentation and test cases are welcome. Bug reports are welcome too. 
+Contributions to documentation and test cases are welcome. Bug reports are welcome too.
 
 API is expected to stay as simple as it is, though.
 
 # About collection pipelines in general
 
-About [collection pipelines programming pattern](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler. 
+About [collection pipelines programming pattern](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler.
 
 In a more general sense this library implements a subset of [CSP](https://en.wikipedia.org/wiki/Communicating_sequential_processes) paradigm, as opposed to [Actor model](https://en.wikipedia.org/wiki/Actor_model).
 
@@ -503,7 +503,7 @@ What else is out there:
 - [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Has lots of utility functions for those who need them: they're out of scope for this project.
 - [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 - [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) by Lars Strojny et al. is supposed to complement currently exisiting PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining.
-- [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
+- [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation.
 - [Simple pipes with PHP generators](https://www.hughgrigg.com/posts/simple-pipes-php-generators/) by Hugh Grigg. Rationale and explanation for an exceptionally close concept. Probably one can use this library as a drop-in replacement, short of different method names.
 - [loophp's Collection](https://github.com/loophp/collection) looks like a viable alternative to this library, as far as processing of multi-gigabyte log files goes. [Supports fluent interface.](https://loophp-collection.readthedocs.io/en/stable/pages/usage.html) It takes the immutability as a first principle, even though PHP's generators are inherently mutable.
 - If you're familiar with Java, [package java.util.stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html) offers an implementation of the same concept.

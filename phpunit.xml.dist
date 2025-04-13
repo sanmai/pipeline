@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
-<phpunit bootstrap="vendor/autoload.php"
-         executionOrder="random"
-         resolveDependencies="true"
-         colors="true"
-         cacheDirectory=".phpunit.cache"
-         requireCoverageMetadata="true"
+<phpunit
+    bootstrap="vendor/autoload.php"
+    executionOrder="random"
+    resolveDependencies="true"
+    colors="true"
+    cacheDirectory=".phpunit.cache"
+    requireCoverageMetadata="true"
 >
     <testsuites>
         <testsuite name="Main">

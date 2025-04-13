@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <phpdoc>
-  <title>General purpose collections pipeline</title>
-  <parser>
-    <target>data/output</target>
-    <visibility>public</visibility>
-  </parser>
-  <transformer>
-    <target>data/output</target>
-  </transformer>
-  <transformations>
-    <template name="responsive-twig" />
-  </transformations>
-  <files>
-    <directory>src</directory>
-  </files>
+    <title>General purpose collections pipeline</title>
+    <parser>
+        <target>data/output</target>
+        <visibility>public</visibility>
+    </parser>
+    <transformer>
+        <target>data/output</target>
+    </transformer>
+    <transformations>
+        <template name="responsive-twig"/>
+    </transformations>
+    <files>
+        <directory>src</directory>
+    </files>
 </phpdoc>
-
