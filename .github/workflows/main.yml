@@ -57,12 +57,7 @@ jobs:
         run: |
           make ci-test
 
-      - name: Upload coverage report
-        continue-on-error: true
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          php vendor/bin/php-coveralls -v
+      - run: git status
 
   analyze:
     name: Static Analysis and Validation
@@ -121,3 +116,5 @@ jobs:
       - name: Static Analysis
         run: |
           make ci-analyze --keep-going
+
+      - run: git status
