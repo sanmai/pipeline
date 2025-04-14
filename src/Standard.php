@@ -28,6 +28,7 @@ use Generator;
 use Iterator;
 use IteratorAggregate;
 use Traversable;
+use Override;
 
 use function array_chunk;
 use function array_filter;
@@ -538,6 +539,7 @@ class Standard implements IteratorAggregate, Countable
         };
     }
 
+    #[Override]
     public function getIterator(): Traversable
     {
         if (!isset($this->pipeline)) {
@@ -613,6 +615,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @see \Countable::count()
      */
+    #[Override]
     public function count(): int
     {
         if ($this->empty()) {
