@@ -538,6 +538,7 @@ class Standard implements IteratorAggregate, Countable
         };
     }
 
+    #[\Override]
     public function getIterator(): Traversable
     {
         if (!isset($this->pipeline)) {
@@ -613,6 +614,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @see \Countable::count()
      */
+    #[\Override]
     public function count(): int
     {
         if ($this->empty()) {

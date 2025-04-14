@@ -75,12 +75,12 @@ final class StaticAnalysisTest extends TestCase
         $example = new class extends Standard {
             private $input;
 
-            public function __construct(iterable $input = null)
+            public function __construct(?iterable $input = null)
             {
                 $this->input = $input;
             }
 
-            public function append(iterable $values = null): self
+            public function append(?iterable $values = null): self
             {
                 return $this;
             }
@@ -90,7 +90,7 @@ final class StaticAnalysisTest extends TestCase
                 return $this;
             }
 
-            public function prepend(iterable $values = null): self
+            public function prepend(?iterable $values = null): self
             {
                 return $this;
             }
@@ -120,7 +120,7 @@ final class StaticAnalysisTest extends TestCase
                 return $this;
             }
 
-            public function cast(callable $func = null): self
+            public function cast(?callable $func = null): self
             {
                 return $this;
             }
