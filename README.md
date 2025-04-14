@@ -35,7 +35,7 @@ use function Pipeline\take;
 // we use an array here simplicity sake
 $iterable = range(1, 3);
 
-// wrap the initial iterable with a pipeline
+// wrap the inital iterable with a pipeline
 $pipeline = take($iterable);
 
 // join side by side with other iterables of any type
@@ -104,9 +104,9 @@ All entry points always return an instance of the pipeline.
 
 |  Method     | Details                       | Use with       |
 | ----------- | ----------------------------- | ----------- |
-| `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
+| `map()`     | Takes an optional inital callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
 | `take()`  | Takes any iterables, including arrays, joining them together in succession.  | `use function Pipeline\take;` |
-| `fromArray()`  | Takes an array, initializes a pipeline with it.  | `use function Pipeline\fromArray;` |
+| `fromArray()`  | Takes an array, initalizes a pipeline with it.  | `use function Pipeline\fromArray;` |
 | `zip()`  | Takes an iterable, and several more, transposing them together.  | `use function Pipeline\zip;` |
 
 
@@ -114,7 +114,7 @@ All entry points always return an instance of the pipeline.
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
-| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `SelectMany`                  |
+| `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an inital generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `SelectMany`                  |
 | `cast()`    | Takes a callback that for each input value expected to return another single value. Unlike `map()`, it assumes no special treatment for generators. Provided no callback does nothing. | `array_map`, `Select`                  |
 | `append()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
 | `push()` | Appends the arguments to the end of the pipeline. | `array_push` |
@@ -128,7 +128,7 @@ All entry points always return an instance of the pipeline.
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
-| `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
+| `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an inital value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
 | `flip()`    | Swaps keys and values. | `array_flip` |
 | `tuples()`    | Converts stream to [key, value] tuples. | |
@@ -141,7 +141,7 @@ All entry points always return an instance of the pipeline.
 | `toArrayPreservingKeys()` | Returns an array with all values and keys. Eagerly executed. |  |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
-| `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
+| `__construct()` | Can be provided with an optional inital iterator. Used in the `take()` function from above.  |     |
 
 Pipeline is an iterator and can be used as any other iterable. 
 
@@ -235,7 +235,7 @@ This library is built to last. There's not a single place where an exception is 
 
 ## `__construct()`
 
-Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. 
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an inital generator to the `map` method. 
 
 ## `$pipeline->map()`
 
