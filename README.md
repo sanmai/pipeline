@@ -147,7 +147,7 @@ Pipeline is an iterator and can be used as any other iterable.
 
 Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
 
-In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obivius mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
+In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obvious mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
 
 # Caveats
 
@@ -363,7 +363,7 @@ Implementation uses a rolling window buffer for negative values of offset and le
 ## `$pipeline->reduce()`
 
 Takes a reducing callback not unlike that of `array_reduce` with two arguments for the value of the previous iteration and for the current item.
-As a second argument it can take an inital value.
+As a second argument it can take an initial value.
 
 ```php
 $total = $pipeline->reduce(function ($curry, $item) {
@@ -454,7 +454,7 @@ This computation uses [Welford's online algorithm](https://en.wikipedia.org/wiki
 
 ## `$pipeline->finalVariance()`
 
-A convenience method to computes the final statistics for the sequence. Accepts an optional cast method, else assumes the sequence countains valid numbers.
+A convenience method to computes the final statistics for the sequence. Accepts an optional cast method, else assumes the sequence contains valid numbers.
 
 ```php
 // Fibonacci numbers generator
@@ -502,7 +502,7 @@ What else is out there:
 - [Illuminate\Support\Collection](https://laravel.com/docs/master/collections) a fluent wrapper for working with arrays of data. Can only work with arrays, also immutable, which is kind of expected for an array-only wrapper.
 - [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Has lots of utility functions for those who need them: they're out of scope for this project.
 - [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
-- [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) by Lars Strojny et al. is supposed to complement currently exisiting PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining.
+- [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) by Lars Strojny et al. is supposed to complement currently existing PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining.
 - [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
 - [Simple pipes with PHP generators](https://www.hughgrigg.com/posts/simple-pipes-php-generators/) by Hugh Grigg. Rationale and explanation for an exceptionally close concept. Probably one can use this library as a drop-in replacement, short of different method names.
 - [loophp's Collection](https://github.com/loophp/collection) looks like a viable alternative to this library, as far as processing of multi-gigabyte log files goes. [Supports fluent interface.](https://loophp-collection.readthedocs.io/en/stable/pages/usage.html) It takes the immutability as a first principle, even though PHP's generators are inherently mutable.
