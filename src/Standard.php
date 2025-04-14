@@ -66,7 +66,7 @@ class Standard implements IteratorAggregate, Countable
     private iterable $pipeline;
 
     /**
-     * Contructor with an optional source of data.
+     * Constructor with an optional source of data.
      */
     public function __construct(?iterable $input = null)
     {
@@ -1164,7 +1164,7 @@ class Standard implements IteratorAggregate, Countable
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
      * @param callable $func
-     * @param bool $discard Whenever to discard the pipeline's interator.
+     * @param bool $discard Whenever to discard the pipeline's iterator.
      */
     public function each(callable $func, bool $discard = true): void
     {
