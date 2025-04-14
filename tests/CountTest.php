@@ -48,6 +48,7 @@ final class CountTest extends TestCase
     public function testCountNonEmptyArray(): void
     {
         $this->assertCount(3, fromArray([1, 2, 3]));
+        $this->assertSame(3, fromArray([1, 2, 3])->count());
     }
 
     public function testCountNonEmptyIterator(): void
