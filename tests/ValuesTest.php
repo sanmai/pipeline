@@ -74,4 +74,9 @@ final class ValuesTest extends TestCase
 
         $this->assertSame(['x', 'x', 'y', 'y'], $values);
     }
+
+    public function testNonPrimedFlip(): void
+    {
+        $this->assertSame([], (new Standard())->values()->toArray());
+    }
 }
