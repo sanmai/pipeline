@@ -17,18 +17,16 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - '7.4'
-          - '8.0'
-          - '8.1'
           - '8.2'
           - '8.3'
           - '8.4'
+          - 'latest'
         coverage: ['pcov']
         dependencies: ['']
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,7 +36,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/composer
           key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
@@ -74,7 +72,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -85,7 +83,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/composer
           key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
@@ -94,7 +92,7 @@ jobs:
             composer-
 
       - name: Restore PHP-CS-Fixer cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build/cache/.php_cs.cache
           key: php-cs-fixer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
