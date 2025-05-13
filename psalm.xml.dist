@@ -2,6 +2,8 @@
 <psalm
     errorLevel="2"
     resolveFromConfigFile="true"
+    findUnusedCode="false"
+    strictBinaryOperands="false"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
@@ -14,6 +16,10 @@
         </ignoreFiles>
     </projectFiles>
 
+    <extraFiles>
+        <directory name="tests" />
+    </extraFiles>
+
     <issueHandlers>
         <ForbiddenCode>
             <errorLevel type="suppress">
@@ -23,6 +29,7 @@
 
         <MissingClosureParamType errorLevel="suppress" />
         <MissingClosureReturnType errorLevel="suppress" />
+        <ClassMustBeFinal errorLevel="suppress" />
 
         <RedundantPropertyInitializationCheck errorLevel="suppress" />
         <PropertyNotSetInConstructor errorLevel="suppress" />
