@@ -1033,6 +1033,34 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return $this
      */
+    public function values()
+    {
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
+        }
+
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_values($this->pipeline);
+
+            return $this;
+        }
+
+        $this->pipeline = self::valuesOnly($this->pipeline);
+
+        return $this;
+    }
+
+    private static function valuesOnly(iterable $previous): iterable
+    {
+        foreach ($previous as $value) {
+            yield $value;
+        }
+    }
+
+    /**
+     * @return $this
+     */
     public function flip()
     {
         if ($this->empty()) {
