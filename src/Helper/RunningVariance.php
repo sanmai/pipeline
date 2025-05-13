@@ -72,12 +72,10 @@ class RunningVariance
             $this->min = $value;
             $this->max = $value;
         } else {
-            // @infection-ignore-all
             if ($value < $this->min) {
                 $this->min = $value;
             }
 
-            // @infection-ignore-all
             if ($value > $this->max) {
                 $this->max = $value;
             }
@@ -176,12 +174,10 @@ class RunningVariance
         $this->m2 = $this->m2 + $other->m2 + ($delta ** 2 * $this->count * $other->count / $count);
         $this->count = $count;
 
-        // @infection-ignore-all
         if ($other->min < $this->min) {
             $this->min = $other->min;
         }
 
-        // @infection-ignore-all
         if ($other->max > $this->max) {
             $this->max = $other->max;
         }
