@@ -12,6 +12,16 @@
         "@default": true,
         "IdenticalEqual": false,
         "NotIdenticalNotEqual": false,
-        "DecrementInteger": false
+        "DecrementInteger": false,
+        "LessThan": {
+            "ignore": [
+                "Pipeline\\Helper\\RunningVariance"
+            ]
+        },
+        "GreaterThan": {
+            "ignore": [
+                "Pipeline\\Helper\\RunningVariance"
+            ]
+        }
     }
 }

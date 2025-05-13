@@ -46,7 +46,7 @@ final class ValuesTest extends TestCase
     {
         $values = fromArray(['a' => 1, 'b' => 2, 'c' => 3])
             ->values()
-            ->toArray();
+            ->toArray(preserve_keys: true);
         $this->assertSame([1, 2, 3], $values);
     }
 
