@@ -1070,6 +1070,34 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return $this
      */
+    public function keys()
+    {
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
+        }
+
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_keys($this->pipeline);
+
+            return $this;
+        }
+
+        $this->pipeline = self::keysOnly($this->pipeline);
+
+        return $this;
+    }
+
+    private static function keysOnly(iterable $previous): iterable
+    {
+        foreach ($previous as $key => $_) {
+            yield $key;
+        }
+    }
+
+    /**
+     * @return $this
+     */
     public function flip()
     {
         if ($this->empty()) {
