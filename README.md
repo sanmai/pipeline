@@ -4,29 +4,53 @@
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=main)](https://coveralls.io/github/sanmai/pipeline?branch=main)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
 
-Pipeline is a PHP library that brings the power of streaming pipelines to your code. Inspired by the pipe operator (`|>`), typical in functional programming languages, Pipeline lets you chain a series of operations on your data concisely, clearly, and readably. This approach simplifies complex data transformations and makes your code more maintainable and easier to test. 
+# Pipeline
 
-The pipeline uses lazy evaluation to optimize performance, especially for large datasets. This means operations are not executed immediately but deferred until the final result is needed. The pipeline is built as a chain of generator functions, processing data iteratively without loading the entire dataset into memory. 
+**Pipeline is a streaming data processor for PHP.**
+It handles any `iterable`, stays lazy by default, and gives you fluent, composable data transformations — without blowing up memory or pulling in a framework.
 
-This means the actual computation is deferred until the final result is needed. This approach offers the benefits of reduced memory usage, making it suitable for handling massive datasets, improved performance by avoiding unnecessary computations, and efficiency for large datasets or even infinite sequences. For example, if you have an array with a million numbers and want to find the first five even numbers multiplied by 2, thanks to the lazy evaluation, it will only process the first few necessary numbers.
+Think of it as a drop-in for `foreach` when you want more power, or as `array_map()` for the real world: files, generators, database cursors, logs, or infinite sequences.
 
-The pipeline makes dealing with `iterable` types as easy as possible, making it a perfect tool for bespoke data processing pipelines, hence the name. If you ever piped together several bash commands where one command uses the output of another in succession, this library does just that for PHP functions, generators, arrays, and iterators.
+```php
+use function Pipeline\take;
 
-The pipeline has the most essential yet basic building blocks. It boasts methods to map, filter, reduce, zip, and unpack data from arbitrary generators and all kinds of standard iterators.
+function oneToMillion(): iterable {
+    for ($i = 1; $i <= 1000000; $i++) {
+        yield $i;
+    }
+}
 
-This rigorously tested library just works. Pipeline neither defines nor throws any exceptions.
+take(oneToMillion())
+    ->map(fn($i) => $i * 2)
+    ->filter(fn($i) => $i % 3 === 0)
+    ->slice(0, 5)
+    ->toArray();
+// [6, 12, 18, 24, 30]
+```
 
-# Install
+No memory spikes. No special types. Just `iterable` in, result out.
+
+## Why Pipeline?
+
+* Works with **arrays, generators, iterators, cursors**
+* Composable operations: `map`, `filter`, `flatten`, `zip`, `reduce`
+* **Lazy by default** — only computes what's actually needed
+* Suitable for millions of rows or infinite sources
+* Requires nothing special: just functions and iterables
+
+You can use it like a collection. You can use it like a stream. You can use it like a scalpel.
 
 ```
 composer require sanmai/pipeline
 ```
 
-The latest version requires PHP 7.4 or above, including PHP 8.2 and later.
+# Requirements
+
+The latest version requires PHP 8.2 or above.
 
 Some earlier versions work under PHP 5.6 and above, but they are not as feature-complete.
 
-# Use
+# Full example
 
 ```php
 use function Pipeline\take;
