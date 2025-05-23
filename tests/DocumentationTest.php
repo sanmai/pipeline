@@ -31,6 +31,7 @@ use function implode;
 use function Pipeline\take;
 use function preg_match_all;
 use function sprintf;
+use function str_contains;
 use function strpos;
 use function substr;
 
@@ -77,7 +78,15 @@ final class DocumentationTest extends TestCase
 
         return take($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
             ->filter(fn(ReflectionMethod $method) => self::interfaceFilter($interfaces, $method))
+            ->filter(fn(ReflectionMethod $method) => false === str_contains($method->getDocComment() ?: '', '@deprecated'))
             ->cast(fn(ReflectionMethod $method) => [$method->getName()]);
+    }
+
+    public function testProvideMethods(): void
+    {
+        $methods = take(self::provideMethods())->toArray();
+
+        $this->assertGreaterThan(0, $methods, 'No public methods found.');
     }
 
     /**

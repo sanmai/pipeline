@@ -579,10 +579,19 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     * @deprecated Use toAssoc() instead
      */
     public function toArrayPreservingKeys(): array
     {
         return $this->toArray(true);
+    }
+
+    /**
+     * Returns all values preserving keys. This is a terminal operation.
+     */
+    public function toAssoc(): array
+    {
+        return $this->toArray(preserve_keys: true);
     }
 
     /**
