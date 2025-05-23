@@ -7,7 +7,7 @@
 # Pipeline
 
 **Pipeline is a streaming data processor for PHP.**
-It handles any `iterable`, stays lazy by default, and gives you fluent, composable data transformations — without blowing up memory or pulling in a framework.
+It handles any `iterable`, stays lazy by default, and gives you fluent, composable data transformations&mdash;without blowing up memory or pulling in a framework.
 
 Think of it as a drop-in for `foreach` when you want more power, or as `array_map()` for the real world: files, generators, database cursors, logs, or infinite sequences.
 
@@ -34,7 +34,7 @@ No memory spikes. No special types. Just `iterable` in, result out.
 
 * Works with **arrays, generators, iterators, cursors**
 * Composable operations: `map`, `filter`, `flatten`, `zip`, `reduce`
-* **Lazy by default** — only computes what's actually needed
+* **Lazy by default**&mdash;only computes what's actually needed, eager with arrays for speed
 * Suitable for millions of rows or infinite sources
 * Requires nothing special: just functions and iterables
 
