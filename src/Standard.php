@@ -639,6 +639,25 @@ class Standard implements IteratorAggregate, Countable
         return iterator_count($this->pipeline);
     }
 
+    /**
+     * @return $this
+     */
+    public function stream()
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        if ($this->pipeline instanceof Generator) {
+            // If the pipeline is a generator, we can just return it.
+            return $this;
+        }
+
+        $this->pipeline = self::generatorFromIterable($this->pipeline);
+
+        return $this;
+    }
+
     private static function makeNonRewindable(iterable $input): Generator
     {
         if ($input instanceof Generator) {
