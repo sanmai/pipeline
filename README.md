@@ -138,6 +138,7 @@ All entry points always return an instance of the pipeline.
 | `min()`     | Finds the lowest value. | `min` |
 | `count()`     | Counts values. Eagerly executed.| `array_count` |
 | `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
+| `stream()` | Ensures subsequent operations use lazy, non-array paths | |
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
 | `toAssoc()` | Returns an array with all values and keys. Eagerly executed. |  |
