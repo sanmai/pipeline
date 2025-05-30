@@ -155,6 +155,7 @@ All entry points always return an instance of the pipeline.
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
 | `values()`  | Keep values only. | `array_values` |
+| `keys()`  | Keep keys only. | `array_keys` |
 | `flip()`    | Swaps keys and values. | `array_flip` |
 | `tuples()`    | Converts stream to [key, value] tuples. | |
 | `max()`     | Finds the highest value. | `max` |
