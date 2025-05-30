@@ -757,12 +757,13 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield $input->key() => $input->current();
-            $input->next();
 
             // Stop once taken enough.
             if (0 === --$take) {
                 break;
             }
+
+            $input->next();
         }
     }
 
