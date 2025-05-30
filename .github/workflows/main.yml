@@ -11,7 +11,7 @@ on:
 
 jobs:
   tests:
-    name: Test with PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
+    name: Tests with PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
     runs-on: ubuntu-latest
 
     strategy:

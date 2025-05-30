@@ -131,15 +131,17 @@ All entry points always return an instance of the pipeline.
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
 | `values()`  | Keep values only. | `array_values` |
+| `keys()`  | Keep keys only. | `array_keys` |
 | `flip()`    | Swaps keys and values. | `array_flip` |
 | `tuples()`    | Converts stream to [key, value] tuples. | |
 | `max()`     | Finds the highest value. | `max` |
 | `min()`     | Finds the lowest value. | `min` |
 | `count()`     | Counts values. Eagerly executed.| `array_count` |
 | `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
+| `stream()` | Ensures subsequent operations use lazy, non-array paths | |
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `toArrayPreservingKeys()` | Returns an array with all values and keys. Eagerly executed. |  |
+| `toAssoc()` | Returns an array with all values and keys. Eagerly executed. |  |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |

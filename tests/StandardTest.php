@@ -384,6 +384,19 @@ final class StandardTest extends TestCase
         ], $pipeline->toArrayPreservingKeys());
     }
 
+    public function testToAssoc(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+        ], $pipeline->toAssoc());
+    }
+
     public function testToArrayWithIterator(): void
     {
         $pipeline = map(function () {
@@ -407,7 +420,7 @@ final class StandardTest extends TestCase
         ], $pipeline->toArray(true));
     }
 
-    public function testToArrayWithIteratorPreservingKeys(): void
+    public function testToAssocWithIterator(): void
     {
         $pipeline = map(function () {
             yield 'a' => 1;
@@ -418,6 +431,6 @@ final class StandardTest extends TestCase
         $this->assertSame([
             'a' => 1,
             'b' => 3,
-        ], $pipeline->toArrayPreservingKeys());
+        ], $pipeline->toAssoc());
     }
 }

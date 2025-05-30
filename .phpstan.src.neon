@@ -1,8 +1,7 @@
 parameters:
-    checkGenericClassInNonGenericObjectType: false
     inferPrivatePropertyTypeFromConstructor: true
-    checkMissingIterableValueType: false
     level: max
     paths:
         - src
     ignoreErrors:
+        - identifier: missingType.iterableValue

@@ -282,6 +282,7 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield iterator_to_array(self::take($input, $length), $preserve_keys);
+            $input->next();
         }
     }
 
@@ -579,10 +580,19 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     * @deprecated Use toAssoc() instead
      */
     public function toArrayPreservingKeys(): array
     {
         return $this->toArray(true);
+    }
+
+    /**
+     * Returns all values preserving keys. This is a terminal operation.
+     */
+    public function toAssoc(): array
+    {
+        return $this->toArray(preserve_keys: true);
     }
 
     /**
@@ -628,6 +638,20 @@ class Standard implements IteratorAggregate, Countable
         }
 
         return iterator_count($this->pipeline);
+    }
+
+    /**
+     * @return $this
+     */
+    public function stream()
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        return $this;
     }
 
     private static function makeNonRewindable(iterable $input): Generator
@@ -729,12 +753,13 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield $input->key() => $input->current();
-            $input->next();
 
             // Stop once taken enough.
             if (0 === --$take) {
                 break;
             }
+
+            $input->next();
         }
     }
 
@@ -897,6 +922,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
         }
 
+        // Fetch the next value
+        $input->next();
+
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
             return;
@@ -932,6 +960,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
             $sum += $weightFunc($output);
         }
+
+        // Fetch the next value
+        $input->next();
 
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
@@ -1055,6 +1086,34 @@ class Standard implements IteratorAggregate, Countable
     {
         foreach ($previous as $value) {
             yield $value;
+        }
+    }
+
+    /**
+     * @return $this
+     */
+    public function keys()
+    {
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
+        }
+
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_keys($this->pipeline);
+
+            return $this;
+        }
+
+        $this->pipeline = self::keysOnly($this->pipeline);
+
+        return $this;
+    }
+
+    private static function keysOnly(iterable $previous): iterable
+    {
+        foreach ($previous as $key => $_) {
+            yield $key;
         }
     }
 
