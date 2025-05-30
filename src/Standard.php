@@ -648,12 +648,7 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        if ($this->pipeline instanceof Generator) {
-            // If the pipeline is a generator, we can just return it.
-            return $this;
-        }
-
-        $this->pipeline = self::generatorFromIterable($this->pipeline);
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
 
         return $this;
     }
