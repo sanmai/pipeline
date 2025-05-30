@@ -282,6 +282,7 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield iterator_to_array(self::take($input, $length), $preserve_keys);
+            $input->next();
         }
     }
 
@@ -752,12 +753,13 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield $input->key() => $input->current();
-            $input->next();
 
             // Stop once taken enough.
             if (0 === --$take) {
                 break;
             }
+
+            $input->next();
         }
     }
 
@@ -920,6 +922,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
         }
 
+        // Fetch the next value
+        $input->next();
+
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
             return;
@@ -955,6 +960,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
             $sum += $weightFunc($output);
         }
+
+        // Fetch the next value
+        $input->next();
 
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
