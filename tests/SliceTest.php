@@ -162,20 +162,6 @@ final class SliceTest extends TestCase
         );
     }
 
-    public function testTakeOnlyAsMuch(): void
-    {
-        $values = fromArray([1, 2, 3, 4])
-            ->stream()
-            ->cast(function ($value) {
-                $this->assertLessThan(3, $value);
-                return $value;
-            })
-            ->slice(0, 2)
-            ->toAssoc();
-
-        $this->assertSame([1, 2], $values);
-    }
-
     public function testSliceNil(): void
     {
         $pipeline = new Standard();

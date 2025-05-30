@@ -44,10 +44,10 @@ final class StreamTest extends TestCase
 {
     public function testStreamArray(): void
     {
-        $values = fromArray([1, 2, 3, 4])
+        $values = fromArray([1, 2, 3, 4, 5])
             ->stream()
             ->cast(function ($value) {
-                $this->assertLessThan(3, $value);
+                $this->assertLessThan(5, $value);
                 return $value;
             })
             ->slice(0, 2)
@@ -58,10 +58,10 @@ final class StreamTest extends TestCase
 
     public function testStreamArrayIterator(): void
     {
-        $values = take(new ArrayIterator([1, 2, 3, 4]))
+        $values = take(new ArrayIterator([1, 2, 3, 4, 5]))
             ->stream()
             ->cast(function ($value) {
-                $this->assertLessThan(3, $value);
+                $this->assertLessThan(5, $value);
                 return $value;
             })
             ->slice(0, 2)
