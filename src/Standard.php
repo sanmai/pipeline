@@ -639,6 +639,20 @@ class Standard implements IteratorAggregate, Countable
         return iterator_count($this->pipeline);
     }
 
+    /**
+     * @return $this
+     */
+    public function stream()
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        return $this;
+    }
+
     private static function makeNonRewindable(iterable $input): Generator
     {
         if ($input instanceof Generator) {
