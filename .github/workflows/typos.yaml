@@ -5,6 +5,10 @@ permissions:
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
+      - v*.*
 
 env:
   CLICOLOR: 1
