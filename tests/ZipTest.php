@@ -47,7 +47,7 @@ final class ZipTest extends TestCase
         $pipeline = new Standard();
 
         $pipeline->zip([1, 2], [3, 4]);
-        $this->assertSame([[1, 3], [2, 4]], $pipeline->toArray());
+        $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
 
         $array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
 
@@ -55,7 +55,7 @@ final class ZipTest extends TestCase
 
         $pipeline->zip(...$array);
 
-        $this->assertSame(array_map(null, ...$array), $pipeline->toArray());
+        $this->assertSame(array_map(null, ...$array), $pipeline->toList());
     }
 
     /**
@@ -67,7 +67,7 @@ final class ZipTest extends TestCase
 
         $pipeline->zip(fromArray([3, 4]));
 
-        $this->assertSame([[1, 3], [2, 4]], $pipeline->toArray());
+        $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
     /**
@@ -85,7 +85,7 @@ final class ZipTest extends TestCase
             yield 4;
         }));
 
-        $this->assertSame([[1, 3], [2, 4]], $pipeline->toArray());
+        $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
     /**
@@ -96,19 +96,19 @@ final class ZipTest extends TestCase
         $pipeline = new Standard();
         $pipeline->zip([3, 4]);
 
-        $this->assertSame([3, 4], $pipeline->toArray());
+        $this->assertSame([3, 4], $pipeline->toList());
     }
 
     public function testZipEmpty(): void
     {
-        $this->assertSame([], take([])->zip([1, 2, 3])->toArray());
+        $this->assertSame([], take([])->zip([1, 2, 3])->toList());
     }
 
     public function testZipUnequalLengths(): void
     {
         $actual = take(['a', 'b', 'c'])
             ->zip([1, 2], [3])
-            ->toArray();
+            ->toList();
 
         $this->assertSame([
             ['a', 1, 3],
@@ -121,7 +121,7 @@ final class ZipTest extends TestCase
     {
         $actual = take(['a', 'b', 'c'])
             ->zip([1], [2, 3])
-            ->toArray();
+            ->toList();
 
         $this->assertSame([
             ['a', 1, 2],
@@ -134,7 +134,7 @@ final class ZipTest extends TestCase
     {
         $actual = take(['a', 'b', 'c'])
             ->zip(range(1, 10), range(10, 100, 10))
-            ->toArray();
+            ->toList();
 
         $this->assertSame([
             ['a', 1, 10],
@@ -147,14 +147,14 @@ final class ZipTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $this->assertSame([], $pipeline->zip([])->toArray());
+        $this->assertSame([], $pipeline->zip([])->toList());
     }
 
     public function testZipNothingNothing(): void
     {
         $pipeline = new Standard();
 
-        $this->assertSame([], $pipeline->zip()->toArray());
+        $this->assertSame([], $pipeline->zip()->toList());
     }
 
     public function testExample(): void

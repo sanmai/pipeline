@@ -84,6 +84,6 @@ final class StreamTest extends TestCase
 
     public function testNonPrimed(): void
     {
-        $this->assertSame([], (new Standard())->stream()->toArray());
+        $this->assertSame([], (new Standard())->stream()->toList());
     }
 }

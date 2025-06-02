@@ -140,8 +140,8 @@ All entry points always return an instance of the pipeline.
 | `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
 | `stream()` | Ensures subsequent operations use lazy, non-array paths | |
 | `runningCount()` | Counts seen values using a reference argument. | |
-| `toArray()` | Returns an array with all values. Eagerly executed. | `dict`, `ToDictionary` |
-| `toAssoc()` | Returns an array with all values and keys. Eagerly executed. |  |
+| `toList()` | Returns an array with all values. Eagerly executed. |  |
+| `toAssoc()` | Returns an array with all values and keys. Eagerly executed. | `dict`, `ToDictionary` |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
@@ -195,13 +195,13 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	/* ['foo' => 'baz'] */
     ```
   
-  Safer would be to use provided `toArray()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
+  Safer would be to use provided `toList()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
   
     ```php
-    var_dump($pipeline->toArray());
+    var_dump($pipeline->toList());
     /* ['bar', 'baz'] */
     ```
-  This method also takes an optional argument to keep the keys.
+  If necessary to preserve the keys, there's a sister method `toAssoc()`.
 
 - The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
 
@@ -275,7 +275,7 @@ Flatten inputs:
 $pipeline->map(function () {
     yield [1];
     yield [2, 3];
-})->unpack()->toArray();
+})->unpack()->toList();
 // [1, 2, 3]
 ```
 
@@ -376,7 +376,7 @@ $total = $pipeline->reduce(function ($curry, $item) {
 
 The pipeline has a default callback that sums all values.
 
-## `$pipeline->toArray()`
+## `$pipeline->toList()`
 
 Returns an array with all values from a pipeline. All array keys are ignored to make sure every single value is returned.
 
@@ -393,7 +393,7 @@ $pipeline->map(function ($i) {
     yield $i + 2;
 });
 
-$result = $pipeline->toArray();
+$result = $pipeline->toList();
 // Since keys are ignored we get:
 // [2, 3, 3, 4]
 ```

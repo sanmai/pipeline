@@ -39,7 +39,7 @@ final class SkipWhileTest extends TestCase
 
         $result = $pipeline
             ->skipWhile(fn($number) => 1 === $number)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([], $result);
     }
@@ -48,7 +48,7 @@ final class SkipWhileTest extends TestCase
     {
         $result = take([2])
             ->skipWhile(fn($number) => 1 === $number)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([2], $result);
     }
@@ -57,7 +57,7 @@ final class SkipWhileTest extends TestCase
     {
         $result = take([1, 1, 1, 2, 3, 4, 1, 2, 3])
             ->skipWhile(fn($number) => 1 === $number)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([2, 3, 4, 1, 2, 3], $result);
     }
@@ -68,7 +68,7 @@ final class SkipWhileTest extends TestCase
             ->skipWhile(fn($number) => 1 === $number)
             ->skipWhile(fn($number) => 2 === $number)
             ->filter(fn($number) => 1 === $number % 2)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([3, 5, 1], $result);
     }

@@ -81,7 +81,7 @@ final class UnpackTest extends TestCase
             new ArrayIterator([1]),
             fromArray([2]),
             [3],
-        ])->unpack()->toArray());
+        ])->unpack()->toList());
     }
 
     /**
@@ -93,6 +93,6 @@ final class UnpackTest extends TestCase
             new ArrayIterator([1]),
             fromArray([2]),
             [3],
-        ])->flatten()->toArray());
+        ])->flatten()->toList());
     }
 }

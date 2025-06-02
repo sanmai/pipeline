@@ -555,9 +555,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
+     * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
      */
-    public function toArray(bool $preserve_keys = false): array
+    public function toList(): array
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -566,16 +566,24 @@ class Standard implements IteratorAggregate, Countable
 
         // We got what we need, moving along.
         if (is_array($this->pipeline)) {
-            if ($preserve_keys) {
-                return $this->pipeline;
-            }
-
             return array_values($this->pipeline);
         }
 
         // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return iterator_to_array($this, $preserve_keys);
+        return iterator_to_array($this, preserve_keys: false);
+    }
+
+    /**
+     * @deprecated Use toList() or toAssoc() instead
+     */
+    public function toArray(bool $preserve_keys = false): array
+    {
+        if ($preserve_keys) {
+            return $this->toAssoc();
+        }
+
+        return $this->toList();
     }
 
     /**
@@ -584,7 +592,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toArrayPreservingKeys(): array
     {
-        return $this->toArray(true);
+        return $this->toAssoc();
     }
 
     /**
@@ -592,7 +600,18 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toAssoc(): array
     {
-        return $this->toArray(preserve_keys: true);
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return [];
+        }
+
+        // We got what we need, moving along.
+        if (is_array($this->pipeline)) {
+            return $this->pipeline;
+        }
+
+        // Preserve keys by default.
+        return iterator_to_array($this);
     }
 
     /**

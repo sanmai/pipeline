@@ -64,7 +64,7 @@ final class EdgeCasesTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertCount(0, $pipeline->toArray());
+        $this->assertCount(0, $pipeline->toList());
     }
 
     /**
@@ -85,7 +85,7 @@ final class EdgeCasesTest extends TestCase
 
         $pipeline->filter('intval');
 
-        $this->assertCount(0, $pipeline->toArray());
+        $this->assertCount(0, $pipeline->toList());
     }
 
     public function testNonUniqueKeys(): void
@@ -107,7 +107,7 @@ final class EdgeCasesTest extends TestCase
         $this->assertSame([
             'bar',
             'baz',
-        ], $pipeline->toArray());
+        ], $pipeline->toList());
     }
 
     public function testMapUnprimed(): void
@@ -117,7 +117,7 @@ final class EdgeCasesTest extends TestCase
             return 1;
         });
 
-        $this->assertSame([1], $pipeline->toArray());
+        $this->assertSame([1], $pipeline->toList());
     }
 
     public function testFilterUnprimed(): void
@@ -125,7 +125,7 @@ final class EdgeCasesTest extends TestCase
         $pipeline = new Standard();
         $pipeline->filter()->unpack();
 
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 
     public function testUnpackUnprimed(): void
@@ -135,7 +135,7 @@ final class EdgeCasesTest extends TestCase
             return 1;
         });
 
-        $this->assertSame([1], $pipeline->toArray());
+        $this->assertSame([1], $pipeline->toList());
     }
 
     public function testInitialInvokeReturnsScalar(): void
@@ -192,7 +192,7 @@ final class EdgeCasesTest extends TestCase
 
     public function testIteratorToArrayWithAllValues(): void
     {
-        $this->assertSame([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toArray());
+        $this->assertSame([2, 3, 3, 4], $this->pipelineWithNonUniqueKeys()->toList());
     }
 
     public function testInvokeMaps(): void

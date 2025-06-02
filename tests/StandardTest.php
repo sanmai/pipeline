@@ -46,7 +46,7 @@ final class StandardTest extends TestCase
         $this->assertSame([], iterator_to_array(new Standard()));
 
         $pipeline = new Standard();
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
 
         $this->assertSame(0, iterator_count(new Standard()));
     }
@@ -89,7 +89,7 @@ final class StandardTest extends TestCase
             yield $i * 1000;
         });
 
-        $this->assertSame([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], $pipeline->toArray());
+        $this->assertSame([10, 100, 1000, 20, 200, 2000, 30, 300, 3000], $pipeline->toList());
     }
 
     public function testTriple(): void
@@ -116,7 +116,7 @@ final class StandardTest extends TestCase
             }
         });
 
-        $this->assertSame([52, 104], $pipeline->toArray());
+        $this->assertSame([52, 104], $pipeline->toList());
     }
 
     public function testFilter(): void
@@ -139,7 +139,7 @@ final class StandardTest extends TestCase
 
         $pipeline->filter();
 
-        $this->assertSame([6, 13, 20, 27, 34, 41, 48], $pipeline->toArray());
+        $this->assertSame([6, 13, 20, 27, 34, 41, 48], $pipeline->toList());
     }
 
     public function testReduce(): void
@@ -306,7 +306,7 @@ final class StandardTest extends TestCase
         $pipeline->map($this->double);
         $pipeline->map($this->plusone);
 
-        $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], $pipeline->toArray());
+        $this->assertSame([4, 5, 8, 9, 12, 13, 16, 17, 20, 21], $pipeline->toList());
     }
 
     public function testMethodChaining(): void
@@ -363,12 +363,12 @@ final class StandardTest extends TestCase
         $this->assertSame([
             1,
             2,
-        ], $pipeline->toArray());
+        ], $pipeline->toList());
 
         $this->assertSame([
             'a' => 1,
             'b' => 2,
-        ], $pipeline->toArray(true));
+        ], $pipeline->toAssoc());
     }
 
     public function testToArrayWithArrayPreservingKeys(): void
@@ -382,6 +382,32 @@ final class StandardTest extends TestCase
             'a' => 1,
             'b' => 2,
         ], $pipeline->toArrayPreservingKeys());
+    }
+
+    public function testToArrayDefault(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            1,
+            2,
+        ], $pipeline->toList());
+    }
+
+    public function testToArrayWithKeys(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            'a' => 1,
+            'b' => 2,
+        ], $pipeline->toArray(preserve_keys: true));
     }
 
     public function testToAssoc(): void
@@ -407,7 +433,7 @@ final class StandardTest extends TestCase
         $this->assertSame([
             1,
             2,
-        ], $pipeline->toArray());
+        ], $pipeline->toList());
 
         $pipeline = map(function () {
             yield 'a' => 1;
@@ -417,7 +443,7 @@ final class StandardTest extends TestCase
         $this->assertSame([
             'a' => 1,
             'b' => 2,
-        ], $pipeline->toArray(true));
+        ], $pipeline->toAssoc());
     }
 
     public function testToAssocWithIterator(): void
