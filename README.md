@@ -141,7 +141,7 @@ All entry points always return an instance of the pipeline.
 | `stream()` | Ensures subsequent operations use lazy, non-array paths | |
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toList()` | Returns an array with all values. Eagerly executed. |  |
-| `toAssoc()` | Returns an array with all values and keys. Eagerly executed. | `dict`, `ToDictionary` |
+| `toAssoc()` | Returns a final array with values and keys. Eagerly executed. | `dict`, `ToDictionary` |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
