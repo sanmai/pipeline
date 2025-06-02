@@ -79,42 +79,42 @@ final class SliceTest extends TestCase
     {
         $this->assertSame(
             [3, 4, 5],
-            $example()->slice(2, 3)->toArray()
+            $example()->slice(2, 3)->toList()
         );
 
         $this->assertSame(
             [6],
-            $example()->slice(5, 200)->toArray()
+            $example()->slice(5, 200)->toList()
         );
 
         $this->assertSame(
             [],
-            $example()->slice(15, 200)->toArray()
+            $example()->slice(15, 200)->toList()
         );
 
         $this->assertSame(
             [5, 6],
-            $example()->slice(-2)->toArray()
+            $example()->slice(-2)->toList()
         );
 
         $this->assertSame(
             [2, 3, 4],
-            $example()->slice(-5, -2)->toArray()
+            $example()->slice(-5, -2)->toList()
         );
 
         $this->assertSame(
             [1, 2, 3],
-            $example()->slice(0, -3)->toArray()
+            $example()->slice(0, -3)->toList()
         );
 
         $this->assertSame(
             [1, 2, 3],
-            $example()->slice(0, 3)->toArray()
+            $example()->slice(0, 3)->toList()
         );
 
         $this->assertSame(
             [2, 3, 4, 5],
-            $example()->slice(1, -1)->toArray()
+            $example()->slice(1, -1)->toList()
         );
     }
 
@@ -128,37 +128,37 @@ final class SliceTest extends TestCase
 
         $this->assertSame(
             ['c' => 3, 'd' => 4, 'e' => 5],
-            $example()->slice(2, 3)->toArray(true)
+            $example()->slice(2, 3)->toAssoc()
         );
 
         $this->assertSame(
             ['f' => 6],
-            $example()->slice(5, 200)->toArray(true)
+            $example()->slice(5, 200)->toAssoc()
         );
 
         $this->assertSame(
             [],
-            $example()->slice(15, 200)->toArray(true)
+            $example()->slice(15, 200)->toAssoc()
         );
 
         $this->assertSame(
             ['e' => 5, 'f' => 6],
-            $example()->slice(-2)->toArray(true)
+            $example()->slice(-2)->toAssoc()
         );
 
         $this->assertSame(
             ['b' => 2, 'c' => 3, 'd' => 4],
-            $example()->slice(-5, -2)->toArray(true)
+            $example()->slice(-5, -2)->toAssoc()
         );
 
         $this->assertSame(
             ['a' => 1, 'b' => 2, 'c' => 3],
-            $example()->slice(0, -3)->toArray(true)
+            $example()->slice(0, -3)->toAssoc()
         );
 
         $this->assertSame(
             ['b' => 2, 'c' => 3, 'd' => 4, 'e' => 5],
-            $example()->slice(1, -1)->toArray(true)
+            $example()->slice(1, -1)->toAssoc()
         );
     }
 
@@ -180,7 +180,7 @@ final class SliceTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $this->assertSame([], $pipeline->slice(0)->toArray());
+        $this->assertSame([], $pipeline->slice(0)->toList());
     }
 
     public static function specimens(): iterable
@@ -329,7 +329,7 @@ final class SliceTest extends TestCase
         });
 
         try {
-            $pipeline->slice(0)->toArray();
+            $pipeline->slice(0)->toList();
         } catch (RuntimeException $e) {
             // We must not have any static methods called.
             $this->assertStringNotContainsString('Standard::', (string) $e);
@@ -358,6 +358,6 @@ final class SliceTest extends TestCase
 
         $this->assertSame([
             0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181,
-        ], $fibonacci->slice(0, 20)->toArray());
+        ], $fibonacci->slice(0, 20)->toList());
     }
 }

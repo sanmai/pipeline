@@ -81,7 +81,7 @@ final class FunctionsTest extends TestCase
      */
     public function testTakeArray(): void
     {
-        $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toArray());
+        $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toList());
     }
 
     /**
@@ -89,9 +89,9 @@ final class FunctionsTest extends TestCase
      */
     public function testTakeMany(): void
     {
-        $this->assertSame([1, 2, 3, 4, 5], take([1, 2], [3, 4], [5])->toArray());
+        $this->assertSame([1, 2, 3, 4, 5], take([1, 2], [3, 4], [5])->toList());
 
-        $this->assertSame([1, 2, 3, 4, 5], take(take([1, 2]), take([3, 4]), fromValues(5))->toArray());
+        $this->assertSame([1, 2, 3, 4, 5], take(take([1, 2]), take([3, 4]), fromValues(5))->toList());
     }
 
     /**
@@ -99,8 +99,8 @@ final class FunctionsTest extends TestCase
      */
     public function testFromValues(): void
     {
-        $this->assertSame([1, 2, 3, 4, 5], fromValues(1, 2, 3, 4, 5)->toArray());
-        $this->assertSame([1, 2, 3], fromValues(...[1, 2, 3])->toArray());
+        $this->assertSame([1, 2, 3, 4, 5], fromValues(1, 2, 3, 4, 5)->toList());
+        $this->assertSame([1, 2, 3], fromValues(...[1, 2, 3])->toList());
     }
 
     /**
@@ -110,7 +110,7 @@ final class FunctionsTest extends TestCase
     {
         $pipeline = fromArray(range(0, 100));
         $this->assertInstanceOf(Standard::class, $pipeline);
-        $this->assertSame(range(0, 100), $pipeline->toArray());
+        $this->assertSame(range(0, 100), $pipeline->toList());
     }
 
     /**
@@ -119,13 +119,13 @@ final class FunctionsTest extends TestCase
     public function testZip(): void
     {
         $pipeline = zip([1, 2], [3, 4]);
-        $this->assertSame([[1, 3], [2, 4]], $pipeline->toArray());
+        $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
 
         $array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
 
         $pipeline = zip(...$array);
         $this->assertInstanceOf(Standard::class, $pipeline);
 
-        $this->assertSame(array_map(null, ...$array), $pipeline->toArray());
+        $this->assertSame(array_map(null, ...$array), $pipeline->toList());
     }
 }

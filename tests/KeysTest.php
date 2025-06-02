@@ -57,7 +57,7 @@ final class KeysTest extends TestCase
             yield 6 => 'b';
             yield 5 => 'c';
             yield 6 => 'a';
-        })->keys()->toArray();
+        })->keys()->toList();
 
         $this->assertSame([5, 6, 5, 6], $keys);
     }
@@ -77,6 +77,6 @@ final class KeysTest extends TestCase
 
     public function testNonPrimed(): void
     {
-        $this->assertSame([], (new Standard())->keys()->toArray());
+        $this->assertSame([], (new Standard())->keys()->toList());
     }
 }

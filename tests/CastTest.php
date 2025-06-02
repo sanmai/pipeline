@@ -54,7 +54,7 @@ final class CastTest extends TestCase
 
     public function testCastNothing(): void
     {
-        $this->assertSame([1, 2, 3], take([1, 2, 3])->cast()->toArray());
+        $this->assertSame([1, 2, 3], take([1, 2, 3])->cast()->toList());
     }
 
     public function testCastIterator(): void
@@ -65,7 +65,7 @@ final class CastTest extends TestCase
             yield 3;
         })->cast(function (int $a) {
             return $a * 2;
-        })->toArray());
+        })->toList());
     }
 
     public function testCastSeedValue(): void
@@ -74,7 +74,7 @@ final class CastTest extends TestCase
 
         $this->assertSame([M_PI], $pipeline->cast(function () {
             return M_PI;
-        })->toArray());
+        })->toList());
     }
 
     public function testCastUnpack(): void
@@ -90,7 +90,7 @@ final class CastTest extends TestCase
             return $b - $a;
         });
 
-        $this->assertSame([0, 2, 6], $pipeline->toArray());
+        $this->assertSame([0, 2, 6], $pipeline->toList());
     }
 
     public function testCastPreservesKeys(): void
@@ -104,6 +104,6 @@ final class CastTest extends TestCase
             yield 'b' => 3;
         })->cast(function (int $a) {
             return $a * 2;
-        })->toArray(true));
+        })->toAssoc());
     }
 }

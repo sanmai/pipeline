@@ -78,6 +78,6 @@ final class ErrorsTest extends TestCase
         if (is_callable([$this, 'expectExceptionMessageMatches'])) {
             $this->expectExceptionMessageMatches('/must .* (iterable|Traversable)/');
         }
-        $pipeline->toArray();
+        $pipeline->toList();
     }
 }

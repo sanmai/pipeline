@@ -48,7 +48,7 @@ final class FlipTest extends TestCase
             yield 'b' => 2;
             yield 'c' => 2;
             yield 'd' => 3;
-        })->flip()->toArray();
+        })->flip()->toList();
 
         $this->assertSame(['a', 'b', 'c', 'd'], $keys);
     }
@@ -60,7 +60,7 @@ final class FlipTest extends TestCase
             yield 'b' => 2;
             yield 'c' => 2;
             yield 'd' => 3;
-        })->flip()->toArray(true);
+        })->flip()->toAssoc();
 
         $this->assertSame([1 => 'a', 'c', 'd'], $keys);
     }
@@ -141,11 +141,11 @@ final class FlipTest extends TestCase
      */
     public function testFlip(array $expected, iterable $input): void
     {
-        $this->assertSame($expected, take($input)->flip()->toArray(true));
+        $this->assertSame($expected, take($input)->flip()->toAssoc());
     }
 
     public function testNonPrimedFlip(): void
     {
-        $this->assertSame([], (new Standard())->flip()->toArray());
+        $this->assertSame([], (new Standard())->flip()->toList());
     }
 }

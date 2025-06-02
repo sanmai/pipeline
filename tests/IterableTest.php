@@ -35,7 +35,7 @@ final class IterableTest extends TestCase
     public function testArrayToArray(): void
     {
         $pipeline = new Standard([1, 2, 3]);
-        $this->assertSame([1, 2, 3], $pipeline->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->toList());
     }
 
     public function testArrayToIterator(): void
@@ -53,13 +53,13 @@ final class IterableTest extends TestCase
             yield $value;
         })->filter()->unpack();
 
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 
     public function testArrayFilter(): void
     {
         $pipeline = new Standard([0, 1, 2, 3, 0]);
-        $this->assertSame([1, 2, 3], $pipeline->filter()->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->filter()->toList());
     }
 
     public function testArrayMap(): void
@@ -67,7 +67,7 @@ final class IterableTest extends TestCase
         $pipeline = new Standard([1 => 0, 1, 2, 3]);
         $this->assertSame([0 => 0, 1, 2, 3], $pipeline->map(function ($value) {
             return $value;
-        })->toArray());
+        })->toList());
     }
 
     public function testArrayMapFilter(): void
@@ -75,6 +75,6 @@ final class IterableTest extends TestCase
         $pipeline = new Standard([1 => 0, 1, 2, 3]);
         $this->assertSame([0 => 1, 2, 3], $pipeline->map(function ($value) {
             return $value;
-        })->filter()->toArray());
+        })->filter()->toList());
     }
 }

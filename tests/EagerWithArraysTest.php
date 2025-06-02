@@ -55,10 +55,10 @@ final class EagerWithArraysTest extends TestCase
 
         $this->assertSame([2 => 1, 2, 3], $reflectionProperty->getValue($pipeline));
 
-        $this->assertSame([1, 2, 3], $pipeline->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->toList());
 
         // This does nothing more
-        $this->assertSame([1, 2, 3], $pipeline->filter()->toArray());
+        $this->assertSame([1, 2, 3], $pipeline->filter()->toList());
     }
 
     /**
@@ -90,10 +90,10 @@ final class EagerWithArraysTest extends TestCase
     {
         $this->assertSame([1, 1, 1, 1, 1], $pipeline->map(function ($value) {
             return 1;
-        })->toArray());
+        })->toList());
 
         // This should not be possible even with an array, as map() is always lazy
         $this->expectExceptionMessage('Cannot traverse an already closed generator');
-        $pipeline->toArray();
+        $pipeline->toList();
     }
 }

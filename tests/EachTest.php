@@ -132,7 +132,7 @@ final class EachTest extends TestCase
         });
 
         $this->assertSame([1, 2], $this->output);
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 
     public function testNoDiscard(): void
@@ -148,7 +148,7 @@ final class EachTest extends TestCase
         });
 
         $this->assertSame([1, 2, 3, 1, 2, 3], $this->output);
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 
 }
