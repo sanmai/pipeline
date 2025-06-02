@@ -21,4 +21,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Spell check
-        uses: crate-ci/typos@v1.32.0
+        uses: crate-ci/typos@v1.33.0
