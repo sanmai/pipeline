@@ -11,7 +11,7 @@ on:
 
 jobs:
   tests:
-    name: Tests with PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}
+    name: Tests with PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,8 +21,6 @@ jobs:
           - '8.3'
           - '8.4'
           - 'latest'
-        coverage: ['pcov']
-        dependencies: ['']
 
     steps:
       - name: Checkout code
@@ -32,7 +30,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: ${{ matrix.coverage }}
+          coverage: pcov
           tools: composer:v2
 
       - name: Cache dependencies
@@ -49,7 +47,7 @@ jobs:
           composer remove --no-update --dev \
               phan/phan phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer
-          composer update --prefer-dist --no-interaction --no-progress ${{ matrix.dependencies }}
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Execute tests
         run: |
