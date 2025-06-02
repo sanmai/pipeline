@@ -394,7 +394,7 @@ final class StandardTest extends TestCase
         $this->assertSame([
             1,
             2,
-        ], $pipeline->toList());
+        ], $pipeline->toArray());
     }
 
     public function testToArrayWithKeys(): void
@@ -408,6 +408,19 @@ final class StandardTest extends TestCase
             'a' => 1,
             'b' => 2,
         ], $pipeline->toArray(preserve_keys: true));
+    }
+
+    public function testToArrayWithoutKeys(): void
+    {
+        $pipeline = fromArray([
+            'a' => 1,
+            'b' => 2,
+        ]);
+
+        $this->assertSame([
+            1,
+            2,
+        ], $pipeline->toArray(preserve_keys: false));
     }
 
     public function testToAssoc(): void
