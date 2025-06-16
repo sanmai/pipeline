@@ -51,8 +51,7 @@ final class EdgeCasesTest extends TestCase
      */
     public function testFilterAnyFalseValueDefaultCallback(): void
     {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
+        $pipeline = map(function () {
             yield false;
             yield 0;
             yield 0.0;
@@ -72,29 +71,7 @@ final class EdgeCasesTest extends TestCase
      */
     public function testFilterAnyFalseValueCustomCallback(): void
     {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
-            yield false;
-            yield 0;
-            yield 0.0;
-            yield '';
-            yield '0';
-            yield [];
-            yield null;
-        });
-
-        $pipeline->filter('intval');
-
-        $this->assertCount(0, $pipeline->toList());
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     */
-    public function testFilterStrictMode(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
+        $pipeline = map(function () {
             yield false;
             yield 0;
             yield 0.0;
@@ -103,30 +80,36 @@ final class EdgeCasesTest extends TestCase
             yield [];
             yield null;
             yield 1;
-            yield 'hello';
         });
 
-        $pipeline->filter(strict: true);
+        $pipeline->filter('intval');
 
-        $result = $pipeline->toList();
-
-        // In strict mode, only null and false are filtered out
-        $this->assertCount(7, $result);
-        $this->assertSame([0, 0.0, '', '0', [], 1, 'hello'], $result);
+        $this->assertSame([1], $pipeline->toList());
     }
 
     /**
      * @covers \Pipeline\Standard::filter()
      */
-    public function testFilterStrictModeWithArrays(): void
+    public function testFilterStrictMode(): void
     {
-        $pipeline = \Pipeline\fromArray([false, 0, 0.0, '', '0', [], null, 1, 'hello']);
+        $nonStrictFalsyValues = [
+            0,
+            0.0,
+            '',
+            '0',
+            [],
+        ];
 
-        $result = $pipeline->filter(strict: true)->toList();
+        $pipeline = map(function () use ($nonStrictFalsyValues) {
+            yield false;
+            yield null;
 
-        // In strict mode, only null and false are filtered out
-        $this->assertCount(7, $result);
-        $this->assertSame([0, 0.0, '', '0', [], 1, 'hello'], $result);
+            yield from $nonStrictFalsyValues;
+        });
+
+        $pipeline->filter(strict: true);
+
+        $this->assertSame($nonStrictFalsyValues, $pipeline->toList());
     }
 
     public function testNonUniqueKeys(): void
