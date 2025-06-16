@@ -435,16 +435,12 @@ class Standard implements IteratorAggregate, Countable
      */
     private static function resolvePredicate(?callable $func, bool $strict = false): callable
     {
-        if (null === $func) {
-            if (!$strict) {
-                // Cast is unnecessary for non-strict filtering
-                return static function ($value) {
-                    return $value;
-                };
-            }
+        if (null === $func && $strict) {
+            return self::strictPredicate(...);
+        }
 
-            // Strict mode: only filter out null and false
-            return static fn($value) => null !== $value && false !== $value;
+        if (null === $func) {
+            return self::nonStrictPredicate(...);
         }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
@@ -453,6 +449,16 @@ class Standard implements IteratorAggregate, Countable
         }
 
         return $func;
+    }
+
+    private static function strictPredicate($value): bool
+    {
+        return null !== $value && false !== $value;
+    }
+
+    private static function nonStrictPredicate($value): bool
+    {
+        return (bool) $value;
     }
 
     /**
