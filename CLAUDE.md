@@ -70,5 +70,5 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 
 - Memory efficient for large datasets through lazy evaluation
 - Use `stream()` to ensure lazy paths are used
-- Avoid `iterator_to_array()` - use `toArray()` instead
+- Avoid `iterator_to_array()` - use `toList()` or `toAssoc()` instead
 - Keys are preserved on best-effort basis
