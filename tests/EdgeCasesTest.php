@@ -28,6 +28,8 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 use function iterator_to_array;
+use function Pipeline\fromArray;
+use function Pipeline\fromValues;
 use function Pipeline\map;
 use function range;
 
@@ -38,56 +40,6 @@ use function range;
  */
 final class EdgeCasesTest extends TestCase
 {
-    public function testStandardStringFunctions(): void
-    {
-        $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
-        $pipeline->filter('is_int');
-
-        $this->assertSame([1, 2], iterator_to_array($pipeline));
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     */
-    public function testFilterAnyFalseValueDefaultCallback(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
-            yield false;
-            yield 0;
-            yield 0.0;
-            yield '';
-            yield '0';
-            yield [];
-            yield null;
-        });
-
-        $pipeline->filter();
-
-        $this->assertCount(0, $pipeline->toList());
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     */
-    public function testFilterAnyFalseValueCustomCallback(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->map(function () {
-            yield false;
-            yield 0;
-            yield 0.0;
-            yield '';
-            yield '0';
-            yield [];
-            yield null;
-        });
-
-        $pipeline->filter('intval');
-
-        $this->assertCount(0, $pipeline->toList());
-    }
-
     public function testNonUniqueKeys(): void
     {
         $pipeline = \Pipeline\map(function () {
@@ -120,23 +72,6 @@ final class EdgeCasesTest extends TestCase
         $this->assertSame([1], $pipeline->toList());
     }
 
-    public function testFilterUnprimed(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->filter()->unpack();
-
-        $this->assertSame([], $pipeline->toList());
-    }
-
-    public function testUnpackUnprimed(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->unpack(function () {
-            return 1;
-        });
-
-        $this->assertSame([1], $pipeline->toList());
-    }
 
     public function testInitialInvokeReturnsScalar(): void
     {

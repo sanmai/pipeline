@@ -352,6 +352,11 @@ $pipeline->filter(function ($item) {
 
 The pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
+With the optional `strict` parameter, it only removes strictly `null` or `false`:
+```php
+$pipeline->filter(strict: true);
+```
+
 ## `$pipeline->slice()`
 
 Takes offset and length arguments, functioning in a very similar fashion to how `array_slice` does with `$preserve_keys` set to true.

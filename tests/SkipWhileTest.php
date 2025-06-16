@@ -23,6 +23,7 @@ namespace Tests\Pipeline;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
+use function Pipeline\fromValues;
 use function Pipeline\map;
 use function Pipeline\take;
 
@@ -71,5 +72,14 @@ final class SkipWhileTest extends TestCase
             ->toList();
 
         $this->assertSame([3, 5, 1], $result);
+    }
+
+    public function testDefaultCallback(): void
+    {
+        $result = fromValues(1, '0', null, false)
+            ->skipWhile(fn($number) => $number)
+            ->toList();
+
+        $this->assertSame(['0', null, false], $result);
     }
 }
