@@ -402,7 +402,7 @@ class Standard implements IteratorAggregate, Countable
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @param ?callable $func
-     * @param bool      $strict When true with no callback, only null and false are filtered out
+     * @param bool      $strict When true, only `null` and `false` are filtered out
      *
      * @return $this
      */
@@ -441,6 +441,14 @@ class Standard implements IteratorAggregate, Countable
 
         if (null === $func) {
             return self::nonStrictPredicate(...);
+        }
+
+        // Handle strict mode for user provided predicates.
+        if ($strict) {
+            return static function ($value) use ($func) {
+                $value = $func($value);
+                return self::strictPredicate($value);
+            };
         }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
