@@ -352,12 +352,8 @@ $pipeline->filter(function ($item) {
 
 The pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
 
-With the optional `strict` parameter:
+With the optional `strict` parameter, it only removes strictly `null` or `false`:
 ```php
-// Default behavior - removes all falsy values (false, 0, '', '0', [], null)
-$pipeline->filter();
-
-// Strict mode - only removes null and false
 $pipeline->filter(strict: true);
 ```
 
