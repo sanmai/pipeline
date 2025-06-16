@@ -94,6 +94,6 @@ final class ChunkTest extends TestCase
 
         $pipeline->chunk(100);
 
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 }

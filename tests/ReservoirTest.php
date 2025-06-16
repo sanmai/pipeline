@@ -52,7 +52,7 @@ final class ReservoirTest extends TestCase
             [20, 17, 11, 13, 18, 13],
             take(range(0, 5))->map(function () {
                 return mt_rand(10, 20);
-            })->toArray()
+            })->toList()
         );
     }
 
@@ -167,7 +167,7 @@ final class ReservoirTest extends TestCase
         $this->assertSame($expected, $pipeline->reservoir($size, $weightFn));
 
         if ($size <= 0) {
-            $this->assertSame([], $pipeline->toArray());
+            $this->assertSame([], $pipeline->toList());
         }
     }
 

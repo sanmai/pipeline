@@ -57,7 +57,7 @@ final class ValuesTest extends TestCase
             yield 6 => 'b';
             yield 5 => 'c';
             yield 6 => 'd';
-        })->values()->toArray();
+        })->values()->toList();
 
         $this->assertSame(['a', 'b', 'c', 'd'], $values);
     }
@@ -77,6 +77,6 @@ final class ValuesTest extends TestCase
 
     public function testNonPrimedFlip(): void
     {
-        $this->assertSame([], (new Standard())->values()->toArray());
+        $this->assertSame([], (new Standard())->values()->toList());
     }
 }

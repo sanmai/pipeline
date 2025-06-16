@@ -42,6 +42,6 @@ final class MapTest extends TestCase
             yield 'b' => 3;
         })->map(function (int $a) {
             return $a * 2;
-        })->toArray(true));
+        })->toAssoc());
     }
 }
