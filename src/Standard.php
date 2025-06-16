@@ -476,7 +476,6 @@ class Standard implements IteratorAggregate, Countable
         return static fn($value) => $func($value);
     }
 
-
     /**
      * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
