@@ -24,6 +24,7 @@ use PHPUnit\Framework\TestCase;
 
 use function ob_end_clean;
 use function ob_start;
+use function Pipeline\take;
 
 /**
  * @coversNothing
@@ -49,5 +50,23 @@ final class ExampleTest extends TestCase
         $this->assertSame(6, $sum);
         $this->assertSame([22, 42, 62], $result);
         $this->assertSame([3, 3], $arrayResult);
+    }
+
+    public function testReadmeExample()
+    {
+        function oneToMillion(): iterable
+        {
+            for ($i = 1; $i <= 1000000; $i++) {
+                yield $i;
+            }
+        }
+
+        $result = take(oneToMillion())
+            ->map(fn($i) => $i * 2)
+            ->filter(fn($i) => 0 === $i % 3)
+            ->slice(0, 5)
+            ->toArray();
+
+        $this->assertSame([6, 12, 18, 24, 30], $result);
     }
 }
