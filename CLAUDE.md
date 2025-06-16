@@ -38,7 +38,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
    - Uses generators extensively for lazy evaluation
 
 2. **Helper Functions**: `src/functions.php`
-   - Entry points: `map()`, `take()`, `fromArray()`, `zip()`
+   - Entry points: `map()`, `take()`, `fromArray()`, `fromValues()`, `zip()`
    - All return Pipeline instances
 
 3. **Statistical Helper**: `src/Helper/RunningVariance.php`
@@ -51,9 +51,9 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
    - Use generators (`yield`) to maintain laziness
    - Non-generator inputs execute eagerly
 
-2. **No Exceptions**: The library never throws exceptions
-   - All methods handle edge cases gracefully
-   - Returns sensible defaults or empty results
+2. **No Exceptions**: The library itself doesn't define or throw exceptions
+   - Some edge cases may still cause PHP language errors
+   - Generally returns sensible defaults or empty results
 
 3. **Mutable Pipeline**: Each method modifies and returns the same instance
    - Not thread-safe (not an issue in PHP)
