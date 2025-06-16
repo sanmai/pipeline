@@ -88,6 +88,47 @@ final class EdgeCasesTest extends TestCase
         $this->assertCount(0, $pipeline->toList());
     }
 
+    /**
+     * @covers \Pipeline\Standard::filter()
+     */
+    public function testFilterStrictMode(): void
+    {
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            yield false;
+            yield 0;
+            yield 0.0;
+            yield '';
+            yield '0';
+            yield [];
+            yield null;
+            yield 1;
+            yield 'hello';
+        });
+
+        $pipeline->filter(strict: true);
+
+        $result = $pipeline->toList();
+
+        // In strict mode, only null and false are filtered out
+        $this->assertCount(7, $result);
+        $this->assertSame([0, 0.0, '', '0', [], 1, 'hello'], $result);
+    }
+
+    /**
+     * @covers \Pipeline\Standard::filter()
+     */
+    public function testFilterStrictModeWithArrays(): void
+    {
+        $pipeline = \Pipeline\fromArray([false, 0, 0.0, '', '0', [], null, 1, 'hello']);
+
+        $result = $pipeline->filter(strict: true)->toList();
+
+        // In strict mode, only null and false are filtered out
+        $this->assertCount(7, $result);
+        $this->assertSame([0, 0.0, '', '0', [], 1, 'hello'], $result);
+    }
+
     public function testNonUniqueKeys(): void
     {
         $pipeline = \Pipeline\map(function () {

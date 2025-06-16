@@ -402,17 +402,18 @@ class Standard implements IteratorAggregate, Countable
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @param ?callable $func
+     * @param bool      $strict When true with no callback, only null and false are filtered out
      *
      * @return $this
      */
-    public function filter(?callable $func = null): self
+    public function filter(?callable $func = null, bool $strict = false): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
             return $this;
         }
 
-        $func = self::resolvePredicate($func);
+        $func = self::resolvePredicate($func, $strict);
 
         // We got an array, that's what we need. Moving along.
         if (is_array($this->pipeline)) {
@@ -432,20 +433,23 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Resolves a nullable predicate into a sensible non-null callable.
      */
-    private static function resolvePredicate(?callable $func): callable
+    private static function resolvePredicate(?callable $func, bool $strict = false): callable
     {
         if (null === $func) {
-            return static function ($value) {
-                // Cast is unnecessary for non-stict filtering
-                return $value;
-            };
+            if (!$strict) {
+                // Cast is unnecessary for non-strict filtering
+                return static function ($value) {
+                    return $value;
+                };
+            }
+
+            // Strict mode: only filter out null and false
+            return static fn($value) => null !== $value && false !== $value;
         }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
         if (is_string($func)) {
-            return static function ($value) use ($func) {
-                return $func($value);
-            };
+            return static fn($value) => $func($value);
         }
 
         return $func;
