@@ -28,6 +28,8 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 use function iterator_to_array;
+use function Pipeline\fromArray;
+use function Pipeline\fromValues;
 use function Pipeline\map;
 use function range;
 
@@ -89,6 +91,7 @@ final class EdgeCasesTest extends TestCase
 
     /**
      * @covers \Pipeline\Standard::filter()
+     * @covers \Pipeline\Standard::resolvePredicate()
      */
     public function testFilterStrictMode(): void
     {
@@ -110,6 +113,17 @@ final class EdgeCasesTest extends TestCase
         $pipeline->filter(strict: true);
 
         $this->assertSame($nonStrictFalsyValues, $pipeline->toList());
+    }
+
+    /**
+     * @covers \Pipeline\Standard::filter()
+     * @covers \Pipeline\Standard::resolvePredicate()
+     */
+    public function testFilterNonStrictMode(): void
+    {
+        $pipeline = fromValues(false, null, '');
+        $pipeline->filter(strict: false);
+        $this->assertCount(0, $pipeline);
     }
 
     public function testNonUniqueKeys(): void

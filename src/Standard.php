@@ -433,7 +433,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Resolves a nullable predicate into a sensible non-null callable.
      */
-    private static function resolvePredicate(?callable $func, bool $strict = false): callable
+    private static function resolvePredicate(?callable $func, bool $strict): callable
     {
         if (null === $func && $strict) {
             return self::strictPredicate(...);
@@ -446,17 +446,11 @@ class Standard implements IteratorAggregate, Countable
         // Handle strict mode for user provided predicates.
         if ($strict) {
             return static function ($value) use ($func) {
-                $value = $func($value);
-                return self::strictPredicate($value);
+                return self::strictPredicate($func($value));
             };
         }
 
-        // Strings usually are internal functions, which typically require exactly one parameter.
-        if (is_string($func)) {
-            return static fn($value) => $func($value);
-        }
-
-        return $func;
+        return self::resolveStringPredicate($func);
     }
 
     private static function strictPredicate($value): bool
@@ -470,6 +464,20 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Resolves a string/callable predicate into a sensible non-null callable.
+     */
+    private static function resolveStringPredicate(callable $func): callable
+    {
+        if (!is_string($func)) {
+            return $func;
+        }
+
+        // Strings usually are internal functions, which typically require exactly one parameter.
+        return static fn($value) => $func($value);
+    }
+
+
+    /**
      * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
      * @param callable $predicate a callback returning boolean value
@@ -481,7 +489,7 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $predicate = self::resolvePredicate($predicate);
+        $predicate = self::resolveStringPredicate($predicate);
 
         $this->filter(static function ($value) use ($predicate): bool {
             static $done = false;
