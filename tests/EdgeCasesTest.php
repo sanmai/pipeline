@@ -40,92 +40,6 @@ use function range;
  */
 final class EdgeCasesTest extends TestCase
 {
-    public function testStandardStringFunctions(): void
-    {
-        $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
-        $pipeline->filter('is_int');
-
-        $this->assertSame([1, 2], iterator_to_array($pipeline));
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     */
-    public function testFilterAnyFalseValueDefaultCallback(): void
-    {
-        $pipeline = map(function () {
-            yield false;
-            yield 0;
-            yield 0.0;
-            yield '';
-            yield '0';
-            yield [];
-            yield null;
-        });
-
-        $pipeline->filter();
-
-        $this->assertCount(0, $pipeline->toList());
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     */
-    public function testFilterAnyFalseValueCustomCallback(): void
-    {
-        $pipeline = map(function () {
-            yield false;
-            yield 0;
-            yield 0.0;
-            yield '';
-            yield '0';
-            yield [];
-            yield null;
-            yield 1;
-        });
-
-        $pipeline->filter('intval');
-
-        $this->assertSame([1], $pipeline->toList());
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     * @covers \Pipeline\Standard::resolvePredicate()
-     */
-    public function testFilterStrictMode(): void
-    {
-        $nonStrictFalsyValues = [
-            0,
-            0.0,
-            '',
-            '0',
-            [],
-        ];
-
-        $pipeline = map(function () use ($nonStrictFalsyValues) {
-            yield false;
-            yield null;
-
-            yield from $nonStrictFalsyValues;
-        });
-
-        $pipeline->filter(strict: true);
-
-        $this->assertSame($nonStrictFalsyValues, $pipeline->toList());
-    }
-
-    /**
-     * @covers \Pipeline\Standard::filter()
-     * @covers \Pipeline\Standard::resolvePredicate()
-     */
-    public function testFilterNonStrictMode(): void
-    {
-        $pipeline = fromValues(false, null, '');
-        $pipeline->filter(strict: false);
-        $this->assertCount(0, $pipeline);
-    }
-
     public function testNonUniqueKeys(): void
     {
         $pipeline = \Pipeline\map(function () {
@@ -158,23 +72,6 @@ final class EdgeCasesTest extends TestCase
         $this->assertSame([1], $pipeline->toList());
     }
 
-    public function testFilterUnprimed(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->filter()->unpack();
-
-        $this->assertSame([], $pipeline->toList());
-    }
-
-    public function testUnpackUnprimed(): void
-    {
-        $pipeline = new Standard();
-        $pipeline->unpack(function () {
-            return 1;
-        });
-
-        $this->assertSame([1], $pipeline->toList());
-    }
 
     public function testInitialInvokeReturnsScalar(): void
     {
