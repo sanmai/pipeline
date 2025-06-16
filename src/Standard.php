@@ -450,15 +450,16 @@ class Standard implements IteratorAggregate, Countable
             };
         }
 
+        /** @phan-suppress-next-line PhanTypeMismatchArgumentNullable */
         return self::resolveStringPredicate($func);
     }
 
-    private static function strictPredicate($value): bool
+    private static function strictPredicate(mixed $value): bool
     {
         return null !== $value && false !== $value;
     }
 
-    private static function nonStrictPredicate($value): bool
+    private static function nonStrictPredicate(mixed $value): bool
     {
         return (bool) $value;
     }

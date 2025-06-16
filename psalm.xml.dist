@@ -30,6 +30,7 @@
         <MissingClosureParamType errorLevel="suppress" />
         <MissingClosureReturnType errorLevel="suppress" />
         <ClassMustBeFinal errorLevel="suppress" />
+        <PrivateFinalMethod errorLevel="suppress" />
 
         <RedundantPropertyInitializationCheck errorLevel="suppress" />
         <PropertyNotSetInConstructor errorLevel="suppress" />
