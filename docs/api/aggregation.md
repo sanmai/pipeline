@@ -212,6 +212,15 @@ $allTags = take($posts)
 
 ### `min()`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To find the smallest value in a collection |
+> | **Key Behavior** | Returns null for empty pipelines, uses PHP comparison rules |
+
 Finds the minimum value using standard PHP comparison.
 
 **Returns:** mixed|null - Minimum value or null for empty pipeline
@@ -247,6 +256,15 @@ $minObject = take($comparableObjects)->min();
 
 ### `max()`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To find the largest value in a collection |
+> | **Key Behavior** | Returns null for empty pipelines, uses PHP comparison rules |
+
 Finds the maximum value using standard PHP comparison.
 
 **Returns:** mixed|null - Maximum value or null for empty pipeline
@@ -278,6 +296,15 @@ $max = take([1, '2', 3.0])->max();
 ```
 
 ### `count()`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To get the total number of elements |
+> | **Key Behavior** | Consumes entire pipeline, implements Countable interface |
 
 Counts the number of elements in the pipeline. Terminal operation.
 
@@ -318,6 +345,15 @@ $unique = take([1, 2, 2, 3, 3, 3])
 ## Statistical Analysis
 
 ### `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To get comprehensive statistics (mean, variance, min/max) |
+> | **Key Behavior** | Returns RunningVariance object with all statistics |
 
 Calculates complete statistical information for numeric data.
 

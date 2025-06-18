@@ -206,6 +206,15 @@ $result = take(['a', 'b', 'c'])
 
 ### `flatten()`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | To merge nested arrays or expand generators |
+> | **Key Behavior** | Flattens one level deep only |
+
 Flattens nested iterables by one level. Each element that is iterable will have its values yielded individually.
 
 **Returns:** $this (Pipeline\Standard instance)
@@ -283,6 +292,15 @@ while (true) {
 For structures with unknown or variable depth, see the [Recursive Flattening](../advanced/complex-pipelines.md#hierarchical-data-processing) pattern in the Complex Pipelines section for a more elegant recursive solution.
 
 ### `unpack(?callable $func = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | To use array elements as function arguments |
+> | **Key Behavior** | Spreads array elements as arguments with ... operator |
 
 Unpacks array elements as arguments to a callback. Without callback, acts like `flatten()`.
 
@@ -410,6 +428,15 @@ take(new SplFileObject('large.csv'))
 ## Slicing
 
 ### `slice(int $offset, ?int $length = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Selection |
+> | **Terminal?** | No |
+> | **When to Use** | To extract a portion of the pipeline |
+> | **Key Behavior** | Works like array_slice(), supports negative offsets |
 
 Extracts a portion of the pipeline, similar to `array_slice()`.
 

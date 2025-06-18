@@ -6,6 +6,15 @@ Methods for converting pipeline data into arrays and managing iteration. These a
 
 ### `toList()`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To get results as a sequential array without keys |
+> | **Key Behavior** | Discards all keys, creates numeric indices starting from 0 |
+
 Converts the pipeline to an indexed array, discarding all keys.
 
 **Returns:** array - Indexed array with sequential numeric keys starting from 0
@@ -48,6 +57,15 @@ $result = take([[1, 2], [3, 4]])
 
 ### `toAssoc()`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To preserve key-value associations |
+> | **Key Behavior** | Maintains original keys, duplicates overwrite |
+
 Converts the pipeline to an associative array, preserving keys.
 
 **Returns:** array - Associative array with preserved keys
@@ -87,6 +105,15 @@ $result = take(['a' => 1, 'b' => 2])
 
 ### `toArray(bool $preserve_keys = false)` [DEPRECATED]
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation (deprecated) |
+> | **Terminal?** | Yes |
+> | **When to Use** | Never - use `toList()` or `toAssoc()` instead |
+> | **Key Behavior** | Legacy method, behavior depends on parameter |
+
 Legacy method for array conversion. Use `toList()` or `toAssoc()` instead.
 
 **Parameters:**
@@ -115,6 +142,15 @@ Legacy method. Use `toAssoc()` instead.
 ## Iterator Access
 
 ### `getIterator()`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Iterator access |
+> | **Terminal?** | No (but exposes internal state) |
+> | **When to Use** | When you need manual iterator control or foreach support |
+> | **Key Behavior** | Enables foreach loops, returns EmptyIterator for empty pipelines |
 
 Returns an iterator for the pipeline data. Implements `IteratorAggregate`.
 
@@ -153,6 +189,15 @@ $iterator = take()->getIterator();
 ## Lazy Evaluation Control
 
 ### `stream()`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Evaluation control |
+> | **Terminal?** | No |
+> | **When to Use** | To force element-by-element processing and reduce memory usage |
+> | **Key Behavior** | Converts arrays to generators, prevents batch optimization |
 
 Converts the pipeline's internal data source (typically an array) into a lazy, element-by-element stream, forcing all subsequent operations to process data one item at a time.
 
@@ -236,6 +281,15 @@ $streamed = take([1, 2, 3, 4, 5])
 ## Element Iteration
 
 ### `each(callable $func, bool $discard = true)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes (by default) |
+> | **When to Use** | For side effects like saving to database or logging |
+> | **Key Behavior** | Executes immediately, discards pipeline unless $discard=false |
 
 Eagerly iterates over all elements, calling a function for each. Terminal operation.
 

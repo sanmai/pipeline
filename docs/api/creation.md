@@ -6,6 +6,15 @@ Methods for creating and initializing pipeline instances. All methods return a `
 
 ### `new Standard(?iterable $input = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Constructor |
+> | **Terminal?** | No |
+> | **When to Use** | To create a pipeline instance directly |
+> | **Key Behavior** | Accepts any iterable or null for empty pipeline |
+
 Creates a new pipeline instance with optional initial data.
 
 **Parameters:**
@@ -43,6 +52,15 @@ $pipeline = new Standard(new SplFileObject('data.txt'));
 
 ### `take(?iterable $input = null, iterable ...$inputs)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Creation helper |
+> | **Terminal?** | No |
+> | **When to Use** | Preferred way to create pipelines, supports multiple sources |
+> | **Key Behavior** | Concatenates multiple iterables into single pipeline |
+
 Creates a pipeline from one or more iterables. Additional inputs are appended in sequence.
 
 **Parameters:**
@@ -76,6 +94,15 @@ $pipeline = take();
 
 ### `fromArray(array $input)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Creation helper |
+> | **Terminal?** | No |
+> | **When to Use** | When you have an array and want type safety |
+> | **Key Behavior** | Only accepts arrays, preserves keys |
+
 Creates a pipeline specifically from an array. Provides type safety when array input is required.
 
 **Parameters:**
@@ -107,6 +134,15 @@ $pipeline = fromArray([
 
 ### `fromValues(...$values)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Creation helper |
+> | **Terminal?** | No |
+> | **When to Use** | To create a pipeline from individual values |
+> | **Key Behavior** | Each argument becomes a pipeline element |
+
 Creates a pipeline from individual values provided as arguments.
 
 **Parameters:**
@@ -135,6 +171,15 @@ $pipeline = fromValues(42);
 ```
 
 ### `map(?callable $func = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Creation helper / Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | To create pipelines from generators or transform existing ones |
+> | **Key Behavior** | Dual purpose: creation and transformation |
 
 Creates a pipeline with an optional generator callback. When called without arguments, returns an empty pipeline. When called with a generator function, initializes the pipeline with the generator's output.
 
@@ -173,6 +218,15 @@ $pipeline = map(function() {
 ```
 
 ### `zip(iterable $base, iterable ...$inputs)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Creation helper |
+> | **Terminal?** | No |
+> | **When to Use** | To combine parallel arrays into tuples |
+> | **Key Behavior** | Creates arrays from corresponding elements, pads with null |
 
 Creates a pipeline by combining multiple iterables element by element (transposition).
 

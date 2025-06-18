@@ -78,6 +78,38 @@ $report = take($transactions)->fold(
 );
 ```
 
+### 5. Use Strict Filtering for Data Cleaning
+
+> **Best Practice: Use `strict: true` for Predictable Data Cleaning**
+> 
+> While `->filter()` is a convenient shortcut for removing all falsy values, this "magic" behavior can lead to unintended data loss by removing valid values like `0` or `''`.
+> 
+> For predictable and safe data cleaning, the recommended approach is to use **`->filter(null, strict: true)`**. This makes your pipeline's behavior explicit, as it will *only* target `null` and `false` values for removal, preserving all other data.
+
+```php
+// AVOID: Aggressive filtering that may lose valid data
+$cleaned = take($data)->filter(); // Removes 0, '', '0', [], null, false
+
+// PREFER: Explicit strict filtering
+$cleaned = take($data)->filter(null, strict: true); // Only removes null and false
+
+// Real-world example: Processing form data
+$formData = [
+    'name' => 'John Doe',
+    'age' => 0,              // Valid: newborn baby
+    'email' => '',           // Valid: user opted out
+    'phone' => null,         // Should be removed
+    'subscribe' => false,    // Should be removed
+    'tags' => [],           // Valid: no tags selected
+];
+
+// Safe cleaning preserves all valid data
+$cleaned = take($formData)
+    ->filter(null, strict: true)
+    ->toList();
+// Result keeps age:0, email:'', and tags:[] intact
+```
+
 ## Data Source Best Practices
 
 ### Working with Arrays

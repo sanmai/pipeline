@@ -34,8 +34,15 @@ Use `filter()` to remove unwanted elements. Without a callback, it's perfect for
 - Preserves keys during filtering
 
 **Strict Mode Benefits:**
-- `strict: false` (default): Removes all falsy values (0, '', false, null, [])
-- `strict: true`: Only removes null and false, preserving 0, '', and empty arrays
+
+> **Best Practice: Use Strict Mode for Predictable Cleaning**
+> 
+> For maximum clarity and to avoid accidental data loss (like removing `0` or empty strings), it is highly recommended to use the strict mode when your goal is to clean out only `null` and `false` values.
+> 
+> - `->filter(null, strict: true)`: **(Recommended for cleaning)** Only removes `null` and `false`
+> - `->filter()`: **(Use with caution)** Removes all [falsy values](https://www.php.net/manual/en/language.types.boolean.php#language.types.boolean.casting), which includes `0`, `''`, `[]`, and `'0'`
+
+See the [Safe and Predictable Data Cleaning](../cookbook/index.md#safe-and-predictable-data-cleaning) recipe for a detailed example.
 
 **Examples:**
 

@@ -10,6 +10,15 @@ The `Pipeline\Helper\RunningVariance` class implements Welford's online algorith
 
 #### `__construct(RunningVariance ...$spiesToMerge)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Constructor |
+> | **Terminal?** | N/A |
+> | **When to Use** | To create or merge statistics from multiple sources |
+> | **Key Behavior** | Supports parallel statistics aggregation |
+
 Creates a new RunningVariance instance, optionally merging existing instances.
 
 **Parameters:**
@@ -106,6 +115,15 @@ echo "New overall avg: " . $updatedStats->getMean() . "\n";
 
 #### `observe(float $value): float`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Data observation |
+> | **Terminal?** | N/A |
+> | **When to Use** | To add individual values to statistics |
+> | **Key Behavior** | Updates all statistics incrementally |
+
 Records a new observation and updates statistics.
 
 **Parameters:**
@@ -123,6 +141,15 @@ $variance->observe(11.8);
 ```
 
 #### Statistical Getters
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Data retrieval |
+> | **Terminal?** | N/A |
+> | **When to Use** | To access calculated statistics |
+> | **Key Behavior** | Returns current statistics, safe for empty datasets |
 
 - `getCount(): int` - Number of observations
 - `getMean(): float` - Arithmetic mean (returns NAN if no observations)

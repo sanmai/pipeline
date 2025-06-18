@@ -6,6 +6,15 @@ Helper methods for specialized operations and data manipulation.
 
 ### `reservoir(int $size, ?callable $weightFunc = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Terminal operation |
+> | **Terminal?** | Yes |
+> | **When to Use** | To randomly sample elements from large datasets |
+> | **Key Behavior** | Memory-efficient sampling, supports weighted selection |
+
 Performs reservoir sampling to randomly select elements. Implements Algorithm R for uniform sampling or Algorithm A-Chao for weighted sampling.
 
 **Parameters:**
@@ -54,6 +63,15 @@ $sample = take([1, 2, 3])->reservoir(10);
 ## Combining Methods
 
 ### `zip(iterable ...$inputs)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | To combine parallel arrays/iterables into tuples |
+> | **Key Behavior** | Creates arrays from corresponding elements, pads with null |
 
 Combines multiple iterables element by element (transposition).
 
@@ -108,6 +126,15 @@ $indexed = take(['apple', 'banana', 'cherry'])
 
 ### `runningCount(?int &$count)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pass-through operation |
+> | **Terminal?** | No |
+> | **When to Use** | To count elements without consuming the pipeline |
+> | **Key Behavior** | Updates count by reference, elements pass through unchanged |
+
 Counts elements as they pass through the pipeline without consuming it.
 
 **Parameters:**
@@ -159,6 +186,15 @@ take($largeDataset)
 ```
 
 ### `runningVariance(?RunningVariance &$variance, ?callable $castFunc = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pass-through operation |
+> | **Terminal?** | No |
+> | **When to Use** | To calculate statistics without consuming the pipeline |
+> | **Key Behavior** | Updates statistics by reference, elements pass through unchanged |
 
 Calculates running statistics as elements pass through.
 
