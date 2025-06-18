@@ -1,0 +1,432 @@
+# Collection Methods
+
+Methods for converting pipeline data into arrays and managing iteration. These are typically terminal operations.
+
+## Array Conversion Methods
+
+### `toList()`
+
+Converts the pipeline to an indexed array, discarding all keys.
+
+**Returns:** array - Indexed array with sequential numeric keys starting from 0
+
+**Examples:**
+
+```php
+// Basic conversion
+$result = take([1, 2, 3, 4, 5])->toList();
+// Result: [1, 2, 3, 4, 5]
+
+// Discards original keys
+$result = take(['a' => 1, 'b' => 2, 'c' => 3])->toList();
+// Result: [1, 2, 3] (keys lost)
+
+// After transformation
+$result = take(['hello', 'world'])
+    ->map('strtoupper')
+    ->toList();
+// Result: ['HELLO', 'WORLD']
+
+// From generator
+$result = take(function() {
+    yield 'a';
+    yield 'b';
+    yield 'c';
+})->toList();
+// Result: ['a', 'b', 'c']
+
+// Empty pipeline
+$result = take([])->toList();
+// Result: []
+
+// Flattening with list
+$result = take([[1, 2], [3, 4]])
+    ->flatten()
+    ->toList();
+// Result: [1, 2, 3, 4]
+```
+
+### `toAssoc()`
+
+Converts the pipeline to an associative array, preserving keys.
+
+**Returns:** array - Associative array with preserved keys
+
+**Examples:**
+
+```php
+// Preserves keys
+$result = take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->map(fn($x) => $x * 2)
+    ->toAssoc();
+// Result: ['a' => 2, 'b' => 4, 'c' => 6]
+
+// Duplicate keys (last value wins)
+$result = take(function() {
+    yield 'key' => 'first';
+    yield 'key' => 'second';
+    yield 'key' => 'third';
+})->toAssoc();
+// Result: ['key' => 'third']
+
+// Mixed keys
+$result = take([
+    'name' => 'Alice',
+    'age' => 30,
+    0 => 'extra',
+    'city' => 'NYC'
+])->toAssoc();
+// Result: ['name' => 'Alice', 'age' => 30, 0 => 'extra', 'city' => 'NYC']
+
+// After key manipulation
+$result = take(['a' => 1, 'b' => 2])
+    ->flip()
+    ->toAssoc();
+// Result: [1 => 'a', 2 => 'b']
+```
+
+### `toArray(bool $preserve_keys = false)` [DEPRECATED]
+
+Legacy method for array conversion. Use `toList()` or `toAssoc()` instead.
+
+**Parameters:**
+- `$preserve_keys` (bool): Whether to preserve keys
+
+**Returns:** array
+
+**Examples:**
+
+```php
+// Without preserving keys (use toList() instead)
+$result = take(['a' => 1, 'b' => 2])->toArray();
+// Result: [1, 2]
+
+// Preserving keys (use toAssoc() instead)
+$result = take(['a' => 1, 'b' => 2])->toArray(true);
+// Result: ['a' => 1, 'b' => 2]
+```
+
+### `toArrayPreservingKeys()` [DEPRECATED]
+
+Legacy method. Use `toAssoc()` instead.
+
+**Returns:** array - Same as `toAssoc()`
+
+## Iterator Access
+
+### `getIterator()`
+
+Returns an iterator for the pipeline data. Implements `IteratorAggregate`.
+
+**Returns:** Traversable - Iterator over pipeline elements
+
+**Examples:**
+
+```php
+// Direct iteration
+$pipeline = take([1, 2, 3]);
+foreach ($pipeline as $value) {
+    echo $value . "\n";
+}
+// Output: 1, 2, 3
+
+// With keys
+$pipeline = take(['a' => 1, 'b' => 2]);
+foreach ($pipeline as $key => $value) {
+    echo "$key: $value\n";
+}
+// Output: a: 1, b: 2
+
+// Manual iterator control
+$iterator = take([1, 2, 3])->getIterator();
+$iterator->rewind();
+while ($iterator->valid()) {
+    echo $iterator->current() . "\n";
+    $iterator->next();
+}
+
+// Empty pipeline returns EmptyIterator
+$iterator = take()->getIterator();
+// Returns: EmptyIterator instance
+```
+
+## Lazy Evaluation Control
+
+### `stream()`
+
+Forces the pipeline to use lazy evaluation via generators.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Examples:**
+
+```php
+// Force streaming mode
+$result = take($data)
+    ->stream()  // Ensures generator-based processing
+    ->map(fn($x) => $x * 2)
+    ->filter(fn($x) => $x > 10)
+    ->toList();
+
+// Useful for large datasets
+take(new SplFileObject('10gb-file.log'))
+    ->stream()
+    ->filter(fn($line) => contains($line, 'ERROR'))
+    ->each(fn($line) => processError($line));
+
+// Convert array to generator
+$streamed = take([1, 2, 3, 4, 5])
+    ->stream()  // Now uses generator internally
+    ->map(fn($x) => expensiveOperation($x));
+// Computation deferred until iteration
+```
+
+## Element Iteration
+
+### `each(callable $func, bool $discard = true)`
+
+Eagerly iterates over all elements, calling a function for each. Terminal operation.
+
+**Parameters:**
+- `$func` (callable): Function to call for each element
+- `$discard` (bool): Whether to discard the pipeline after iteration (default: true)
+
+**Returns:** void
+
+**Callback signature:** `function(mixed $value, mixed $key): void`
+
+**Examples:**
+
+```php
+// Basic iteration
+take([1, 2, 3])->each(fn($x) => print("Value: $x\n"));
+// Output: Value: 1, Value: 2, Value: 3
+
+// With keys
+take(['a' => 1, 'b' => 2])->each(function($value, $key) {
+    echo "$key => $value\n";
+});
+// Output: a => 1, b => 2
+
+// Side effects
+$sum = 0;
+take([1, 2, 3, 4, 5])->each(function($x) use (&$sum) {
+    $sum += $x;
+});
+// $sum is now 15
+
+// Process and discard
+take(new SplFileObject('data.csv'))
+    ->map('str_getcsv')
+    ->each(fn($row) => insertToDatabase($row));
+// Pipeline is discarded after processing
+
+// Keep pipeline (rare use case)
+$pipeline = take([1, 2, 3]);
+$pipeline->each(fn($x) => print($x), discard: false);
+// $pipeline still contains data
+
+// Error handling
+take($items)->each(function($item) {
+    try {
+        processItem($item);
+    } catch (Exception $e) {
+        logError($e);
+    }
+});
+```
+
+## Key and Value Methods
+
+### `keys()`
+
+Extracts only the keys from the pipeline.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Examples:**
+
+```php
+// Extract keys
+$result = take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->keys()
+    ->toList();
+// Result: ['a', 'b', 'c']
+
+// Numeric keys
+$result = take(['first', 'second', 'third'])
+    ->keys()
+    ->toList();
+// Result: [0, 1, 2]
+
+// After transformation
+$result = take(['name' => 'Alice', 'age' => 30])
+    ->flip()
+    ->keys()
+    ->toList();
+// Result: ['Alice', 30]
+
+// Use keys for processing
+$result = take($data)
+    ->keys()
+    ->filter(fn($key) => str_starts_with($key, 'user_'))
+    ->toList();
+```
+
+### `values()`
+
+Extracts only the values, discarding keys.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Examples:**
+
+```php
+// Reset keys to sequential
+$result = take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->values()
+    ->toAssoc();
+// Result: [0 => 1, 1 => 2, 2 => 3]
+
+// No effect on sequential arrays
+$result = take([1, 2, 3])
+    ->values()
+    ->toList();
+// Result: [1, 2, 3]
+
+// Useful after filtering
+$result = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4])
+    ->filter(fn($x) => $x > 2)
+    ->values()  // Reset to sequential keys
+    ->toList();
+// Result: [3, 4]
+```
+
+### `flip()`
+
+Swaps keys and values.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Examples:**
+
+```php
+// Basic flip
+$result = take(['a' => 1, 'b' => 2])
+    ->flip()
+    ->toAssoc();
+// Result: [1 => 'a', 2 => 'b']
+
+// Deduplication pattern
+$result = take([1, 2, 2, 3, 3, 3])
+    ->flip()  // Values become keys (deduplicates)
+    ->flip()  // Flip back
+    ->values()  // Reset keys
+    ->toList();
+// Result: [1, 2, 3]
+
+// String keys from values
+$result = take(['apple', 'banana', 'cherry'])
+    ->flip()
+    ->toAssoc();
+// Result: ['apple' => 0, 'banana' => 1, 'cherry' => 2]
+
+// Creating lookup tables
+$lookup = take($users)
+    ->map(fn($user) => [$user['email'] => $user['id']])
+    ->flatten()
+    ->toAssoc();
+```
+
+### `tuples()`
+
+Converts key-value pairs into [key, value] tuples.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Examples:**
+
+```php
+// Convert to tuples
+$result = take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->tuples()
+    ->toList();
+// Result: [['a', 1], ['b', 2], ['c', 3]]
+
+// Process keys and values together
+$result = take(['name' => 'Alice', 'age' => 30])
+    ->tuples()
+    ->map(fn($tuple) => $tuple[0] . ': ' . $tuple[1])
+    ->toList();
+// Result: ['name: Alice', 'age: 30']
+
+// Filter by key and value
+$result = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4])
+    ->tuples()
+    ->filter(fn($tuple) => $tuple[0] !== 'b' && $tuple[1] < 4)
+    ->map(fn($tuple) => $tuple[1])
+    ->toList();
+// Result: [1, 3]
+
+// Reconstruct after processing
+$result = take(['a' => 1, 'b' => 2])
+    ->tuples()
+    ->map(fn($tuple) => [$tuple[0] . '_key', $tuple[1] * 10])
+    ->reduce(fn($acc, $tuple) => [...$acc, $tuple[0] => $tuple[1]], []);
+// Result: ['a_key' => 10, 'b_key' => 20]
+```
+
+## Usage Patterns
+
+### Collecting Filtered Results
+
+```php
+// Collect matching items
+$errors = take($logEntries)
+    ->filter(fn($entry) => $entry['level'] === 'ERROR')
+    ->toList();
+
+// Collect with preserved indices
+$filtered = take($items)
+    ->filter($predicate)
+    ->toAssoc();  // Keeps original array indices
+```
+
+### Key-Based Operations
+
+```php
+// Extract specific keys
+$userIds = take($users)
+    ->map(fn($user) => [$user['id'] => $user])
+    ->flatten()
+    ->keys()
+    ->toList();
+
+// Reindex after operations
+$reindexed = take($data)
+    ->filter($condition)
+    ->sort($comparator)
+    ->values()  // Reset to 0-based indices
+    ->toList();
+```
+
+### Memory Management
+
+```php
+// Process without collecting
+take($hugeDataset)
+    ->filter($predicate)
+    ->map($transformer)
+    ->each($processor);  // No array created
+
+// Collect only what's needed
+$sample = take($hugeDataset)
+    ->filter($predicate)
+    ->slice(0, 100)  // Limit before collecting
+    ->toList();
+```
+
+## Next Steps
+
+- [Utility Methods](utility.md) - Helper methods for common operations
+- [Statistics](statistics.md) - Statistical analysis methods

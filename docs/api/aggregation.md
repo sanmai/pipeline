@@ -1,0 +1,372 @@
+# Aggregation Methods
+
+Methods that reduce pipeline elements to single values. These are terminal operations that consume the pipeline.
+
+## Core Reduction Methods
+
+### `reduce(?callable $func = null, $initial = null)`
+
+Reduces elements to a single value using a callback. Defaults to summation.
+
+**Parameters:**
+- `$func` (?callable): Reduction function. If null, sums numeric values.
+- `$initial` (mixed): Initial value for the accumulator (default: 0 if func is null)
+
+**Returns:** mixed - The final reduced value
+
+**Callback signature:** `function(mixed $carry, mixed $item): mixed`
+
+**Examples:**
+
+```php
+// Default summation
+$sum = take([1, 2, 3, 4, 5])->reduce();
+// Result: 15
+
+// With initial value
+$sum = take([1, 2, 3])->reduce(null, 10);
+// Result: 16 (10 + 1 + 2 + 3)
+
+// Product calculation
+$product = take([2, 3, 4])
+    ->reduce(fn($carry, $item) => $carry * $item, 1);
+// Result: 24
+
+// String concatenation
+$string = take(['Hello', ' ', 'World'])
+    ->reduce(fn($carry, $item) => $carry . $item, '');
+// Result: 'Hello World'
+
+// Building an array
+$indexed = take(['a', 'b', 'c'])
+    ->reduce(function($carry, $item) {
+        $carry[$item] = strlen($item);
+        return $carry;
+    }, []);
+// Result: ['a' => 1, 'b' => 1, 'c' => 1]
+
+// Count occurrences
+$counts = take(['a', 'b', 'a', 'c', 'b', 'a'])
+    ->reduce(function($counts, $item) {
+        $counts[$item] = ($counts[$item] ?? 0) + 1;
+        return $counts;
+    }, []);
+// Result: ['a' => 3, 'b' => 2, 'c' => 1]
+
+// Find maximum with details
+$data = [
+    ['name' => 'Alice', 'score' => 85],
+    ['name' => 'Bob', 'score' => 92],
+    ['name' => 'Charlie', 'score' => 88]
+];
+$highest = take($data)
+    ->reduce(fn($best, $item) => 
+        $item['score'] > ($best['score'] ?? 0) ? $item : $best
+    , []);
+// Result: ['name' => 'Bob', 'score' => 92]
+```
+
+### `fold($initial, ?callable $func = null)`
+
+Like `reduce()` but requires an initial value. More predictable for type safety.
+
+**Parameters:**
+- `$initial` (mixed): Required initial value for the accumulator
+- `$func` (?callable): Reduction function. If null, sums numeric values.
+
+**Returns:** mixed - The final reduced value (same type as $initial if consistent)
+
+**Callback signature:** `function(mixed $carry, mixed $item): mixed`
+
+**Examples:**
+
+```php
+// Basic fold with sum
+$sum = take([1, 2, 3])->fold(0);
+// Result: 6
+
+// Fold with custom function
+$result = take([1, 2, 3])
+    ->fold([], fn($arr, $item) => [...$arr, $item * 2]);
+// Result: [2, 4, 6]
+
+// Type-safe accumulation
+$total = take($orders)
+    ->fold(0.0, fn($sum, $order) => $sum + $order['amount']);
+// Always returns float
+
+// Building complex structure
+$grouped = take($items)
+    ->fold([], function($groups, $item) {
+        $key = $item['category'];
+        $groups[$key][] = $item;
+        return $groups;
+    });
+
+// Safe string building
+$csv = take($records)
+    ->fold('', fn($csv, $record) => 
+        $csv . implode(',', $record) . "\n"
+    );
+
+// Nested data extraction
+$allTags = take($posts)
+    ->fold([], fn($tags, $post) => 
+        array_merge($tags, $post['tags'] ?? [])
+    );
+```
+
+## Statistical Aggregations
+
+### `min()`
+
+Finds the minimum value using standard PHP comparison.
+
+**Returns:** mixed|null - Minimum value or null for empty pipeline
+
+**Examples:**
+
+```php
+// Numeric minimum
+$min = take([5, 2, 8, 1, 9])->min();
+// Result: 1
+
+// String minimum (alphabetical)
+$min = take(['banana', 'apple', 'cherry'])->min();
+// Result: 'apple'
+
+// Empty pipeline
+$min = take([])->min();
+// Result: null
+
+// With transformation
+$min = take($products)
+    ->map(fn($p) => $p['price'])
+    ->min();
+
+// Date minimum
+$dates = ['2024-01-15', '2024-01-01', '2024-01-30'];
+$earliest = take($dates)->min();
+// Result: '2024-01-01'
+
+// Object comparison (using __toString or comparison operators)
+$minObject = take($comparableObjects)->min();
+```
+
+### `max()`
+
+Finds the maximum value using standard PHP comparison.
+
+**Returns:** mixed|null - Maximum value or null for empty pipeline
+
+**Examples:**
+
+```php
+// Numeric maximum
+$max = take([5, 2, 8, 1, 9])->max();
+// Result: 9
+
+// String maximum
+$max = take(['banana', 'apple', 'cherry'])->max();
+// Result: 'cherry'
+
+// With transformation
+$highest = take($scores)
+    ->map(fn($s) => $s['value'])
+    ->max();
+
+// Complex comparison
+$latest = take($events)
+    ->map(fn($e) => $e['timestamp'])
+    ->max();
+
+// Mixed types (PHP comparison rules apply)
+$max = take([1, '2', 3.0])->max();
+// Result: 3.0
+```
+
+### `count()`
+
+Counts the number of elements in the pipeline. Terminal operation.
+
+**Returns:** int - Number of elements
+
+**Examples:**
+
+```php
+// Basic count
+$count = take([1, 2, 3, 4, 5])->count();
+// Result: 5
+
+// Count after filtering
+$count = take(range(1, 100))
+    ->filter(fn($x) => $x % 2 === 0)
+    ->count();
+// Result: 50
+
+// Count with generators
+$count = take(function() {
+    for ($i = 0; $i < 1000000; $i++) {
+        yield $i;
+    }
+})->filter(fn($x) => $x < 1000)->count();
+// Result: 1000
+
+// Empty pipeline
+$count = take([])->count();
+// Result: 0
+
+// Count unique values
+$unique = take([1, 2, 2, 3, 3, 3])
+    ->flip()->flip()  // Deduplicate
+    ->count();
+// Result: 3
+```
+
+## Statistical Analysis
+
+### `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null)`
+
+Calculates complete statistical information for numeric data.
+
+**Parameters:**
+- `$castFunc` (?callable): Function to convert values to float (default: floatval)
+- `$variance` (?RunningVariance): Optional pre-initialized variance calculator
+
+**Returns:** RunningVariance - Object containing statistical data
+
+**Examples:**
+
+```php
+use Pipeline\Helper\RunningVariance;
+
+// Basic statistics
+$stats = take([1, 2, 3, 4, 5])->finalVariance();
+echo $stats->getCount();           // 5
+echo $stats->getMean();            // 3.0
+echo $stats->getVariance();        // 2.5
+echo $stats->getStandardDeviation(); // ~1.58
+echo $stats->getMin();             // 1.0
+echo $stats->getMax();             // 5.0
+
+// With custom casting
+$stats = take(['1.5', '2.5', '3.5'])
+    ->finalVariance(fn($x) => (float)$x);
+echo $stats->getMean(); // 2.5
+
+// Ignore non-numeric values
+$stats = take([1, 'text', 2, null, 3])
+    ->finalVariance(fn($x) => is_numeric($x) ? (float)$x : null);
+echo $stats->getCount(); // 3 (only numeric values)
+
+// Calculate statistics for specific field
+$scores = [
+    ['name' => 'Alice', 'score' => 85],
+    ['name' => 'Bob', 'score' => 92],
+    ['name' => 'Charlie', 'score' => 88]
+];
+$stats = take($scores)
+    ->finalVariance(fn($x) => $x['score']);
+echo $stats->getMean(); // 88.33...
+
+// Continuing from existing statistics
+$variance1 = take($dataset1)->finalVariance();
+$combined = take($dataset2)->finalVariance(null, $variance1);
+// $combined now has statistics for both datasets
+```
+
+## Advanced Aggregation Patterns
+
+### Custom Aggregations
+
+```php
+// Multiple aggregations in one pass
+$result = take($sales)
+    ->reduce(function($acc, $sale) {
+        $acc['total'] += $sale['amount'];
+        $acc['count']++;
+        $acc['byCategory'][$sale['category']] = 
+            ($acc['byCategory'][$sale['category']] ?? 0) + $sale['amount'];
+        return $acc;
+    }, ['total' => 0, 'count' => 0, 'byCategory' => []]);
+
+// Percentile calculation
+function percentile($data, $p) {
+    $sorted = take($data)->toList();
+    sort($sorted);
+    $index = ($p / 100) * (count($sorted) - 1);
+    $lower = floor($index);
+    $upper = ceil($index);
+    $weight = $index - $lower;
+    return $sorted[$lower] * (1 - $weight) + $sorted[$upper] * $weight;
+}
+
+// Running aggregations with side effects
+$totals = [];
+take($transactions)
+    ->reduce(function($balance, $transaction) use (&$totals) {
+        $balance += $transaction['amount'];
+        $totals[] = ['date' => $transaction['date'], 'balance' => $balance];
+        return $balance;
+    }, 0);
+```
+
+### Grouping and Aggregating
+
+```php
+// Group by key and sum
+$grouped = take($items)
+    ->reduce(function($groups, $item) {
+        $key = $item['category'];
+        $groups[$key] = ($groups[$key] ?? 0) + $item['value'];
+        return $groups;
+    }, []);
+
+// Group with multiple aggregations
+$summary = take($orders)
+    ->reduce(function($acc, $order) {
+        $customer = $order['customer_id'];
+        if (!isset($acc[$customer])) {
+            $acc[$customer] = [
+                'count' => 0,
+                'total' => 0,
+                'items' => []
+            ];
+        }
+        $acc[$customer]['count']++;
+        $acc[$customer]['total'] += $order['amount'];
+        $acc[$customer]['items'][] = $order['item_id'];
+        return $acc;
+    }, []);
+```
+
+### Early Termination Patterns
+
+```php
+// Find first matching element
+$found = take($largeDataset)
+    ->reduce(function($found, $item) {
+        if ($found !== null) return $found;
+        return matchesCriteria($item) ? $item : null;
+    }, null);
+
+// Check if any/all match
+$hasError = take($results)
+    ->reduce(fn($has, $item) => $has || $item['status'] === 'error', false);
+
+$allValid = take($inputs)
+    ->reduce(fn($valid, $item) => $valid && validate($item), true);
+```
+
+## Performance Considerations
+
+1. **Terminal operations consume the pipeline** - Cannot reuse after aggregation
+2. **Use `runningCount()` for counting** during transformation chains
+3. **Array optimization** - `count()` uses native `count()` for arrays
+4. **Memory efficiency** - Aggregations process lazily, consuming one element at a time
+5. **Type consistency** - Use `fold()` when type safety is important
+
+## Next Steps
+
+- [Collection Methods](collection.md) - Converting pipelines to arrays
+- [Utility Methods](utility.md) - Helper methods for common operations

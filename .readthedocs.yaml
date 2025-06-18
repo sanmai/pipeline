@@ -1,0 +1,5 @@
+# Read the Docs configuration file
+version: 2
+
+mkdocs:
+  configuration: mkdocs.yml

@@ -1,0 +1,67 @@
+site_name: Pipeline - PHP Functional Programming Library
+site_description: Comprehensive documentation for the sanmai/pipeline PHP library optimized for LLM consumption
+site_url: https://pipeline.readthedocs.io
+repo_url: https://github.com/sanmai/pipeline
+repo_name: sanmai/pipeline
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+
+nav:
+  - Home: index.md
+  - Quick Start:
+    - Installation: quickstart/installation.md
+    - Basic Usage: quickstart/basic-usage.md
+    - Examples: quickstart/examples.md
+  - API Reference:
+    - Pipeline Creation: api/creation.md
+    - Transformation Methods: api/transformation.md
+    - Filtering Methods: api/filtering.md
+    - Aggregation Methods: api/aggregation.md
+    - Collection Methods: api/collection.md
+    - Utility Methods: api/utility.md
+    - Helper Functions: api/helpers.md
+    - Statistics: api/statistics.md
+  - Advanced Usage:
+    - Complex Pipelines: advanced/complex-pipelines.md
+    - Performance Tips: advanced/performance.md
+    - Best Practices: advanced/best-practices.md
+  - Reference:
+    - Method Index: reference/method-index.md
+    - Changelog: reference/changelog.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - def_list
+  - attr_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sanmai/pipeline

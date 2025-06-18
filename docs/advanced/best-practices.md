@@ -1,0 +1,494 @@
+# Best Practices
+
+Guidelines and recommendations for using the Pipeline library effectively.
+
+## General Principles
+
+### 1. Prefer Lazy Evaluation
+
+```php
+// GOOD: Process only what's needed
+$result = take(new SplFileObject('large.log'))
+    ->filter(fn($line) => str_contains($line, 'ERROR'))
+    ->slice(0, 10)  // Only need first 10
+    ->toList();
+
+// BAD: Load everything first
+$lines = file('large.log');
+$result = take($lines)
+    ->filter(fn($line) => str_contains($line, 'ERROR'))
+    ->slice(0, 10)
+    ->toList();
+```
+
+### 2. Chain Operations
+
+```php
+// GOOD: Single pipeline chain
+$result = take($data)
+    ->filter($predicate)
+    ->map($transformer)
+    ->slice(0, 100)
+    ->toList();
+
+// BAD: Breaking the chain unnecessarily
+$filtered = take($data)->filter($predicate)->toList();
+$mapped = take($filtered)->map($transformer)->toList();
+$result = take($mapped)->slice(0, 100)->toList();
+```
+
+### 3. Use Appropriate Methods
+
+```php
+// GOOD: Use specialized methods
+$count = take($data)->count();
+$min = take($values)->min();
+$stats = take($numbers)->finalVariance();
+
+// BAD: Reimplementing built-in functionality
+$count = take($data)->reduce(fn($c, $_) => $c + 1, 0);
+$min = take($values)->reduce(fn($min, $v) => $v < $min ? $v : $min);
+```
+
+## Data Source Best Practices
+
+### Working with Arrays
+
+```php
+// When you have an array, pipeline operations are optimized
+$result = take($array)
+    ->filter($predicate)  // Uses array_filter
+    ->cast($caster)       // Uses array_map
+    ->toList();
+
+// Force generator if memory is a concern
+$result = take($array)
+    ->stream()  // Convert to generator
+    ->filter($predicate)
+    ->map($transformer)
+    ->toList();
+```
+
+### Working with Files
+
+```php
+// GOOD: Stream large files
+function processLogFile($filename) {
+    return take(new SplFileObject($filename))
+        ->filter(fn($line) => trim($line) !== '')
+        ->map(fn($line) => parseLogLine($line))
+        ->filter(fn($entry) => $entry !== null);
+}
+
+// GOOD: Handle file errors gracefully
+function safeFileProcessor($filename) {
+    if (!file_exists($filename)) {
+        return take([]);  // Empty pipeline
+    }
+    
+    try {
+        return take(new SplFileObject($filename));
+    } catch (\Exception $e) {
+        logError($e);
+        return take([]);
+    }
+}
+```
+
+### Working with Generators
+
+```php
+// GOOD: Generators maintain state efficiently
+function fibonacci() {
+    $a = 0;
+    $b = 1;
+    while (true) {
+        yield $a;
+        [$a, $b] = [$b, $a + $b];
+    }
+}
+
+$first10Fib = take(fibonacci())
+    ->slice(0, 10)
+    ->toList();
+
+// GOOD: Clean up resources in generators
+function readDatabase($query) {
+    $connection = new PDO($dsn);
+    $statement = $connection->query($query);
+    
+    try {
+        while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            yield $row;
+        }
+    } finally {
+        $statement->closeCursor();
+        $connection = null;
+    }
+}
+```
+
+## Transformation Best Practices
+
+### Use map() vs cast()
+
+```php
+// Use map() when yielding multiple values
+$result = take(['hello world', 'foo bar'])
+    ->map(function($phrase) {
+        foreach (explode(' ', $phrase) as $word) {
+            yield $word;
+        }
+    })
+    ->toList();
+// Result: ['hello', 'world', 'foo', 'bar']
+
+// Use cast() for simple transformations
+$result = take(['1', '2', '3'])
+    ->cast('intval')  // Simple, efficient
+    ->toList();
+// Result: [1, 2, 3]
+
+// Use cast() when you don't want generator expansion
+$result = take([generatorFunc()])
+    ->cast(fn($gen) => iterator_to_array($gen))
+    ->toList();
+// Result: [[...array from generator...]]
+```
+
+### Filtering Strategies
+
+```php
+// Default filter removes all falsy values
+$result = take([0, 1, false, 2, null, 3, '', 4, []])
+    ->filter()
+    ->toList();
+// Result: [1, 2, 3, 4]
+
+// Strict mode only removes null and false
+$result = take([0, '', [], null, false])
+    ->filter(null, strict: true)
+    ->toList();
+// Result: [0, '', []]
+
+// Combine conditions in single filter
+$result = take($users)
+    ->filter(fn($user) => 
+        $user['active'] && 
+        $user['age'] >= 18 && 
+        in_array($user['role'], ['admin', 'moderator'])
+    )
+    ->toList();
+```
+
+## Error Handling
+
+### Defensive Programming
+
+```php
+// Handle missing array keys
+$result = take($users)
+    ->map(fn($user) => [
+        'id' => $user['id'] ?? null,
+        'name' => $user['name'] ?? 'Unknown',
+        'email' => $user['email'] ?? '',
+        'verified' => $user['verified'] ?? false
+    ])
+    ->filter(fn($user) => $user['id'] !== null)
+    ->toList();
+
+// Validate before processing
+$result = take($inputs)
+    ->filter(fn($input) => $this->validator->isValid($input))
+    ->map(fn($input) => $this->processor->process($input))
+    ->toList();
+
+// Separate invalid items
+$valid = [];
+$invalid = [];
+
+take($items)
+    ->each(function($item) use (&$valid, &$invalid) {
+        if (isValid($item)) {
+            $valid[] = processItem($item);
+        } else {
+            $invalid[] = $item;
+        }
+    });
+```
+
+### Exception Handling
+
+```php
+// Wrap operations that might fail
+class SafePipeline {
+    public static function tryMap($pipeline, callable $callback, $default = null) {
+        return $pipeline->map(function($item) use ($callback, $default) {
+            try {
+                return $callback($item);
+            } catch (\Exception $e) {
+                logException($e, ['item' => $item]);
+                return $default;
+            }
+        });
+    }
+}
+
+$result = SafePipeline::tryMap(
+    take($urls),
+    fn($url) => fetchUrl($url),
+    null
+)->filter()->toList();  // Remove failed fetches
+```
+
+## Performance Patterns
+
+### Memory Management
+
+```php
+// Process large datasets in chunks
+function processLargeDataset($source, $processor, $chunkSize = 1000) {
+    $processed = 0;
+    
+    take($source)
+        ->chunk($chunkSize)
+        ->each(function($chunk) use ($processor, &$processed) {
+            foreach ($chunk as $item) {
+                $processor->process($item);
+                $processed++;
+                
+                if ($processed % 10000 === 0) {
+                    echo "Processed: $processed\n";
+                    gc_collect_cycles();  // Force garbage collection
+                }
+            }
+        });
+    
+    return $processed;
+}
+```
+
+### Efficient Aggregation
+
+```php
+// Use running methods for statistics during processing
+$count = null;
+$stats = null;
+
+$processed = take($measurements)
+    ->runningCount($count)
+    ->runningVariance($stats)
+    ->filter(function($value) use ($stats) {
+        // Filter outliers based on running statistics
+        if ($stats->getCount() < 10) return true;
+        
+        $mean = $stats->getMean();
+        $stdDev = $stats->getStandardDeviation();
+        return abs($value - $mean) <= 3 * $stdDev;
+    })
+    ->toList();
+
+echo "Processed $count items\n";
+echo "Mean: " . $stats->getMean() . "\n";
+```
+
+## Testing Pipelines
+
+### Unit Testing
+
+```php
+class PipelineTest extends PHPUnit\Framework\TestCase {
+    public function testFilteringPipeline() {
+        $input = [1, 2, 3, 4, 5, 6];
+        
+        $result = take($input)
+            ->filter(fn($x) => $x % 2 === 0)
+            ->map(fn($x) => $x * 2)
+            ->toList();
+        
+        $this->assertEquals([4, 8, 12], $result);
+    }
+    
+    public function testEmptyPipeline() {
+        $result = take([])
+            ->filter(fn($x) => true)
+            ->map(fn($x) => $x * 2)
+            ->toList();
+        
+        $this->assertEquals([], $result);
+    }
+    
+    public function testGeneratorPipeline() {
+        $generator = function() {
+            yield 1;
+            yield 2;
+            yield 3;
+        };
+        
+        $result = take($generator())
+            ->map(fn($x) => $x ** 2)
+            ->toList();
+        
+        $this->assertEquals([1, 4, 9], $result);
+    }
+}
+```
+
+### Integration Testing
+
+```php
+// Test with real data sources
+public function testFileProcessing() {
+    $testFile = tempnam(sys_get_temp_dir(), 'test');
+    file_put_contents($testFile, "line1\nline2\nline3\n");
+    
+    try {
+        $result = take(new SplFileObject($testFile))
+            ->map('trim')
+            ->filter()
+            ->toList();
+        
+        $this->assertEquals(['line1', 'line2', 'line3'], $result);
+    } finally {
+        unlink($testFile);
+    }
+}
+```
+
+## Code Organization
+
+### Creating Reusable Pipelines
+
+```php
+namespace App\Pipelines;
+
+class UserPipeline {
+    public static function activeUsers($users) {
+        return take($users)
+            ->filter(fn($user) => $user['active'] ?? false)
+            ->filter(fn($user) => !($user['deleted_at'] ?? false));
+    }
+    
+    public static function withRole($users, string $role) {
+        return take($users)
+            ->filter(fn($user) => ($user['role'] ?? '') === $role);
+    }
+    
+    public static function sortByCreatedAt($users, bool $desc = true) {
+        $data = take($users)->toList();
+        usort($data, fn($a, $b) => $desc
+            ? $b['created_at'] <=> $a['created_at']
+            : $a['created_at'] <=> $b['created_at']
+        );
+        return take($data);
+    }
+}
+
+// Usage
+$admins = UserPipeline::activeUsers($users)
+    ->pipe(fn($p) => UserPipeline::withRole($p, 'admin'))
+    ->pipe(fn($p) => UserPipeline::sortByCreatedAt($p))
+    ->toList();
+```
+
+### Pipeline Factories
+
+```php
+class PipelineFactory {
+    private array $config;
+    
+    public function __construct(array $config) {
+        $this->config = $config;
+    }
+    
+    public function createDataProcessor(): callable {
+        return function($data) {
+            $pipeline = take($data);
+            
+            // Apply filters from config
+            foreach ($this->config['filters'] ?? [] as $filter) {
+                $pipeline = $pipeline->filter($this->buildFilter($filter));
+            }
+            
+            // Apply transformations
+            foreach ($this->config['transformers'] ?? [] as $transformer) {
+                $pipeline = $pipeline->map($this->buildTransformer($transformer));
+            }
+            
+            return $pipeline;
+        };
+    }
+    
+    private function buildFilter($config): callable {
+        return match($config['type']) {
+            'range' => fn($x) => $x >= $config['min'] && $x <= $config['max'],
+            'equals' => fn($x) => $x === $config['value'],
+            'regex' => fn($x) => preg_match($config['pattern'], $x),
+            default => fn($x) => true
+        };
+    }
+    
+    private function buildTransformer($config): callable {
+        return match($config['type']) {
+            'multiply' => fn($x) => $x * $config['factor'],
+            'round' => fn($x) => round($x, $config['precision']),
+            'format' => fn($x) => sprintf($config['format'], $x),
+            default => fn($x) => $x
+        };
+    }
+}
+```
+
+## Common Antipatterns to Avoid
+
+### 1. Pipeline Reuse After Consumption
+
+```php
+// BAD: Trying to reuse consumed generator
+$pipeline = take(generatorFunction());
+$first = $pipeline->toList();
+$second = $pipeline->toList(); // Empty! Generator exhausted
+
+// GOOD: Create fresh pipelines
+$first = take(generatorFunction())->toList();
+$second = take(generatorFunction())->toList();
+```
+
+### 2. Modifying Data During Iteration
+
+```php
+// BAD: Modifying source during pipeline
+$array = [1, 2, 3];
+take($array)
+    ->each(function($value) use (&$array) {
+        $array[] = $value * 2; // Don't modify source!
+    });
+
+// GOOD: Create new data
+$array = [1, 2, 3];
+$doubled = take($array)
+    ->map(fn($x) => $x * 2)
+    ->toList();
+```
+
+### 3. Overusing Pipelines
+
+```php
+// BAD: Pipeline for simple operations
+$sum = take($array)->reduce();
+
+// GOOD: Use native PHP when simpler
+$sum = array_sum($array);
+
+// Pipelines shine with complex transformations
+$result = take($data)
+    ->filter($complexPredicate)
+    ->map($transformer)
+    ->chunk(100)
+    ->each($processor);
+```
+
+## Next Steps
+
+- [Method Index](../reference/method-index.md) - Quick reference for all methods
+- [Examples](../quickstart/examples.md) - More code examples
