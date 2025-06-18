@@ -150,8 +150,8 @@ $errors = [];
 take(new SplFileObject('data.csv'))
     ->map('str_getcsv')
     ->filter(function($row) use (&$errors) {
-        // Skip empty rows
-        if (empty($row) || count($row) < 3) {
+        // Skip invalid rows
+        if (!is_array($row) || count($row) < 3) {
             $errors[] = "Invalid row: " . json_encode($row);
             return false;
         }

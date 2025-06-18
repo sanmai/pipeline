@@ -283,7 +283,9 @@ $result = take(['', '0', 0, 'hello', null, false, []])
 
 // Remove empty arrays/strings
 $result = take(['', [], 'hello', [1, 2], null, ''])
-    ->filter(fn($x) => !empty($x))
+    ->filter(fn($x) => 
+        ($x !== '' && $x !== null && $x !== [])
+    )
     ->toList();
 // Result: ['hello', [1, 2]]
 ```

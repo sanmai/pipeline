@@ -46,7 +46,7 @@ class UserProcessor
      */
     public static function hasEmail(array $user): bool
     {
-        return !empty($user['email']);
+        return isset($user['email']) && $user['email'] !== '';
     }
 }
 ```
