@@ -82,7 +82,7 @@ $report = take($transactions)->fold(
 
 > **Best Practice: Use `strict: true` for Predictable Data Cleaning**
 > 
-> While `->filter()` is a convenient shortcut for removing all falsy values, this "magic" behavior can lead to unintended data loss by removing valid values like `0` or `''`.
+> While `->filter()` is a convenient shortcut for removing all falsy values, this "magic" behavior can lead to unintended data loss by removing valid values like `'0'` (string zero).
 > 
 > For predictable and safe data cleaning, the recommended approach is to use **`->filter(null, strict: true)`**. This makes your pipeline's behavior explicit, as it will *only* target `null` and `false` values for removal, preserving all other data.
 

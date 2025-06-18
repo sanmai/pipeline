@@ -99,6 +99,15 @@ $result = take($data)
 
 ### `skipWhile(callable $predicate)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Filtering |
+> | **Terminal?** | No |
+> | **When to Use** | To skip header/prefix elements until a condition is met |
+> | **Key Behavior** | Stops checking after first false, keeps all remaining elements |
+
 Skips elements from the beginning while the predicate returns true. Once false is returned, all remaining elements are kept.
 
 **Parameters:**

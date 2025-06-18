@@ -6,6 +6,15 @@ Top-level functions in the `Pipeline` namespace that provide convenient ways to 
 
 ### `map(?callable $func = null): Standard`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pipeline creation |
+> | **Terminal?** | No |
+> | **When to Use** | To create a pipeline from a generator function |
+> | **Key Behavior** | Empty if no callback; single value if callback doesn't yield |
+
 Creates a pipeline with an optional generator callback.
 
 **Parameters:**
@@ -61,6 +70,15 @@ $random = map(function() {
 
 ### `take(?iterable $input = null, iterable ...$inputs): Standard`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pipeline creation |
+> | **Terminal?** | No |
+> | **When to Use** | To create a pipeline from existing data (arrays, iterators, etc.) |
+> | **Key Behavior** | Concatenates multiple inputs sequentially |
+
 Creates a pipeline from one or more iterables.
 
 **Parameters:**
@@ -110,6 +128,15 @@ $combined = take(
 
 ### `fromArray(array $input): Standard`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pipeline creation |
+> | **Terminal?** | No |
+> | **When to Use** | When you have an array and want type safety |
+> | **Key Behavior** | Equivalent to take() but requires array type |
+
 Creates a pipeline specifically from an array.
 
 **Parameters:**
@@ -152,6 +179,15 @@ function processArray(array $data) {
 ```
 
 ### `fromValues(...$values): Standard`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pipeline creation |
+> | **Terminal?** | No |
+> | **When to Use** | To create a pipeline from individual arguments |
+> | **Key Behavior** | Each argument becomes a pipeline element |
 
 Creates a pipeline from individual values.
 
@@ -197,6 +233,15 @@ function buildPipeline(...$args) {
 ```
 
 ### `zip(iterable $base, iterable ...$inputs): Standard`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Pipeline creation |
+> | **Terminal?** | No |
+> | **When to Use** | To combine parallel arrays/iterables into tuples |
+> | **Key Behavior** | Shorter iterables are padded with null |
 
 Creates a pipeline by combining multiple iterables element by element.
 

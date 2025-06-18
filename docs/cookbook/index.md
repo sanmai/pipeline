@@ -55,7 +55,7 @@ $safelyCleaned = take($rawData)
 - This aligns with the library's philosophy of preferring explicit, predictable operations over implicit ones. See also the ["Prefer `fold()` for Aggregations"](../advanced/best-practices.md#4-prefer-fold-for-aggregations) best practice
 - If you *explicitly* want to remove all falsy values, the default `->filter()` is still the correct tool for the job
 - For more complex cleaning scenarios, combine with explicit predicates: `->filter(fn($v) => $v !== null && $v !== false && $v !== '')`
-- Related methods: [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`toList()`](../api/consumption.md#tolist)
+- **Related Methods:** [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard), [`toList()`](../api/collection.md#tolist)
 
 ---
 
@@ -90,7 +90,7 @@ take(new SplFileObject('large-dataset.csv'))
 - This pattern is memory-efficient and significantly faster than single-item inserts
 - Adjust batch size based on your database's capabilities and memory limits
 - For APIs, respect rate limits by adding delays between batches
-- Related methods: [`chunk()`](../api/chunking.md#chunkint-size), [`each()`](../api/iteration.md#eachcallable-func)
+- **Related Methods:** [`chunk()`](../api/transformation.md#chunkint-length-bool-preserve_keys--false), [`each()`](../api/collection.md#eachcallable-func-bool-discard--true), [`map()`](../api/transformation.md#mapcallable-func--null)
 
 ---
 
@@ -133,7 +133,7 @@ take($liveSensorStream)
 - This allows for memory-safe monitoring of infinite data streams
 - Adjust the threshold (3 σ) based on your sensitivity requirements
 - Consider using a sliding window for non-stationary data
-- Related methods: [`runningVariance()`](../api/statistics.md#runningvariancerunningvariance-variance--null), [`each()`](../api/iteration.md#eachcallable-func)
+- **Related Methods:** [`runningVariance()`](../api/utility.md#runningvariancerunningvariance-variance-callable-castfunc--null), [`each()`](../api/collection.md#eachcallable-func-bool-discard--true), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 
 ---
 
@@ -179,7 +179,7 @@ echo "Total Count: " . $overallStats->getCount() . "\n";
 - This uses a mathematically sound parallel algorithm to combine statistics
 - Each server can process its data independently (even on different machines)
 - The merge operation is O(1) regardless of dataset size
-- Related methods: [`finalVariance()`](../api/statistics.md#finalvariancebool-converttofloat--true), [`map()`](../api/transformation.md#mapcallable-func)
+- **Related Methods:** [`finalVariance()`](../api/aggregation.md#finalvariancecallable-castfunc--null-runningvariance-variance--null), [`RunningVariance`](../api/statistics.md#runningvariance-class), [`map()`](../api/transformation.md#mapcallable-func--null)
 
 ---
 
@@ -248,7 +248,7 @@ take(new SplFileObject('events.jsonl'))
 - Use JSONL format for streaming large JSON datasets
 - Always validate/sanitize data before processing
 - Log errors for debugging but don't let them stop the pipeline
-- Related methods: [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`map()`](../api/transformation.md#mapcallable-func), [`chunk()`](../api/chunking.md#chunkint-size)
+- **Related Methods:** [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`map()`](../api/transformation.md#mapcallable-func--null), [`chunk()`](../api/transformation.md#chunkint-length-bool-preserve_keys--false), [`SplFileObject`](https://www.php.net/manual/en/class.splfileobject.php)
 
 ---
 
@@ -299,7 +299,7 @@ echo "Processed: " . count($successes) . " successes, " . count($failures) . " f
 - This pattern allows the pipeline to continue even when individual items fail
 - Collect both successes and failures for comprehensive reporting
 - Consider retry logic for transient failures
-- Related methods: [`map()`](../api/transformation.md#mapcallable-func), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`toList()`](../api/consumption.md#tolist)
+- **Related Methods:** [`map()`](../api/transformation.md#mapcallable-func--null), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`toList()`](../api/collection.md#tolist), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 
 ---
 
@@ -364,7 +364,7 @@ function streamingDeduplicate($source, $keyFunc, $maxMemory = 10000) {
 - The `flip()` technique is fast but only works for scalar values
 - For objects/arrays, extract a unique key to check against
 - Consider using a Bloom filter for very large datasets
-- Related methods: [`flip()`](../api/reorganization.md#flip), [`values()`](../api/reorganization.md#values), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false)
+- **Related Methods:** [`flip()`](../api/collection.md#flip), [`values()`](../api/collection.md#values), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 
 ---
 
@@ -421,7 +421,7 @@ foreach ($errorLogs as $match) {
 - This pattern efficiently searches gigabytes of logs using minimal memory
 - Early termination prevents unnecessary processing
 - Can be extended with more complex pattern matching or ML-based classification
-- Related methods: [`map()`](../api/transformation.md#mapcallable-func), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`each()`](../api/iteration.md#eachcallable-func)
+- **Related Methods:** [`map()`](../api/transformation.md#mapcallable-func--null), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`each()`](../api/collection.md#eachcallable-func-bool-discard--true), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 
 ---
 
@@ -489,7 +489,7 @@ $firstPrimes = $primes->slice(0, 10)->toList();
 - Generators maintain state between yields, making them perfect for sequences
 - Always use limiting methods like `slice()` or `take()` with infinite sequences
 - Consider memory implications when storing results from infinite sequences
-- Related methods: [`map()`](../api/creation.md#mapcallable-func), [`slice()`](../api/selection.md#sliceint-offset-int-length--null), [`toList()`](../api/consumption.md#tolist)
+- **Related Methods:** [`map()`](../api/helpers.md#mapcallable-func--null-standard), [`slice()`](../api/transformation.md#sliceint-offset-int-length--null), [`toList()`](../api/collection.md#tolist)
 
 ---
 
@@ -559,9 +559,9 @@ $requestsByHour = take(new SplFileObject('access.log'))
 **Tips:**
 - Use regular expressions to parse structured log formats
 - Aggregate data using `fold()` with structured initial values
-- Consider using [`runningCount()`](../api/aggregation.md#runningcountint-count--null) for real-time counting
-- For very large files, process in chunks with [`chunk()`](../api/chunking.md#chunkint-size)
-- Related methods: [`fold()`](../api/aggregation.md#foldmixed-initial-callable-func--null), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`map()`](../api/transformation.md#mapcallable-func)
+- Consider using [`runningCount()`](../api/utility.md#runningcountint-count) for real-time counting
+- For very large files, process in chunks with [`chunk()`](../api/transformation.md#chunkint-length-bool-preserve_keys--false)
+- **Related Methods:** [`fold()`](../api/aggregation.md#foldinitial-callable-func--null), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`map()`](../api/transformation.md#mapcallable-func--null), [`SplFileObject`](https://www.php.net/manual/en/class.splfileobject.php)
 
 ---
 
@@ -643,10 +643,11 @@ $rollingStats = take($measurements)
 ```
 
 **Tips:**
-- [`tuples()`](../api/transformation.md#tuples) is perfect for position-aware calculations
+- [`tuples()`](../api/collection.md#tuples) is perfect for position-aware calculations
 - Adjust window size based on your data's characteristics
-- Consider using [`runningVariance()`](../api/statistics.md#runningvariancerunningvariance-variance--null) for streaming statistics
+- Consider using [`runningVariance()`](../api/utility.md#runningvariancerunningvariance-variance-callable-castfunc--null) for streaming statistics
 - For time-series data, consider grouping by time periods first
+- **Related Methods:** [`tuples()`](../api/collection.md#tuples), [`map()`](../api/transformation.md#mapcallable-func--null), [`toList()`](../api/collection.md#tolist), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 - Related methods: [`tuples()`](../api/transformation.md#tuples), [`map()`](../api/transformation.md#mapcallable-func), [`toList()`](../api/consumption.md#tolist)
 
 ---
