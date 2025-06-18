@@ -412,11 +412,19 @@ class UserPipeline {
     }
 }
 
-// Usage
-$admins = UserPipeline::activeUsers($users)
-    ->pipe(fn($p) => UserPipeline::withRole($p, 'admin'))
-    ->pipe(fn($p) => UserPipeline::sortByCreatedAt($p))
-    ->toList();
+// Usage - compose by chaining method results
+$pipeline = UserPipeline::activeUsers($users);
+$pipeline = UserPipeline::withRole($pipeline, 'admin');
+$pipeline = UserPipeline::sortByCreatedAt($pipeline);
+$admins = $pipeline->toList();
+
+// Or more concisely using temporary variables
+$admins = UserPipeline::sortByCreatedAt(
+    UserPipeline::withRole(
+        UserPipeline::activeUsers($users), 
+        'admin'
+    )
+)->toList();
 ```
 
 ### Pipeline Factories

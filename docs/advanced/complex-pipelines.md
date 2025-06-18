@@ -8,7 +8,7 @@ Advanced patterns and techniques for building sophisticated data processing pipe
 
 A key advantage of functional programming is composition. You can create reusable, testable components for your pipelines by encapsulating logic into invokable classes or callables. This makes your main pipeline chains cleaner, more readable, and easier to maintain.
 
-The intended pattern is not to use a special `pipe()` method, but to pass these reusable callables directly into standard methods like `map()`, `filter()`, and `cast()`.
+The recommended pattern is to pass reusable callables directly into standard methods like `map()`, `filter()`, and `cast()`.
 
 **Example: Creating a Reusable User Processor**
 
@@ -98,7 +98,7 @@ Result:
 * **Readability:** The main pipeline chain clearly expresses the business logic: filter active users, normalize their data, then ensure they have an email.
 * **Testability:** Each method in `UserProcessor` can be unit-tested in isolation, ensuring your transformations and filters are correct.
 * **Reusability:** The `UserProcessor` components can be reused in any pipeline across your application that deals with user data.
-* **No Magic:** This pattern uses the library's core `map` and `filter` methods, leveraging standard PHP features without needing a special `pipe()` method.
+* **No Magic:** This pattern uses the library's core `map` and `filter` methods, leveraging standard PHP features.
 
 ### Conditional Pipeline Building
 
