@@ -15,6 +15,61 @@ Transforms each element using a callback. Callbacks can return single values or 
 
 **Callback signature:** `function(mixed $value): mixed|Generator`
 
+**When to Use:**
+Use `map()` for any transformation, especially when your callback might return multiple values (by yielding from a generator). It's the most flexible transformation method.
+
+**Performance Notes:**
+- Processes elements one by one using a foreach loop
+- Handles generators specially, yielding from them
+- For simple 1-to-1 transformations on arrays, consider `cast()` for better performance
+
+**Comparison with `cast()`:**
+- `map()`: Handles generators specially by yielding from them, can expand one element to many
+- `cast()`: Optimized for arrays, always 1-to-1 transformation, no special generator handling
+
+### `map()` vs `cast()`: The Generator Gotcha
+
+A critical difference between `map()` and `cast()` is how they handle a callback that returns a `Generator`.
+
+- **`map()`** will **expand** the returned generator, yielding each of its values into the main pipeline. This is useful for one-to-many transformations.
+- **`cast()`** will treat the returned generator as a **single value**, placing the `Generator` object itself into the pipeline.
+
+Failing to choose the right method can lead to unexpected results.
+
+**Example: The Gotcha in Action**
+
+```php
+// Goal: Create a pipeline containing two Generator objects.
+
+// Using map() - This does NOT work as intended.
+$result = take(['a', 'b'])
+    ->map(function($letter) {
+        // This generator will be EXPANDED by map(), not kept as an object.
+        return (function() use ($letter) {
+            yield $letter;
+            yield strtoupper($letter);
+        })();
+    })
+    ->toList();
+
+// Incorrect Result: ['a', 'A', 'b', 'B'] - The generators were expanded!
+
+// Using cast() - This is the correct solution.
+$result = take(['a', 'b'])
+    ->cast(function($letter) {
+        // cast() treats the generator as a regular return value.
+        return (function() use ($letter) {
+            yield $letter;
+            yield strtoupper($letter);
+        })();
+    })
+    ->toList();
+
+// Correct Result: [Generator, Generator] - The generators are preserved as values.
+```
+
+**Use `cast()` when you need to transform elements into `Generator` objects themselves.** Use `map()` when you want to transform one element into many.
+
 **Examples:**
 
 ```php
@@ -68,6 +123,26 @@ Transforms each element using a callback that must return exactly one value. Unl
 **Returns:** $this (Pipeline\Standard instance)
 
 **Callback signature:** `function(mixed $value): mixed`
+
+**When to Use:**
+Use `cast()` for simple, 1-to-1 value transformations (like type casting with `'intval'` or property access), especially when your input is an array. It does not provide special handling for generator return values.
+
+**Performance Notes:**
+- Highly optimized for arrays using `array_map()` internally
+- Faster than `map()` for simple transformations on arrays
+- No special generator handling - treats generator returns as regular values
+
+**Why `cast()` Exists:**
+`cast()` was created to address specific needs that `map()` cannot handle due to its generator-expanding behavior:
+1. When you need to transform values into generator objects without expansion
+2. When you want guaranteed 1-to-1 transformation without surprises
+3. When working with arrays and want the performance benefit of `array_map()`
+
+**Comparison with `map()`:**
+- `cast()`: Array-optimized, always 1-to-1, no generator expansion
+- `map()`: More flexible, expands generators by yielding from them, can transform one element to many
+
+Both have predictable behavior - the key difference is that `map()` treats generator returns as a source of values to yield, while `cast()` treats them as regular return values.
 
 **Examples:**
 
@@ -147,14 +222,45 @@ $result = take([
 ->flatten()
 ->toList();
 // Result: [1, 2, 3, 4, 5, 6]
-
-// Multiple flatten for deep nesting
-$result = take([[[1]], [[2]], [[3]]])
-    ->flatten()  // First level
-    ->flatten()  // Second level
-    ->toList();
-// Result: [1, 2, 3]
 ```
+
+**Flattening Deeply Nested Structures**
+
+Since `flatten()` only reduces one level of nesting at a time, you may need to call it multiple times for deeper structures.
+
+```php
+$deeplyNested = [[[1]], [[2, 3]], [[4]]];
+
+$partiallyFlat = take($deeplyNested)
+    ->flatten()
+    ->toList();
+// Result: [[1], [2, 3], [4]]
+
+$fullyFlat = take($deeplyNested)
+    ->flatten() // First level
+    ->flatten() // Second level
+    ->toList();
+// Result: [1, 2, 3, 4]
+
+// For unknown depth, you can use a loop
+$veryDeep = [[[[[[1]]]]], [[[2]]], [[3, [4]]]];
+$pipeline = take($veryDeep);
+
+// Flatten until no more nesting (be careful with infinite structures!)
+while (true) {
+    $before = $pipeline->toList();
+    $pipeline = take($before)->flatten();
+    $after = $pipeline->toList();
+    
+    // If nothing changed, we're done
+    if ($before === $after) {
+        break;
+    }
+}
+// Result: [1, 2, 3, 4]
+```
+
+For structures with unknown or variable depth, see the [Recursive Flattening](../advanced/complex-pipelines.md#hierarchical-data-processing) pattern in the Complex Pipelines section for a more elegant recursive solution.
 
 ### `unpack(?callable $func = null)`
 

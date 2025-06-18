@@ -50,6 +50,32 @@ $count = take($data)->reduce(fn($c, $_) => $c + 1, 0);
 $min = take($values)->reduce(fn($min, $v) => $v < $min ? $v : $min);
 ```
 
+### 4. Prefer `fold()` for Aggregations
+
+While `reduce()` offers a quick shortcut for summation, **`fold()` is the recommended method for all aggregations.** By requiring an explicit initial value, `fold()` eliminates the "implicit magic" of `reduce()`, making your code more predictable, easier to debug, and less prone to type-related errors. This practice is especially important when the result of your aggregation is a different type (like an array) than the items being processed.
+
+```php
+// AVOID: Implicit initial value with reduce()
+$sum = take($numbers)->reduce(); // What's the starting value?
+$data = take($items)->reduce($buildArray); // Initial value is unclear
+
+// PREFER: Explicit initial value with fold()
+$sum = take($numbers)->fold(0); // Clear: starts from 0
+$data = take($items)->fold([], $buildArray); // Clear: starts with empty array
+
+// Type-safe aggregation with fold()
+$report = take($transactions)->fold(
+    ['total' => 0.0, 'count' => 0, 'by_type' => []],
+    function($report, $transaction) {
+        $report['total'] += $transaction['amount'];
+        $report['count']++;
+        $report['by_type'][$transaction['type']] = 
+            ($report['by_type'][$transaction['type']] ?? 0) + 1;
+        return $report;
+    }
+);
+```
+
 ## Data Source Best Practices
 
 ### Working with Arrays

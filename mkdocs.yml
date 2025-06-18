@@ -26,6 +26,7 @@ nav:
     - Installation: quickstart/installation.md
     - Basic Usage: quickstart/basic-usage.md
     - Examples: quickstart/examples.md
+  - Pipeline Cookbook: cookbook/index.md
   - API Reference:
     - Pipeline Creation: api/creation.md
     - Transformation Methods: api/transformation.md

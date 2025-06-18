@@ -16,6 +16,18 @@ Filters elements based on a predicate function. Without a callback, removes fals
 
 **Callback signature:** `function(mixed $value): bool`
 
+**When to Use:**
+Use `filter()` to remove unwanted elements. Without a callback, it's perfect for cleaning data by removing empty/null values. With a callback, it's your general-purpose filtering tool.
+
+**Performance Notes:**
+- Uses native `array_filter()` when input is an array (highly optimized)
+- Uses `CallbackFilterIterator` for iterators (memory efficient)
+- Preserves keys during filtering
+
+**Strict Mode Benefits:**
+- `strict: false` (default): Removes all falsy values (0, '', false, null, [])
+- `strict: true`: Only removes null and false, preserving 0, '', and empty arrays
+
 **Examples:**
 
 ```php

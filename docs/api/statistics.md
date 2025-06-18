@@ -27,6 +27,83 @@ $variance = new RunningVariance();
 $combined = new RunningVariance($stats1, $stats2, $stats3);
 ```
 
+### Merging Statistics for Parallel Processing
+
+The `RunningVariance` class supports combining statistics from multiple independent datasets using its parallel-safe merge algorithm (based on Chan et al.'s parallel algorithm). This is invoked when you pass existing `RunningVariance` instances to the constructor.
+
+**Why This Matters:**
+This feature enables true parallel processing patterns where different data sources can be analyzed independently and then combined for overall statistics. It's mathematically correct and preserves all statistical properties.
+
+**Use Cases:**
+- Combining statistics from multiple servers or data centers
+- Merging results from distributed processing jobs
+- Incremental statistics updates without reprocessing historical data
+- Time-windowed analysis where each window is processed separately
+
+**Example: Distributed Data Analysis**
+
+```php
+// Scenario: Analyze response times from multiple data centers
+$dataCenters = ['us-east', 'us-west', 'eu-central', 'asia-pacific'];
+$dcStats = [];
+
+// Step 1: Each data center calculates its own statistics (parallelizable)
+foreach ($dataCenters as $dc) {
+    $dcStats[$dc] = take(fetchLogsFromDataCenter($dc))
+        ->map(fn($log) => $log['response_time_ms'])
+        ->finalVariance();
+    
+    echo "$dc: Mean=" . round($dcStats[$dc]->getMean(), 2) . 
+         "ms, Count=" . $dcStats[$dc]->getCount() . "\n";
+}
+
+// Step 2: Combine all statistics for global view
+$globalStats = new RunningVariance(...array_values($dcStats));
+
+echo "\nGlobal Statistics:\n";
+echo "Total Requests: " . $globalStats->getCount() . "\n";
+echo "Average Response Time: " . round($globalStats->getMean(), 2) . "ms\n";
+echo "Standard Deviation: " . round($globalStats->getStandardDeviation(), 2) . "ms\n";
+echo "95th Percentile Range: " . 
+     round($globalStats->getMean() - 2 * $globalStats->getStandardDeviation(), 2) . 
+     " - " . 
+     round($globalStats->getMean() + 2 * $globalStats->getStandardDeviation(), 2) . 
+     "ms\n";
+
+// Step 3: Compare individual DCs to global average
+foreach ($dcStats as $dc => $stats) {
+    $deviation = abs($stats->getMean() - $globalStats->getMean());
+    $sigmas = $deviation / $globalStats->getStandardDeviation();
+    
+    if ($sigmas > 1) {
+        echo "WARNING: $dc deviates by " . round($sigmas, 1) . 
+             " standard deviations from global average\n";
+    }
+}
+```
+
+**Example: Incremental Updates**
+
+```php
+// Maintain running statistics that update daily
+$historicalStats = loadFromCache('historical_stats'); // Previous RunningVariance
+
+// Process today's data
+$todayStats = take(fetchTodayData())
+    ->map(fn($record) => $record['value'])
+    ->finalVariance();
+
+// Combine with historical data
+$updatedStats = new RunningVariance($historicalStats, $todayStats);
+
+// Save for tomorrow
+saveToCache('historical_stats', $updatedStats);
+
+echo "Historical avg: " . $historicalStats->getMean() . "\n";
+echo "Today's avg: " . $todayStats->getMean() . "\n";
+echo "New overall avg: " . $updatedStats->getMean() . "\n";
+```
+
 #### `observe(float $value): float`
 
 Records a new observation and updates statistics.

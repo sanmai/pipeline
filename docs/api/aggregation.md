@@ -6,7 +6,9 @@ Methods that reduce pipeline elements to single values. These are terminal opera
 
 ### `reduce(?callable $func = null, $initial = null)`
 
-Reduces elements to a single value using a callback. Defaults to summation.
+Reduces elements to a single value, acting as a convenient shortcut for `array_reduce`. It defaults to summation when no callback is provided.
+
+> **Note:** For greater clarity and type safety in your aggregations, it is highly recommended to use `fold()` instead, as it requires an explicit initial value.
 
 **Parameters:**
 - `$func` (?callable): Reduction function. If null, sums numeric values.
@@ -15,6 +17,19 @@ Reduces elements to a single value using a callback. Defaults to summation.
 **Returns:** mixed - The final reduced value
 
 **Callback signature:** `function(mixed $carry, mixed $item): mixed`
+
+**When to Use:**
+`reduce()` should be seen as a convenience shortcut, particularly for quick summation. Its implicit default initial value can make it less predictable than `fold()`. Use it only for simple cases where the implicit behavior is acceptable. For all other aggregations, use `fold()` for better clarity and type safety.
+
+**Performance Notes:**
+- Terminal operation - consumes the entire pipeline
+- Uses `array_reduce()` for arrays (optimized)
+- Memory efficient for large datasets (processes one element at a time)
+
+**Common Patterns:**
+- Building lookup tables: `reduce(fn($acc, $x) => [...$acc, $x['id'] => $x], [])`
+- Counting occurrences: `reduce(fn($counts, $x) => [...$counts, $x => ($counts[$x] ?? 0) + 1], [])`
+- Finding max with metadata: `reduce(fn($best, $x) => $x['score'] > ($best['score'] ?? 0) ? $x : $best)`
 
 **Examples:**
 
@@ -77,6 +92,65 @@ Like `reduce()` but requires an initial value. More predictable for type safety.
 **Returns:** mixed - The final reduced value (same type as $initial if consistent)
 
 **Callback signature:** `function(mixed $carry, mixed $item): mixed`
+
+## Choosing Between `fold()` and `reduce()`
+
+While both methods perform aggregations, they represent different design philosophies.
+
+**In general, prefer `fold()` over `reduce()` for maximum clarity and type safety.**
+
+### `fold($initial, ?callable $func = null)` (Recommended)
+
+`fold()` is the more robust and explicit of the two methods. It **requires** you to provide an `$initial` value. This removes ambiguity and prevents a class of subtle bugs, especially when the final aggregated type is different from the items in the pipeline (e.g., building an array from a stream of numbers). Because the starting value is always explicit, the behavior is predictable and type-safe.
+
+### `reduce(?callable $func = null, $initial = null)`
+
+`reduce()` should be seen as a convenience shortcut for PHP's `array_reduce`, particularly for the most common aggregation: summation. When called with no arguments, it defaults to summing numeric values. However, its use of an implicit, "magic" starting value (`null`) can make it less predictable than `fold()` in complex scenarios. Use it when you need a quick sum and the data is simple. For all other cases, `fold()` is the safer choice.
+
+```php
+// Quick summation with reduce() - acceptable for simple cases
+$sum = take([1, 2, 3])->reduce(); // Implicit initial value of 0
+
+// Better: Explicit initial value with fold()
+$sum = take([1, 2, 3])->fold(0); // Clear: we start from 0
+$product = take([1, 2, 3])->fold(1, fn($acc, $x) => $acc * $x); // Clear: we start from 1
+
+// Complex aggregations - always use fold()
+$stats = take($numbers)->fold(
+    ['sum' => 0, 'count' => 0, 'min' => INF, 'max' => -INF],
+    function($acc, $num) {
+        $acc['sum'] += $num;
+        $acc['count']++;
+        $acc['min'] = min($acc['min'], $num);
+        $acc['max'] = max($acc['max'], $num);
+        return $acc;
+    }
+);
+```
+
+**Example: Type Safety with fold()**
+
+```php
+// reduce() with implicit initial value - less type-safe
+$sum = take([1, 2, 3])->reduce(); // Initial value is 0 (inferred)
+
+// fold() with explicit initial value - more type-safe
+$sum = take([1, 2, 3])->fold(0); // Explicitly start with integer 0
+$product = take([1, 2, 3])->fold(1, fn($acc, $x) => $acc * $x); // Start with 1
+
+// Building different type - fold() is clearer
+$csv = take($records)
+    ->fold('', fn($csv, $record) => $csv . implode(',', $record) . "\n");
+// Initial value '' makes it clear we're building a string
+
+// Complex accumulator - fold() ensures correct structure
+$stats = take($numbers)
+    ->fold(['sum' => 0, 'count' => 0], function($acc, $num) {
+        $acc['sum'] += $num;
+        $acc['count']++;
+        return $acc;
+    });
+```
 
 **Examples:**
 
