@@ -6,40 +6,99 @@ Advanced patterns and techniques for building sophisticated data processing pipe
 
 ### Building Reusable Pipeline Components
 
-```php
-use function Pipeline\take;
-use function Pipeline\map;
+A key advantage of functional programming is composition. You can create reusable, testable components for your pipelines by encapsulating logic into invokable classes or callables. This makes your main pipeline chains cleaner, more readable, and easier to maintain.
 
-// Create reusable pipeline transformers
-class PipelineBuilders {
-    public static function normalizeText(): callable {
-        return fn($pipeline) => $pipeline
-            ->map('trim')
-            ->filter()  // Remove empty strings
-            ->map('strtolower')
-            ->map(fn($s) => preg_replace('/\s+/', ' ', $s));
+The intended pattern is not to use a special `pipe()` method, but to pass these reusable callables directly into standard methods like `map()`, `filter()`, and `cast()`.
+
+**Example: Creating a Reusable User Processor**
+
+Let's define a class with reusable logic for processing user data. Each public method will be a self-contained transformation or filter.
+
+```php
+namespace App\Pipeline\Components;
+
+use Pipeline\Standard;
+
+class UserProcessor
+{
+    /**
+     * A filter that keeps only active users.
+     */
+    public static function filterActive(array $user): bool
+    {
+        return ($user['active'] ?? false) === true;
     }
-    
-    public static function extractNumbers(): callable {
-        return fn($pipeline) => $pipeline
-            ->map(fn($text) => preg_match_all('/\d+\.?\d*/', $text, $matches) ? $matches[0] : [])
-            ->flatten()
-            ->map('floatval');
+
+    /**
+     * A transformation that normalizes user names and emails.
+     */
+    public static function normalize(array $user): array
+    {
+        return [
+            ...$user,
+            'name' => ucwords(strtolower(trim($user['name'] ?? ''))),
+            'email' => strtolower(trim($user['email'] ?? '')),
+        ];
     }
-    
-    public static function validateRange($min, $max): callable {
-        return fn($pipeline) => $pipeline
-            ->filter(fn($x) => $x >= $min && $x <= $max);
+
+    /**
+     * A validation step that ensures an email exists.
+     */
+    public static function hasEmail(array $user): bool
+    {
+        return !empty($user['email']);
     }
 }
-
-// Use composed pipelines
-$result = take($rawData)
-    ->pipe(PipelineBuilders::normalizeText())
-    ->pipe(PipelineBuilders::extractNumbers())
-    ->pipe(PipelineBuilders::validateRange(0, 100))
-    ->toList();
 ```
+
+Now, you can compose these reusable components into a clean, readable pipeline using the first-class callable syntax (`...`).
+
+```php
+use App\Pipeline\Components\UserProcessor;
+use function Pipeline\take;
+
+$rawUsers = [
+    ['name' => '  ALICE ', 'email' => 'ALICE@EXAMPLE.COM', 'active' => true],
+    ['name' => 'bob', 'email' => 'bob@example.com', 'active' => false], // Inactive
+    ['name' => 'CHARLIE', 'email' => '  charlie@example.com', 'active' => true],
+    ['name' => 'David', 'email' => null, 'active' => true], // No email
+];
+
+$processedUsers = take($rawUsers)
+    // Use the filterActive method as a callable
+    ->filter(UserProcessor::filterActive(...))
+    
+    // Use the normalize method as a callable
+    ->map(UserProcessor::normalize(...))
+    
+    // Use the hasEmail validator as a callable
+    ->filter(UserProcessor::hasEmail(...))
+    
+    ->toList();
+
+/*
+Result:
+[
+    [
+        'name' => 'Alice',
+        'email' => 'alice@example.com',
+        'active' => true,
+    ],
+    [
+        'name' => 'Charlie',
+        'email' => 'charlie@example.com',
+        'active' => true,
+    ],
+]
+*/
+```
+
+**Benefits of this Approach:**
+
+* **Readability:** The main pipeline chain clearly expresses the business logic: filter active users, normalize their data, then ensure they have an email.
+* **Testability:** Each method in `UserProcessor` can be unit-tested in isolation, ensuring your transformations and filters are correct.
+* **Reusability:** The `UserProcessor` components can be reused in any pipeline across your application that deals with user data.
+* **No Magic:** This pattern uses the library's core `map` and `filter` methods, leveraging standard PHP features without needing a special `pipe()` method.
 
 ### Conditional Pipeline Building
 
@@ -229,14 +288,16 @@ class SafeProcessor {
 }
 
 $processor = new SafeProcessor();
-$results = take($inputs)
-    ->pipe(fn($p) => $processor->safeTransform($p, function($item) {
-        // Potentially failing transformation
-        if (!isset($item['required_field'])) {
-            throw new \Exception('Missing required field');
-        }
-        return processItem($item);
-    }))
+$pipeline = take($inputs);
+$pipeline = $processor->safeTransform($pipeline, function($item) {
+    // Potentially failing transformation
+    if (!isset($item['required_field'])) {
+        throw new \Exception('Missing required field');
+    }
+    return processItem($item);
+});
+
+$results = $pipeline
     ->filter(fn($result) => $result['success'])
     ->map(fn($result) => $result['data'])
     ->toList();

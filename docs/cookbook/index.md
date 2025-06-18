@@ -112,11 +112,16 @@ $server3Stats = take(readServerLog('server3.log'))
     ->map(fn($line) => parseMetric($line))
     ->finalVariance();
 
-// Merge all statistics using Welford's parallel algorithm
-$overallStats = new RunningVariance();
-$overallStats->merge($server1Stats);
-$overallStats->merge($server2Stats);
-$overallStats->merge($server3Stats);
+// Merge all statistics using the constructor, which accepts multiple instances
+$overallStats = new RunningVariance(
+    $server1Stats,
+    $server2Stats,
+    $server3Stats
+);
+
+// Or using argument unpacking if you have an array of stats objects
+// $allStats = [$server1Stats, $server2Stats, $server3Stats];
+// $overallStats = new RunningVariance(...$allStats);
 
 echo "Overall Mean: " . $overallStats->getMean() . "\n";
 echo "Overall StdDev: " . $overallStats->getStandardDeviation() . "\n";

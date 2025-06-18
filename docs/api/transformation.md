@@ -6,6 +6,15 @@ Methods that transform elements flowing through the pipeline. All transformation
 
 ### `map(?callable $func = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | For any 1-to-1 or 1-to-many transformation |
+> | **Key Behavior** | Expands `Generator` objects returned by the callback |
+
 Transforms each element using a callback. Callbacks can return single values or yield multiple values using generators.
 
 **Parameters:**
@@ -29,7 +38,9 @@ Use `map()` for any transformation, especially when your callback might return m
 
 ### `map()` vs `cast()`: The Generator Gotcha
 
-A critical difference between `map()` and `cast()` is how they handle a callback that returns a `Generator`.
+> **Warning: The Generator Gotcha**
+> 
+> A critical difference between `map()` and `cast()` is how they handle a callback that returns a `Generator`. `map()` will **expand** the generator, while `cast()` will treat it as a **single value**. Use `cast()` when you need to create a pipeline of `Generator` objects.
 
 - **`map()`** will **expand** the returned generator, yielding each of its values into the main pipeline. This is useful for one-to-many transformations.
 - **`cast()`** will treat the returned generator as a **single value**, placing the `Generator` object itself into the pipeline.
@@ -114,6 +125,15 @@ $result = take([1, 2, 3])
 ```
 
 ### `cast(?callable $func = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | For simple 1-to-1 transformations, especially on arrays |
+> | **Key Behavior** | Treats generator returns as regular values (no expansion) |
 
 Transforms each element using a callback that must return exactly one value. Unlike `map()`, generator returns are not specially handled.
 
@@ -328,6 +348,15 @@ $result = take($data)
 
 ### `chunk(int $length, bool $preserve_keys = false)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **When to Use** | For batch processing or dividing data into manageable pieces |
+> | **Key Behavior** | Creates arrays of arrays, each containing up to `$length` items |
+
 Splits the pipeline into chunks of specified size.
 
 **Parameters:**
@@ -335,6 +364,8 @@ Splits the pipeline into chunks of specified size.
 - `$preserve_keys` (bool): Whether to preserve original keys (default: false)
 
 **Returns:** $this (Pipeline\Standard instance)
+
+> **See Also:** For a practical example, see the [Batch Processing recipe](../cookbook/index.md#batch-processing-databaseapi) in the Pipeline Cookbook.
 
 **Examples:**
 

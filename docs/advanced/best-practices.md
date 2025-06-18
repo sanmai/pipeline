@@ -52,7 +52,9 @@ $min = take($values)->reduce(fn($min, $v) => $v < $min ? $v : $min);
 
 ### 4. Prefer `fold()` for Aggregations
 
-While `reduce()` offers a quick shortcut for summation, **`fold()` is the recommended method for all aggregations.** By requiring an explicit initial value, `fold()` eliminates the "implicit magic" of `reduce()`, making your code more predictable, easier to debug, and less prone to type-related errors. This practice is especially important when the result of your aggregation is a different type (like an array) than the items being processed.
+> **Best Practice: Always Use `fold()` for Aggregations**
+> 
+> While `reduce()` offers a quick shortcut for summation, **`fold()` is the recommended method for all aggregations.** By requiring an explicit initial value, `fold()` eliminates the "implicit magic" of `reduce()`, making your code more predictable, easier to debug, and less prone to type-related errors.
 
 ```php
 // AVOID: Implicit initial value with reduce()

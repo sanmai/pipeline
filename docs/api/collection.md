@@ -360,6 +360,8 @@ Swaps keys and values.
 
 **Returns:** $this (Pipeline\Standard instance)
 
+> **See Also:** This method is key to the [Memory-Efficient Deduplication recipe](../cookbook/index.md#memory-efficient-deduplication) in the Pipeline Cookbook.
+
 **Examples:**
 
 ```php

@@ -6,6 +6,15 @@ Methods that reduce pipeline elements to single values. These are terminal opera
 
 ### `reduce(?callable $func = null, $initial = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Aggregation |
+> | **Terminal?** | **Yes** |
+> | **When to Use** | Quick summation only (prefer `fold()` for everything else) |
+> | **Key Behavior** | Implicit initial value can cause surprises |
+
 Reduces elements to a single value, acting as a convenient shortcut for `array_reduce`. It defaults to summation when no callback is provided.
 
 > **Note:** For greater clarity and type safety in your aggregations, it is highly recommended to use `fold()` instead, as it requires an explicit initial value.
@@ -82,6 +91,15 @@ $highest = take($data)
 ```
 
 ### `fold($initial, ?callable $func = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Aggregation |
+> | **Terminal?** | **Yes** |
+> | **When to Use** | **Recommended for all aggregations** due to type safety |
+> | **Key Behavior** | Requires explicit initial value, making it predictable |
 
 Like `reduce()` but requires an initial value. More predictable for type safety.
 

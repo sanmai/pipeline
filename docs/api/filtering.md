@@ -6,6 +6,15 @@ Methods for removing unwanted elements from the pipeline. All filtering methods 
 
 ### `filter(?callable $func = null, bool $strict = false)`
 
+> **Quick Reference**
+> 
+> | | |
+> |:---|:---|
+> | **Type** | Filtering |
+> | **Terminal?** | No |
+> | **When to Use** | To remove unwanted elements based on any condition |
+> | **Key Behavior** | Without callback, removes falsy values (configurable with `strict`) |
+
 Filters elements based on a predicate function. Without a callback, removes falsy values.
 
 **Parameters:**
