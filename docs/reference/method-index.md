@@ -82,6 +82,7 @@ Quick reference for all Pipeline methods and helper functions.
 
 | Method | Description | Returns |
 |--------|-------------|---------|
+| `pipe(callable $operation)` | Apply complex transformation | Pipeline |
 | `reservoir(int $size, ?callable $weightFunc = null)` | Random sampling | array |
 | `stream()` | Force lazy evaluation | Pipeline |
 | `getIterator()` | Get iterator (IteratorAggregate) | Traversable |

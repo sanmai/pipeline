@@ -40,6 +40,36 @@ $result = take($array)
     ->toList();
 ```
 
+### Batch vs Stream Processing on Arrays
+
+The pipeline library employs two distinct processing models for arrays, and choosing the right one is key to managing memory.
+
+* **Batch Processing (Default for Arrays):** By default, operations on arrays are optimized to run in batches using native PHP functions like `array_map` (for `cast()`) and `array_filter` (for `filter()`). This is very fast for small-to-medium arrays. However, each step creates a new intermediate array in memory.
+
+* **Stream Processing (After `stream()`):** Calling the `stream()` method converts the array into a `Generator`. This switches the processing model so that each element travels through the entire pipeline chain individually. This completely avoids the creation of large intermediate arrays, drastically reducing peak memory usage at the cost of a small performance overhead for the generator itself.
+
+**When to switch to `stream()`:**
+
+You should explicitly call `->stream()` on an array pipeline if you are performing memory-intensive transformations (like loading data for each item) or if the intermediate arrays created by `map()` or `filter()` would be too large for your available memory.
+
+```php
+// Example: Each user ID loads a full user object with related data
+$userIds = range(1, 10000);
+
+// WITHOUT stream() - Creates 10,000 user objects in memory at once
+$activeUsers = take($userIds)
+    ->map(fn($id) => User::loadWithRelations($id))  // 10,000 objects created here!
+    ->filter(fn($user) => $user->isActive())        // Then filtered
+    ->toList();
+
+// WITH stream() - Loads and processes one user at a time
+$activeUsers = take($userIds)
+    ->stream()  // Switch to element-by-element processing
+    ->map(fn($id) => User::loadWithRelations($id))  // Only 1 user in memory at a time
+    ->filter(fn($user) => $user->isActive())        // Filtered immediately
+    ->toList();
+```
+
 ## Lazy vs Eager Showdown
 
 Understanding the difference between lazy and eager evaluation is crucial for performance. Here's a concrete demonstration:

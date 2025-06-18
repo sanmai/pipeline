@@ -154,32 +154,84 @@ $iterator = take()->getIterator();
 
 ### `stream()`
 
-Forces the pipeline to use lazy evaluation via generators.
+Converts the pipeline's internal data source (typically an array) into a lazy, element-by-element stream, forcing all subsequent operations to process data one item at a time.
 
 **Returns:** $this (Pipeline\Standard instance)
+
+**When to Use:**
+
+The primary purpose of `stream()` is to switch from the library's optimized **batch processing** for arrays to a **streaming model**. This is crucial for managing memory when you have a large array and apply transformations that would otherwise create large, intermediate arrays.
+
+### How `stream()` Changes Behavior
+
+Understanding this is key to performance tuning.
+
+* **Without `stream()` (Array Batch Processing):** When the pipeline holds an array, each method is optimized to process the *entire array at once* before passing it to the next step. For example, `->map(...)->filter(...)` will first create a **new, full array** with all the mapped values, and only then will `filter()` iterate over that new array to produce the final result. This can lead to high peak memory usage.
+
+* **With `stream()` (Element-at-a-Time Streaming):** After calling `stream()`, each element is pulled through the *entire chain of operations* individually. A single element is mapped, then immediately filtered, and only then is the next element from the source array processed. This avoids the creation of large intermediate arrays.
+
+**Example: Managing Intermediate Memory**
+
+```php
+$largeArray = range(1, 100000);
+
+// --- Scenario 1: WITHOUT stream() ---
+// Creates a full intermediate array. Peak memory is higher.
+$result = take($largeArray)
+    // Step 1: map() creates a NEW array of 100,000 strings in memory.
+    ->map(fn($id) => "user_id_{$id}")
+    // Step 2: filter() processes that new 100,000-item array.
+    ->filter(fn($user) => substr($user, -1) === '5')
+    ->toList();
+
+// --- Scenario 2: WITH stream() ---
+// Processes one element at a time. Peak memory is significantly lower.
+$result = take($largeArray)
+    ->stream() // Switch to one-by-one processing.
+    // Now, for each number:
+    // 1. One element (e.g., 15) is mapped to "user_id_15".
+    // 2. That single string is immediately passed to filter().
+    // 3. The process repeats for the next number. No large intermediate array is ever created.
+    ->map(fn($id) => "user_id_{$id}")
+    ->filter(fn($user) => substr($user, -1) === '5')
+    ->toList();
+```
+
+**Performance Trade-offs:**
+
+- **Memory**: `stream()` significantly reduces peak memory usage by avoiding intermediate arrays
+- **Speed**: Batch processing (without `stream()`) is typically faster for small-to-medium arrays
+- **Best Practice**: Use `stream()` when memory is a concern or when transformations are expensive
 
 **Examples:**
 
 ```php
-// Force streaming mode
-$result = take($data)
-    ->stream()  // Ensures generator-based processing
-    ->map(fn($x) => $x * 2)
-    ->filter(fn($x) => $x > 10)
+// Force streaming mode for memory efficiency
+$result = take($largeArray)
+    ->stream()  // Process element-by-element
+    ->map(fn($x) => expensiveTransform($x))
+    ->filter(fn($x) => $x > threshold())
     ->toList();
 
-// Useful for large datasets
-take(new SplFileObject('10gb-file.log'))
-    ->stream()
-    ->filter(fn($line) => contains($line, 'ERROR'))
-    ->each(fn($line) => processError($line));
+// Useful when transformations pull additional data
+take($userIds)
+    ->stream()  // Avoid loading all user data at once
+    ->map(fn($id) => fetchUserData($id))  // This might load lots of data
+    ->filter(fn($user) => $user->isActive())
+    ->each(fn($user) => processUser($user));
 
-// Convert array to generator
+// Convert array to generator for controlled processing
 $streamed = take([1, 2, 3, 4, 5])
     ->stream()  // Now uses generator internally
     ->map(fn($x) => expensiveOperation($x));
 // Computation deferred until iteration
 ```
+
+**When NOT to use `stream()`:**
+
+- Small arrays where performance matters more than memory
+- Simple transformations that don't create large intermediate values
+- When the source is already a generator or lazy iterator
 
 ## Element Iteration
 

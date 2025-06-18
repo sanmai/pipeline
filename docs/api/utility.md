@@ -220,6 +220,109 @@ take($sensorReadings)
 
 ## Special Operations
 
+### `pipe(callable $operation)`
+
+Applies a complex, multi-step operation to the entire pipeline instance. This is useful for grouping reusable sets of pipeline transformations into a single callable.
+
+**Parameters:**
+- `$operation` (callable): A function that receives the pipeline instance as its only argument and must return a pipeline instance.
+
+**Returns:** $this (Pipeline\Standard instance)
+
+**Callback signature:** `function(Pipeline\Standard $pipeline): Pipeline\Standard`
+
+**When to Use:**
+Use `pipe()` when you want to:
+- Apply a pre-defined set of transformations
+- Create reusable pipeline components
+- Compose complex operations from simpler ones
+- Keep your main pipeline chain readable
+
+**Examples:**
+
+```php
+// Define reusable pipeline operations
+$normalizeText = function($pipeline) {
+    return $pipeline
+        ->map('trim')
+        ->filter()  // Remove empty strings
+        ->map('strtolower');
+};
+
+$extractEmails = function($pipeline) {
+    return $pipeline
+        ->map(function($text) {
+            preg_match_all('/[\w\.-]+@[\w\.-]+\.\w+/', $text, $matches);
+            yield from $matches[0];
+        })
+        ->filter(fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL));
+};
+
+// Apply operations using pipe()
+$emails = take($textLines)
+    ->pipe($normalizeText)
+    ->pipe($extractEmails)
+    ->toList();
+
+// Compose multiple operations
+$processUsers = function($pipeline) {
+    return $pipeline
+        ->filter(fn($user) => $user['active'] ?? false)
+        ->map(fn($user) => [
+            'id' => $user['id'],
+            'name' => ucfirst(strtolower($user['name'])),
+            'email' => strtolower($user['email'])
+        ])
+        ->filter(fn($user) => filter_var($user['email'], FILTER_VALIDATE_EMAIL));
+};
+
+$validUsers = take($rawUsers)
+    ->pipe($processUsers)
+    ->toList();
+
+// Pipeline factory pattern
+class PipelineTransformers {
+    public static function sanitizeHtml(): callable {
+        return fn($pipeline) => $pipeline
+            ->map('strip_tags')
+            ->map('html_entity_decode')
+            ->map('trim')
+            ->filter();
+    }
+    
+    public static function parseNumbers(): callable {
+        return fn($pipeline) => $pipeline
+            ->map(fn($text) => preg_replace('/[^0-9.-]/', '', $text))
+            ->filter('is_numeric')
+            ->map('floatval');
+    }
+}
+
+// Use with factory methods
+$numbers = take($htmlContent)
+    ->pipe(PipelineTransformers::sanitizeHtml())
+    ->pipe(PipelineTransformers::parseNumbers())
+    ->toList();
+
+// Conditional pipeline composition
+$processData = function($pipeline) use ($config) {
+    if ($config['normalize']) {
+        $pipeline = $pipeline->pipe($normalizeText);
+    }
+    if ($config['validate']) {
+        $pipeline = $pipeline->filter($validator);
+    }
+    if ($config['transform']) {
+        $pipeline = $pipeline->map($transformer);
+    }
+    return $pipeline;
+};
+
+$result = take($data)
+    ->pipe($processData)
+    ->toList();
+```
+
 ### `skipWhile(callable $predicate)`
 
 Skips elements from the beginning while predicate is true.
