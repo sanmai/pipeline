@@ -514,7 +514,7 @@ foreach ($items as $item) {
 
 // GOOD: Create lookup once
 $lookup = take($data)
-    ->reduce(fn($acc, $x) => [...$acc, $x['id'] => $x], []);
+    ->fold([], fn($acc, $x) => [...$acc, $x['id'] => $x]);
 foreach ($items as $item) {
     $result = $lookup[$item['ref_id']] ?? null;
 }

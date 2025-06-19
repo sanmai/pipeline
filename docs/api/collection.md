@@ -480,7 +480,7 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4])
 $result = take(['a' => 1, 'b' => 2])
     ->tuples()
     ->map(fn($tuple) => [$tuple[0] . '_key', $tuple[1] * 10])
-    ->reduce(fn($acc, $tuple) => [...$acc, $tuple[0] => $tuple[1]], []);
+    ->fold([], fn($acc, $tuple) => [...$acc, $tuple[0] => $tuple[1]]);
 // Result: ['a_key' => 10, 'b_key' => 20]
 ```
 

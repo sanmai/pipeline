@@ -287,7 +287,7 @@ $result = zip(
 $keys = ['name', 'age', 'city'];
 $values = ['Alice', 30, 'NYC'];
 $record = zip($keys, $values)
-    ->reduce(fn($acc, $pair) => [...$acc, $pair[0] => $pair[1]], []);
+    ->fold([], fn($acc, $pair) => [...$acc, $pair[0] => $pair[1]]);
 // Result: ['name' => 'Alice', 'age' => 30, 'city' => 'NYC']
 
 // Parallel iteration

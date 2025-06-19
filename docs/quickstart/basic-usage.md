@@ -184,12 +184,12 @@ $sum = take([1, 2, 3, 4, 5])->reduce();
 
 // Custom reducer
 $product = take([1, 2, 3, 4, 5])
-    ->reduce(fn($carry, $item) => $carry * $item, 1);
+    ->fold(1, fn($carry, $item) => $carry * $item);
 // Result: 120
 
 // String concatenation
 $string = take(['Hello', ' ', 'World'])
-    ->reduce(fn($carry, $item) => $carry . $item, '');
+    ->fold('', fn($carry, $item) => $carry . $item);
 // Result: 'Hello World'
 ```
 

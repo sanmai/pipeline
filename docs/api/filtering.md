@@ -184,10 +184,10 @@ $users = [
     ['id' => 1, 'name' => 'Alice'],  // Duplicate
 ];
 $unique = take($users)
-    ->reduce(function($carry, $user) {
+    ->fold([], function($carry, $user) {
         $carry[$user['id']] = $user;
         return $carry;
-    }, []);
+    });
 // Result: [1 => ['id' => 1, 'name' => 'Alice'], 2 => ['id' => 2, 'name' => 'Bob']]
 ```
 
