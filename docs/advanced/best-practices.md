@@ -4,7 +4,37 @@ Guidelines and recommendations for using the Pipeline library effectively.
 
 ## General Principles
 
-### 1. Prefer Lazy Evaluation
+### 1. Think in Streams, Not Arrays (The Golden Rule)
+
+This library is fundamentally designed for **streaming, lazy data processing**. Its core strength is handling large datasets with minimal memory.
+
+**Always prefer iterators and generators (`new SplFileObject(...)`, `function() { yield ... }`) as your starting data source.**
+
+The internal array optimizations are a secondary convenience for small-scale tasks. Do not rely on them for serious data processing. To write robust, memory-safe, and scalable code with this library, always think in terms of streams. If you must start with a large array, immediately use `->stream()` to switch to the recommended lazy processing model.
+
+```php
+// EXCELLENT: Start with a streaming source
+$result = take(new SplFileObject('users.csv'))
+    ->map('str_getcsv')
+    ->filter(fn($row) => $row[2] === 'active')
+    ->map(fn($row) => processUser($row))
+    ->toList();
+
+// GOOD: Convert array to stream for safety
+$result = take($millionUsers)
+    ->stream()  // Convert to generator immediately
+    ->filter(fn($user) => $user['active'])
+    ->map(fn($user) => enrichUser($user))
+    ->toList();
+
+// RISKY: Relying on array optimizations
+$result = take($millionUsers)
+    ->filter(fn($user) => $user['active'])  // Creates 500k element array!
+    ->map(fn($user) => enrichUser($user))    // Another 500k element array!
+    ->toList();
+```
+
+### 2. Prefer Lazy Evaluation
 
 ```php
 // GOOD: Process only what's needed
@@ -21,7 +51,7 @@ $result = take($lines)
     ->toList();
 ```
 
-### 2. Chain Operations
+### 3. Chain Operations
 
 ```php
 // GOOD: Single pipeline chain
@@ -37,7 +67,7 @@ $mapped = take($filtered)->map($transformer)->toList();
 $result = take($mapped)->slice(0, 100)->toList();
 ```
 
-### 3. Use Appropriate Methods
+### 4. Use Appropriate Methods
 
 ```php
 // GOOD: Use specialized methods
@@ -50,7 +80,7 @@ $count = take($data)->reduce(fn($c, $_) => $c + 1, 0);
 $min = take($values)->reduce(fn($min, $v) => $v < $min ? $v : $min);
 ```
 
-### 4. Prefer `fold()` for Aggregations
+### 5. Prefer `fold()` for Aggregations
 
 > **Best Practice: Always Use `fold()` for Aggregations**
 > 
@@ -78,7 +108,7 @@ $report = take($transactions)->fold(
 );
 ```
 
-### 5. Use Strict Filtering for Data Cleaning
+### 6. Use Strict Filtering for Data Cleaning
 
 > **Best Practice: Use `strict: true` for Predictable Data Cleaning**
 > 

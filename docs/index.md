@@ -14,18 +14,26 @@
 
 ## Core Concepts
 
+### The Streaming-First Principle
+
+This library is built on the principle of **lazy evaluation** using PHP generators. This allows you to process datasets of any size—from small arrays to multi-gigabyte files or even infinite data streams—with minimal and predictable memory usage.
+
+**The primary and recommended way to use this library is with iterable, streaming data sources like `SplFileObject` or custom generators.**
+
+While the library includes convenience optimizations for small in-memory arrays, these should not be considered the primary mode of operation. The true power and memory safety of the library are unlocked when you adopt a "streaming-first" mindset.
+
 ### Pipeline Object
-The central `Pipeline\Standard` class represents a data processing pipeline. All methods modify and return the same instance (as Generators are mutable).
+The central `Pipeline\Standard` class represents a data processing pipeline. All methods modify and return the same instance (mutable design pattern).
 
-### Lazy vs Eager Evaluation
+### The Hybrid Execution Model
 
-The library uses a sophisticated hybrid execution model that depends on both your data source AND the specific methods you use:
+Based on the streaming-first principle, the library uses a hybrid execution model:
 
-- **Array-Optimized Methods**: A few methods (`filter()`, `cast()`, `slice()`, `chunk()`) have special optimizations. When operating on arrays, they execute eagerly using native PHP functions for speed, creating intermediate arrays.
+- **Streaming/Lazy (Recommended):** When the source is an iterator or generator, every operation is lazy. Data is "pulled" through the entire pipeline chain one element at a time when a terminal method (like `toList()` or `each()`) is called. This is the most memory-efficient approach.
 
-- **Always-Lazy Methods**: Most methods (`map()`, `flatten()`, `zip()`, etc.) are always lazy, using generators even when the source is an array. They process items one-by-one only when a terminal operation requests them.
+- **Array-Optimized (For Convenience):** When the source is an array, a few specific methods (`filter()`, `cast()`, `chunk()`, `slice()`) have an eager "fast path" that operates on the entire array at once. This can be faster for small arrays but should be used with caution, as it can create large intermediate arrays in memory. All other methods (like `map()`) remain lazy even with array input.
 
-- **The `stream()` Method**: Forces all subsequent operations to use lazy evaluation, preventing array-optimized methods from creating intermediate arrays. Essential for memory management with large datasets.
+- **The `stream()` Method**: Converts arrays to generators, forcing all subsequent operations to use lazy evaluation. Essential for memory safety when processing large arrays.
 
 ### Method Categories
 
