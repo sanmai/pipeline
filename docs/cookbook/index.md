@@ -38,15 +38,15 @@ $rawData = [
 ];
 
 // --- The Aggressive Way (can lead to data loss) ---
-$aggressivelyCleaned = take($rawData)
-    ->filter() // Default behavior removes ALL falsy values
-    ->toList();
+$aggressivelyCleaned = take($rawData)  // Array input -> EAGER "push" execution
+    ->filter() // Immediately creates new array without falsy values
+    ->toList(); // Simply returns the already-filtered array
 // Result: [1, 'hello', true] - DANGEROUS! Lost 0, '', '0', and []
 
 // --- The Safe & Predictable Way (Recommended) ---
-$safelyCleaned = take($rawData)
-    ->filter(null, strict: true) // Only removes `null` and `false`
-    ->toList();
+$safelyCleaned = take($rawData)  // Array input -> EAGER "push" execution
+    ->filter(null, strict: true) // Immediately creates new array without null/false
+    ->toList(); // Simply returns the already-filtered array
 // Result: [1, 'hello', 0, '', '0', true, []] - Correct and safe
 ```
 
@@ -195,9 +195,9 @@ echo "Total Count: " . $overallStats->getCount() . "\n";
 $processed = 0;
 $errors = [];
 
-take(new SplFileObject('data.csv'))
-    ->map('str_getcsv')
-    ->filter(function($row) use (&$errors) {
+take(new SplFileObject('data.csv'))  // Starts with an iterator -> LAZY "pull" execution
+    ->map('str_getcsv')               // Each line is parsed one-by-one as needed
+    ->filter(function($row) use (&$errors) {  // Each row filtered individually
         // Skip invalid rows
         if (!is_array($row) || count($row) < 3) {
             $errors[] = "Invalid row: " . json_encode($row);
@@ -205,7 +205,7 @@ take(new SplFileObject('data.csv'))
         }
         return true;
     })
-    ->map(function($row) {
+    ->map(function($row) {            // Transform happens per row, not in batch
         // Transform CSV row to structured data
         return [
             'id' => $row[0],
@@ -214,8 +214,8 @@ take(new SplFileObject('data.csv'))
             'processed_at' => date('Y-m-d H:i:s')
         ];
     })
-    ->chunk(500)  // Process in batches
-    ->each(function($batch) use (&$processed) {
+    ->chunk(500)  // Accumulates rows into batches of 500
+    ->each(function($batch) use (&$processed) {  // Terminal operation - pulls data through chain
         saveToDatabase($batch);
         $processed += count($batch);
         echo "Processed: $processed records\n";

@@ -18,9 +18,12 @@
 The central `Pipeline\Standard` class represents a data processing pipeline. All methods modify and return the same instance (as Generators are mutable).
 
 ### Lazy vs Eager Evaluation
-- **Lazy**: Operations using generators execute only when results are consumed
-- **Eager**: Operations on arrays execute immediately
-- **Hybrid**: Pipeline automatically optimizes between array and generator operations
+
+The library uses a hybrid approach and automatically chooses the best execution model based on your data source:
+
+- **Lazy/Streaming "Pull" Model (for Generators & Iterators)**: The default for file handles and generators. No work is done until a terminal method like `toList()` or `each()` is called. The terminal method **"pulls"** each item through the *entire* pipeline chain, one by one. This is extremely memory-efficient.
+
+- **Eager/Batch "Push" Model (for Arrays)**: The default for arrays, optimized for speed. Each operation (like `map()` or `filter()`) runs immediately on the *entire* array and **"pushes"** a new intermediate array to the next step. A terminal method like `toList()` at the end simply returns the final, already-computed array.
 
 ### Method Categories
 

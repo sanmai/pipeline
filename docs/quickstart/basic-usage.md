@@ -221,10 +221,10 @@ $errorCount = take(new SplFileObject('app.log'))
     ->count();
 
 // Process CSV file
-$data = take(new SplFileObject('data.csv'))
+$data = take(new SplFileObject('data.csv'))  // Starts with a lazy iterator
     ->map('str_getcsv')
     ->filter(fn($row) => count($row) === 3)  // Valid rows only
-    ->toList();
+    ->toList();  // toList() "pulls" each line through the chain to produce the final array
 ```
 
 ### Pagination Pattern

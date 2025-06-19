@@ -25,16 +25,20 @@ $result = take($lines)
 
 ### Array vs Generator Performance
 
+- **Array (Eager Push Model):** When the pipeline holds an array, operations like `filter()` are optimized with `array_filter()`. This is fast but operates on the whole array at once, creating intermediate arrays at each step.
+- **Generator (Lazy Pull Model):** When the pipeline holds a generator, items are pulled through the entire chain one by one, which is essential for large datasets.
+- **`stream()`:** Use `->stream()` to explicitly switch an array-based pipeline from the eager "push" model to the lazy "pull" model to conserve memory.
+
 ```php
-// Array operations are optimized
+// Array operations are optimized (push model)
 $result = take($array)
     ->filter($predicate)  // Uses array_filter internally
     ->map($transformer)   // Uses array_map for cast()
     ->toList();
 
-// Force generator for memory efficiency
+// Force generator for memory efficiency (pull model)
 $result = take($array)
-    ->stream()  // Convert to generator
+    ->stream()  // Convert to generator - switch to pull model
     ->filter($predicate)
     ->map($transformer)
     ->toList();
@@ -225,6 +229,103 @@ function slidingWindow($data, $windowSize) {
         });
 }
 ```
+
+## The Two Execution Models: Push vs Pull
+
+The Pipeline library has two execution models. Understanding which one is active is the key to mastering performance and memory management.
+
+### 1. The Eager "Push" Model (For Arrays)
+
+When you start a pipeline with `take($myArray)`, each method call executes **immediately and completely** on the entire array before the next method is called.
+
+**Execution Flow:**
+1. `take($array)`: The pipeline holds the initial array
+2. `->map()`: Creates a **new intermediate array** containing all mapped results. This array is "pushed" to the next step
+3. `->filter()`: Creates **another new intermediate array** with the filtered results
+4. `->toList()`: Does no processing. It simply returns the final array that was already computed by the last operation
+
+**Use this model for:** Speed on small to medium-sized arrays  
+**Beware of:** High peak memory usage, as intermediate arrays are created
+
+```php
+// EAGER "PUSH" MODEL
+$result = take([1, 2, 3, 4])      // -> [1, 2, 3, 4]
+    ->map(fn($n) => $n * 2)        // -> immediately computes and stores [2, 4, 6, 8]
+    ->filter(fn($n) => $n > 5)     // -> immediately computes and stores [6, 8]
+    ->toList();                    // -> simply returns the final [6, 8]
+
+// Memory footprint: 3 arrays in memory at peak (original + 2 intermediates)
+```
+
+### 2. The Lazy "Pull" Model (For Iterators & Generators)
+
+When you start a pipeline with `take(new SplFileObject(...))` or a generator, **no work is done** until you call a terminal method. The terminal method "pulls" items through the chain one at a time.
+
+**Execution Flow:**
+1. `take($iterator)`: The pipeline holds the iterator, but it is untouched
+2. `->map()`: The map logic is stored but not executed
+3. `->filter()`: The filter logic is stored but not executed
+4. `->toList()`: **Execution begins!**
+   - It asks the filter for an item
+   - The filter asks the map for an item
+   - The map asks the source iterator for an item (e.g., `1`)
+   - The map transforms it (`2`) and passes it to the filter
+   - The filter checks it (`2 > 5` is false) and asks the map for the *next* item
+   - This repeats, one element at a time, until the chain is complete
+
+**Use this model for:** Large or infinite datasets, file processing, and memory-critical operations
+
+```php
+// LAZY "PULL" MODEL
+$generator = (function() { 
+    yield 1; yield 2; yield 3; yield 4; 
+})();
+
+$result = take($generator)         // -> Holds the generator, nothing happens
+    ->map(fn($n) => $n * 2)        // -> Stores the map logic
+    ->filter(fn($n) => $n > 5)     // -> Stores the filter logic
+    ->toList();                    // -> Execution starts, pulling items one-by-one
+
+// Memory footprint: Only current item in memory, no intermediate arrays
+```
+
+### Switching Models with `->stream()`
+
+You can force the lazy "pull" model on an array by inserting `->stream()` into the chain:
+
+```php
+// Original array - would use eager model
+$result = take([1, 2, 3, 4])
+    ->stream()                     // Switch from "push" to "pull" model
+    ->map(fn($n) => $n * 2)        // Now processes one item at a time
+    ->filter(fn($n) => $n > 5)     // No intermediate arrays created
+    ->toList();
+
+// Practical example: Processing large array with memory constraints
+$users = loadMillionUsers();      // Large array in memory
+
+// Without stream() - creates multiple large intermediate arrays
+$active = take($users)
+    ->filter(fn($u) => $u['active'])    // New array with ~500k users
+    ->map(fn($u) => enrichUser($u))      // Another array with ~500k users
+    ->toList();                          // Peak memory: 3x the original array
+
+// With stream() - processes one user at a time
+$active = take($users)
+    ->stream()                           // Convert to pull model
+    ->filter(fn($u) => $u['active'])     // No intermediate array
+    ->map(fn($u) => enrichUser($u))      // No intermediate array  
+    ->toList();                          // Peak memory: 1x original + current item
+```
+
+### Performance Trade-offs
+
+| Model | Speed | Memory | Best For |
+|-------|-------|---------|----------|
+| Push (Arrays) | Fast | High | Small-medium datasets where speed matters |
+| Pull (Generators) | Slower | Minimal | Large datasets, streaming, memory constraints |
+
+The overhead of the pull model is typically 20-50% slower than push for pure CPU-bound operations, but this is often negligible compared to I/O operations or when memory constraints would cause swapping.
 
 ## Operation Optimization
 
