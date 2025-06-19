@@ -15,7 +15,7 @@
 ## Core Concepts
 
 ### Pipeline Object
-The central `Pipeline\Standard` class represents a data processing pipeline. All methods modify and return the same instance (mutable design pattern).
+The central `Pipeline\Standard` class represents a data processing pipeline. All methods modify and return the same instance (as Generators are mutable).
 
 ### Lazy vs Eager Evaluation
 - **Lazy**: Operations using generators execute only when results are consumed
