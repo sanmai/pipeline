@@ -38,14 +38,14 @@ $rawData = [
 ];
 
 // --- The Aggressive Way (can lead to data loss) ---
-$aggressivelyCleaned = take($rawData)  // Array input -> EAGER "push" execution
-    ->filter() // Immediately creates new array without falsy values
+$aggressivelyCleaned = take($rawData)  // Array input
+    ->filter() // EAGER: array_filter() creates new array without falsy values
     ->toList(); // Simply returns the already-filtered array
 // Result: [1, 'hello', true] - DANGEROUS! Lost 0, '', '0', and []
 
 // --- The Safe & Predictable Way (Recommended) ---
-$safelyCleaned = take($rawData)  // Array input -> EAGER "push" execution
-    ->filter(null, strict: true) // Immediately creates new array without null/false
+$safelyCleaned = take($rawData)  // Array input
+    ->filter(null, strict: true) // EAGER: array_filter() creates new array without null/false
     ->toList(); // Simply returns the already-filtered array
 // Result: [1, 'hello', 0, '', '0', true, []] - Correct and safe
 ```
@@ -55,6 +55,7 @@ $safelyCleaned = take($rawData)  // Array input -> EAGER "push" execution
 - This aligns with the library's philosophy of preferring explicit, predictable operations over implicit ones. See also the ["Prefer `fold()` for Aggregations"](../advanced/best-practices.md#4-prefer-fold-for-aggregations) best practice
 - If you *explicitly* want to remove all falsy values, the default `->filter()` is still the correct tool for the job
 - For more complex cleaning scenarios, combine with explicit predicates: `->filter(fn($v) => $v !== null && $v !== false && $v !== '')`
+- **Performance Note:** Because this recipe starts with an array and uses `->filter()`, the filtering step will be performed eagerly using `array_filter()`. For very large source arrays, add `->stream()` before the filter to ensure memory safety
 - **Related Methods:** [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard), [`toList()`](../api/collection.md#tolist)
 
 ---
@@ -195,9 +196,9 @@ echo "Total Count: " . $overallStats->getCount() . "\n";
 $processed = 0;
 $errors = [];
 
-take(new SplFileObject('data.csv'))  // Starts with an iterator -> LAZY "pull" execution
-    ->map('str_getcsv')               // Each line is parsed one-by-one as needed
-    ->filter(function($row) use (&$errors) {  // Each row filtered individually
+take(new SplFileObject('data.csv'))  // Starts with an iterator (lazy source)
+    ->map('str_getcsv')               // LAZY: map() always uses generators
+    ->filter(function($row) use (&$errors) {  // LAZY: filter() is lazy with iterators
         // Skip invalid rows
         if (!is_array($row) || count($row) < 3) {
             $errors[] = "Invalid row: " . json_encode($row);
@@ -421,6 +422,7 @@ foreach ($errorLogs as $match) {
 - This pattern efficiently searches gigabytes of logs using minimal memory
 - Early termination prevents unnecessary processing
 - Can be extended with more complex pattern matching or ML-based classification
+- **Performance Note:** This recipe starts with `SplFileObject`, an iterator, so the entire pipeline runs in memory-efficient lazy mode. The `map()` and `filter()` operations process one line at a time
 - **Related Methods:** [`map()`](../api/transformation.md#mapcallable-func--null), [`filter()`](../api/filtering.md#filtercallable-func--null-bool-strict--false), [`each()`](../api/collection.md#eachcallable-func-bool-discard--true), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
 
 ---

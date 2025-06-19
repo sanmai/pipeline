@@ -19,11 +19,13 @@ The central `Pipeline\Standard` class represents a data processing pipeline. All
 
 ### Lazy vs Eager Evaluation
 
-The library uses a hybrid approach and automatically chooses the best execution model based on your data source:
+The library uses a sophisticated hybrid execution model that depends on both your data source AND the specific methods you use:
 
-- **Lazy/Streaming "Pull" Model (for Generators & Iterators)**: The default for file handles and generators. No work is done until a terminal method like `toList()` or `each()` is called. The terminal method **"pulls"** each item through the *entire* pipeline chain, one by one. This is extremely memory-efficient.
+- **Array-Optimized Methods**: A few methods (`filter()`, `cast()`, `slice()`, `chunk()`) have special optimizations. When operating on arrays, they execute eagerly using native PHP functions for speed, creating intermediate arrays.
 
-- **Eager/Batch "Push" Model (for Arrays)**: The default for arrays, optimized for speed. Each operation (like `map()` or `filter()`) runs immediately on the *entire* array and **"pushes"** a new intermediate array to the next step. A terminal method like `toList()` at the end simply returns the final, already-computed array.
+- **Always-Lazy Methods**: Most methods (`map()`, `flatten()`, `zip()`, etc.) are always lazy, using generators even when the source is an array. They process items one-by-one only when a terminal operation requests them.
+
+- **The `stream()` Method**: Forces all subsequent operations to use lazy evaluation, preventing array-optimized methods from creating intermediate arrays. Essential for memory management with large datasets.
 
 ### Method Categories
 
@@ -140,7 +142,7 @@ The library follows a no-exception philosophy:
 1. **Use `stream()`** to force lazy evaluation paths
 2. **Avoid `iterator_to_array()`** - use `toList()` or `toAssoc()` instead
 3. **Use `runningCount()`** when you need count while preserving the pipeline
-4. **Array operations are optimized** when the pipeline contains arrays and lazy evaluation is not requested with `stream()`
+4. **Only specific methods** (`filter`, `cast`, `slice`, `chunk`) use array optimizations
 
 ## Next Steps
 

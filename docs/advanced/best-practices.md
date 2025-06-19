@@ -115,17 +115,23 @@ $cleaned = take($formData)
 ### Working with Arrays
 
 ```php
-// When you have an array, pipeline operations are optimized
+// Array-optimized methods run eagerly for speed
 $result = take($array)
-    ->filter($predicate)  // Uses array_filter
-    ->cast($caster)       // Uses array_map
+    ->filter($predicate)  // EAGER: Uses array_filter
+    ->cast($caster)       // EAGER: Uses array_map  
     ->toList();
 
-// Force generator if memory is a concern
+// But map() is always lazy, even with arrays
+$result = take($array)
+    ->filter($predicate)  // EAGER: Creates intermediate array
+    ->map($transformer)   // LAZY: Waits for terminal operation
+    ->toList();
+
+// Force ALL operations to be lazy with stream()
 $result = take($array)
     ->stream()  // Convert to generator
-    ->filter($predicate)
-    ->map($transformer)
+    ->filter($predicate)  // Now lazy
+    ->map($transformer)   // Still lazy
     ->toList();
 ```
 

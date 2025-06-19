@@ -230,102 +230,105 @@ function slidingWindow($data, $windowSize) {
 }
 ```
 
-## The Two Execution Models: Push vs Pull
+## Understanding the Hybrid Execution Model
 
-The Pipeline library has two execution models. Understanding which one is active is the key to mastering performance and memory management.
+The Pipeline library uses a sophisticated hybrid execution model that depends on both the data source (array vs. iterator) and the **specific methods** you call. Understanding this is key to optimizing your pipelines.
 
-### 1. The Eager "Push" Model (For Arrays)
+### 1. Array-Optimized Methods (The "Eager Path")
 
-When you start a pipeline with `take($myArray)`, each method call executes **immediately and completely** on the entire array before the next method is called.
+A select set of methods are optimized for speed when operating on arrays. If the pipeline contains an array, these methods will execute **eagerly**, processing the entire array at once and creating a new intermediate array.
 
-**Execution Flow:**
-1. `take($array)`: The pipeline holds the initial array
-2. `->map()`: Creates a **new intermediate array** containing all mapped results. This array is "pushed" to the next step
-3. `->filter()`: Creates **another new intermediate array** with the filtered results
-4. `->toList()`: Does no processing. It simply returns the final array that was already computed by the last operation
+**Array-Optimized Methods:**
+- `filter()` - Uses `array_filter()` internally
+- `cast()` - Uses `array_map()` internally  
+- `chunk()` - Uses `array_chunk()` internally
+- `slice()` - Uses `array_slice()` internally
 
-**Use this model for:** Speed on small to medium-sized arrays  
-**Beware of:** High peak memory usage, as intermediate arrays are created
+**Behavior:** Fast, but can consume significant memory by creating intermediate arrays
 
+**Example:**
 ```php
-// EAGER "PUSH" MODEL
-$result = take([1, 2, 3, 4])      // -> [1, 2, 3, 4]
-    ->map(fn($n) => $n * 2)        // -> immediately computes and stores [2, 4, 6, 8]
-    ->filter(fn($n) => $n > 5)     // -> immediately computes and stores [6, 8]
-    ->toList();                    // -> simply returns the final [6, 8]
-
-// Memory footprint: 3 arrays in memory at peak (original + 2 intermediates)
+take(['user1', 'user2', 'admin1'])    // Pipeline holds an array
+    ->filter(fn($u) => str_starts_with($u, 'user'))  // EAGER: creates new array ['user1', 'user2']
+    ->map(fn($u) => strtoupper($u))   // LAZY: always uses generators, waits for consumer
+    ->toList();  // Pulls items through map() from the intermediate array
 ```
 
-### 2. The Lazy "Pull" Model (For Iterators & Generators)
+### 2. Always-Lazy Methods (The "Streaming Path")
 
-When you start a pipeline with `take(new SplFileObject(...))` or a generator, **no work is done** until you call a terminal method. The terminal method "pulls" items through the chain one at a time.
+Most transformation methods are **always lazy** and process elements one by one using generators. Even if the pipeline starts with an array, these methods will treat it as a stream.
 
-**Execution Flow:**
-1. `take($iterator)`: The pipeline holds the iterator, but it is untouched
-2. `->map()`: The map logic is stored but not executed
-3. `->filter()`: The filter logic is stored but not executed
-4. `->toList()`: **Execution begins!**
-   - It asks the filter for an item
-   - The filter asks the map for an item
-   - The map asks the source iterator for an item (e.g., `1`)
-   - The map transforms it (`2`) and passes it to the filter
-   - The filter checks it (`2 > 5` is false) and asks the map for the *next* item
-   - This repeats, one element at a time, until the chain is complete
+**Always-Lazy Methods:**
+- `map()` - Always uses generators
+- `flatten()` - Always uses generators
+- `unpack()` - Always uses generators
+- `zip()` - Always uses generators
+- And most other transformation methods
 
-**Use this model for:** Large or infinite datasets, file processing, and memory-critical operations
+**Behavior:** Extremely memory-efficient, as no intermediate arrays are created
 
-```php
-// LAZY "PULL" MODEL
-$generator = (function() { 
-    yield 1; yield 2; yield 3; yield 4; 
-})();
+### 3. The Role of `stream()`: Forcing the Lazy Path
 
-$result = take($generator)         // -> Holds the generator, nothing happens
-    ->map(fn($n) => $n * 2)        // -> Stores the map logic
-    ->filter(fn($n) => $n > 5)     // -> Stores the filter logic
-    ->toList();                    // -> Execution starts, pulling items one-by-one
+The `->stream()` method converts an array-based pipeline into a generator-based one. Its primary purpose is to **force the Array-Optimized methods** (like `filter()` and `cast()`) to run in lazy, streaming mode.
 
-// Memory footprint: Only current item in memory, no intermediate arrays
-```
+**This is how you prevent intermediate arrays and manage memory.**
 
-### Switching Models with `->stream()`
-
-You can force the lazy "pull" model on an array by inserting `->stream()` into the chain:
+**Example: `filter()` with and without `stream()`**
 
 ```php
-// Original array - would use eager model
-$result = take([1, 2, 3, 4])
-    ->stream()                     // Switch from "push" to "pull" model
-    ->map(fn($n) => $n * 2)        // Now processes one item at a time
-    ->filter(fn($n) => $n > 5)     // No intermediate arrays created
+$largeArray = range(1, 100000);
+
+// WITHOUT stream(): filter() runs eagerly, creating a 50,000 element array
+$result = take($largeArray)
+    ->filter(fn($n) => $n % 2 === 0)  // EAGER: creates array of 50,000 evens
+    ->map(fn($n) => $n * $n)          // LAZY: waits for terminal operation
+    ->slice(0, 10)                    // EAGER: array_slice on intermediate array
     ->toList();
 
-// Practical example: Processing large array with memory constraints
-$users = loadMillionUsers();      // Large array in memory
-
-// Without stream() - creates multiple large intermediate arrays
-$active = take($users)
-    ->filter(fn($u) => $u['active'])    // New array with ~500k users
-    ->map(fn($u) => enrichUser($u))      // Another array with ~500k users
-    ->toList();                          // Peak memory: 3x the original array
-
-// With stream() - processes one user at a time
-$active = take($users)
-    ->stream()                           // Convert to pull model
-    ->filter(fn($u) => $u['active'])     // No intermediate array
-    ->map(fn($u) => enrichUser($u))      // No intermediate array  
-    ->toList();                          // Peak memory: 1x original + current item
+// WITH stream(): ALL methods run lazily
+$result = take($largeArray)
+    ->stream()                        // Force lazy mode for ALL methods
+    ->filter(fn($n) => $n % 2 === 0)  // LAZY: processes one-by-one
+    ->map(fn($n) => $n * $n)          // LAZY: still one-by-one
+    ->slice(0, 10)                    // LAZY: stops after 10 items
+    ->toList();
 ```
+
+**Memory Comparison:**
+- Without `stream()`: Peak memory includes full array + 50,000 element intermediate array
+- With `stream()`: Peak memory is just the original array + current processing item
 
 ### Performance Trade-offs
 
-| Model | Speed | Memory | Best For |
-|-------|-------|---------|----------|
-| Push (Arrays) | Fast | High | Small-medium datasets where speed matters |
-| Pull (Generators) | Slower | Minimal | Large datasets, streaming, memory constraints |
+| Method Type | When Array | When Iterator | Use `stream()` When |
+|-------------|------------|---------------|---------------------|
+| Array-Optimized (`filter`, `cast`, `slice`, `chunk`) | Eager (fast, high memory) | Always lazy | You need to save memory |
+| Always-Lazy (`map`, `flatten`, `zip`, etc.) | Still lazy | Always lazy | Not needed (already lazy) |
 
-The overhead of the pull model is typically 20-50% slower than push for pure CPU-bound operations, but this is often negligible compared to I/O operations or when memory constraints would cause swapping.
+**Key Insight:** Chain array-optimized methods for speed on small arrays. Insert `stream()` when memory is a concern.
+
+### Method-Specific Examples
+
+```php
+// Understanding which methods are eager vs lazy
+$data = range(1, 10000);
+
+$result = take($data)
+    ->filter(fn($n) => $n % 2 === 0)   // EAGER: creates 5,000 element array
+    ->map(fn($n) => $n * 2)            // LAZY: waits for terminal
+    ->cast(fn($n) => (string)$n)       // LAZY: would be eager without previous map()
+    ->slice(0, 100)                    // LAZY: because pipeline is now a generator
+    ->toList();
+
+// To ensure everything is lazy, add stream() at the start
+$result = take($data)
+    ->stream()                         // Forces ALL methods to be lazy
+    ->filter(fn($n) => $n % 2 === 0)   // LAZY: processes one-by-one
+    ->map(fn($n) => $n * 2)            // LAZY: still one-by-one
+    ->cast(fn($n) => (string)$n)       // LAZY: forced by stream()
+    ->slice(0, 100)                    // LAZY: stops after 100 items
+    ->toList();
+```
 
 ## Operation Optimization
 
