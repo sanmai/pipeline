@@ -6,3 +6,5 @@ build:
 
 mkdocs:
   configuration: mkdocs.yml
+  tools:
+    python: "3.12"
