@@ -7,34 +7,14 @@ repo_url: https://github.com/sanmai/pipeline
 repo_name: sanmai/pipeline
 
 theme:
-  name: material
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
-    - navigation.path
-    - toc.integrate
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-  palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
+  name: readthedocs
 
 nav:
   - Home: index.md
 
 markdown_extensions:
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences
   - admonition
-  - pymdownx.details
   - def_list
-  - attr_list
   - footnotes
   - tables
   - toc:
@@ -42,8 +22,3 @@ markdown_extensions:
 
 plugins:
   - search
-
-extra:
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/sanmai/pipeline
