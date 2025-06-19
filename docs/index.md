@@ -87,7 +87,7 @@ $pipeline = map(function() {
 $result = $pipeline
     ->filter($predicate)
     ->map($transformer)
-    ->reduce($reducer, $initial);
+    ->fold($initial, $reducer);
 ```
 
 ## Memory Efficiency Example
