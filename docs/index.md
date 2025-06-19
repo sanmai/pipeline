@@ -136,7 +136,7 @@ The library follows a no-exception philosophy:
 
 1. **Use `stream()`** to force lazy evaluation paths
 2. **Avoid `iterator_to_array()`** - use `toList()` or `toAssoc()` instead
-3. **Prefer `runningCount()`** over `count()` for counting during processing
+3. **Use `runningCount()`** when you need count while preserving the pipeline
 4. **Array operations are optimized** when the pipeline contains arrays
 
 ## Next Steps
