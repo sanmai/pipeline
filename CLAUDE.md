@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a PHP library called `sanmai/pipeline` that provides functional programming capabilities for working with data pipelines using lazy evaluation. The library supports PHP 8.2+ and implements streaming pipelines similar to the pipe operator (`|>`) in functional languages.
+This is a PHP library called `sanmai/pipeline` that provides functional programming capabilities for working with data pipelines using lazy evaluation. The library implements streaming pipelines similar to the pipe operator (`|>`) in functional languages.
 
 **Documentation Note**: The documentation in the `docs/` directory is primarily LLM-authored and specifically designed to help AI assistants understand the library's patterns, best practices, and idiomatic usage. It emphasizes explicit operations over implicit magic, making the library's behavior predictable and easy to reason about.
 
 ## Essential Development Commands
 
 ### Testing
-- `make cs test` - Run full test suite (fix code style, then run analysis, unit tests, mutation testing)
+- `make cs test` - Run full test suite (fix code style, then run unit tests)
 - `make test` - Run tests without fixing code style first
 - `make phpunit` - Run PHPUnit tests with coverage
 - `vendor/bin/phpunit tests/SpecificTest.php` - Run a single test file
@@ -71,12 +71,12 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - PHPUnit with coverage metadata required (`@covers` annotations)
 - Mutation testing with Infection (90% MSI required)
 - Multiple static analyzers for code quality (Phan, PHPStan max level, Psalm error level 2)
-- CI matrix testing across PHP 8.2-8.4
+- CI matrix testing across multiple PHP versions
 
 ### Performance Considerations
 
 - Memory efficient for large datasets through lazy evaluation
 - Use `stream()` to ensure lazy paths are used
 - Avoid `iterator_to_array()` - use `toList()` or `toAssoc()` instead
-- Keys are preserved on best-effort basis (duplicate keys will overwrite)
+- Keys are preserved on best-effort basis
 - For counting operations, prefer `runningCount()` to avoid terminal operations
