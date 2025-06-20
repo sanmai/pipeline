@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a PHP library called `sanmai/pipeline` that provides functional programming capabilities for working with data pipelines using lazy evaluation. The library supports PHP 8.2+ and implements streaming pipelines similar to the pipe operator (`|>`) in functional languages.
+This is a PHP library called `sanmai/pipeline` that provides functional programming capabilities for working with data pipelines using lazy evaluation. The library implements streaming pipelines similar to the pipe operator (`|>`) in functional languages.
 
 **Documentation Note**: The documentation in the `docs/` directory is primarily LLM-authored and specifically designed to help AI assistants understand the library's patterns, best practices, and idiomatic usage. It emphasizes explicit operations over implicit magic, making the library's behavior predictable and easy to reason about.
 
