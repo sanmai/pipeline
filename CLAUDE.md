@@ -37,7 +37,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 
 1. **Main Pipeline Class**: `src/Standard.php`
    - Implements `IteratorAggregate` and `Countable`
-   - All methods return the same instance (mutable design)
+   - All methods return the same instance (mutable design, as generators are)
    - Uses generators extensively for lazy evaluation
    - Default callbacks for common operations (filter removes falsy, reduce sums)
 
