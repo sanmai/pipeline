@@ -11,7 +11,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 ## Essential Development Commands
 
 ### Testing
-- `make cs test` - Run full test suite (fix code style, then run analysis, unit tests, mutation testing)
+- `make cs test` - Run full test suite (fix code style, then run unit tests)
 - `make test` - Run tests without fixing code style first
 - `make phpunit` - Run PHPUnit tests with coverage
 - `vendor/bin/phpunit tests/SpecificTest.php` - Run a single test file
