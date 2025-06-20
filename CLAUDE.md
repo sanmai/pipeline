@@ -71,7 +71,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - PHPUnit with coverage metadata required (`@covers` annotations)
 - Mutation testing with Infection (90% MSI required)
 - Multiple static analyzers for code quality (Phan, PHPStan max level, Psalm error level 2)
-- CI matrix testing across PHP 8.2-8.4
+- CI matrix testing across multiple PHP versions
 
 ### Performance Considerations
 
