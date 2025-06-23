@@ -38,6 +38,15 @@ Use `map()` for any transformation, especially when your callback might return m
 
 ### `map()` vs `cast()`: The Generator Gotcha
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Comparison Guide |
+> | **Terminal?** | N/A |
+> | **Execution** | N/A |
+> | **Key Behavior** | `map()` expands generators, `cast()` treats them as values. |
+
 > **Warning: The Generator Gotcha**
 > 
 > A critical difference between `map()` and `cast()` is how they handle a callback that returns a `Generator`. `map()` will **expand** the generator, while `cast()` will treat it as a **single value**. Use `cast()` when you need to create a pipeline of `Generator` objects.

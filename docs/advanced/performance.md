@@ -62,7 +62,7 @@ $errors = take($lines)
     ->slice(0, 5)
     ->toList();
 
-echo "Eager: " . round(microtime(true) - $start, 2) . "s, ";
+echo 'Eager: ' . round(microtime(true) - $start, 2) . 's, ';
 echo "Memory: " . round((memory_get_peak_usage() - $memory) / 1024 / 1024) . "MB\n";
 // Output: "Eager: 8.5s, Memory: 1024MB"
 
@@ -75,7 +75,7 @@ $errors = take(new SplFileObject('1GB-test.log'))
     ->slice(0, 5)
     ->toList();
 
-echo "Lazy: " . round(microtime(true) - $start, 2) . "s, ";
+echo 'Lazy: ' . round(microtime(true) - $start, 2) . 's, ';
 echo "Memory: " . round((memory_get_peak_usage() - $memory) / 1024 / 1024) . "MB\n";
 // Output: "Lazy: 0.003s, Memory: 0.5MB"
 ```
@@ -478,7 +478,7 @@ class BatchInserter {
                 $this->pdo->beginTransaction();
                 try {
                     $stmt = $this->pdo->prepare(
-                        "INSERT INTO records (id, data) VALUES (?, ?)"
+                        'INSERT INTO records (id, data) VALUES (?, ?)'
                     );
                     
                     foreach ($chunk as $record) {

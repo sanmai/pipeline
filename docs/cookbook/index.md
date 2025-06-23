@@ -38,15 +38,15 @@ $rawData = [
 ];
 
 // --- The Aggressive Way (can lead to data loss) ---
-$aggressivelyCleaned = take($rawData)  // Array input
-    ->filter() // EAGER: array_filter() creates new array without falsy values
-    ->toList(); // Simply returns the already-filtered array
+$aggressivelyCleaned = take($rawData)  // Starts with an array
+    ->filter() // EAGER: array_filter() runs immediately, creating a new array
+    ->toList(); // Simply returns the already-computed array
 // Result: [1, 'hello', true] - DANGEROUS! Lost 0, '', '0', and []
 
 // --- The Safe & Predictable Way (Recommended) ---
-$safelyCleaned = take($rawData)  // Array input
-    ->filter(null, strict: true) // EAGER: array_filter() creates new array without null/false
-    ->toList(); // Simply returns the already-filtered array
+$safelyCleaned = take($rawData)  // Starts with an array
+    ->filter(null, strict: true) // EAGER: this also runs immediately on the array
+    ->toList(); // Simply returns the final result
 // Result: [1, 'hello', 0, '', '0', true, []] - Correct and safe
 ```
 
@@ -201,7 +201,7 @@ take(new SplFileObject('data.csv'))  // Starts with an iterator (lazy source)
     ->filter(function($row) use (&$errors) {  // LAZY: filter() is lazy with iterators
         // Skip invalid rows
         if (!is_array($row) || count($row) < 3) {
-            $errors[] = "Invalid row: " . json_encode($row);
+            $errors[] = 'Invalid row: ' . json_encode($row);
             return false;
         }
         return true;
@@ -650,7 +650,6 @@ $rollingStats = take($measurements)
 - Consider using [`runningVariance()`](../api/utility.md#runningvariancerunningvariance-variance-callable-castfunc--null) for streaming statistics
 - For time-series data, consider grouping by time periods first
 - **Related Methods:** [`tuples()`](../api/collection.md#tuples), [`map()`](../api/transformation.md#mapcallable-func--null), [`toList()`](../api/collection.md#tolist), [`take()`](../api/creation.md#takeiterable-input--null-iterable-inputs-standard)
-- Related methods: [`tuples()`](../api/transformation.md#tuples), [`map()`](../api/transformation.md#mapcallable-func), [`toList()`](../api/consumption.md#tolist)
 
 ---
 

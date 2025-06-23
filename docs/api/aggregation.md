@@ -119,9 +119,27 @@ While both methods perform aggregations, they represent different design philoso
 
 ### `fold($initial, ?callable $func = null)` (Recommended)
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Aggregation |
+> | **Terminal?** | **Yes** |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Explicit initial value makes it predictable and type-safe. |
+
 `fold()` is the more robust and explicit of the two methods. It **requires** you to provide an `$initial` value. This removes ambiguity and prevents a class of subtle bugs, especially when the final aggregated type is different from the items in the pipeline (e.g., building an array from a stream of numbers). Because the starting value is always explicit, the behavior is predictable and type-safe.
 
 ### `reduce(?callable $func = null, $initial = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Aggregation |
+> | **Terminal?** | **Yes** |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Implicit default initial value can cause surprises. |
 
 `reduce()` should be seen as a convenience shortcut for PHP's `array_reduce`, particularly for the most common aggregation: summation. When called with no arguments, it defaults to summing numeric values. However, its use of an implicit, "magic" starting value (`null`) can make it less predictable than `fold()` in complex scenarios. Use it when you need a quick sum and the data is simple. For all other cases, `fold()` is the safer choice.
 

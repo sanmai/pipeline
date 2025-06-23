@@ -276,6 +276,15 @@ $result = zip(range(1, 5), letters())->toList();
 
 ### `append(?iterable $values = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Data Addition |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Concatenates additional iterables to the end of the pipeline. |
+
 Adds elements to the end of the pipeline.
 
 **Parameters:**
@@ -305,6 +314,15 @@ $result = take([1])
 
 ### `push(...$vector)`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Data Addition |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Appends individual arguments as separate elements. |
+
 Appends individual values to the end of the pipeline.
 
 **Parameters:**
@@ -329,6 +347,15 @@ $result = take(['a'])
 ```
 
 ### `prepend(?iterable $values = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Data Addition |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Adds elements before existing pipeline data. |
 
 Adds elements to the beginning of the pipeline.
 
@@ -360,6 +387,15 @@ $result = take([3])
 ```
 
 ### `unshift(...$vector)`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Data Addition |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Prepends individual arguments as separate elements. |
 
 Prepends individual values to the beginning of the pipeline.
 

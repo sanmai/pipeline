@@ -260,11 +260,29 @@ take($sensorReadings)
 
 ### `skipWhile(callable $predicate)`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Filtering |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Skips until first false, then keeps all remaining elements. |
+
 Skips elements from the beginning while predicate is true.
 
 See [Filtering Methods](filtering.md#skipwhile) for details.
 
 ### `stream()`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Evaluation Control |
+> | **Terminal?** | No |
+> | **Execution** | Forces Lazy |
+> | **Key Behavior** | Converts arrays to generators for memory efficiency. |
 
 Forces lazy evaluation using generators.
 

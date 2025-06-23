@@ -135,6 +135,15 @@ $result = take(['a' => 1, 'b' => 2])->toArray(true);
 
 ### `toArrayPreservingKeys()` [DEPRECATED]
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Terminal operation (deprecated) |
+> | **Terminal?** | **Yes** |
+> | **Execution** | Depends on Input |
+> | **Key Behavior** | Legacy method - use `toAssoc()` instead. |
+
 Legacy method. Use `toAssoc()` instead.
 
 **Returns:** array - Same as `toAssoc()`
@@ -346,6 +355,15 @@ take($items)->each(function($item) {
 
 ### `keys()`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Extracts keys as values, discarding original values. |
+
 Extracts only the keys from the pipeline.
 
 **Returns:** $this (Pipeline\Standard instance)
@@ -381,6 +399,15 @@ $result = take($data)
 
 ### `values()`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Resets keys to sequential numeric indices. |
+
 Extracts only the values, discarding keys.
 
 **Returns:** $this (Pipeline\Standard instance)
@@ -409,6 +436,15 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4])
 ```
 
 ### `flip()`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Swaps keys and values, useful for deduplication. |
 
 Swaps keys and values.
 
@@ -447,6 +483,15 @@ $lookup = take($users)
 ```
 
 ### `tuples()`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Transformation |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Converts each element to [key, value] array pairs. |
 
 Converts key-value pairs into [key, value] tuples.
 

@@ -178,6 +178,15 @@ echo "Max: " . $variance->getMax() . "\n";                  // 5.0
 
 ### `runningVariance(?RunningVariance &$variance, ?callable $castFunc = null)`
 
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Pass-through Operation |
+> | **Terminal?** | No |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Observes statistics without consuming the pipeline. |
+
 Observes values as they pass through the pipeline without consuming it.
 
 **Parameters:**
@@ -227,6 +236,15 @@ $items = take($products)
 ```
 
 ### `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null)`
+
+> **Quick Reference**
+> 
+> | | |
+> |---|---|
+> | **Type** | Aggregation |
+> | **Terminal?** | **Yes** |
+> | **Execution** | Always Lazy |
+> | **Key Behavior** | Returns RunningVariance object with all statistics. |
 
 Calculates complete statistics for the pipeline. Terminal operation.
 
