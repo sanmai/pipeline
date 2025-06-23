@@ -23,7 +23,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - `make phan` - Run Phan static analyzer
 - `make phpstan` - Run PHPStan static analysis
 - `make psalm` - Run Psalm static analysis
-- `make infection` - Run mutation testing (90% MSI minimum)
+- `make infection` - Run mutation testing (with a set MSI minimum)
 
 ### Build & Validation
 - `composer install` - Install dependencies
