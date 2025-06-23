@@ -23,7 +23,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - `make phan` - Run Phan static analyzer
 - `make phpstan` - Run PHPStan static analysis
 - `make psalm` - Run Psalm static analysis
-- `make infection` - Run mutation testing (90% MSI minimum)
+- `make infection` - Run mutation testing (with a set MSI minimum)
 
 ### Build & Validation
 - `composer install` - Install dependencies
@@ -37,7 +37,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 
 1. **Main Pipeline Class**: `src/Standard.php`
    - Implements `IteratorAggregate` and `Countable`
-   - All methods return the same instance (mutable design)
+   - All methods return the same instance (mutable design, as generators are)
    - Uses generators extensively for lazy evaluation
    - Default callbacks for common operations (filter removes falsy, reduce sums)
 
