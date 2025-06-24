@@ -72,7 +72,6 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - Mutation testing with Infection (90% MSI required)
 - Multiple static analyzers for code quality (Phan, PHPStan max level, Psalm error level 2)
 - CI matrix testing across multiple PHP versions
-- Nested loops are unacceptable anywhere in the project
 
 ### Performance Considerations
 
@@ -81,3 +80,8 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - Avoid `iterator_to_array()` - use `toList()` or `toAssoc()` instead
 - Keys are preserved on best-effort basis
 - For counting operations, prefer `runningCount()` to avoid terminal operations
+
+### Practice What You Preach
+
+- Nested loops are unacceptable anywhere in the project, including tests.
+- That said, one-off `foreach` loops are allowed for clarity and simplicity.
