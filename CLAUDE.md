@@ -72,6 +72,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - Mutation testing with Infection (90% MSI required)
 - Multiple static analyzers for code quality (Phan, PHPStan max level, Psalm error level 2)
 - CI matrix testing across multiple PHP versions
+- Nested loops are unacceptable anywhere in the project
 
 ### Performance Considerations
 

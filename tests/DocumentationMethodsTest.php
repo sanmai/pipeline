@@ -106,6 +106,7 @@ final class DocumentationMethodsTest extends TestCase
      */
     private function scanDocumentationForMethods(string $directory): array
     {
+        // Define reusable components following the complex-pipelines.md pattern
         $skipMethods = [
             // PHP built-in functions
             'count', 'array_sum', 'array_filter', 'array_map', 'array_reduce', 'array_slice', 'array_chunk',
@@ -146,36 +147,49 @@ final class DocumentationMethodsTest extends TestCase
             '/\|\s*`(\w+)\([^)]*\)`/m', // Table method references
         ];
 
-        return take(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)))
-            ->filter(fn($file) => $file->isFile() && 'md' === $file->getExtension())
-            ->filter(fn($file) => 'BUNDLED_DOCUMENTATION.md' !== $file->getBasename())
-            ->map(function ($file) use ($directory, $patterns, $skipMethods) {
-                $content = file_get_contents($file->getPathname());
-                $relativePath = str_replace($directory . '/', '', $file->getPathname());
+        // Reusable filter: only markdown files
+        $isMarkdownFile = fn($file) => $file->isFile() && 'md' === $file->getExtension();
 
-                return take($patterns)
-                    ->map(function ($pattern) use ($content) {
-                        preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE);
-                        return $matches[1] ?? [];
-                    })
-                    ->flatten()
-                    ->filter(fn($match) => !in_array($match[0], $skipMethods, true))
-                    ->map(function ($match) use ($content, $relativePath) {
-                        $method = $match[0];
-                        $offset = $match[1];
-                        $lineNumber = substr_count(substr($content, 0, $offset), "\n") + 1;
-                        return ['method' => $method, 'location' => "{$relativePath}:{$lineNumber}"];
-                    })
-                    ->toList();
-            })
+        // Reusable filter: skip bundled documentation
+        $notBundledDoc = fn($file) => 'BUNDLED_DOCUMENTATION.md' !== $file->getBasename();
+
+        // Reusable transformer: extract methods from file
+        $extractMethodsFromFile = function ($file) use ($directory, $patterns, $skipMethods) {
+            $content = file_get_contents($file->getPathname());
+            $relativePath = str_replace($directory . '/', '', $file->getPathname());
+
+            return take($patterns)
+                ->map(function ($pattern) use ($content) {
+                    preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE);
+                    return $matches[1] ?? [];
+                })
+                ->flatten()
+                ->filter(fn($match) => !in_array($match[0], $skipMethods, true))
+                ->map(function ($match) use ($content, $relativePath) {
+                    $method = $match[0];
+                    $offset = $match[1];
+                    $lineNumber = substr_count(substr($content, 0, $offset), "\n") + 1;
+                    return ['method' => $method, 'location' => "{$relativePath}:{$lineNumber}"];
+                })
+                ->toList();
+        };
+
+        // Reusable aggregator: group by method name
+        $groupByMethod = function ($methods, $item) {
+            if (!isset($methods[$item['method']])) {
+                $methods[$item['method']] = [];
+            }
+            $methods[$item['method']][] = $item['location'];
+            return $methods;
+        };
+
+        // Compose the pipeline using named components
+        return take(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)))
+            ->filter($isMarkdownFile)
+            ->filter($notBundledDoc)
+            ->map($extractMethodsFromFile)
             ->flatten()
-            ->fold([], function ($methods, $item) {
-                if (!isset($methods[$item['method']])) {
-                    $methods[$item['method']] = [];
-                }
-                $methods[$item['method']][] = $item['location'];
-                return $methods;
-            });
+            ->fold([], $groupByMethod);
     }
 
     /**
