@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -21,6 +22,26 @@ namespace Tests\Pipeline;
 
 use Pipeline\Standard;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ReflectionClass;
+use ReflectionMethod;
+
+use function array_diff;
+use function array_keys;
+use function dirname;
+use function file_get_contents;
+use function implode;
+use function in_array;
+use function Pipeline\take;
+use function preg_match_all;
+use function str_replace;
+use function str_starts_with;
+use function strpos;
+use function substr;
+use function substr_count;
+
+use const PREG_OFFSET_CAPTURE;
 
 /**
  * @coversNothing
@@ -35,10 +56,10 @@ final class DocumentationMethodsTest extends TestCase
     protected function setUp(): void
     {
         // Get all public methods from the Pipeline\Standard class
-        $reflection = new \ReflectionClass(Standard::class);
+        $reflection = new ReflectionClass(Standard::class);
         $this->publicMethods = [];
-        
-        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             // Skip magic methods and constructors
             if (!str_starts_with($method->getName(), '__')) {
                 $this->publicMethods[] = $method->getName();
@@ -80,96 +101,81 @@ final class DocumentationMethodsTest extends TestCase
 
     /**
      * Scan documentation files for method references.
-     * 
+     *
      * @return array<string, array<string>>
      */
     private function scanDocumentationForMethods(string $directory): array
     {
-        $methods = [];
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory)
-        );
+        $skipMethods = [
+            // PHP built-in functions
+            'count', 'array_sum', 'array_filter', 'array_map', 'array_reduce', 'array_slice', 'array_chunk',
+            'json_decode', 'explode', 'implode', 'trim', 'sort',
+            'fn', 'function', 'use', 'new', 'echo', 'print',
+            'isset', 'empty', 'is_array', 'is_numeric',
+            'str_getcsv', 'str_contains', 'str_starts_with',
+            'file_get_contents', 'file', 'range', 'sqrt',
+            'round', 'take', 'map', 'zip', 'fromArray', 'fromValues',
+            'iterator_to_array',
 
-        foreach ($iterator as $file) {
-            if (!$file->isFile() || $file->getExtension() !== 'md') {
-                continue;
-            }
+            // RunningVariance methods (different class)
+            'getMean', 'getStandardDeviation', 'getCount', 'getVariance',
+            'getMin', 'getMax', 'observe', 'merge',
 
-            // Skip the bundled documentation file
-            if ($file->getBasename() === 'BUNDLED_DOCUMENTATION.md') {
-                continue;
-            }
+            // PDO/Database methods
+            'prepare', 'execute', 'fetch', 'closeCursor', 'beginTransaction',
+            'commit', 'rollBack', 'query',
 
-            $content = file_get_contents($file->getPathname());
-            $relativePath = str_replace($directory . '/', '', $file->getPathname());
+            // Iterator methods
+            'rewind', 'valid', 'current', 'next',
 
-            // Pattern to match method calls in various contexts
-            // Matches: ->method(, `method(`, ### `method(`, etc.
-            $patterns = [
-                '/->(\w+)\s*\(/m',           // Method calls like ->method(
-                '/`(\w+)\s*\(/m',            // Backtick method references
-                '/###\s+`(\w+)\s*\(/m',      // Header method references
-                '/\|\s*`(\w+)\([^)]*\)`/m', // Table method references
-            ];
+            // Other example methods
+            'isActive', 'getMessage', 'bulkInsert', 'measure', 'getReport',
+            'withFiltering', 'withTransformation', 'withSorting', 'process',
+            'safeTransform', 'getErrors', 'addExtractor', 'addTransformer',
+            'addLoader', 'run', 'memoize', 'isValid', 'assertEquals',
+            'buildFilter', 'buildTransformer',
 
-            foreach ($patterns as $pattern) {
-                if (preg_match_all($pattern, $content, $matches)) {
-                    foreach ($matches[1] as $method) {
-                        // Skip common non-pipeline methods and PHP built-ins
-                        $skipMethods = [
-                            // PHP built-in functions
-                            'count', 'array_sum', 'array_filter', 'array_map', 'array_reduce', 'array_slice',
-                            'json_decode', 'explode', 'implode', 'trim', 'sort',
-                            'fn', 'function', 'use', 'new', 'echo', 'print',
-                            'isset', 'empty', 'is_array', 'is_numeric',
-                            'str_getcsv', 'str_contains', 'str_starts_with',
-                            'file_get_contents', 'file', 'range', 'sqrt',
-                            'round', 'take', 'map', 'zip', 'fromArray', 'fromValues',
-                            'iterator_to_array',
-                            
-                            // RunningVariance methods (different class)
-                            'getMean', 'getStandardDeviation', 'getCount', 'getVariance',
-                            'getMin', 'getMax', 'observe', 'merge',
-                            
-                            // PDO/Database methods
-                            'prepare', 'execute', 'fetch', 'closeCursor', 'beginTransaction',
-                            'commit', 'rollBack', 'query',
-                            
-                            // Iterator methods
-                            'rewind', 'valid', 'current', 'next',
-                            
-                            // Other example methods
-                            'isActive', 'getMessage', 'bulkInsert', 'measure', 'getReport',
-                            'withFiltering', 'withTransformation', 'withSorting', 'process',
-                            'safeTransform', 'getErrors', 'addExtractor', 'addTransformer',
-                            'addLoader', 'run', 'memoize', 'isValid', 'assertEquals',
-                            'buildFilter', 'buildTransformer',
-                            
-                            // Constructor
-                            '__construct'
-                        ];
-                        
-                        if (in_array($method, $skipMethods, true)) {
-                            continue;
-                        }
+            // Constructor
+            '__construct',
+        ];
 
-                        // Skip if it's a helper function (these are not methods)
-                        if (in_array($method, ['take', 'map', 'zip', 'fromArray', 'fromValues'], true)) {
-                            continue;
-                        }
+        $patterns = [
+            '/->(\w+)\s*\(/m',           // Method calls like ->method(
+            '/`(\w+)\s*\(/m',            // Backtick method references
+            '/###\s+`(\w+)\s*\(/m',      // Header method references
+            '/\|\s*`(\w+)\([^)]*\)`/m', // Table method references
+        ];
 
-                        if (!isset($methods[$method])) {
-                            $methods[$method] = [];
-                        }
-                        
-                        $lineNumber = substr_count(substr($content, 0, strpos($content, $matches[0][0])), "\n") + 1;
-                        $methods[$method][] = "{$relativePath}:{$lineNumber}";
-                    }
+        return take(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)))
+            ->filter(fn($file) => $file->isFile() && 'md' === $file->getExtension())
+            ->filter(fn($file) => 'BUNDLED_DOCUMENTATION.md' !== $file->getBasename())
+            ->map(function ($file) use ($directory, $patterns, $skipMethods) {
+                $content = file_get_contents($file->getPathname());
+                $relativePath = str_replace($directory . '/', '', $file->getPathname());
+
+                return take($patterns)
+                    ->map(function ($pattern) use ($content) {
+                        preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE);
+                        return $matches[1] ?? [];
+                    })
+                    ->flatten()
+                    ->filter(fn($match) => !in_array($match[0], $skipMethods, true))
+                    ->map(function ($match) use ($content, $relativePath) {
+                        $method = $match[0];
+                        $offset = $match[1];
+                        $lineNumber = substr_count(substr($content, 0, $offset), "\n") + 1;
+                        return ['method' => $method, 'location' => "{$relativePath}:{$lineNumber}"];
+                    })
+                    ->toList();
+            })
+            ->flatten()
+            ->fold([], function ($methods, $item) {
+                if (!isset($methods[$item['method']])) {
+                    $methods[$item['method']] = [];
                 }
-            }
-        }
-
-        return $methods;
+                $methods[$item['method']][] = $item['location'];
+                return $methods;
+            });
     }
 
     /**
@@ -179,24 +185,24 @@ final class DocumentationMethodsTest extends TestCase
     {
         $docsPath = dirname(__DIR__) . '/docs';
         $pipeUsages = [];
-        
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($docsPath)
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($docsPath)
         );
 
         foreach ($iterator as $file) {
-            if (!$file->isFile() || $file->getExtension() !== 'md') {
+            if (!$file->isFile() || 'md' !== $file->getExtension()) {
                 continue;
             }
 
             // Skip the bundled documentation file
-            if ($file->getBasename() === 'BUNDLED_DOCUMENTATION.md') {
+            if ('BUNDLED_DOCUMENTATION.md' === $file->getBasename()) {
                 continue;
             }
 
             $content = file_get_contents($file->getPathname());
             $relativePath = str_replace($docsPath . '/', '', $file->getPathname());
-            
+
             // Look for actual usage of ->pipe(
             if (preg_match_all('/->pipe\s*\(/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
                 foreach ($matches[0] as $match) {
@@ -208,11 +214,11 @@ final class DocumentationMethodsTest extends TestCase
 
         if (!empty($pipeUsages)) {
             $this->fail(
-                "The non-existent pipe() method is being used in examples:\n" . 
+                "The non-existent pipe() method is being used in examples:\n" .
                 implode("\n", $pipeUsages)
             );
         }
-        
+
         $this->assertTrue(true, 'No usage of pipe() method found in documentation');
     }
 
@@ -223,7 +229,7 @@ final class DocumentationMethodsTest extends TestCase
     {
         $docsPath = dirname(__DIR__) . '/docs';
         $documentedMethods = array_keys($this->scanDocumentationForMethods($docsPath));
-        
+
         $undocumentedMethods = [];
         foreach ($this->publicMethods as $method) {
             if (!in_array($method, $documentedMethods, true)) {
@@ -237,7 +243,7 @@ final class DocumentationMethodsTest extends TestCase
 
         if (!empty($undocumentedMethods)) {
             $this->markTestIncomplete(
-                "The following public methods are not documented: " . 
+                "The following public methods are not documented: " .
                 implode(', ', $undocumentedMethods)
             );
         }
