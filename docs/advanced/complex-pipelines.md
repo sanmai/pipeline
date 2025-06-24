@@ -112,10 +112,10 @@ class DataProcessor {
     }
     
     public function withFiltering(array $criteria): self {
-        foreach ($criteria as $field => $value) {
-            $this->pipeline = $this->pipeline
-                ->filter(fn($item) => ($item[$field] ?? null) === $value);
-        }
+        $this->pipeline = take($criteria)
+            ->fold($this->pipeline, fn($pipeline, $value, $field) => 
+                $pipeline->filter(fn($item) => ($item[$field] ?? null) === $value)
+            );
         return $this;
     }
     
@@ -333,8 +333,15 @@ function withRetry(callable $operation, int $maxAttempts = 3) {
     };
 }
 
+// Define fetch operation as a static method
+class DataFetcher {
+    public static function fetch($url) {
+        return fetchData($url);
+    }
+}
+
 $results = take($urls)
-    ->map(withRetry(fn($url) => fetchData($url), 3))
+    ->map(withRetry(DataFetcher::fetch(...), 3))
     ->filter()  // Remove failed fetches
     ->toList();
 ```
@@ -355,12 +362,11 @@ class BatchProcessor {
             ->chunk($batchSize)
             ->map(function($batch) use ($processor) {
                 // Simulate parallel processing of batch
-                $results = [];
                 $startTime = microtime(true);
                 
-                foreach ($batch as $key => $item) {
-                    $results[$key] = $processor($item);
-                }
+                $results = take($batch)
+                    ->map(fn($item, $key) => [$key, $processor($item)])
+                    ->toAssoc();
                 
                 $duration = microtime(true) - $startTime;
                 return [
@@ -396,7 +402,9 @@ class TreeProcessor {
         
         if (isset($node['children']) && is_array($node['children'])) {
             $result['children'] = take($node['children'])
-                ->map(fn($child) => self::traverseTree($child, $processor))
+                ->map(function($child) use ($processor) {
+                    return self::traverseTree($child, $processor);
+                })
                 ->toList();
         }
         
@@ -412,6 +420,14 @@ class TreeProcessor {
             }
         }
     }
+    
+    private static function processNode(array $node): array {
+        return [
+            ...$node,
+            'processed' => true,
+            'path' => strtolower(str_replace(' ', '-', $node['name']))
+        ];
+    }
 }
 
 // Process hierarchical data
@@ -426,12 +442,8 @@ $tree = [
     ]
 ];
 
-// Transform tree
-$transformed = TreeProcessor::traverseTree($tree, fn($node) => [
-    ...$node,
-    'processed' => true,
-    'path' => strtolower(str_replace(' ', '-', $node['name']))
-]);
+// Transform tree using static method reference from same class
+$transformed = TreeProcessor::traverseTree($tree, TreeProcessor::processNode(...));
 
 // Flatten to list
 $flat = take([TreeProcessor::flattenTree($tree)])
@@ -467,39 +479,65 @@ class ETLPipeline {
         // Extract
         $extracted = take($sources)
             ->map(function($source) {
-                $data = [];
-                foreach ($this->extractors as $extractor) {
-                    $data = array_merge($data, $extractor($source));
-                }
-                return $data;
+                return take($this->extractors)
+                    ->map(fn($extractor) => $extractor($source))
+                    ->flatten()
+                    ->toList();
             })
             ->flatten();
         
         // Transform
-        $transformed = array_reduce(
-            $this->transformers,
-            fn($pipeline, $transformer) => $pipeline->map($transformer),
-            $extracted
-        );
+        $transformed = take($this->transformers)
+            ->fold($extracted, fn($pipeline, $transformer) => 
+                $pipeline->map($transformer)
+            );
         
         // Load
         $transformed->each(function($item) {
-            foreach ($this->loaders as $loader) {
-                $loader($item);
-            }
+            take($this->loaders)
+                ->each(fn($loader) => $loader($item));
         });
     }
 }
 
-// Configure and run ETL
+    private static function extractCsv($file): array {
+        return parseCsv($file);
+    }
+    
+    private static function extractJson($file): array {
+        return parseJson($file);
+    }
+    
+    private static function normalizeRow($row): array {
+        return normalizeData($row);
+    }
+    
+    private static function validateRow($row): array {
+        return validateData($row);
+    }
+    
+    private static function enrichRow($row): array {
+        return enrichData($row);
+    }
+    
+    private static function saveToDb($row): void {
+        saveToDatabase($row);
+    }
+    
+    private static function indexToEs($row): void {
+        indexInElasticsearch($row);
+    }
+}
+
+// Configure and run ETL using static method references
 $etl = new ETLPipeline();
-$etl->addExtractor(fn($file) => parseCsv($file))
-    ->addExtractor(fn($file) => parseJson($file))
-    ->addTransformer(fn($row) => normalizeData($row))
-    ->addTransformer(fn($row) => validateData($row))
-    ->addTransformer(fn($row) => enrichData($row))
-    ->addLoader(fn($row) => saveToDatabase($row))
-    ->addLoader(fn($row) => indexInElasticsearch($row))
+$etl->addExtractor(self::extractCsv(...))
+    ->addExtractor(self::extractJson(...))
+    ->addTransformer(self::normalizeRow(...))
+    ->addTransformer(self::validateRow(...))
+    ->addTransformer(self::enrichRow(...))
+    ->addLoader(self::saveToDb(...))
+    ->addLoader(self::indexToEs(...))
     ->run($dataFiles);
 ```
 
@@ -529,23 +567,15 @@ class MemoizedPipeline {
     }
 }
 
-// Short-circuit evaluation
+// Short-circuit evaluation with proper limiting
 function earlyTermination($items, $predicate, $limit = null) {
-    $found = 0;
-    $results = [];
+    $pipeline = take($items)->filter($predicate);
     
-    take($items)
-        ->filter($predicate)
-        ->each(function($item) use (&$found, &$results, $limit) {
-            $results[] = $item;
-            $found++;
-            
-            if ($limit !== null && $found >= $limit) {
-                throw new \Exception('Limit reached'); // Hack to break
-            }
-        });
+    if ($limit !== null) {
+        $pipeline = $pipeline->slice(0, $limit);
+    }
     
-    return $results;
+    return $pipeline->toList();
 }
 ```
 

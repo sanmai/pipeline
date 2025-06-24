@@ -57,14 +57,11 @@ final class DocumentationMethodsTest extends TestCase
     {
         // Get all public methods from the Pipeline\Standard class
         $reflection = new ReflectionClass(Standard::class);
-        $this->publicMethods = [];
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            // Skip magic methods and constructors
-            if (!str_starts_with($method->getName(), '__')) {
-                $this->publicMethods[] = $method->getName();
-            }
-        }
+        $this->publicMethods = take($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
+            ->map(fn($method) => $method->getName())
+            ->filter(fn($name) => !str_starts_with($name, '__'))
+            ->toList();
     }
 
     /**
@@ -76,8 +73,9 @@ final class DocumentationMethodsTest extends TestCase
         $this->assertDirectoryExists($docsPath, 'Documentation directory not found');
 
         $documentedMethods = $this->scanDocumentationForMethods($docsPath);
-        $nonExistentMethods = [];
 
+        // Filter documented methods to find non-existent ones
+        $nonExistentMethods = [];
         foreach ($documentedMethods as $method => $locations) {
             if (!in_array($method, $this->publicMethods, true)) {
                 $nonExistentMethods[$method] = $locations;
@@ -86,13 +84,15 @@ final class DocumentationMethodsTest extends TestCase
 
         if (!empty($nonExistentMethods)) {
             $message = "The following methods are documented but do not exist in Pipeline\\Standard:\n\n";
-            foreach ($nonExistentMethods as $method => $locations) {
-                $message .= "- {$method}() found in:\n";
-                foreach ($locations as $location) {
-                    $message .= "  * {$location}\n";
-                }
-                $message .= "\n";
-            }
+            $message .= implode("\n", take($nonExistentMethods)
+                ->map(function ($locations, $method) {
+                    $locationList = implode("\n", take($locations)
+                        ->map(fn($location) => "  * {$location}")
+                        ->toList());
+                    return "- {$method}() found in:\n{$locationList}\n";
+                })
+                ->toList());
+
             $this->fail($message);
         }
 
@@ -198,33 +198,31 @@ final class DocumentationMethodsTest extends TestCase
     public function testPipeMethodNotUsedInExamples(): void
     {
         $docsPath = dirname(__DIR__) . '/docs';
-        $pipeUsages = [];
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($docsPath)
-        );
+        // Reusable components
+        $isMarkdownFile = fn($file) => $file->isFile() && 'md' === $file->getExtension();
+        $notBundledDoc = fn($file) => 'BUNDLED_DOCUMENTATION.md' !== $file->getBasename();
 
-        foreach ($iterator as $file) {
-            if (!$file->isFile() || 'md' !== $file->getExtension()) {
-                continue;
-            }
-
-            // Skip the bundled documentation file
-            if ('BUNDLED_DOCUMENTATION.md' === $file->getBasename()) {
-                continue;
-            }
-
+        $findPipeUsages = function ($file) use ($docsPath) {
             $content = file_get_contents($file->getPathname());
             $relativePath = str_replace($docsPath . '/', '', $file->getPathname());
 
-            // Look for actual usage of ->pipe(
-            if (preg_match_all('/->pipe\s*\(/m', $content, $matches, PREG_OFFSET_CAPTURE)) {
-                foreach ($matches[0] as $match) {
+            preg_match_all('/->pipe\s*\(/m', $content, $matches, PREG_OFFSET_CAPTURE);
+
+            return take($matches[0] ?? [])
+                ->map(function ($match) use ($content, $relativePath) {
                     $lineNumber = substr_count(substr($content, 0, $match[1]), "\n") + 1;
-                    $pipeUsages[] = "{$relativePath}:{$lineNumber}";
-                }
-            }
-        }
+                    return "{$relativePath}:{$lineNumber}";
+                })
+                ->toList();
+        };
+
+        $pipeUsages = take(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($docsPath)))
+            ->filter($isMarkdownFile)
+            ->filter($notBundledDoc)
+            ->map($findPipeUsages)
+            ->flatten()
+            ->toList();
 
         if (!empty($pipeUsages)) {
             $this->fail(
@@ -244,16 +242,13 @@ final class DocumentationMethodsTest extends TestCase
         $docsPath = dirname(__DIR__) . '/docs';
         $documentedMethods = array_keys($this->scanDocumentationForMethods($docsPath));
 
-        $undocumentedMethods = [];
-        foreach ($this->publicMethods as $method) {
-            if (!in_array($method, $documentedMethods, true)) {
-                $undocumentedMethods[] = $method;
-            }
-        }
-
         // Some methods might be intentionally undocumented (like internal ones)
         $allowedUndocumented = ['getIterator', '__construct'];
-        $undocumentedMethods = array_diff($undocumentedMethods, $allowedUndocumented);
+
+        $undocumentedMethods = take($this->publicMethods)
+            ->filter(fn($method) => !in_array($method, $documentedMethods, true))
+            ->filter(fn($method) => !in_array($method, $allowedUndocumented, true))
+            ->toList();
 
         if (!empty($undocumentedMethods)) {
             $this->markTestIncomplete(
