@@ -82,7 +82,7 @@ final class DocumentationMethodsTest extends TestCase
             }
         }
 
-        if (!empty($nonExistentMethods)) {
+        if ([] !== $nonExistentMethods) {
             $message = "The following methods are documented but do not exist in Pipeline\\Standard:\n\n";
             $message .= implode("\n", take($nonExistentMethods)
                 ->map(function ($locations, $method) {
@@ -224,7 +224,7 @@ final class DocumentationMethodsTest extends TestCase
             ->flatten()
             ->toList();
 
-        if (!empty($pipeUsages)) {
+        if ([] !== $pipeUsages) {
             $this->fail(
                 "The non-existent pipe() method is being used in examples:\n" .
                 implode("\n", $pipeUsages)
@@ -250,7 +250,7 @@ final class DocumentationMethodsTest extends TestCase
             ->filter(fn($method) => !in_array($method, $allowedUndocumented, true))
             ->toList();
 
-        if (!empty($undocumentedMethods)) {
+        if ([] !== $undocumentedMethods) {
             $this->markTestIncomplete(
                 "The following public methods are not documented: " .
                 implode(', ', $undocumentedMethods)
