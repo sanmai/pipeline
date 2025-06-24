@@ -6,3 +6,6 @@ parameters:
     paths:
         - src
         - tests
+
+rules:
+    - Tests\Pipeline\PHPStan\Rules\NoEmptyRule
