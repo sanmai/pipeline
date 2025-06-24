@@ -8,6 +8,9 @@ on:
     branches:
       - main
       - v*.*
+  schedule:
+    # Run at noon JST (3:00 UTC) on the 15th of every month
+    - cron: '0 3 15 * *'
 
 jobs:
   tests:
