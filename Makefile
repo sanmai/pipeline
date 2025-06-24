@@ -158,7 +158,7 @@ yamllint:
 # Quick development testing procedure                        #
 ##############################################################
 
-PHP_VERSIONS=php7.1 php7.2 php7.3 php7.4
+PHP_VERSIONS=php8.2 php8.3 php8.4
 
 .PHONY: quick
 quick:
