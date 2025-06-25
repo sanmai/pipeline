@@ -94,11 +94,8 @@ final class AppendPrependTest extends TestCase
 
     public static function provideAppend(): iterable
     {
-        foreach (self::provideAppendArrays() as $arrays) {
-            foreach (self::generateIterableCombinations($arrays) as $sample) {
-                yield $sample;
-            }
-        }
+        return take(self::provideAppendArrays())
+            ->map(self::generateIterableCombinations(...));
     }
 
     /**
@@ -154,11 +151,8 @@ final class AppendPrependTest extends TestCase
 
     public static function providePrepend(): iterable
     {
-        foreach (self::providePrependArrays() as $arrays) {
-            foreach (self::generateIterableCombinations($arrays) as $sample) {
-                yield $sample;
-            }
-        }
+        return take(self::providePrependArrays())
+            ->map(self::generateIterableCombinations(...));
     }
 
     /**

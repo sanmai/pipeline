@@ -262,6 +262,7 @@ final class SliceTest extends TestCase
             [-PHP_INT_MAX, 0],
         ];
 
+        // @phpstan-ignore-next-line Data provider exception
         foreach ($inputs as $array) {
             foreach ($argsList as $args) {
                 // First with keys:
