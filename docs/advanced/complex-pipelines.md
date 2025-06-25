@@ -6,7 +6,7 @@ Advanced patterns and techniques for building sophisticated data processing pipe
 
 ### Building Reusable Pipeline Components
 
-A key advantage of functional programming is composition. You can create reusable, testable components for your pipelines by encapsulating logic into invokable classes or callables. This makes your main pipeline chains cleaner, more readable, and easier to maintain.
+A key advantage of functional programming is composition. You can create reusable, testable components for your pipelines by encapsulating logic into invocable classes or callables. This makes your main pipeline chains cleaner, more readable, and easier to maintain.
 
 The recommended pattern is to pass reusable callables directly into standard methods like `map()`, `filter()`, and `cast()`.
 
