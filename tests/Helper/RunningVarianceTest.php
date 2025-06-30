@@ -241,7 +241,7 @@ final class RunningVarianceTest extends TestCase
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
-            ->slice(0, $count)->toArray();
+            ->slice(0, $count)->toList();
 
         $benchmark = self::standard_deviation($numbers);
 
@@ -273,7 +273,7 @@ final class RunningVarianceTest extends TestCase
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
             ->slice(0, $count)
-            ->toArray();
+            ->toList();
 
         try {
             $this->assertEqualsWithDelta($sigma, self::standard_deviation(
@@ -297,6 +297,7 @@ final class RunningVarianceTest extends TestCase
         $two_pi = 2 * M_PI;
         $epsilon = PHP_FLOAT_EPSILON;
 
+        // @phpstan-ignore-next-line Known algorithm exception
         while (true) {
             do {
                 $u1 = mt_rand() / mt_getrandmax();

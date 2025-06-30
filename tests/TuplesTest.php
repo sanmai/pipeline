@@ -102,7 +102,7 @@ final class TuplesTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $actual = $pipeline->tuples()->toArray();
+        $actual = $pipeline->tuples()->toList();
 
         $this->assertSame(
             [],

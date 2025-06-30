@@ -282,6 +282,7 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield iterator_to_array(self::take($input, $length), $preserve_keys);
+            $input->next();
         }
     }
 
@@ -401,17 +402,18 @@ class Standard implements IteratorAggregate, Countable
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @param ?callable $func
+     * @param bool      $strict When true, only `null` and `false` are filtered out
      *
      * @return $this
      */
-    public function filter(?callable $func = null): self
+    public function filter(?callable $func = null, bool $strict = false): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
             return $this;
         }
 
-        $func = self::resolvePredicate($func);
+        $func = self::resolvePredicate($func, $strict);
 
         // We got an array, that's what we need. Moving along.
         if (is_array($this->pipeline)) {
@@ -431,23 +433,48 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Resolves a nullable predicate into a sensible non-null callable.
      */
-    private static function resolvePredicate(?callable $func): callable
+    private static function resolvePredicate(?callable $func, bool $strict): callable
     {
+        if (null === $func && $strict) {
+            return self::strictPredicate(...);
+        }
+
         if (null === $func) {
-            return static function ($value) {
-                // Cast is unnecessary for non-stict filtering
-                return $value;
+            return self::nonStrictPredicate(...);
+        }
+
+        // Handle strict mode for user provided predicates.
+        if ($strict) {
+            return static function ($value) use ($func) {
+                return self::strictPredicate($func($value));
             };
+        }
+
+        /** @phan-suppress-next-line PhanTypeMismatchArgumentNullable */
+        return self::resolveStringPredicate($func);
+    }
+
+    private static function strictPredicate(mixed $value): bool
+    {
+        return null !== $value && false !== $value;
+    }
+
+    private static function nonStrictPredicate(mixed $value): bool
+    {
+        return (bool) $value;
+    }
+
+    /**
+     * Resolves a string/callable predicate into a sensible non-null callable.
+     */
+    private static function resolveStringPredicate(callable $func): callable
+    {
+        if (!is_string($func)) {
+            return $func;
         }
 
         // Strings usually are internal functions, which typically require exactly one parameter.
-        if (is_string($func)) {
-            return static function ($value) use ($func) {
-                return $func($value);
-            };
-        }
-
-        return $func;
+        return static fn($value) => $func($value);
     }
 
     /**
@@ -462,7 +489,7 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $predicate = self::resolvePredicate($predicate);
+        $predicate = self::resolveStringPredicate($predicate);
 
         $this->filter(static function ($value) use ($predicate): bool {
             static $done = false;
@@ -554,9 +581,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * By default returns all values regardless of keys used, discarding all keys in the process. Has an option to keep the keys. This is a terminal operation.
+     * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
      */
-    public function toArray(bool $preserve_keys = false): array
+    public function toList(): array
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -565,16 +592,24 @@ class Standard implements IteratorAggregate, Countable
 
         // We got what we need, moving along.
         if (is_array($this->pipeline)) {
-            if ($preserve_keys) {
-                return $this->pipeline;
-            }
-
             return array_values($this->pipeline);
         }
 
         // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
         // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return iterator_to_array($this, $preserve_keys);
+        return iterator_to_array($this, preserve_keys: false);
+    }
+
+    /**
+     * @deprecated Use toList() or toAssoc() instead
+     */
+    public function toArray(bool $preserve_keys = false): array
+    {
+        if ($preserve_keys) {
+            return $this->toAssoc();
+        }
+
+        return $this->toList();
     }
 
     /**
@@ -583,7 +618,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toArrayPreservingKeys(): array
     {
-        return $this->toArray(true);
+        return $this->toAssoc();
     }
 
     /**
@@ -591,7 +626,18 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toAssoc(): array
     {
-        return $this->toArray(preserve_keys: true);
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return [];
+        }
+
+        // We got what we need, moving along.
+        if (is_array($this->pipeline)) {
+            return $this->pipeline;
+        }
+
+        // Preserve keys by default.
+        return iterator_to_array($this);
     }
 
     /**
@@ -637,6 +683,20 @@ class Standard implements IteratorAggregate, Countable
         }
 
         return iterator_count($this->pipeline);
+    }
+
+    /**
+     * @return $this
+     */
+    public function stream()
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $this->pipeline = self::makeNonRewindable($this->pipeline);
+
+        return $this;
     }
 
     private static function makeNonRewindable(iterable $input): Generator
@@ -738,12 +798,13 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield $input->key() => $input->current();
-            $input->next();
 
             // Stop once taken enough.
             if (0 === --$take) {
                 break;
             }
+
+            $input->next();
         }
     }
 
@@ -906,6 +967,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
         }
 
+        // Fetch the next value
+        $input->next();
+
         // Return if there's nothing more to fetch
         if (!$input->valid()) {
             return;
@@ -941,6 +1005,9 @@ class Standard implements IteratorAggregate, Countable
             yield $output;
             $sum += $weightFunc($output);
         }
+
+        // Fetch the next value
+        $input->next();
 
         // Return if there's nothing more to fetch
         if (!$input->valid()) {

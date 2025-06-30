@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 
 use function Pipeline\fromArray;
 use function round;
@@ -81,7 +82,7 @@ final class UnpackTest extends TestCase
             new ArrayIterator([1]),
             fromArray([2]),
             [3],
-        ])->unpack()->toArray());
+        ])->unpack()->toList());
     }
 
     /**
@@ -93,6 +94,16 @@ final class UnpackTest extends TestCase
             new ArrayIterator([1]),
             fromArray([2]),
             [3],
-        ])->flatten()->toArray());
+        ])->flatten()->toList());
+    }
+
+    public function testUnpackUnprimed(): void
+    {
+        $pipeline = new Standard();
+        $pipeline->unpack(function () {
+            return 1;
+        });
+
+        $this->assertSame([1], $pipeline->toList());
     }
 }

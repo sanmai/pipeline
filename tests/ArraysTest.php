@@ -52,7 +52,7 @@ final class ArraysTest extends TestCase
             return 42;
         });
 
-        $this->assertSame([42], $pipeline->toArray());
+        $this->assertSame([42], $pipeline->toList());
     }
 
     public function testArrayFilter(): void
@@ -62,7 +62,7 @@ final class ArraysTest extends TestCase
             return false;
         })->filter()->filter();
 
-        $this->assertSame([], $pipeline->toArray());
+        $this->assertSame([], $pipeline->toList());
     }
 
     public function testArrayReduce(): void
@@ -87,6 +87,6 @@ final class ArraysTest extends TestCase
             2 => 2,
         ]);
 
-        $this->assertSame([1, 2], $pipeline->toArray());
+        $this->assertSame([1, 2], $pipeline->toList());
     }
 }

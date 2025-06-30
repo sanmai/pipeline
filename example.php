@@ -83,10 +83,10 @@ $pipeline->filter(function ($value) {
 });
 
 // reduce to a single value; can be an array or any value
-$value = $pipeline->reduce(function ($carry, $valuetem) {
+$value = $pipeline->fold(0, function ($carry, $valuetem) {
     // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
     return $carry + $valuetem;
-}, 0);
+});
 
 var_dump($value);
 // int(104)
@@ -123,7 +123,7 @@ var_dump($result);
 //     int(62)
 // }
 
-// Now an example for toArray()
+// Now an example for toList()
 // Yields [0 => 1, 1 => 2]
 $pipeline = map(function () {
     yield 1;
@@ -139,7 +139,7 @@ $pipeline->map(function ($value) {
 // remove first and last elements
 $pipeline->slice(1, -1);
 
-$arrayResult = $pipeline->toArray();
+$arrayResult = $pipeline->toList();
 var_dump($arrayResult);
 // Since keys are discarded we get:
 // array(4) {

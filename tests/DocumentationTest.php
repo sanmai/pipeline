@@ -84,7 +84,7 @@ final class DocumentationTest extends TestCase
 
     public function testProvideMethods(): void
     {
-        $methods = take(self::provideMethods())->toArray();
+        $methods = take(self::provideMethods())->toList();
 
         $this->assertGreaterThan(0, $methods, 'No public methods found.');
     }

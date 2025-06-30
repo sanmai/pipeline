@@ -125,7 +125,7 @@ final class StaticAnalysisTest extends TestCase
                 return $this;
             }
 
-            public function filter(?callable $func = null): self
+            public function filter(?callable $func = null, bool $strict = false): self
             {
                 return $this;
             }

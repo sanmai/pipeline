@@ -25,7 +25,7 @@ export XDEBUG_MODE=coverage
 # Phan
 PHAN=vendor/bin/phan
 PHAN_ARGS=-j $(JOBS) --allow-polyfill-parser
-PHAN_PHP_VERSION=7.1
+PHAN_PHP_VERSION=8.2
 export PHAN_DISABLE_XDEBUG_WARN=1
 
 # PHPStan
@@ -158,7 +158,7 @@ yamllint:
 # Quick development testing procedure                        #
 ##############################################################
 
-PHP_VERSIONS=php7.1 php7.2 php7.3 php7.4
+PHP_VERSIONS=php8.2 php8.3 php8.4
 
 .PHONY: quick
 quick:
