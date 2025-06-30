@@ -45,7 +45,7 @@ $aggressivelyCleaned = take($rawData)  // Starts with an array
 
 // --- The Safe & Predictable Way (Recommended) ---
 $safelyCleaned = take($rawData)  // Starts with an array
-    ->filter(null, strict: true) // EAGER: this also runs immediately on the array
+    ->filter(strict: true) // EAGER: this also runs immediately on the array
     ->toList(); // Simply returns the final result
 // Result: [1, 'hello', 0, '', '0', true, []] - Correct and safe
 ```

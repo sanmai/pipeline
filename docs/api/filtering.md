@@ -39,7 +39,7 @@ Use `filter()` to remove unwanted elements. Without a callback, it's perfect for
 > 
 > For maximum clarity and to avoid accidental data loss (like removing `0` or empty strings), it is highly recommended to use the strict mode when your goal is to clean out only `null` and `false` values.
 > 
-> - `->filter(null, strict: true)`: **(Recommended for cleaning)** Only removes `null` and `false`
+> - `->filter(strict: true)`: **(Recommended for cleaning)** Only removes `null` and `false`
 > - `->filter()`: **(Use with caution)** Removes all [falsy values](https://www.php.net/manual/en/language.types.boolean.php#language.types.boolean.casting), which includes `0`, `''`, `[]`, and `'0'`
 
 See the [Safe and Predictable Data Cleaning](../cookbook/index.md#safe-and-predictable-data-cleaning) recipe for a detailed example.
@@ -61,7 +61,7 @@ $result = take([0, 1, false, 2, null, 3, '', 4, []])
 
 // Strict mode (only null and false)
 $result = take([0, 1, false, 2, null, 3, '', 4, []])
-    ->filter(null, strict: true)
+    ->filter(strict: true)
     ->toList();
 // Result: [0, 1, 2, 3, '', 4, []]
 

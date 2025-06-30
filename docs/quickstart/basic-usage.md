@@ -100,7 +100,7 @@ $result = take([0, 1, false, 2, null, 3, '', 4])
 
 // Strict mode - only removes null and false
 $result = take([0, 1, false, 2, null, 3, '', 4])
-    ->filter(null, strict: true)
+    ->filter(strict: true)
     ->toList();
 // Result: [0, 1, 2, 3, '', 4]
 ```
@@ -231,7 +231,7 @@ $data = take(new SplFileObject('data.csv'))  // Starts with a lazy iterator
 
 ```php
 // Get page of results
-function getPage($data, $page, $perPage = 10) {
+function getPage(iterable $data, $page, $perPage = 10) {
     $offset = ($page - 1) * $perPage;
     return take($data)
         ->slice($offset, $perPage)

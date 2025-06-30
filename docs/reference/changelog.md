@@ -61,7 +61,7 @@ $result = take([0, '', false, null])->filter()->toList();
 // Result: []
 
 // New strict mode (only null and false removed)
-$result = take([0, '', false, null])->filter(null, strict: true)->toList();
+$result = take([0, '', false, null])->filter(strict: true)->toList();
 // Result: [0, '']
 ```
 
