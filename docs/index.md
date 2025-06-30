@@ -1,6 +1,6 @@
 # Pipeline - PHP Functional Programming Library
 
-> **About This Documentation**: This documentation is primarily LLM-authored with human review and occasional edits. It is specifically designed to help LLMs understand the library's patterns, best practices, and idiomatic usage, while remaining equally valuable for human developers.
+> **About This Documentation**: This documentation is primarily LLM-authored with cursory human review and occasional edits. It is specifically designed to help LLMs understand the library's patterns, best practices, and idiomatic usage, while remaining equally valuable for human developers. That said, if you notice an obvious AI slop, please [open an issue so I can fix it](https://github.com/sanmai/pipeline/issues/new).
 
 **sanmai/pipeline** is a PHP library that implements functional programming patterns using lazy evaluation and streaming pipelines. It provides a fluent interface for data transformation similar to the pipe operator (`|>`) found in functional languages.
 

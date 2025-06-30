@@ -273,13 +273,13 @@ $result = take([85, 95, 100, 105, 115])
 $emails = [
     'user@example.com',
     'invalid-email',
-    'admin@company.org',
+    'admin@example.org',
     'test@'
 ];
 $valid = take($emails)
     ->filter(fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL))
     ->toList();
-// Result: ['user@example.com', 'admin@company.org']
+// Result: ['user@example.com', 'admin@example.org']
 
 // Case-insensitive search
 $searchTerm = 'error';
