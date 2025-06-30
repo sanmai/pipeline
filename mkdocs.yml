@@ -11,6 +11,27 @@ theme:
 
 nav:
   - Home: index.md
+  - Quick Start:
+      - Installation: quickstart/installation.md
+      - Basic Usage: quickstart/basic-usage.md
+      - Examples: quickstart/examples.md
+  - Pipeline Cookbook: cookbook/index.md
+  - API Reference:
+      - Pipeline Creation: api/creation.md
+      - Transformation Methods: api/transformation.md
+      - Filtering Methods: api/filtering.md
+      - Aggregation Methods: api/aggregation.md
+      - Collection Methods: api/collection.md
+      - Utility Methods: api/utility.md
+      - Helper Functions: api/helpers.md
+      - Statistics: api/statistics.md
+  - Advanced Usage:
+      - Complex Pipelines: advanced/complex-pipelines.md
+      - Performance Tips: advanced/performance.md
+      - Best Practices: advanced/best-practices.md
+  - Reference:
+      - Method Index: reference/method-index.md
+      - Changelog: reference/changelog.md
 
 markdown_extensions:
   - admonition

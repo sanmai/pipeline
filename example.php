@@ -83,10 +83,10 @@ $pipeline->filter(function ($value) {
 });
 
 // reduce to a single value; can be an array or any value
-$value = $pipeline->reduce(function ($carry, $valuetem) {
+$value = $pipeline->fold(0, function ($carry, $valuetem) {
     // for the sake of convenience the default reducer from the simple pipeline does summation, just like we do here
     return $carry + $valuetem;
-}, 0);
+});
 
 var_dump($value);
 // int(104)
