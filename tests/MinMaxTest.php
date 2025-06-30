@@ -101,7 +101,6 @@ final class MinMaxTest extends TestCase
 
     public static function provideMinInputs(): iterable
     {
-        // @phpstan-ignore-next-line Data provider exception
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : min($input);
 
@@ -135,7 +134,6 @@ final class MinMaxTest extends TestCase
 
     public static function provideMaxInputs(): iterable
     {
-        // @phpstan-ignore-next-line Data provider exception
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : max($input);
 
