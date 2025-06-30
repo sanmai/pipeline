@@ -25,7 +25,7 @@ export XDEBUG_MODE=coverage
 # Phan
 PHAN=vendor/bin/phan
 PHAN_ARGS=-j $(JOBS) --allow-polyfill-parser
-PHAN_PHP_VERSION=7.1
+PHAN_PHP_VERSION=8.2
 export PHAN_DISABLE_XDEBUG_WARN=1
 
 # PHPStan

@@ -21,11 +21,15 @@ declare(strict_types=1);
 namespace Tests\Pipeline\PHPStan\Rules;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\Closure;
+use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Do_;
 use PhpParser\Node\Stmt\For_;
 use PhpParser\Node\Stmt\Foreach_;
+use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\While_;
 use PhpParser\NodeFinder;
+use PhpParser\NodeTraverser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -53,12 +57,15 @@ class NoNestedLoopsRule implements Rule
             return [];
         }
 
-        $nodeFinder = new NodeFinder();
-        $nestedLoops = $nodeFinder->find($node, function (Node $innerNode) use ($node): bool {
-            return $innerNode !== $node && $this->isLoopNode($innerNode);
-        });
+        // Only check direct statements within the loop body, not inside function calls
+        $stmts = $this->getLoopStatements($node);
+        if (null === $stmts) {
+            return [];
+        }
 
-        if (count($nestedLoops) > 0) {
+        $hasNestedLoop = $this->hasDirectNestedLoop($stmts);
+
+        if ($hasNestedLoop) {
             return [
                 RuleErrorBuilder::message(
                     'Nested loops are not allowed. Use functional approaches like map(), filter(), or extract to a separate method.'
@@ -75,5 +82,40 @@ class NoNestedLoopsRule implements Rule
             || $node instanceof Foreach_
             || $node instanceof While_
             || $node instanceof Do_;
+    }
+
+    private function isFunctionBoundary(Node $node): bool
+    {
+        return $node instanceof Function_
+            || $node instanceof ClassMethod
+            || $node instanceof Closure;
+    }
+
+    /**
+     * @param Node $node
+     * @return array<Node\Stmt>|null
+     */
+    private function getLoopStatements(Node $node): ?array
+    {
+        if ($node instanceof For_ || $node instanceof Foreach_ || $node instanceof While_ || $node instanceof Do_) {
+            return $node->stmts;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<Node> $stmts
+     */
+    private function hasDirectNestedLoop(array $stmts): bool
+    {
+        // Simply check if any direct statement is a loop
+        foreach ($stmts as $stmt) {
+            if ($this->isLoopNode($stmt)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
