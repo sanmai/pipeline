@@ -103,51 +103,6 @@ $result = take(['a' => 1, 'b' => 2])
 // Result: [1 => 'a', 2 => 'b']
 ```
 
-### `toArray(bool $preserve_keys = false)` [DEPRECATED]
-
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Terminal operation (deprecated) |
-> | **Terminal?** | Yes |
-> | **When to Use** | Never - use `toList()` or `toAssoc()` instead |
-> | **Key Behavior** | Legacy method, behavior depends on parameter |
-
-Legacy method for array conversion. Use `toList()` or `toAssoc()` instead.
-
-**Parameters:**
-- `$preserve_keys` (bool): Whether to preserve keys
-
-**Returns:** array
-
-**Examples:**
-
-```php
-// Without preserving keys (use toList() instead)
-$result = take(['a' => 1, 'b' => 2])->toArray();
-// Result: [1, 2]
-
-// Preserving keys (use toAssoc() instead)
-$result = take(['a' => 1, 'b' => 2])->toArray(true);
-// Result: ['a' => 1, 'b' => 2]
-```
-
-### `toArrayPreservingKeys()` [DEPRECATED]
-
-> **Quick Reference**
-> 
-> | | |
-> |---|---|
-> | **Type** | Terminal operation (deprecated) |
-> | **Terminal?** | **Yes** |
-> | **Execution** | Depends on Input |
-> | **Key Behavior** | Legacy method - use `toAssoc()` instead. |
-
-Legacy method. Use `toAssoc()` instead.
-
-**Returns:** array - Same as `toAssoc()`
-
 ## Iterator Access
 
 ### `getIterator()`

@@ -56,8 +56,6 @@ Quick reference for all Pipeline methods and helper functions.
 |--------|-------------|---------|
 | `toList()` | Convert to indexed array | array |
 | `toAssoc()` | Convert preserving keys | array |
-| `toArray(bool $preserve_keys = false)` | **DEPRECATED** - Use toList/toAssoc | array |
-| `toArrayPreservingKeys()` | **DEPRECATED** - Use toAssoc | array |
 
 ## Terminal Operations - Aggregation
 
@@ -157,7 +155,7 @@ Return Pipeline instance for chaining:
 
 ### Terminal Operations
 Consume pipeline and return final result:
-- `toList()`, `toAssoc()`, `toArray()`
+- `toList()`, `toAssoc()`
 - `reduce()`, `fold()`
 - `count()`, `min()`, `max()`
 - `each()`
