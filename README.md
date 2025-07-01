@@ -234,6 +234,30 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
+# Type Safety with Generics
+
+Pipeline includes generic type annotations that provide better type safety when using static analysis tools like PHPStan, Psalm, or PHPStorm.
+
+```php
+use function Pipeline\fromArray;
+
+// Create a type-safe pipeline
+/** @var Standard<string, int> $numbers */
+$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+
+// PHPStan/Psalm understand the types
+$doubled = $numbers->map(fn(int $n): int => $n * 2);     // Still Standard<string, int>
+$strings = $numbers->cast(fn(int $n): string => "#$n");  // Still Standard<string, string>*
+
+// Terminal operations return concrete types
+$list = $strings->toList();   // list<string>
+$assoc = $strings->toAssoc(); // array<string, string>
+```
+
+**Note**: Due to the library's mutable design, type transformations return the same instance. Static analyzers understand the type changes through PHPDoc annotations.
+
+For more details, see the [Generic Type Support documentation](docs/generics.md).
+
 # Methods
 
 ## `__construct()`
