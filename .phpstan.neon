@@ -12,3 +12,4 @@ rules:
     - Tests\Pipeline\PHPStan\Rules\NoNestedLoopsRule
     - Tests\Pipeline\PHPStan\Rules\RequireGuardClausesInLoopsRule
     - Tests\Pipeline\PHPStan\Rules\NoCountZeroComparisonRule
+    - Tests\Pipeline\PHPStan\Rules\NoNestedIfStatementsRule
