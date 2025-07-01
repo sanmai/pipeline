@@ -54,7 +54,9 @@ use function array_keys;
 /**
  * Concrete pipeline with sensible default callbacks.
  *
- * @template-implements IteratorAggregate<mixed, mixed>
+ * @template TKey
+ * @template TValue
+ * @template-implements IteratorAggregate<TKey, TValue>
  */
 class Standard implements IteratorAggregate, Countable
 {
@@ -62,11 +64,15 @@ class Standard implements IteratorAggregate, Countable
      * Pre-primed pipeline.
      *
      * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
+     *
+     * @var iterable<TKey, TValue>
      */
     private iterable $pipeline;
 
     /**
      * Constructor with an optional source of data.
+     *
+     * @param ?iterable<TKey, TValue> $input
      */
     public function __construct(?iterable $input = null)
     {
@@ -110,8 +116,11 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Appends the contents of an interable to the end of the pipeline.
+     *
+     * @param ?iterable<TKey, TValue> $values
+     * @return static
      */
-    public function append(?iterable $values = null): self
+    public function append(?iterable $values = null)
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -291,11 +300,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func a callback must either return a value or yield values (return a generator)
-     *
-     * @return $this
+     * @template TNewValue
+     * @param ?callable(TValue, TKey): (TNewValue|Generator<mixed, TNewValue>) $func a callback must either return a value or yield values (return a generator)
+     * @return static
+     * @phpstan-return ($func is null ? static : static<TKey, TNewValue>)
      */
-    public function map(?callable $func = null): self
+    public function map(?callable $func = null)
     {
         if (null === $func) {
             return $this;
@@ -354,13 +364,13 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func a callback must return a value
-     *
+     * @template TNewValue
+     * @param ?callable(TValue): TNewValue $func a callback must return a value
      * @psalm-suppress RedundantCondition
-     *
-     * @return $this
+     * @return static
+     * @phpstan-return ($func is null ? static : static<TKey, TNewValue>)
      */
-    public function cast(?callable $func = null): self
+    public function cast(?callable $func = null)
     {
         if (null === $func) {
             return $this;
@@ -401,12 +411,11 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable $func
-     * @param bool      $strict When true, only `null` and `false` are filtered out
-     *
-     * @return $this
+     * @param ?callable(TValue, TKey): bool $func
+     * @param bool $strict When true, only `null` and `false` are filtered out
+     * @return static
      */
-    public function filter(?callable $func = null, bool $strict = false): self
+    public function filter(?callable $func = null, bool $strict = false)
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -566,6 +575,9 @@ class Standard implements IteratorAggregate, Countable
         };
     }
 
+    /**
+     * @return Traversable<TKey, TValue>
+     */
     #[Override]
     public function getIterator(): Traversable
     {
@@ -582,6 +594,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
+     *
+     * @return list<TValue>
      */
     public function toList(): array
     {
@@ -623,6 +637,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     *
+     * @return array<TKey, TValue>
      */
     public function toAssoc(): array
     {
