@@ -301,7 +301,7 @@ class Standard implements IteratorAggregate, Countable
      * With no callback is a no-op (can safely take a null).
      *
      * @template TNewValue
-     * @param ?callable(TValue, TKey): (TNewValue|Generator<mixed, TNewValue>) $func a callback must either return a value or yield values (return a generator)
+     * @param ?callable(TValue): (TNewValue|Generator<mixed, TNewValue>) $func a callback must either return a value or yield values (return a generator)
      * @return static
      * @phpstan-return ($func is null ? static : static<TKey, TNewValue>)
      */
@@ -411,7 +411,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable(TValue, TKey): bool $func
+     * @param ?callable(TValue, TKey, Iterator): bool $func
      * @param bool $strict When true, only `null` and `false` are filtered out
      * @return static
      */
