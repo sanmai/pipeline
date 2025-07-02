@@ -115,7 +115,6 @@ final class FlipTest extends TestCase
 
     public static function provideFlipInputs(): iterable
     {
-        // @phpstan-ignore-next-line Data provider exception
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = array_flip($input);
 
