@@ -816,12 +816,15 @@ class Standard implements IteratorAggregate, Countable
         $buffer = [];
 
         foreach ($input as $key => $value) {
-            if (count($buffer) >= $length) {
-                // Buffer is full, remove oldest item over N
-                array_shift($buffer);
+            if (count($buffer) < $length) {
+                // Read at most N records.
+                $buffer[] = [$key, $value];
+
+                continue;
             }
 
-            // Always add the new item
+            // Remove and add one record each time.
+            array_shift($buffer);
             $buffer[] = [$key, $value];
         }
 
@@ -840,12 +843,10 @@ class Standard implements IteratorAggregate, Countable
         foreach ($input as $key => $value) {
             $buffer[] = [$key, $value];
 
-            if (count($buffer) <= $length) {
-                continue;
+            if (count($buffer) > $length) {
+                [$key, $value] = array_shift($buffer);
+                yield $key => $value;
             }
-
-            [$key, $value] = array_shift($buffer);
-            yield $key => $value;
         }
     }
 
