@@ -584,7 +584,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
-     * @returns list
+     * @return list<>
      */
     public function toList(): array
     {
