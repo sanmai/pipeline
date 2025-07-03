@@ -94,8 +94,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * @psalm-suppress TypeDoesNotContainType
-     * @psalm-assert-if-false non-empty-array|\Traversable $this->pipeline
-     * @phpstan-assert-if-false non-empty-array|\Traversable $this->pipeline
+     * @psalm-assert-if-false non-empty-array|Traversable $this->pipeline
+     * @phpstan-assert-if-false non-empty-array|Traversable $this->pipeline
      */
     private function empty(): bool
     {
