@@ -21,7 +21,7 @@
         "php-coveralls/php-coveralls": "^2.4.1",
         "phpstan/phpstan": "^2",
         "phpunit/phpunit": ">=9.4 <12",
-        "sanmai/phpstan-rules": "^0.1.0",
+        "sanmai/phpstan-rules": "^0.2.0",
         "vimeo/psalm": ">=2"
     },
     "autoload": {

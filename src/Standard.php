@@ -94,6 +94,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * @psalm-suppress TypeDoesNotContainType
+     * @psalm-assert-if-false non-empty-array|\Traversable $this->pipeline
+     * @phpstan-assert-if-false non-empty-array|\Traversable $this->pipeline
      */
     private function empty(): bool
     {
@@ -582,6 +584,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
+     * @returns list
      */
     public function toList(): array
     {
@@ -623,6 +626,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     * @return array
      */
     public function toAssoc(): array
     {
@@ -813,15 +817,12 @@ class Standard implements IteratorAggregate, Countable
         $buffer = [];
 
         foreach ($input as $key => $value) {
-            if (count($buffer) < $length) {
-                // Read at most N records.
-                $buffer[] = [$key, $value];
-
-                continue;
+            if (count($buffer) >= $length) {
+                // Buffer is full, remove oldest item over N
+                array_shift($buffer);
             }
 
-            // Remove and add one record each time.
-            array_shift($buffer);
+            // Always add the new item
             $buffer[] = [$key, $value];
         }
 
@@ -840,10 +841,12 @@ class Standard implements IteratorAggregate, Countable
         foreach ($input as $key => $value) {
             $buffer[] = [$key, $value];
 
-            if (count($buffer) > $length) {
-                [$key, $value] = array_shift($buffer);
-                yield $key => $value;
+            if (count($buffer) <= $length) {
+                continue;
             }
+
+            [$key, $value] = array_shift($buffer);
+            yield $key => $value;
         }
     }
 
@@ -1226,10 +1229,11 @@ class Standard implements IteratorAggregate, Countable
     private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
     {
         if (null === $castFunc) {
-            $castFunc = 'floatval';
+            $castFunc = floatval(...);
         }
 
         return $this->cast(static function ($value) use ($variance, $castFunc) {
+            /** @var float|null $float */
             $float = $castFunc($value);
 
             if (null !== $float) {
