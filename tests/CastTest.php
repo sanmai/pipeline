@@ -40,7 +40,6 @@ final class CastTest extends TestCase
     {
         $result = [];
 
-        // @phpstan-ignore-next-line We test how the library is actually used
         foreach (take([1, 2, 3])->cast(function (int $i) {
             yield $i;
         }) as $generator) {
