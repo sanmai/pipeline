@@ -1,469 +1,199 @@
-# Pipeline Creation Methods
+# Creation Methods
 
-Methods for creating and initializing pipeline instances. All methods return a `Pipeline\Standard` instance that can be chained with other operations.
+These methods are used to create and initialize pipeline instances.
 
-## Class Constructor
+## Constructor
 
-### `new Standard(?iterable $input = null)`
+### `new Standard()`
 
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Constructor |
-> | **Terminal?** | No |
-> | **When to Use** | To create a pipeline instance directly |
-> | **Key Behavior** | Accepts any iterable or null for empty pipeline |
+The `Standard` class is the main entry point for creating a pipeline.
 
-Creates a new pipeline instance with optional initial data.
+**Signature**: `new Standard(?iterable $input = null)`
 
-**Parameters:**
-- `$input` (?iterable): Optional initial data source (array, Iterator, IteratorAggregate, or Generator)
+-   `$input`: An optional initial data source, which can be an array, iterator, or generator.
 
-**Returns:** Pipeline\Standard instance
-
-**Examples:**
+**Examples**:
 
 ```php
 use Pipeline\Standard;
 
-// Empty pipeline
+// Create an empty pipeline
 $pipeline = new Standard();
 
-// From array
-$pipeline = new Standard([1, 2, 3, 4, 5]);
+// Create a pipeline from an array
+$pipeline = new Standard([1, 2, 3]);
 
-// From generator
-function gen() {
+// Create a pipeline from a generator
+$pipeline = new Standard(function () {
     yield 1;
     yield 2;
-    yield 3;
-}
-$pipeline = new Standard(gen());
-
-// From iterator
-$pipeline = new Standard(new ArrayIterator(['a', 'b', 'c']));
-
-// From file
-$pipeline = new Standard(new SplFileObject('data.txt'));
+});
 ```
 
 ## Helper Functions
 
-### `take(?iterable $input = null, iterable ...$inputs)`
+### `take()`
 
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Creation helper |
-> | **Terminal?** | No |
-> | **When to Use** | Preferred way to create pipelines, supports multiple sources |
-> | **Key Behavior** | Concatenates multiple iterables into single pipeline |
+Creates a pipeline from one or more iterables.
 
-Creates a pipeline from one or more iterables. Additional inputs are appended in sequence.
+**Signature**: `take(?iterable $input = null, iterable ...$inputs): Standard`
 
-**Parameters:**
-- `$input` (?iterable): Primary data source
-- `...$inputs` (iterable): Additional data sources to append
+-   `$input`: The primary data source.
+-   `...$inputs`: Additional data sources to append.
 
-**Returns:** Pipeline\Standard instance
-
-**Examples:**
+**Examples**:
 
 ```php
 use function Pipeline\take;
 
-// Single source
+// From a single source
 $pipeline = take([1, 2, 3]);
 
-// Multiple sources (concatenated)
-$pipeline = take([1, 2], [3, 4], [5, 6]);
-// Equivalent to [1, 2, 3, 4, 5, 6]
-
-// From generator with additional arrays
-$pipeline = take(
-    generateData(),
-    [100, 200],
-    moreData()
-);
-
-// Empty pipeline
-$pipeline = take();
+// From multiple sources
+$pipeline = take([1, 2], [3, 4]); // [1, 2, 3, 4]
 ```
 
-### `fromArray(array $input)`
+### `fromArray()`
 
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Creation helper |
-> | **Terminal?** | No |
-> | **When to Use** | When you have an array and want type safety |
-> | **Key Behavior** | Only accepts arrays, preserves keys |
+Creates a pipeline from an array.
 
-Creates a pipeline specifically from an array. Provides type safety when array input is required.
+**Signature**: `fromArray(array $input): Standard`
 
-**Parameters:**
-- `$input` (array): Source array
-
-**Returns:** Pipeline\Standard instance
-
-**Examples:**
+**Examples**:
 
 ```php
 use function Pipeline\fromArray;
 
-// Indexed array
-$pipeline = fromArray([1, 2, 3, 4, 5]);
-
-// Associative array
-$pipeline = fromArray([
-    'first' => 1,
-    'second' => 2,
-    'third' => 3
-]);
-
-// Multidimensional array
-$pipeline = fromArray([
-    ['id' => 1, 'name' => 'Alice'],
-    ['id' => 2, 'name' => 'Bob']
-]);
+$pipeline = fromArray(['a' => 1, 'b' => 2]);
 ```
 
-### `fromValues(...$values)`
+### `fromValues()`
 
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Creation helper |
-> | **Terminal?** | No |
-> | **When to Use** | To create a pipeline from individual values |
-> | **Key Behavior** | Each argument becomes a pipeline element |
+Creates a pipeline from a sequence of individual values.
 
-Creates a pipeline from individual values provided as arguments.
+**Signature**: `fromValues(...$values): Standard`
 
-**Parameters:**
-- `...$values` (mixed): Individual values to include in pipeline
-
-**Returns:** Pipeline\Standard instance
-
-**Examples:**
+**Examples**:
 
 ```php
 use function Pipeline\fromValues;
 
-// From scalar values
-$pipeline = fromValues(1, 2, 3, 4, 5);
-
-// From mixed types
-$pipeline = fromValues('a', 1, true, null, ['x' => 'y']);
-
-// From objects
-$obj1 = new stdClass();
-$obj2 = new DateTime();
-$pipeline = fromValues($obj1, $obj2);
-
-// Single value
-$pipeline = fromValues(42);
+$pipeline = fromValues(1, 'a', true);
 ```
 
-### `map(?callable $func = null)`
+### `zip()`
 
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Creation helper / Transformation |
-> | **Terminal?** | No |
-> | **When to Use** | To create pipelines from generators or transform existing ones |
-> | **Key Behavior** | Dual purpose: creation and transformation |
+Combines multiple iterables into a single pipeline of tuples.
 
-Creates a pipeline with an optional generator callback. When called without arguments, returns an empty pipeline. When called with a generator function, initializes the pipeline with the generator's output.
+**Signature**: `zip(iterable $base, iterable ...$inputs): Standard`
 
-**Parameters:**
-- `$func` (?callable): Optional generator function or value-returning function
+**Behavior**:
 
-**Returns:** Pipeline\Standard instance
+-   Creates a new pipeline where each element is an array containing the corresponding elements from the input iterables.
+-   If the iterables have different lengths, the shorter ones are padded with `null`.
 
-**Examples:**
-
-```php
-use function Pipeline\map;
-
-// Empty pipeline
-$pipeline = map();
-
-// From generator function
-$pipeline = map(function() {
-    for ($i = 1; $i <= 5; $i++) {
-        yield $i * $i;
-    }
-});
-// Yields: 1, 4, 9, 16, 25
-
-// From value-returning function (creates single-element pipeline)
-$pipeline = map(fn() => 'hello');
-// Contains: ['hello']
-
-// Infinite sequence generator
-$pipeline = map(function() {
-    $n = 1;
-    while (true) {
-        yield $n++;
-    }
-})->slice(0, 10);  // Take first 10
-```
-
-### `zip(iterable $base, iterable ...$inputs)`
-
-> **Quick Reference**
-> 
-> | | |
-> |:---|:---|
-> | **Type** | Creation helper |
-> | **Terminal?** | No |
-> | **When to Use** | To combine parallel arrays into tuples |
-> | **Key Behavior** | Creates arrays from corresponding elements, pads with null |
-
-Creates a pipeline by combining multiple iterables element by element (transposition).
-
-**Parameters:**
-- `$base` (iterable): Base iterable to zip
-- `...$inputs` (iterable): Additional iterables to zip with
-
-**Returns:** Pipeline\Standard instance with arrays as elements
-
-**Examples:**
+**Examples**:
 
 ```php
 use function Pipeline\zip;
 
-// Basic zip
-$names = ['Alice', 'Bob', 'Charlie'];
-$ages = [30, 25, 35];
+$names = ['Alice', 'Bob'];
+$ages = [30, 25];
+
 $result = zip($names, $ages)->toList();
-// Result: [['Alice', 30], ['Bob', 25], ['Charlie', 35]]
-
-// Multiple iterables
-$result = zip(
-    ['A', 'B', 'C'],
-    [1, 2, 3],
-    ['x', 'y', 'z']
-)->toList();
-// Result: [['A', 1, 'x'], ['B', 2, 'y'], ['C', 3, 'z']]
-
-// Uneven lengths (shorter iterables padded with null)
-$result = zip(
-    [1, 2, 3, 4, 5],
-    ['a', 'b', 'c']
-)->toList();
-// Result: [[1, 'a'], [2, 'b'], [3, 'c'], [4, null], [5, null]]
-
-// With generators
-function letters() {
-    foreach (range('a', 'z') as $letter) {
-        yield $letter;
-    }
-}
-$result = zip(range(1, 5), letters())->toList();
-// Result: [[1, 'a'], [2, 'b'], [3, 'c'], [4, 'd'], [5, 'e']]
+// [['Alice', 30], ['Bob', 25]]
 ```
 
-## Data Addition Methods
+## Adding Data to a Pipeline
 
-### `append(?iterable $values = null)`
+### `append()`
 
-> **Quick Reference**
-> 
-> | | |
-> |---|---|
-> | **Type** | Data Addition |
-> | **Terminal?** | No |
-> | **Execution** | Always Lazy |
-> | **Key Behavior** | Concatenates additional iterables to the end of the pipeline. |
+Adds elements from an iterable to the end of the pipeline.
 
-Adds elements to the end of the pipeline.
+**Signature**: `append(?iterable $values = null): self`
 
-**Parameters:**
-- `$values` (?iterable): Values to append
-
-**Returns:** $this (Pipeline\Standard instance)
-
-**Examples:**
+**Examples**:
 
 ```php
-$pipeline = take([1, 2, 3])
-    ->append([4, 5, 6])
-    ->append(generateMore());
-// Result: 1, 2, 3, 4, 5, 6, ...generated values...
-
-// Append nothing (no-op)
-$pipeline = take([1, 2, 3])->append(null);
-// Result: [1, 2, 3]
-
-// Chain multiple appends
-$result = take([1])
-    ->append([2])
-    ->append([3])
-    ->toList();
-// Result: [1, 2, 3]
+$pipeline = take([1, 2])->append([3, 4]); // [1, 2, 3, 4]
 ```
 
-### `push(...$vector)`
-
-> **Quick Reference**
-> 
-> | | |
-> |---|---|
-> | **Type** | Data Addition |
-> | **Terminal?** | No |
-> | **Execution** | Always Lazy |
-> | **Key Behavior** | Appends individual arguments as separate elements. |
+### `push()`
 
 Appends individual values to the end of the pipeline.
 
-**Parameters:**
-- `...$vector` (mixed): Individual values to append
+**Signature**: `push(...$vector): self`
 
-**Returns:** $this (Pipeline\Standard instance)
-
-**Examples:**
+**Examples**:
 
 ```php
-$result = take([1, 2, 3])
-    ->push(4)
-    ->push(5, 6)
-    ->toList();
-// Result: [1, 2, 3, 4, 5, 6]
-
-// Push various types
-$result = take(['a'])
-    ->push('b', 100, true, null)
-    ->toList();
-// Result: ['a', 'b', 100, true, null]
+$pipeline = take([1, 2])->push(3, 4); // [1, 2, 3, 4]
 ```
 
-### `prepend(?iterable $values = null)`
+### `prepend()`
 
-> **Quick Reference**
-> 
-> | | |
-> |---|---|
-> | **Type** | Data Addition |
-> | **Terminal?** | No |
-> | **Execution** | Always Lazy |
-> | **Key Behavior** | Adds elements before existing pipeline data. |
+Adds elements from an iterable to the beginning of the pipeline.
 
-Adds elements to the beginning of the pipeline.
+**Signature**: `prepend(?iterable $values = null): self`
 
-**Parameters:**
-- `$values` (?iterable): Values to prepend
-
-**Returns:** $this (Pipeline\Standard instance)
-
-**Examples:**
+**Examples**:
 
 ```php
-$result = take([4, 5, 6])
-    ->prepend([1, 2, 3])
-    ->toList();
-// Result: [1, 2, 3, 4, 5, 6]
-
-// Prepend to empty pipeline
-$result = take()
-    ->prepend([1, 2, 3])
-    ->toList();
-// Result: [1, 2, 3]
-
-// Chain operations
-$result = take([3])
-    ->prepend([2])
-    ->prepend([1])
-    ->toList();
-// Result: [1, 2, 3]
+$pipeline = take([3, 4])->prepend([1, 2]); // [1, 2, 3, 4]
 ```
 
-### `unshift(...$vector)`
-
-> **Quick Reference**
-> 
-> | | |
-> |---|---|
-> | **Type** | Data Addition |
-> | **Terminal?** | No |
-> | **Execution** | Always Lazy |
-> | **Key Behavior** | Prepends individual arguments as separate elements. |
+### `unshift()`
 
 Prepends individual values to the beginning of the pipeline.
 
-**Parameters:**
-- `...$vector` (mixed): Individual values to prepend
+**Signature**: `unshift(...$vector): self`
 
-**Returns:** $this (Pipeline\Standard instance)
-
-**Examples:**
+**Examples**:
 
 ```php
-$result = take([4, 5, 6])
-    ->unshift(1, 2, 3)
+$pipeline = take([3, 4])->unshift(1, 2); // [1, 2, 3, 4]
+```
+
+## Working with Callables
+
+The library accepts callables in many methods like `map()`, `filter()`, and `cast()`. Since PHP 8.1, you can use the first-class callable syntax for cleaner, more modern code.
+
+### First-Class Callable Syntax
+
+```php
+// Modern syntax (PHP 8.1+)
+$pipeline = take(['1', '2', '3'])
+    ->cast(intval(...))
     ->toList();
-// Result: [1, 2, 3, 4, 5, 6]
 
-// Order matters
-$result = take([3])
-    ->unshift(2)
-    ->unshift(1)
+// Works with any function
+$pipeline = take(['hello', 'world'])
+    ->map(strtoupper(...))
     ->toList();
-// Result: [1, 2, 3]
+
+// Works with object methods
+$helper = new DataProcessor();
+$pipeline = take($data)
+    ->filter($helper->isValid(...))
+    ->map($helper->transform(...));
+
+// Works with static methods
+$pipeline = take($users)
+    ->filter(User::isActive(...))
+    ->map(User::normalize(...));
 ```
 
-## Usage Patterns
-
-### Combining Creation Methods
+### Legacy Syntax (Still Supported)
 
 ```php
-// Start with array, add more data
-$pipeline = fromArray([1, 2, 3])
-    ->append(generateMore())
-    ->push(100, 200)
-    ->prepend([0]);
+// String callables (older style)
+$pipeline->cast('intval');
 
-// Start empty, build up
-$pipeline = take()
-    ->append(dataSource1())
-    ->append(dataSource2())
-    ->push('end');
+// Array callables (older style)
+$pipeline->map([$object, 'method']);
+
+// Static method array (older style)
+$pipeline->filter(['ClassName', 'staticMethod']);
 ```
 
-### Lazy Evaluation
-
-```php
-// Pipeline creation is lazy - nothing executes until consumed
-$pipeline = take(expensiveGenerator())
-    ->append(anotherExpensiveSource());
-// No computation happens yet
-
-// Computation begins here
-$result = $pipeline->toList();
-```
-
-### Memory Efficiency
-
-```php
-// Process large file without loading into memory
-$pipeline = take(new SplFileObject('10gb-file.txt'))
-    ->append(new SplFileObject('another-large-file.txt'));
-
-// Still memory efficient - processes line by line
-$pipeline->each(function($line) {
-    processLine($line);
-});
-```
-
-## Next Steps
-
-- [Transformation Methods](transformation.md) - Methods for transforming pipeline data
-- [Filtering Methods](filtering.md) - Methods for filtering elements
+The first-class callable syntax is recommended for new code as it provides better IDE support, type safety, and is more readable.
