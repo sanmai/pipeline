@@ -2,6 +2,19 @@
 
 Collection methods are used to convert a pipeline into an array or to iterate over its elements.
 
+## Terminal Operations
+
+A pipeline is **lazy** and does not begin processing data until a **terminal operation** is called. These methods consume the pipeline to produce a final result.
+
+Understanding this is key to using the library effectively. No work is done, and no memory is used by the pipeline itself, until one of these methods is invoked.
+
+Common terminal operations include:
+- `toList()` and `toAssoc()` - Convert to arrays
+- `fold()` and `reduce()` - Aggregate to a single value
+- `count()`, `min()`, `max()` - Calculate statistics
+- `each()` - Iterate and perform side effects
+- `finalVariance()` - Calculate comprehensive statistics
+
 ## Array Conversion
 
 ### `toList()`

@@ -69,10 +69,15 @@ $pipeline->append([1, 2, 3]);
 The `map()` method applies a callback to each element in the pipeline.
 
 ```php
+use function Pipeline\take;
+
 // Double each number
 $result = take([1, 2, 3])
     ->map(fn($x) => $x * 2)
     ->toList(); // [2, 4, 6]
+
+// Note: With arrays, some operations like filter() execute immediately.
+// Use ->stream() first if you need lazy processing throughout.
 
 // Extract a property from an array of objects
 $users = [

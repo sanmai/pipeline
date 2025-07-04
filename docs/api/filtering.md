@@ -16,6 +16,10 @@ Filters the pipeline using a callback function. If no callback is provided, it r
 -   Preserves the original keys of the elements.
 -   For arrays, it uses the highly optimized `array_filter()` function.
 
+> **Performance Note**
+>
+> When working with arrays, `filter()` uses PHP's `array_filter()` internally, creating a new array in memory. For large datasets, use `->stream()` first to process elements one at a time and avoid creating intermediate arrays.
+
 **Examples**:
 
 ```php

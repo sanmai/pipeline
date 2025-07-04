@@ -16,6 +16,10 @@ Transforms each element using a callback function. This is the most flexible tra
 
 -   If the callback returns a `Generator`, `map()` will expand it, yielding each of its values into the main pipeline.
 
+> **Performance Note**
+>
+> When starting with an array, `map()` processes lazily but other methods in your chain might not. For large datasets, consider using `->stream()` first to ensure all operations process one element at a time, avoiding high memory usage.
+
 **Examples**:
 
 ```php
@@ -45,6 +49,10 @@ Transforms each element using a callback, but with a key difference from `map()`
 
 -   If the callback returns a `Generator`, `cast()` will treat it as a single value, not expand it.
 -   It is faster than `map()` for simple transformations on arrays because it uses `array_map()` internally.
+
+> **Performance Note**
+>
+> When working with arrays, `cast()` uses PHP's `array_map()` internally, creating a new array in memory. For large datasets, use `->stream()` first to process elements one at a time.
 
 **Examples**:
 
