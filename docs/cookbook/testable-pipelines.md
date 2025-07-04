@@ -132,7 +132,7 @@ class ProductImportHelperTest extends TestCase
     {
         $input = ['sku' => '  PROD-12345  ', 'name' => ' Widget ', 'price' => '9.99'];
         $expected = ['sku' => 'PROD-12345', 'name' => 'Widget', 'price' => 9.99];
-        
+
         $this->assertEquals($expected, $this->helper->normalizeData($input));
     }
 }
@@ -149,56 +149,56 @@ class ProductImporterTest extends TestCase
     public function testImportSequenceIsCorrect(): void
     {
         $helper = $this->createMock(ProductImportHelper::class);
-        
+
         // Define the EXACT sequence we expect
         $helper->expects($this->once())
             ->method('isCompleteRow')
             ->willReturn(true);
-            
+
         $helper->expects($this->once())
             ->method('normalizeData')
             ->willReturnArgument(0);
-            
+
         $helper->expects($this->once())
             ->method('isValidSku')
             ->willReturn(true);
-            
+
         $helper->expects($this->once())
             ->method('isNewProduct')
             ->willReturn(true);
-            
+
         $helper->expects($this->once())
             ->method('createProductEntity')
             ->willReturn(new Product('PROD-12345', 'Test', 99.99));
 
         $importer = new ProductImporter($helper);
-        
+
         // Execute the pipeline
         $results = iterator_to_array($importer->import([
             ['sku' => 'PROD-12345', 'name' => 'Test Product', 'price' => '99.99']
         ]));
-        
+
         $this->assertCount(1, $results);
     }
 
     public function testSkipsInvalidSku(): void
     {
         $helper = $this->createMock(ProductImportHelper::class);
-        
+
         $helper->expects($this->once())->method('isCompleteRow')->willReturn(true);
         $helper->expects($this->once())->method('normalizeData')->willReturnArgument(0);
         $helper->expects($this->once())->method('isValidSku')->willReturn(false);
-        
+
         // This is the key: isNewProduct should NEVER be called for invalid SKUs
         $helper->expects($this->never())->method('isNewProduct');
         $helper->expects($this->never())->method('createProductEntity');
 
         $importer = new ProductImporter($helper);
-        
+
         $results = iterator_to_array($importer->import([
             ['sku' => 'INVALID', 'name' => 'Test', 'price' => '99.99']
         ]));
-        
+
         $this->assertEmpty($results);
     }
 }
@@ -212,7 +212,7 @@ The second test is crucial - it verifies that we never hit the database for inva
 
 2. **Separation of Concerns**: The orchestrator is a clean specification; the helper contains implementation details.
 
-3. **Exceptional Testability**: 
+3. **Exceptional Testability**:
    - Helper methods are simple unit tests
    - Orchestrator logic is tested via mocks
    - No complex test setup required

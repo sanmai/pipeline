@@ -148,13 +148,13 @@ take($apiResponses)
             $errors[] = ['url' => $response['url'], 'error' => 'Request failed'];
             return null;
         }
-        
+
         $decoded = json_decode($response['data'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             $errors[] = ['url' => $response['url'], 'error' => 'Invalid JSON'];
             return null;
         }
-        
+
         return $decoded;
     })
     ->filter() // Remove nulls
