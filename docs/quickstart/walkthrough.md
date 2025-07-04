@@ -14,7 +14,7 @@ Here is the complete pipeline:
 use function Pipeline\take;
 
 // Sample CSV data with a header row
-$csv = <<<
+$csv = <<<CSV
 name,age,city
 Alice,30,New York
 Bob,25,Los Angeles
