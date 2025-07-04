@@ -78,7 +78,7 @@ class ChangeDetector
 
 $detector = new ChangeDetector();
 $changes = take($prices)
-    ->map([$detector, 'detect'])
+    ->map($detector->detect(...))
     ->filter() // Remove the first null
     ->toList();
 ```

@@ -59,7 +59,7 @@ Transforms each element using a callback, but with a key difference from `map()`
 ```php
 // Type casting
 $result = take(['1', '2', '3'])
-    ->cast('intval')
+    ->cast(intval(...))
     ->toList(); // [1, 2, 3]
 
 // Creating a pipeline of generators

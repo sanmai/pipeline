@@ -18,6 +18,7 @@ nav:
   - Pipeline Cookbook:
       - Overview: cookbook/index.md
       - Associative Arrays: cookbook/associative-arrays.md
+      - Testable Pipelines: cookbook/testable-pipelines.md
   - API Reference:
       - Pipeline Creation: api/creation.md
       - Transformation Methods: api/transformation.md

@@ -27,7 +27,7 @@ $cleanedData = take($rawData)
 ```php
 // Process a large dataset in batches of 1000
 take(new SplFileObject('large-dataset.csv'))
-    ->map('str_getcsv')
+    ->map(str_getcsv(...))
     ->chunk(1000)
     ->each(function ($batch) {
         // Insert the batch into the database
@@ -87,7 +87,7 @@ $overallStats = new RunningVariance($stats1, $stats2);
 ```php
 // Process a large CSV file
 $data = take(new SplFileObject('data.csv'))
-    ->map('str_getcsv')
+    ->map(str_getcsv(...))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```

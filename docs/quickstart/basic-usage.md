@@ -112,12 +112,12 @@ The `cast()` method provides a simple way to change the type of elements.
 ```php
 // Convert strings to integers
 $result = take(['1', '2', '3'])
-    ->cast('intval')
+    ->cast(intval(...))
     ->toList(); // [1, 2, 3]
 
 // Convert strings to uppercase
 $result = take(['hello', 'world'])
-    ->cast('strtoupper')
+    ->cast(strtoupper(...))
     ->toList(); // ['HELLO', 'WORLD']
 ```
 
@@ -214,7 +214,7 @@ $errorCount = take(new SplFileObject('app.log'))
 
 // Process a CSV file
 $data = take(new SplFileObject('data.csv'))
-    ->map('str_getcsv')
+    ->map(str_getcsv(...))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```

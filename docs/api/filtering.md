@@ -37,6 +37,17 @@ $result = take([0, 1, false, 2, null, 3, '', 4])
 $result = take([0, 1, false, 2, null, 3, '', 4])
     ->filter(strict: true)
     ->toList(); // [0, 1, 2, 3, '', 4]
+
+// Using built-in type checking functions
+$result = take([1, '2', 3.0, 'four'])
+    ->filter(is_int(...))
+    ->toList(); // [1]
+
+// Using object methods as filters
+$validator = new DataValidator();
+$result = take($records)
+    ->filter($validator->isValid(...))
+    ->toList();
 ```
 
 ## `skipWhile()`

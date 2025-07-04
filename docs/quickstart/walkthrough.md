@@ -24,7 +24,7 @@ CSV;
 
 // Build the pipeline
 $users = take(explode("\n", $csv))
-    ->map('str_getcsv')           // 1. Parse each line into an array
+    ->map(str_getcsv(...))        // 1. Parse each line into an array
     ->slice(1)                    // 2. Skip the header row
     ->map(fn($row) => [          // 3. Transform to an associative array
         'name' => $row[0],
@@ -45,7 +45,7 @@ $users = take(explode("\n", $csv))
 
 1.  **`take(explode("\n", $csv))`**: We begin by creating a pipeline from the CSV data. `explode()` splits the string into an array of lines.
 
-2.  **`map('str_getcsv')`**: The `map()` method is used to apply `str_getcsv()` to each line, converting each CSV string into an array of values.
+2.  **`map(str_getcsv(...))`**: The `map()` method is used to apply `str_getcsv()` to each line, converting each CSV string into an array of values.
 
 3.  **`slice(1)`**: This method skips the first element of the pipeline, which in this case is the header row.
 

@@ -153,3 +153,47 @@ Prepends individual values to the beginning of the pipeline.
 ```php
 $pipeline = take([3, 4])->unshift(1, 2); // [1, 2, 3, 4]
 ```
+
+## Working with Callables
+
+The library accepts callables in many methods like `map()`, `filter()`, and `cast()`. Since PHP 8.1, you can use the first-class callable syntax for cleaner, more modern code.
+
+### First-Class Callable Syntax
+
+```php
+// Modern syntax (PHP 8.1+)
+$pipeline = take(['1', '2', '3'])
+    ->cast(intval(...))
+    ->toList();
+
+// Works with any function
+$pipeline = take(['hello', 'world'])
+    ->map(strtoupper(...))
+    ->toList();
+
+// Works with object methods
+$helper = new DataProcessor();
+$pipeline = take($data)
+    ->filter($helper->isValid(...))
+    ->map($helper->transform(...));
+
+// Works with static methods
+$pipeline = take($users)
+    ->filter(User::isActive(...))
+    ->map(User::normalize(...));
+```
+
+### Legacy Syntax (Still Supported)
+
+```php
+// String callables (older style)
+$pipeline->cast('intval');
+
+// Array callables (older style)
+$pipeline->map([$object, 'method']);
+
+// Static method array (older style)
+$pipeline->filter(['ClassName', 'staticMethod']);
+```
+
+The first-class callable syntax is recommended for new code as it provides better IDE support, type safety, and is more readable.
