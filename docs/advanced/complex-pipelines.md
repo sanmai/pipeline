@@ -162,7 +162,17 @@ take($apiResponses)
         $validUsers[] = $user;
     });
 
-// Result: $validUsers contains 2 valid users, $errors contains 2 error entries
+// $validUsers:
+// [
+//     ['id' => 1, 'name' => 'Alice'],
+//     ['id' => 3, 'name' => 'Charlie'],
+// ]
+//
+// $errors:
+// [
+//     ['url' => '/users/2', 'error' => 'Invalid JSON'],
+//     ['url' => '/users/4', 'error' => 'Request failed'],
+// ]
 ```
 
 ## Hierarchical Data
