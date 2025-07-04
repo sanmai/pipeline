@@ -63,7 +63,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      */
-    private iterable $pipeline;
+    private array|Iterator $pipeline;
 
     /**
      * Constructor with an optional source of data.
@@ -89,20 +89,27 @@ class Standard implements IteratorAggregate, Countable
             $input = $input->getIterator();
         }
 
+        /** @var Iterator $input */
         $this->pipeline = $input;
     }
 
     /**
      * @psalm-suppress TypeDoesNotContainType
+     * @phpstan-assert-if-false non-empty-array|Traversable $this->pipeline
      */
     private function empty(): bool
     {
-        return !isset($this->pipeline) || [] === $this->pipeline;
+        if (!isset($this->pipeline)) {
+            return true;
+        }
+
+        if ([] === $this->pipeline) {
+            return true;
+        }
+
+        return false;
     }
 
-    /**
-     * @phan-suppress PhanTypeObjectUnsetDeclaredProperty
-     */
     private function discard(): void
     {
         unset($this->pipeline);
@@ -168,7 +175,6 @@ class Standard implements IteratorAggregate, Countable
     private function willReplace(?iterable $values = null): bool
     {
         // Nothing needs to be done here.
-        /** @phan-suppress-next-line PhanTypeComparisonFromArray */
         if (null === $values || [] === $values) {
             return true;
         }
@@ -207,7 +213,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Replace the internal pipeline with a combination of two non-empty iterables, generator-way.
      */
-    private static function joinYield(iterable $left, iterable $right): iterable
+    private static function joinYield(iterable $left, iterable $right): Generator
     {
         yield from $left;
         yield from $right;
@@ -278,7 +284,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $length
      */
-    private static function toChunks(Generator $input, int $length, bool $preserve_keys): iterable
+    private static function toChunks(Generator $input, int $length, bool $preserve_keys): Generator
     {
         while ($input->valid()) {
             yield iterator_to_array(self::take($input, $length), $preserve_keys);
@@ -332,7 +338,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function apply(iterable $previous, callable $func): iterable
+    private static function apply(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
             $result = $func($value);
@@ -389,7 +395,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function applyOnce(iterable $previous, callable $func): iterable
+    private static function applyOnce(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
             yield $key => $func($value);
@@ -422,9 +428,6 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        assert($this->pipeline instanceof Iterator);
-
-        /** @psalm-suppress ArgumentTypeCoercion */
         $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
@@ -450,7 +453,6 @@ class Standard implements IteratorAggregate, Countable
             };
         }
 
-        /** @phan-suppress-next-line PhanTypeMismatchArgumentNullable */
         return self::resolveStringPredicate($func);
     }
 
@@ -537,7 +539,7 @@ class Standard implements IteratorAggregate, Countable
             return $initial;
         }
 
-        $func = self::resolveReducer($func);
+        $func ??= self::defaultReducer(...);
 
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
@@ -551,19 +553,15 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Resolves a nullable reducer into a sensible callable.
+     * @param mixed $carry
+     * @param mixed $item
+     * @return mixed
      */
-    private static function resolveReducer(?callable $func): callable
+    private static function defaultReducer($carry, $item)
     {
-        if (null !== $func) {
-            return $func;
-        }
+        $carry += $item;
 
-        return static function ($carry, $item) {
-            $carry += $item;
-
-            return $carry;
-        };
+        return $carry;
     }
 
     #[Override]
@@ -582,6 +580,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
+     * @return list<mixed>
      */
     public function toList(): array
     {
@@ -860,9 +859,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         if (!isset($this->pipeline)) {
-            $input = array_shift($inputs);
-            /** @var iterable $input */
-            $this->pipeline = $input;
+            $this->replace(array_shift($inputs));
         }
 
         if ([] === $inputs) {
@@ -1127,7 +1124,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function valuesOnly(iterable $previous): iterable
+    private static function valuesOnly(iterable $previous): Generator
     {
         foreach ($previous as $value) {
             yield $value;
@@ -1155,7 +1152,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function keysOnly(iterable $previous): iterable
+    private static function keysOnly(iterable $previous): Generator
     {
         foreach ($previous as $key => $_) {
             yield $key;
@@ -1183,7 +1180,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function flipKeysAndValues(iterable $previous): iterable
+    private static function flipKeysAndValues(iterable $previous): Generator
     {
         foreach ($previous as $key => $value) {
             yield $value => $key;
@@ -1216,7 +1213,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function toTuples(iterable $previous): iterable
+    private static function toTuples(iterable $previous): Generator
     {
         foreach ($previous as $key => $value) {
             yield [$key, $value];
@@ -1226,10 +1223,11 @@ class Standard implements IteratorAggregate, Countable
     private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
     {
         if (null === $castFunc) {
-            $castFunc = 'floatval';
+            $castFunc = floatval(...);
         }
 
         return $this->cast(static function ($value) use ($variance, $castFunc) {
+            /** @var float|null $float */
             $float = $castFunc($value);
 
             if (null !== $float) {

@@ -17,10 +17,10 @@
         "friendsofphp/php-cs-fixer": "^3.17",
         "infection/infection": ">=0.10.5",
         "league/pipeline": "^0.3 || ^1.0",
-        "phan/phan": ">=1.1",
         "php-coveralls/php-coveralls": "^2.4.1",
-        "phpstan/phpstan": ">=0.10 <2",
+        "phpstan/phpstan": "^2",
         "phpunit/phpunit": ">=9.4 <12",
+        "sanmai/phpstan-rules": "^0.3.0",
         "vimeo/psalm": ">=2"
     },
     "autoload": {

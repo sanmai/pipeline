@@ -27,12 +27,13 @@
             </errorLevel>
         </ForbiddenCode>
 
-        <MissingClosureParamType errorLevel="suppress" />
-        <MissingClosureReturnType errorLevel="suppress" />
-        <ClassMustBeFinal errorLevel="suppress" />
-        <PrivateFinalMethod errorLevel="suppress" />
+        <ClassMustBeFinal errorLevel="info" />
 
+        <MissingClosureParamType errorLevel="info" />
+        <MissingClosureReturnType errorLevel="info" />
         <RedundantPropertyInitializationCheck errorLevel="suppress" />
         <PropertyNotSetInConstructor errorLevel="suppress" />
+        <RedundantCondition errorLevel="info" />
+        <NoValue errorLevel="info" />
     </issueHandlers>
 </psalm>
