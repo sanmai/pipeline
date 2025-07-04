@@ -123,6 +123,48 @@ $results = take($inputs)
 $errors = $processor->getErrors();
 ```
 
+### Practical Example: Processing API Responses
+
+Here's a real-world example of handling errors when processing API responses:
+
+```php
+use function Pipeline\take;
+
+// Simulate API responses with potential failures
+$apiResponses = [
+    ['url' => '/users/1', 'data' => '{"id":1,"name":"Alice"}'],
+    ['url' => '/users/2', 'data' => 'invalid json'],
+    ['url' => '/users/3', 'data' => '{"id":3,"name":"Charlie"}'],
+    ['url' => '/users/4', 'data' => null], // Failed request
+];
+
+// Process with error collection
+$validUsers = [];
+$errors = [];
+
+take($apiResponses)
+    ->map(function($response) use (&$errors) {
+        if ($response['data'] === null) {
+            $errors[] = ['url' => $response['url'], 'error' => 'Request failed'];
+            return null;
+        }
+        
+        $decoded = json_decode($response['data'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $errors[] = ['url' => $response['url'], 'error' => 'Invalid JSON'];
+            return null;
+        }
+        
+        return $decoded;
+    })
+    ->filter() // Remove nulls
+    ->each(function($user) use (&$validUsers) {
+        $validUsers[] = $user;
+    });
+
+// Result: $validUsers contains 2 valid users, $errors contains 2 error entries
+```
+
 ## Hierarchical Data
 
 For nested data structures, you can use recursion to process the entire tree.

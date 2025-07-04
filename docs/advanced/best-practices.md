@@ -21,6 +21,25 @@ $result = take($largeArray)
     ->toList();
 ```
 
+#### Array Processing Warning
+
+When working with arrays, be aware that certain methods (`filter()`, `cast()`, `slice()`, `chunk()`) use PHP's native array functions for performance. This means they create intermediate arrays:
+
+```php
+// This creates intermediate arrays in memory:
+$result = take($millionRecords)
+    ->filter(fn($r) => $r['active'])     // New array with ~500k elements
+    ->map(fn($r) => transform($r))       // Another array with ~500k elements
+    ->toList();
+
+// Better: Use stream() for large arrays
+$result = take($millionRecords)
+    ->stream()                           // Process one element at a time
+    ->filter(fn($r) => $r['active'])
+    ->map(fn($r) => transform($r))
+    ->toList();
+```
+
 ### 2. Chain Operations
 
 Keep your operations in a single, fluent chain for readability and efficiency.

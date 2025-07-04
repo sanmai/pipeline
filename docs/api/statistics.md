@@ -8,13 +8,14 @@ Calculates a comprehensive set of statistics for numeric data in the pipeline.
 
 **Signature**: `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null): RunningVariance`
 
--   `$castFunc`: A function to convert pipeline values to floats. Defaults to `floatval`.
+-   `$castFunc`: A function to convert pipeline values to floats. Defaults to `floatval`. Return `null` to skip non-numeric values.
 -   `$variance`: An optional, pre-initialized `RunningVariance` object to continue calculations from.
 
 **Behavior**:
 
 -   This is a terminal operation that returns a `RunningVariance` object.
 -   The `RunningVariance` object contains methods to get the mean, variance, standard deviation, min, max, and count.
+-   Values that the `$castFunc` returns as `null` are not included in the statistics.
 
 **Examples**:
 
@@ -23,10 +24,24 @@ use Pipeline\Helper\RunningVariance;
 
 // Basic statistics
 $stats = take([1, 2, 3, 4, 5])->finalVariance();
-echo $stats->getMean(); // 3.0
+echo $stats->getCount();              // 5
+echo $stats->getMean();               // 3.0
+echo $stats->getVariance();           // 2.5
+echo $stats->getStandardDeviation();  // ~1.58
+echo $stats->getMin();                // 1.0
+echo $stats->getMax();                // 5.0
 
 // Statistics for a specific field
 $stats = take($users)->finalVariance(fn($user) => $user['age']);
+
+// Handling mixed data (skip non-numeric values)
+$stats = take(['1', 'abc', 2, null, 3.5])
+    ->finalVariance(fn($x) => is_numeric($x) ? (float)$x : null);
+echo $stats->getCount(); // 3 (only numeric values counted)
+
+// Continuing from existing statistics
+$initialStats = take($firstBatch)->finalVariance();
+$combinedStats = take($secondBatch)->finalVariance(null, $initialStats);
 ```
 
 ## `runningVariance()`
