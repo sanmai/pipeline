@@ -119,4 +119,4 @@ jobs:
 
       - name: Static Analysis
         run: |
-          make ci-analyze --keep-going -j
+          make ci-analyze --keep-going -j --output-sync
