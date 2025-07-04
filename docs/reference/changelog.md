@@ -1,77 +1,53 @@
 # Changelog
 
-## Version History
+This document outlines the version history and key changes for the Pipeline library.
 
-### v6.x Series
+## Version 6.x
 
-#### Key Features
-- PHP 8.2+ requirement
-- Strict mode for `filter()` method
-- Improved type safety and static analysis support
-- Performance optimizations for array operations
+### Key Features
 
-#### Breaking Changes from v5.x
-- Minimum PHP version increased to 8.2
-- Some internal method signatures changed for better type safety
+-   **PHP 8.2+ Requirement**: The minimum required PHP version has been updated to 8.2.
+-   **Strict Filtering**: The `filter()` method now includes a `strict` mode for more precise control over data cleaning.
+-   **Improved Type Safety**: Enhanced type annotations and static analysis support for PHPStan, Psalm, and Phan.
+-   **Performance Optimizations**: Array operations are now faster, and the `cast()` method is optimized for arrays.
 
-### Method Evolution
+### Breaking Changes
 
-#### Deprecated Methods
-- `toArray()` - Use `toList()` or `toAssoc()` instead
-- `toArrayPreservingKeys()` - Use `toAssoc()` instead
+-   The minimum required PHP version is now 8.2.
+-   Some internal method signatures have been updated to improve type safety.
 
-#### New Methods (Recent Versions)
-- `toList()` - Replaces `toArray(false)`
-- `toAssoc()` - Replaces `toArray(true)`
-- `strict` parameter for `filter()` - More precise filtering control
+### Deprecations
 
-### Performance Improvements
-
-- Array operations now use native PHP functions when possible
-- `cast()` method optimized with `array_map` for arrays
-- Memory usage reduced for large dataset processing
-- Generator handling improved for better lazy evaluation
-
-### Static Analysis Support
-
-- PHPStan max level support
-- Psalm error level 2 compatibility
-- Phan integration
-- Comprehensive type annotations
+-   `toArray()`: Use `toList()` or `toAssoc()` instead.
+-   `toArrayPreservingKeys()`: Use `toAssoc()` instead.
 
 ## Migration Guide
 
-### From v5.x to v6.x
+### Migrating from v5.x to v6.x
+
+**Array Conversion**
+
+-   Replace `->toArray()` with `->toList()`.
+-   Replace `->toArray(true)` with `->toAssoc()`.
+
+**Filtering**
+
+To maintain the old filtering behavior (which removes all falsy values), no changes are needed. To use the new, safer strict filtering, add the `strict: true` parameter:
 
 ```php
-// Old way
-$result = $pipeline->toArray();  // Without preserving keys
-$result = $pipeline->toArray(true);  // Preserving keys
+// Old behavior (removes all falsy values)
+$result = take([0, '', false, null])->filter()->toList(); // []
 
-// New way
-$result = $pipeline->toList();  // Without preserving keys
-$result = $pipeline->toAssoc();  // Preserving keys
+// New strict mode (removes only null and false)
+$result = take([0, '', false, null])->filter(strict: true)->toList(); // [0, '']
 ```
 
-### Filter Strict Mode
+## Future Development
 
-```php
-// Old behavior (all falsy values removed)
-$result = take([0, '', false, null])->filter()->toList();
-// Result: []
+The library follows semantic versioning. Future development will focus on:
 
-// New strict mode (only null and false removed)
-$result = take([0, '', false, null])->filter(strict: true)->toList();
-// Result: [0, '']
-```
+-   Performance and memory optimizations
+-   Enhanced type safety
+-   Additional statistical methods
 
-## Future Considerations
-
-The library follows semantic versioning and maintains backward compatibility within major versions. Future enhancements focus on:
-
-- Performance optimization
-- Enhanced type safety
-- Additional statistical methods
-- Improved memory efficiency
-
-For the latest changes, see the [GitHub repository](https://github.com/sanmai/pipeline).
+For the latest updates, please refer to the [GitHub repository](https://github.com/sanmai/pipeline).

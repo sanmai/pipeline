@@ -1,701 +1,94 @@
 # Performance Optimization
 
-Guidelines and techniques for optimizing pipeline performance and memory usage.
+This guide provides techniques for optimizing your pipelines for speed and memory efficiency.
 
-## The Power of Streaming: A Real-World Example
+## The Power of Streaming
 
-Let's start with a concrete demonstration that shows why this library's streaming-first approach is so powerful.
+The library's core strength is its ability to process large datasets with minimal memory usage through streaming. This is achieved by using iterators and generators, which process data one element at a time.
 
-### Finding Errors in a Large Log File
+**Example: Finding Errors in a Large Log File**
 
-Consider the task of finding the first 5 "ERROR" lines in a 10 GB log file.
+Consider the task of finding the first five "ERROR" lines in a 10 GB log file.
 
-**The Wrong Way (Loading Everything into Memory):**
+**The Inefficient Way (Loading into Memory)**
+
 ```php
-// WARNING: Do not run this on a large file!
-// This approach will likely exhaust your server's memory
-
-$lines = file('huge-10GB.log'); // Loads the ENTIRE file into memory (10GB!)
+// Warning: This will likely exhaust your server's memory.
+$lines = file('huge-10GB.log'); // Loads the entire 10GB file into memory
 $errors = take($lines)
     ->filter(fn($line) => str_contains($line, 'ERROR'))
     ->slice(0, 5)
     ->toList();
-
-// Problems:
-// 1. file() loads entire 10GB into memory immediately
-// 2. Creates a massive array of all lines
-// 3. May crash with: "Allowed memory size exhausted"
-// 4. Processes entire file even though we only need 5 errors
 ```
 
-**The Right Way (Streaming):**
+**The Efficient Way (Streaming)**
+
 ```php
-// This is memory-safe and efficient
+// This is memory-safe and fast.
 $errors = take(new SplFileObject('huge-10GB.log'))
-    // SplFileObject reads one line at a time (lazy)
-    ->filter(fn($line) => str_contains($line, 'ERROR'))
-    // Filter processes lines as they're read
-    ->slice(0, 5)
-    // slice() ensures we stop after finding 5 matches
-    ->toList();
-    // toList() triggers execution and collects results
-
-// Benefits:
-// 1. Memory usage stays constant (~1MB) regardless of file size
-// 2. Stops reading after finding 5 errors (could be on line 100 of 10 million)
-// 3. Can process files larger than available RAM
-// 4. Typically 100-1000x faster for this use case
-```
-
-### Real Performance Comparison
-
-```php
-// Test setup: 1GB log file with errors on lines 50, 150, 250, 350, 450
-
-// Eager approach
-$start = microtime(true);
-$memory = memory_get_usage();
-
-$lines = file('1GB-test.log');  // ~8 seconds, ~1GB RAM
-$errors = take($lines)
     ->filter(fn($line) => str_contains($line, 'ERROR'))
     ->slice(0, 5)
     ->toList();
-
-echo 'Eager: ' . round(microtime(true) - $start, 2) . 's, ';
-echo "Memory: " . round((memory_get_peak_usage() - $memory) / 1024 / 1024) . "MB\n";
-// Output: "Eager: 8.5s, Memory: 1024MB"
-
-// Lazy approach
-$start = microtime(true);
-$memory = memory_get_usage();
-
-$errors = take(new SplFileObject('1GB-test.log'))
-    ->filter(fn($line) => str_contains($line, 'ERROR'))
-    ->slice(0, 5)
-    ->toList();
-
-echo 'Lazy: ' . round(microtime(true) - $start, 2) . 's, ';
-echo "Memory: " . round((memory_get_peak_usage() - $memory) / 1024 / 1024) . "MB\n";
-// Output: "Lazy: 0.003s, Memory: 0.5MB"
 ```
 
-The streaming approach is **2,800x faster** and uses **2,000x less memory** because it:
-1. Only reads lines until it finds 5 errors
-2. Never loads the entire file into memory
-3. Processes data in a streaming fashion
+The streaming approach is significantly faster and more memory-efficient because it reads the file line by line and stops as soon as the required number of errors has been found.
 
-## Understanding the Streaming Model
+## The `stream()` Method
 
-The library's core strength lies in its streaming, generator-based architecture. This is the recommended way to use the library for any serious data processing task.
+The `stream()` method is a powerful tool for controlling how your pipeline processes data. It converts the pipeline to use generators, forcing element-by-element processing instead of batch operations.
 
-### How Streaming Works
+### Understanding Array vs Stream Processing
 
-When you use iterators or generators as your data source, the pipeline operates in a memory-efficient "pull" mode:
+By default, when working with arrays, the library optimizes certain operations:
 
 ```php
-$result = take(new SplFileObject('data.csv'))
-    ->map('str_getcsv')                    // Stored as transformation
-    ->filter(fn($row) => $row[2] > 1000)   // Stored as filter
-    ->map(fn($row) => processRow($row))    // Stored as transformation
-    ->toList();                            // NOW execution begins
-
-// Execution flow when toList() is called:
-// 1. toList asks the last map for an item
-// 2. That map asks the filter for an item
-// 3. The filter asks the first map for an item
-// 4. The first map asks SplFileObject for a line
-// 5. The line flows through: read -> parse -> filter -> process -> collect
-// 6. Repeat until done
-```
-
-Each element flows through the **entire** pipeline before the next element is read. This means:
-- Memory usage is constant regardless of file size
-- Processing can stop early (e.g., with `slice()`)
-- You can process infinite streams
-- No intermediate arrays are created
-
-### The Role of `stream()`: Converting Arrays to Streams
-
-If you must start with an array but want memory-safe processing, use `->stream()`:
-
-```php
-$largeArray = loadMillionRecords();
-
-// RISKY: Array optimizations create intermediate arrays
+// Without stream(): Creates intermediate arrays
 $result = take($largeArray)
-    ->filter(fn($r) => $r['active'])      // Creates 500k element array
-    ->map(fn($r) => enrichRecord($r))     // Creates another 500k array
+    ->filter($predicate)  // Creates a new filtered array in memory
+    ->map($transformer)   // Creates another transformed array
     ->toList();
+```
 
-// SAFE: Force streaming mode
+With `stream()`, each element flows through the entire pipeline before the next one starts:
+
+```php
+// With stream(): Processes one element at a time
 $result = take($largeArray)
-    ->stream()                            // Convert to generator
-    ->filter(fn($r) => $r['active'])      // Process one at a time
-    ->map(fn($r) => enrichRecord($r))     // No intermediate arrays
+    ->stream()           // Convert to generator
+    ->filter($predicate) // Element passes through filter...
+    ->map($transformer)  // ...then immediately through map
     ->toList();
 ```
 
-**When to switch to `stream()`:**
+### When to Use `stream()`
 
-You should explicitly call `->stream()` on an array pipeline if you are performing memory-intensive transformations (like loading data for each item) or if the intermediate arrays created by `map()` or `filter()` would be too large for your available memory.
-
-```php
-// Example: Each user ID loads a full user object with related data
-$userIds = range(1, 10000);
-
-// WITHOUT stream() - Creates 10,000 user objects in memory at once
-$activeUsers = take($userIds)
-    ->map(fn($id) => User::loadWithRelations($id))  // 10,000 objects created here!
-    ->filter(fn($user) => $user->isActive())        // Then filtered
-    ->toList();
-
-// WITH stream() - Loads and processes one user at a time
-$activeUsers = take($userIds)
-    ->stream()  // Switch to element-by-element processing
-    ->map(fn($id) => User::loadWithRelations($id))  // Only 1 user in memory at a time
-    ->filter(fn($user) => $user->isActive())        // Filtered immediately
-    ->toList();
-```
-
-## Array Optimizations: A Convenience Feature
-
-While this library is designed for streaming, it includes some convenience optimizations for small arrays. These should be considered a secondary feature, not the primary way to use the library.
-
-### Array-Optimized Methods
-
-A small set of methods have "fast paths" when operating on arrays:
-
-- `filter()` - Uses `array_filter()` internally
-- `cast()` - Uses `array_map()` internally
-- `slice()` - Uses `array_slice()` internally
-- `chunk()` - Uses `array_chunk()` internally
-
-These optimizations can make operations faster on small arrays, but they come with a significant trade-off: **they create intermediate arrays in memory**.
-
-```php
-// Example: Processing 10,000 user records
-$users = loadUsers(); // Array of 10,000 users
-
-$result = take($users)
-    ->filter(fn($u) => $u['active'])      // Creates intermediate array (~5,000 users)
-    ->cast(fn($u) => $u['id'])           // Creates another array (5,000 IDs)
-    ->toList();
-
-// Memory usage: 3 arrays in memory simultaneously!
-// Original (10k) + filtered (5k) + cast (5k) = ~20k elements
-```
-
-### Why You Should Usually Avoid This
-
-The array optimizations are a convenience for small datasets, but they violate the streaming principle:
-
-1. **Memory Usage Grows Linearly**: Each operation creates a full copy of the data
-2. **No Early Termination**: Can't stop processing midway like with streams
-3. **Not Scalable**: What works for 1,000 items may crash with 1,000,000
-
-### The Solution: Always Use `stream()`
-
-For any non-trivial data processing, immediately convert arrays to streams:
-
-```php
-$users = loadUsers(); // Even if it's an array
-
-$result = take($users)
-    ->stream()                          // Convert to generator first!
-    ->filter(fn($u) => $u['active'])    // Now processes one at a time
-    ->cast(fn($u) => $u['id'])         // No intermediate arrays
-    ->toList();
-```
-
-**Remember**: This library is a streaming library. The array optimizations exist only for convenience with tiny datasets. For production code, always think in streams.
-
-## Memory Optimization
-
-### Processing Large Files
-
-```php
-// DON'T: Load entire file
-$data = json_decode(file_get_contents('large.json'), true);
-$result = take($data)->map($processor)->toList();
-
-// DO: Stream line by line
-$result = take(new SplFileObject('large.jsonl'))
-    ->map('json_decode')
-    ->filter()  // Skip invalid JSON
-    ->map($processor)
-    ->toList();
-
-// DO: Use generators for custom reading
-function readLargeJson($filename) {
-    $handle = fopen($filename, 'r');
-    $buffer = '';
-    
-    while (!feof($handle)) {
-        $chunk = fread($handle, 8192);
-        $buffer .= $chunk;
-        
-        while (($pos = strpos($buffer, "\n")) !== false) {
-            $line = substr($buffer, 0, $pos);
-            $buffer = substr($buffer, $pos + 1);
-            
-            if ($json = json_decode($line, true)) {
-                yield $json;
-            }
-        }
-    }
-    
-    fclose($handle);
-}
-
-$result = take(readLargeJson('large.jsonl'))
-    ->filter($predicate)
-    ->toList();
-```
-
-### Chunking for Memory Management
-
-```php
-// Process in manageable chunks
-take(new SplFileObject('huge.csv'))
-    ->map('str_getcsv')
-    ->chunk(1000)  // Process 1000 rows at a time
-    ->each(function($chunk) {
-        // Process chunk (e.g., bulk database insert)
-        $this->repository->bulkInsert($chunk);
-        
-        // Free memory after each chunk
-        gc_collect_cycles();
-    });
-
-// Sliding window processing
-function slidingWindow($data, $windowSize) {
-    $window = [];
-    
-    return take($data)
-        ->map(function($item) use (&$window, $windowSize) {
-            $window[] = $item;
-            if (count($window) > $windowSize) {
-                array_shift($window);
-            }
-            return ['current' => $item, 'window' => $window];
-        });
-}
-```
-
-## Understanding the Hybrid Execution Model
-
-The Pipeline library uses a sophisticated hybrid execution model that depends on both the data source (array vs. iterator) and the **specific methods** you call. Understanding this is key to optimizing your pipelines.
-
-### 1. Array-Optimized Methods (The "Eager Path")
-
-A select set of methods are optimized for speed when operating on arrays. If the pipeline contains an array, these methods will execute **eagerly**, processing the entire array at once and creating a new intermediate array.
-
-**Array-Optimized Methods:**
-- `filter()` - Uses `array_filter()` internally
-- `cast()` - Uses `array_map()` internally  
-- `chunk()` - Uses `array_chunk()` internally
-- `slice()` - Uses `array_slice()` internally
-
-**Behavior:** Fast, but can consume significant memory by creating intermediate arrays
-
-**Example:**
-```php
-take(['user1', 'user2', 'admin1'])    // Pipeline holds an array
-    ->filter(fn($u) => str_starts_with($u, 'user'))  // EAGER: creates new array ['user1', 'user2']
-    ->map(fn($u) => strtoupper($u))   // LAZY: always uses generators, waits for consumer
-    ->toList();  // Pulls items through map() from the intermediate array
-```
-
-### 2. Always-Lazy Methods (The "Streaming Path")
-
-Most transformation methods are **always lazy** and process elements one by one using generators. Even if the pipeline starts with an array, these methods will treat it as a stream.
-
-**Always-Lazy Methods:**
-- `map()` - Always uses generators
-- `flatten()` - Always uses generators
-- `unpack()` - Always uses generators
-- `zip()` - Always uses generators
-- And most other transformation methods
-
-**Behavior:** Extremely memory-efficient, as no intermediate arrays are created
-
-### 3. The Role of `stream()`: Forcing the Lazy Path
-
-The `->stream()` method converts an array-based pipeline into a generator-based one. Its primary purpose is to **force the Array-Optimized methods** (like `filter()` and `cast()`) to run in lazy, streaming mode.
-
-**This is how you prevent intermediate arrays and manage memory.**
-
-**Example: `filter()` with and without `stream()`**
-
-```php
-$largeArray = range(1, 100000);
-
-// WITHOUT stream(): filter() runs eagerly, creating a 50,000 element array
-$result = take($largeArray)
-    ->filter(fn($n) => $n % 2 === 0)  // EAGER: creates array of 50,000 evens
-    ->map(fn($n) => $n * $n)          // LAZY: waits for terminal operation
-    ->slice(0, 10)                    // EAGER: array_slice on intermediate array
-    ->toList();
-
-// WITH stream(): ALL methods run lazily
-$result = take($largeArray)
-    ->stream()                        // Force lazy mode for ALL methods
-    ->filter(fn($n) => $n % 2 === 0)  // LAZY: processes one-by-one
-    ->map(fn($n) => $n * $n)          // LAZY: still one-by-one
-    ->slice(0, 10)                    // LAZY: stops after 10 items
-    ->toList();
-```
-
-**Memory Comparison:**
-- Without `stream()`: Peak memory includes full array + 50,000 element intermediate array
-- With `stream()`: Peak memory is just the original array + current processing item
+Use `stream()` when:
+- Working with large arrays that would create memory pressure
+- Your transformations are expensive and you might not process all elements
+- You want predictable memory usage regardless of input size
 
 ### Performance Trade-offs
 
-| Method Type | When Array | When Iterator | Use `stream()` When |
-|-------------|------------|---------------|---------------------|
-| Array-Optimized (`filter`, `cast`, `slice`, `chunk`) | Eager (fast, high memory) | Always lazy | You need to save memory |
-| Always-Lazy (`map`, `flatten`, `zip`, etc.) | Still lazy | Always lazy | Not needed (already lazy) |
+- **Memory**: `stream()` significantly reduces peak memory usage
+- **Speed**: Array operations are typically faster for small-to-medium datasets
+- **Best Practice**: Use `stream()` for large arrays or when memory is constrained
 
-**Key Insight:** Chain array-optimized methods for speed on small arrays. Insert `stream()` when memory is a concern.
+## Array Optimizations
 
-### Method-Specific Examples
+For convenience, some methods are optimized for speed when working with small arrays:
 
-```php
-// Understanding which methods are eager vs lazy
-$data = range(1, 10000);
+-   `filter()`
+-   `cast()`
+-   `slice()`
+-   `chunk()`
 
-$result = take($data)
-    ->filter(fn($n) => $n % 2 === 0)   // EAGER: creates 5,000 element array
-    ->map(fn($n) => $n * 2)            // LAZY: waits for terminal
-    ->cast(fn($n) => (string)$n)       // LAZY: would be eager without previous map()
-    ->slice(0, 100)                    // LAZY: because pipeline is now a generator
-    ->toList();
+These methods use native PHP array functions internally, which can be faster for small datasets. However, they create intermediate arrays in memory, so they should be used with caution.
 
-// To ensure everything is lazy, add stream() at the start
-$result = take($data)
-    ->stream()                         // Forces ALL methods to be lazy
-    ->filter(fn($n) => $n % 2 === 0)   // LAZY: processes one-by-one
-    ->map(fn($n) => $n * 2)            // LAZY: still one-by-one
-    ->cast(fn($n) => (string)$n)       // LAZY: forced by stream()
-    ->slice(0, 100)                    // LAZY: stops after 100 items
-    ->toList();
-```
+## Memory Management
 
-## Operation Optimization
+-   **Process in chunks**: Use the `chunk()` method to process large datasets in smaller, more manageable batches.
+-   **Release resources**: When using generators to interact with resources like files or database connections, be sure to release them in a `finally` block.
 
-### Efficient Filtering
+## Profiling
 
-```php
-// Combine filters for efficiency
-// DON'T: Multiple filter passes
-$result = take($data)
-    ->filter(fn($x) => $x > 0)
-    ->filter(fn($x) => $x < 100)
-    ->filter(fn($x) => $x % 2 === 0)
-    ->toList();
-
-// DO: Single combined filter
-$result = take($data)
-    ->filter(fn($x) => $x > 0 && $x < 100 && $x % 2 === 0)
-    ->toList();
-
-// Early termination with skipWhile
-$result = take($sortedData)
-    ->skipWhile(fn($x) => $x < $threshold)
-    ->filter(fn($x) => $x < $upperLimit)
-    ->toList();
-```
-
-### Transformation Optimization
-
-```php
-// Use cast() for simple transformations on arrays
-$result = take($array)
-    ->cast('intval')  // Optimized with array_map
-    ->toList();
-
-// Avoid creating intermediate arrays
-// DON'T
-$result = take($data)
-    ->map(fn($x) => processStep1($x))
-    ->toList();  // Intermediate array
-$result = take($result)
-    ->map(fn($x) => processStep2($x))
-    ->toList();
-
-// DO
-$result = take($data)
-    ->map(fn($x) => processStep1($x))
-    ->map(fn($x) => processStep2($x))
-    ->toList();
-```
-
-### Aggregation Optimization
-
-```php
-// Use specialized methods
-// DON'T: Count by converting to array
-$count = count(take($generator)->toList());
-
-// DO: Use count() directly
-$count = take($generator)->count();
-
-// Running calculations without collecting
-$sum = 0;
-$count = 0;
-take($hugeDataset)
-    ->runningCount($count)
-    ->each(function($value) use (&$sum) {
-        $sum += $value;
-    });
-$average = $sum / $count;
-
-// Efficient min/max for sorted data
-$min = take($sortedData)->slice(0, 1)->toList()[0] ?? null;
-$max = take($sortedData)->slice(-1, 1)->toList()[0] ?? null;
-```
-
-## Database and I/O Optimization
-
-### Batch Database Operations
-
-```php
-class BatchInserter {
-    private $batchSize;
-    private $pdo;
-    
-    public function __construct(PDO $pdo, int $batchSize = 1000) {
-        $this->pdo = $pdo;
-        $this->batchSize = $batchSize;
-    }
-    
-    public function insertBatch($records) {
-        take($records)
-            ->chunk($this->batchSize)
-            ->each(function($chunk) {
-                $this->pdo->beginTransaction();
-                try {
-                    $stmt = $this->pdo->prepare(
-                        'INSERT INTO records (id, data) VALUES (?, ?)'
-                    );
-                    
-                    foreach ($chunk as $record) {
-                        $stmt->execute([$record['id'], $record['data']]);
-                    }
-                    
-                    $this->pdo->commit();
-                } catch (\Exception $e) {
-                    $this->pdo->rollBack();
-                    throw $e;
-                }
-            });
-    }
-}
-```
-
-### Parallel-Like Processing
-
-```php
-// Simulate parallel processing with proc_open
-function parallelMap($items, $command, $workers = 4) {
-    $chunks = take($items)
-        ->chunk(ceil(count($items) / $workers))
-        ->toList();
-    
-    $processes = [];
-    $results = [];
-    
-    // Start processes
-    foreach ($chunks as $i => $chunk) {
-        $descriptors = [
-            0 => ['pipe', 'r'],  // stdin
-            1 => ['pipe', 'w'],  // stdout
-            2 => ['pipe', 'w']   // stderr
-        ];
-        
-        $process = proc_open($command, $descriptors, $pipes);
-        fwrite($pipes[0], json_encode($chunk));
-        fclose($pipes[0]);
-        
-        $processes[$i] = [
-            'process' => $process,
-            'stdout' => $pipes[1],
-            'stderr' => $pipes[2]
-        ];
-    }
-    
-    // Collect results
-    foreach ($processes as $i => $proc) {
-        $output = stream_get_contents($proc['stdout']);
-        fclose($proc['stdout']);
-        fclose($proc['stderr']);
-        proc_close($proc['process']);
-        
-        $results[$i] = json_decode($output, true);
-    }
-    
-    return take($results)->flatten()->toList();
-}
-```
-
-## Profiling and Measurement
-
-### Performance Monitoring
-
-```php
-class PerformanceMonitor {
-    private array $metrics = [];
-    
-    public function measure(string $operation, callable $callback) {
-        $start = microtime(true);
-        $memStart = memory_get_usage();
-        
-        $result = $callback();
-        
-        $duration = microtime(true) - $start;
-        $memUsed = memory_get_usage() - $memStart;
-        
-        $this->metrics[$operation] = [
-            'duration' => $duration,
-            'memory' => $memUsed,
-            'peak_memory' => memory_get_peak_usage()
-        ];
-        
-        return $result;
-    }
-    
-    public function getReport(): array {
-        return $this->metrics;
-    }
-}
-
-$monitor = new PerformanceMonitor();
-
-$result = $monitor->measure('processing', function() use ($data) {
-    return take($data)
-        ->filter($predicate)
-        ->map($transformer)
-        ->toList();
-});
-
-print_r($monitor->getReport());
-```
-
-### Benchmarking Pipelines
-
-```php
-function benchmarkPipeline($name, $data, $pipeline) {
-    $iterations = 10;
-    $times = [];
-    
-    for ($i = 0; $i < $iterations; $i++) {
-        $start = microtime(true);
-        $pipeline($data);
-        $times[] = microtime(true) - $start;
-    }
-    
-    $avg = array_sum($times) / count($times);
-    $min = min($times);
-    $max = max($times);
-    
-    echo "$name:\n";
-    echo "  Average: " . round($avg * 1000, 2) . "ms\n";
-    echo "  Min: " . round($min * 1000, 2) . "ms\n";
-    echo "  Max: " . round($max * 1000, 2) . "ms\n\n";
-}
-
-// Compare approaches
-benchmarkPipeline('Array-based', $data, fn($d) =>
-    take($d)->filter($pred)->map($trans)->toList()
-);
-
-benchmarkPipeline('Generator-based', $data, fn($d) =>
-    take($d)->stream()->filter($pred)->map($trans)->toList()
-);
-```
-
-## Optimization Checklist
-
-### Before Optimization
-1. **Profile first** - Identify actual bottlenecks
-2. **Measure baseline** - Know your starting point
-3. **Set targets** - Define performance goals
-
-### Memory Optimization
-- ✓ Use generators for large datasets
-- ✓ Process in chunks for batch operations
-- ✓ Avoid intermediate array creation
-- ✓ Use `stream()` to force lazy evaluation
-- ✓ Free resources explicitly when needed
-
-### Speed Optimization
-- ✓ Combine multiple filters into one
-- ✓ Use `cast()` for simple transformations
-- ✓ Leverage array optimizations when possible
-- ✓ Minimize function calls in hot paths
-- ✓ Use early termination patterns
-
-### I/O Optimization
-- ✓ Batch database operations
-- ✓ Use prepared statements
-- ✓ Stream file reading
-- ✓ Implement connection pooling
-- ✓ Consider async/parallel patterns
-
-## Common Performance Pitfalls
-
-### Pitfall 1: Unnecessary Array Conversion
-
-```php
-// BAD: Forces array creation
-$exists = in_array($needle, take($generator)->toList());
-
-// GOOD: Short-circuit on first match
-$exists = take($generator)
-    ->filter(fn($x) => $x === $needle)
-    ->slice(0, 1)
-    ->count() > 0;
-```
-
-### Pitfall 2: Repeated Pipeline Creation
-
-```php
-// BAD: Recreating pipeline
-foreach ($items as $item) {
-    $result = take($data)
-        ->filter(fn($x) => $x['id'] === $item['ref_id'])
-        ->toList();
-}
-
-// GOOD: Create lookup once
-$lookup = take($data)
-    ->fold([], fn($acc, $x) => [...$acc, $x['id'] => $x]);
-foreach ($items as $item) {
-    $result = $lookup[$item['ref_id']] ?? null;
-}
-```
-
-### Pitfall 3: Inefficient Deduplication
-
-```php
-// BAD: O(n²) deduplication
-$unique = [];
-take($items)->each(function($item) use (&$unique) {
-    if (!in_array($item, $unique)) {
-        $unique[] = $item;
-    }
-});
-
-// GOOD: O(n) using keys
-$unique = take($items)
-    ->flip()->flip()
-    ->values()
-    ->toList();
-```
-
-## Next Steps
-
-- [Best Practices](best-practices.md) - General guidelines
-- [Method Index](../reference/method-index.md) - Quick method reference
+Before optimizing, always profile your code to identify the actual bottlenecks. Use tools like Xdebug or Blackfire to get a clear picture of your pipeline's performance.

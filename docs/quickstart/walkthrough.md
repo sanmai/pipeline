@@ -1,15 +1,19 @@
-# Walkthrough: A Simple Pipeline
+# Walkthrough: Processing CSV Data
 
-This walkthrough demonstrates the core concepts of the Pipeline library through a practical example.
+This walkthrough demonstrates the core concepts of the library by building a practical data processing pipeline.
 
-## CSV Processing Pipeline
+## The Goal
 
-Let's build a pipeline that processes CSV data step by step:
+Our objective is to process a string of CSV data. We will parse the data, skip the header, transform it into a more usable format, filter it based on a condition, and finally, collect the results.
+
+## The Pipeline
+
+Here is the complete pipeline:
 
 ```php
 use function Pipeline\take;
 
-// Sample CSV data with header row
+// Sample CSV data with a header row
 $csv = <<<CSV
 name,age,city
 Alice,30,New York
@@ -20,39 +24,47 @@ CSV;
 
 // Build the pipeline
 $users = take(explode("\n", $csv))
-    ->map('str_getcsv')           // Convert each line to array
-    ->slice(1)                    // Skip header row
-    ->map(fn($row) => [          // Transform to associative array
+    ->map(str_getcsv(...))        // 1. Parse each line into an array
+    ->slice(1)                    // 2. Skip the header row
+    ->map(fn($row) => [          // 3. Transform to an associative array
         'name' => $row[0],
         'age' => (int)$row[1],
         'city' => $row[2]
     ])
-    ->filter(fn($user) => $user['age'] >= 30)  // Keep users 30+
-    ->toList();                   // Execute pipeline
+    ->filter(fn($user) => $user['age'] >= 30)  // 4. Keep users aged 30 or over
+    ->toList();                   // 5. Execute the pipeline and collect results
 
-// Result: [
+// The final result:
+// [
 //   ['name' => 'Alice', 'age' => 30, 'city' => 'New York'],
 //   ['name' => 'Charlie', 'age' => 35, 'city' => 'Chicago']
 // ]
 ```
 
-## Understanding the Flow
+## Step-by-Step Explanation
 
-1. **Create the pipeline**: `take()` initializes a pipeline with your data
-2. **Transform line by line**: `map('str_getcsv')` parses CSV format
-3. **Filter data**: `slice(1)` removes the header row
-4. **Structure the data**: The second `map()` creates proper objects
-5. **Apply business logic**: `filter()` keeps only relevant records
-6. **Execute**: `toList()` runs the pipeline and returns results
+1.  **`take(explode("\n", $csv))`**: We begin by creating a pipeline from the CSV data. `explode()` splits the string into an array of lines.
 
-## Key Concepts Demonstrated
+2.  **`map(str_getcsv(...))`**: The `map()` method is used to apply `str_getcsv()` to each line, converting each CSV string into an array of values.
 
-- **Lazy evaluation**: Nothing happens until `toList()` is called
-- **Method chaining**: Each method returns the pipeline for fluent syntax
-- **Transformation**: `map()` changes data structure
-- **Filtering**: `filter()` removes unwanted elements
-- **Terminal operation**: `toList()` executes and collects results
+3.  **`slice(1)`**: This method skips the first element of the pipeline, which in this case is the header row.
+
+4.  **`map(fn($row) => ...)`**: We use `map()` again to transform the indexed array for each row into a more readable associative array.
+
+5.  **`filter(fn($user) => ...)`**: The `filter()` method is used to apply our business logic, keeping only the users who are 30 years of age or older.
+
+6.  **`toList()`**: This is a terminal operation. It triggers the execution of all the previous (lazy) operations and collects the final results into an array.
+
+## Key Concepts
+
+This example illustrates several core principles of the library:
+
+-   **Lazy Evaluation**: No processing occurs until a terminal method like `toList()` is called.
+-   **Method Chaining**: Each operation returns the pipeline object, allowing for a fluent and expressive syntax.
+-   **Transformation**: `map()` is used to change the structure and format of the data.
+-   **Filtering**: `filter()` and `slice()` are used to selectively remove data.
 
 ## Next Steps
 
-Now that you understand the basics, explore the [Pipeline Cookbook](../cookbook/index.md) for solutions to specific problems, or dive into the [API Reference](../api/creation.md) for detailed method documentation.
+-   Explore the [Cookbook](../cookbook/index.md) for more practical examples.
+-   Consult the [API Reference](../api/creation.md) for detailed information on each method.
