@@ -71,14 +71,15 @@ class RunningVariance
         if (1 === $this->count) {
             $this->min = $value;
             $this->max = $value;
-        } else {
-            if ($value < $this->min) {
-                $this->min = $value;
-            }
+            return $value;
+        }
 
-            if ($value > $this->max) {
-                $this->max = $value;
-            }
+        if ($value < $this->min) {
+            $this->min = $value;
+        }
+
+        if ($value > $this->max) {
+            $this->max = $value;
         }
 
         return $value;

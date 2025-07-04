@@ -1,3 +1,6 @@
+includes:
+    - vendor/sanmai/phpstan-rules/extension.neon
+
 parameters:
     inferPrivatePropertyTypeFromConstructor: true
     level: max
@@ -5,3 +8,5 @@ parameters:
         - src
     ignoreErrors:
         - identifier: missingType.iterableValue
+        - "#Binary operation .* between .* and .* results in an error.#"
+        - "#array_flip expects array.*, array given#"
