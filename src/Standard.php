@@ -56,23 +56,21 @@ use function array_keys;
  *
  * @template TKey
  * @template TValue
- * @template-implements IteratorAggregate<TKey, TValue>
+ * @implements IteratorAggregate<TKey, TValue>
  */
 class Standard implements IteratorAggregate, Countable
 {
     /**
      * Pre-primed pipeline.
      *
-     * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
-     *
-     * @var iterable<TKey, TValue>
+     * @var array<TKey, TValue>|Iterator<TKey, TValue>
      */
     private array|Iterator $pipeline;
 
     /**
      * Constructor with an optional source of data.
      *
-     * @param ?iterable<TKey, TValue> $input
+     * @param null|iterable<TKey, TValue> $input
      */
     public function __construct(?iterable $input = null)
     {
@@ -124,10 +122,9 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Appends the contents of an interable to the end of the pipeline.
      *
-     * @param ?iterable<TKey, TValue> $values
-     * @return static
+     * @return self<TKey, TValue>
      */
-    public function append(?iterable $values = null)
+    public function append(?iterable $values = null): self
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -144,6 +141,7 @@ class Standard implements IteratorAggregate, Countable
      * Appends a list of values to the end of the pipeline.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
     public function push(...$vector): self
     {
@@ -152,6 +150,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Prepends the pipeline with the contents of an iterable.
+     *
+     * @return self<TKey, TValue>
      */
     public function prepend(?iterable $values = null): self
     {
@@ -170,6 +170,7 @@ class Standard implements IteratorAggregate, Countable
      * Prepends the pipeline with a list of values.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
     public function unshift(...$vector): self
     {
@@ -203,6 +204,8 @@ class Standard implements IteratorAggregate, Countable
      * Replace the internal pipeline with a combination of two non-empty iterables, array-optimized.
      *
      * Utility method for appending/prepending methods.
+     *
+     * @return self<TKey, TValue>
      */
     private function join(iterable $left, iterable $right): self
     {
@@ -231,7 +234,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Flattens inputs: arrays become lists.
      *
-     * @return $this
+     * @return self<int, mixed>
      */
     public function flatten(): self
     {
@@ -245,7 +248,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func
      *
-     * @return $this
+     * @return self<TKey, mixed>
      */
     public function unpack(?callable $func = null): self
     {
@@ -265,7 +268,7 @@ class Standard implements IteratorAggregate, Countable
      * @param int<1, max> $length        the size of each chunk
      * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
-     * @return $this
+     * @return self<int, list<TValue>>
      */
     public function chunk(int $length, bool $preserve_keys = false): self
     {
@@ -306,12 +309,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @template TNewValue
-     * @param ?callable(TValue): (TNewValue|Generator<mixed, TNewValue>) $func a callback must either return a value or yield values (return a generator)
-     * @return static
-     * @phpstan-return ($func is null ? static : static<TKey, TNewValue>)
+     * @template TMapValue
+     * @param ?callable(TValue, TKey): TMapValue $func a callback must either return a value or yield values (return a generator)
+     *
+     * @return self<TKey, TMapValue>
      */
-    public function map(?callable $func = null)
+    public function map(?callable $func = null): self
     {
         if (null === $func) {
             return $this;
@@ -370,13 +373,14 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @template TNewValue
-     * @param ?callable(TValue): TNewValue $func a callback must return a value
+     * @template TCastValue
+     * @param ?callable(TValue, TKey): TCastValue $func a callback must return a value
+     *
      * @psalm-suppress RedundantCondition
-     * @return static
-     * @phpstan-return ($func is null ? static : static<TKey, TNewValue>)
+     *
+     * @return self<TKey, TCastValue>
      */
-    public function cast(?callable $func = null)
+    public function cast(?callable $func = null): self
     {
         if (null === $func) {
             return $this;
@@ -417,11 +421,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable(TValue, TKey, Iterator): bool $func
-     * @param bool $strict When true, only `null` and `false` are filtered out
-     * @return static
+     * @param ?callable(TValue, TKey):bool $func
+     * @param bool      $strict When true, only `null` and `false` are filtered out
+     *
+     * @return self<TKey, TValue>
      */
-    public function filter(?callable $func = null, bool $strict = false)
+    public function filter(?callable $func = null, bool $strict = false): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -492,6 +497,7 @@ class Standard implements IteratorAggregate, Countable
      * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
      * @param callable $predicate a callback returning boolean value
+     * @return self<TKey, TValue>
      */
     public function skipWhile(callable $predicate): self
     {
@@ -573,9 +579,6 @@ class Standard implements IteratorAggregate, Countable
         return $carry;
     }
 
-    /**
-     * @return Traversable<TKey, TValue>
-     */
     #[Override]
     public function getIterator(): Traversable
     {
@@ -587,13 +590,13 @@ class Standard implements IteratorAggregate, Countable
             return $this->pipeline;
         }
 
+        /** @var ArrayIterator<TKey, TValue> */
         return new ArrayIterator($this->pipeline);
     }
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
-     *
-     * @return list<TValue>
+     * @return list<mixed>
      */
     public function toList(): array
     {
@@ -635,7 +638,6 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
-     *
      * @return array<TKey, TValue>
      */
     public function toAssoc(): array
@@ -700,7 +702,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<TKey, TValue>
      */
     public function stream()
     {
@@ -735,9 +737,9 @@ class Standard implements IteratorAggregate, Countable
      * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
      * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
-     * @return $this
+     * @return self<TKey, TValue>
      */
-    public function slice(int $offset, ?int $length = null)
+    public function slice(int $offset, ?int $length = null): self
     {
         if ($this->empty()) {
             // With non-primed pipeline just move along.
@@ -865,9 +867,9 @@ class Standard implements IteratorAggregate, Countable
      * Performs a lazy zip operation on iterables, not unlike that of
      * array_map with first argument set to null. Also known as transposition.
      *
-     * @return $this
+     * @return self<int, list<mixed>>
      */
-    public function zip(iterable ...$inputs)
+    public function zip(iterable ...$inputs): self
     {
         if ([] === $inputs) {
             return $this;
@@ -1119,9 +1121,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<int, TValue>
      */
-    public function values()
+    public function values(): self
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1147,9 +1149,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<int, TKey>
      */
-    public function keys()
+    public function keys(): self
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1175,9 +1177,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<TValue, TKey>
      */
-    public function flip()
+    public function flip(): self
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1203,9 +1205,9 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<int, array{TKey, TValue}>
      */
-    public function tuples()
+    public function tuples(): self
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1262,7 +1264,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param-out Helper\RunningVariance $variance
      *
-     * @return $this
+     * @return self<TKey, TValue>
      */
     public function runningVariance(
         ?Helper\RunningVariance &$variance,

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -20,6 +19,12 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+/**
+ * @template TMapKey
+ * @template TMapValue
+ * @param null|callable(TMapValue, TMapKey): TMapValue $func
+ * @return Standard<TMapKey, TMapValue>
+ */
 function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
@@ -31,6 +36,13 @@ function map(?callable $func = null): Standard
     return $pipeline->map($func);
 }
 
+/**
+ * @template TTakeKey
+ * @template TTakeValue
+ * @param null|iterable<TTakeKey, TTakeValue> $input
+ * @param iterable<TTakeKey, TTakeValue> ...$inputs
+ * @return Standard<TTakeKey, TTakeValue>
+ */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
     $pipeline = new Standard($input);
@@ -42,6 +54,12 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
     return $pipeline;
 }
 
+/**
+ * @template TArrayKey of array-key
+ * @template TArrayValue
+ * @param array<TArrayKey, TArrayValue> $input
+ * @return Standard<TArrayKey, TArrayValue>
+ */
 function fromArray(array $input): Standard
 {
     return new Standard($input);
@@ -49,12 +67,20 @@ function fromArray(array $input): Standard
 
 /**
  * @param mixed ...$values
+ * @return Standard<int, mixed>
  */
 function fromValues(...$values): Standard
 {
     return new Standard($values);
 }
 
+/**
+ * @template TZipKey
+ * @template TZipValue
+ * @param iterable<TZipKey, TZipValue> $base
+ * @param iterable<TZipKey, TZipValue> ...$inputs
+ * @return Standard<TZipKey, TZipValue>
+ */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
     $result = take($base);

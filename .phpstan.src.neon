@@ -9,4 +9,3 @@ parameters:
     ignoreErrors:
         - identifier: missingType.iterableValue
         - "#Binary operation .* between .* and .* results in an error.#"
-        - "#array_flip expects array.*, array given#"
