@@ -151,4 +151,11 @@ final class EachTest extends TestCase
         $this->assertSame([], $pipeline->toList());
     }
 
+    public function testNotVoidReturn(): void
+    {
+        $pipeline = fromArray([1, 2, 3]);
+        $pipeline->each(intval(...));
+
+        $this->addToAssertionCount(1);
+    }
 }

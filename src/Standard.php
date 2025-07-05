@@ -116,7 +116,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Appends the contents of an interable to the end of the pipeline.
+     * Appends the contents of an iterable to the end of the pipeline.
      */
     public function append(?iterable $values = null): self
     {
@@ -234,7 +234,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
-     * @param ?callable $func
+     * @param ?callable $func A callback that accepts any number of arguments and returns a single value.
      *
      * @return $this
      */
@@ -254,7 +254,7 @@ class Standard implements IteratorAggregate, Countable
      * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
      *
      * @param int<1, max> $length        the size of each chunk
-     * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
      * @return $this
      */
@@ -362,8 +362,6 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func a callback must return a value
      *
-     * @psalm-suppress RedundantCondition
-     *
      * @return $this
      */
     public function cast(?callable $func = null): self
@@ -395,6 +393,9 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
+    /**
+     * @param callable(mixed):mixed $func
+     */
     private static function applyOnce(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
@@ -407,8 +408,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param null|callable(mixed):bool $func
-     * @param bool      $strict When true, only `null` and `false` are filtered out
+     * @param ?callable(mixed):bool $func
+     * @param bool $strict When true, only `null` and `false` are filtered out
      *
      * @return $this
      */
@@ -513,8 +514,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
-     * @param T         $initial The initial initial value for a $carry
+     * @param ?callable(mixed, mixed):mixed $func A reducer such as function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T $initial The initial value for the $carry
      *
      * @return int|T
      */
@@ -528,8 +529,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param T         $initial initial value for a $carry
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T $initial initial value for a $carry
+     * @param ?callable(mixed, mixed):mixed $func    function (mixed $carry, mixed $item) { must return updated $carry }
      *
      * @return T
      */
@@ -912,7 +913,7 @@ class Standard implements IteratorAggregate, Countable
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling
      *
      * @param int       $size       The desired sample size
-     * @param ?callable $weightFunc The optional weighting function
+     * @param ?callable(mixed):(int|float) $weightFunc The optional weighting function
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
@@ -1032,7 +1033,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Find lowest value using the standard comparison rules. Returns null for empty sequences.
+     * Finds the lowest value using the standard comparison rules. Returns null for empty sequences.
      *
      * @return null|mixed
      */
@@ -1070,7 +1071,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Find highest value using the standard comparison rules. Returns null for empty sequences.
+     * Finds the highest value using the standard comparison rules. Returns null for empty sequences.
      *
      * @return null|mixed
      */
@@ -1238,8 +1239,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Feeds in an instance of RunningVariance.
      *
-     * @param ?Helper\RunningVariance &$variance the instance of RunningVariance; initialized unless provided
-     * @param ?callable               $castFunc  the cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance &$variance The instance of RunningVariance; initialized unless provided
+     * @param ?callable $castFunc The cast callback, returning ?float; null values are not counted
      *
      * @param-out Helper\RunningVariance $variance
      *
@@ -1259,8 +1260,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Computes final statistics for the sequence.
      *
-     * @param ?callable(mixed):(?float) $castFunc the cast callback, returning ?float; null values are not counted
-     * @param ?Helper\RunningVariance $variance the optional instance of RunningVariance
+     * @param ?callable(mixed):(?float) $castFunc The cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance $variance The optional instance of RunningVariance
      */
     public function finalVariance(
         ?callable $castFunc = null,
@@ -1289,7 +1290,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
-     * @param callable $func
+     * @param callable $func A callback such as fn($value, $key); return value is ignored
      * @param bool $discard Whenever to discard the pipeline's iterator.
      */
     public function each(callable $func, bool $discard = true): void
