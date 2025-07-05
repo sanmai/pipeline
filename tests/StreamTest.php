@@ -42,6 +42,15 @@ use function shuffle;
  */
 final class StreamTest extends TestCase
 {
+    /** @var array<mixed> */
+    private array $seenValues = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seenValues = [];
+    }
+
     public function testStreamArray(): void
     {
         $values = fromArray([1, 2, 3, 4, 5])
@@ -85,5 +94,61 @@ final class StreamTest extends TestCase
     public function testNonPrimed(): void
     {
         $this->assertSame([], (new Standard())->stream()->toList());
+    }
+
+    private function observe(mixed $value): mixed
+    {
+        $this->seenValues[] = $value;
+
+        return $value;
+    }
+
+    public function testNonStreamEager(): void
+    {
+        $count = fromArray([])
+            ->append([1, 2, 3])
+            ->cast($this->observe(...))
+            ->cast(static fn($value) => $value * 10)
+            ->cast($this->observe(...))
+            ->count();
+
+        $this->assertSame(3, $count);
+        $this->assertSame([1, 2, 3, 10, 20, 30], $this->seenValues);
+    }
+
+    public function testNonStreamLazy(): void
+    {
+        $count = fromArray([])
+            ->append(new ArrayIterator([1, 2, 3]))
+            ->cast($this->observe(...))
+            ->cast(static fn($value) => $value * 10)
+            ->cast($this->observe(...))
+            ->count();
+
+        $this->assertSame(3, $count);
+        $this->assertSame([1, 10, 2, 20, 3, 30], $this->seenValues);
+    }
+
+    public static function provideStreamLazy(): iterable
+    {
+        yield [fromArray([])];
+        yield [new Standard()];
+    }
+
+    /**
+     * @dataProvider provideStreamLazy
+     */
+    public function testStreamLazy(Standard $input): void
+    {
+        $count = $input
+            ->stream()
+            ->append([1, 2, 3])
+            ->cast($this->observe(...))
+            ->cast(static fn($value) => $value * 10)
+            ->cast($this->observe(...))
+            ->count();
+
+        $this->assertSame(3, $count);
+        $this->assertSame([1, 10, 2, 20, 3, 30], $this->seenValues);
     }
 }
