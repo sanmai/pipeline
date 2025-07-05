@@ -40,10 +40,10 @@ class RunningVariance
      */
     private int $count = 0;
 
-    /** The smallest observed value */
+    /** The smallest observed value. */
     private float $min = NAN;
 
-    /** The largest observed value */
+    /** The largest observed value. */
     private float $max = NAN;
 
     /** First moment: the mean value. */
@@ -93,20 +93,20 @@ class RunningVariance
         return $this->count;
     }
 
-    /** The smallest observed value */
+    /** The smallest observed value. */
     public function getMin(): float
     {
         return $this->min;
     }
 
-    /** The largest observed value */
+    /** The largest observed value. */
     public function getMax(): float
     {
         return $this->max;
     }
 
     /**
-     * Get the mean value.
+     * Gets the mean value.
      */
     public function getMean(): float
     {
@@ -119,7 +119,7 @@ class RunningVariance
     }
 
     /**
-     * Get the variance.
+     * Gets the variance.
      */
     public function getVariance(): float
     {
@@ -138,7 +138,7 @@ class RunningVariance
     }
 
     /**
-     * Compute the standard deviation.
+     * Computes the standard deviation.
      */
     public function getStandardDeviation(): float
     {
@@ -146,7 +146,7 @@ class RunningVariance
     }
 
     /**
-     * Merge another instance into this instance.
+     * Merges another instance into this instance.
      *
      * @see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Parallel_algorithm
      */

@@ -43,7 +43,7 @@ $config
         '@PER-CS:risky' => true,
 
         '@PHPUnit100Migration:risky' => true,
-        '@PHP74Migration' => true,
+        '@PHP82Migration' => true,
 
         'native_constant_invocation' => [
             'strict' => false,
