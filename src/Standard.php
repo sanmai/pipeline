@@ -248,7 +248,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func
      *
-     * @return self<TKey, mixed>
+     * @return self<int, mixed>
      */
     public function unpack(?callable $func = null): self
     {
@@ -550,11 +550,13 @@ class Standard implements IteratorAggregate, Countable
      */
     public function fold($initial, ?callable $func = null)
     {
+        if (null === $func) {
+            $func = self::defaultReducer(...);
+        }
+
         if ($this->empty()) {
             return $initial;
         }
-
-        $func ??= self::defaultReducer(...);
 
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
@@ -638,7 +640,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
-     * @return array<TKey, TValue>
+     * @return array<(int&TKey)|(string&TKey), TValue>
      */
     public function toAssoc(): array
     {
@@ -690,7 +692,6 @@ class Standard implements IteratorAggregate, Countable
     public function count(): int
     {
         if ($this->empty()) {
-            // With non-primed pipeline just return zero.
             return 0;
         }
 

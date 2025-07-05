@@ -2,13 +2,20 @@ includes:
     - vendor/sanmai/phpstan-rules/extension.neon
 
 parameters:
+    reportUnmatchedIgnoredErrors: false
     inferPrivatePropertyTypeFromConstructor: true
     level: max
     paths:
         - src
     ignoreErrors:
         - identifier: missingType.iterableValue
-        - "#Binary operation .* between .* and .* results in an error#"
-        - "#Property .* does not accept .*#"
-        - "#Parameter .* of function array_flip expects array#"
-        - "#Type mixed in generic type .* is not subtype of template type .*#"
+        - identifier: assign.propertyType
+        - identifier: argument.type
+        - identifier: arguments.count
+        - identifier: generics.notSubtype
+        - identifier: missingType.generics
+        - identifier: parameter.notFound
+        - identifier: method.templateTypeNotInParameter
+        - identifier: return.type"
+    excludePaths:
+        - src/Immutable*

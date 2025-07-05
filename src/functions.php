@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -18,6 +19,8 @@
 declare(strict_types=1);
 
 namespace Pipeline;
+
+use function is_array;
 
 /**
  * @template TMapKey
@@ -41,14 +44,14 @@ function map(?callable $func = null): Standard
  * @template TTakeValue
  * @param null|iterable<TTakeKey, TTakeValue> $input
  * @param iterable<TTakeKey, TTakeValue> ...$inputs
- * @return Standard<TTakeKey, TTakeValue>
+ * @return Immutable<TTakeKey, TTakeValue>|Standard<TTakeKey, TTakeValue>
  */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
-    $pipeline = new Standard($input);
+    $pipeline = is_array($input) ? new Immutable($input) : new Standard($input);
 
     foreach ($inputs as $input) {
-        $pipeline->append($input);
+        $pipeline = $pipeline->append($input);
     }
 
     return $pipeline;
@@ -67,7 +70,7 @@ function fromArray(array $input): Standard
 
 /**
  * @param mixed ...$values
- * @return Standard<int, mixed>
+ * @return Standard<int|string, mixed>
  */
 function fromValues(...$values): Standard
 {
