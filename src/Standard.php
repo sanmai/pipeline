@@ -83,7 +83,7 @@ class Standard implements IteratorAggregate, Countable
             return;
         }
 
-        // IteratorAggregate is a nuance best we avoid dealing with.
+        // IteratorAggregate is a nuance we'd best avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
         while ($input instanceof IteratorAggregate) {
             $input = $input->getIterator();
@@ -356,7 +356,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
+     * Takes a callback that for each input value is expected to return another single value. Unlike map(), it assumes no special treatment for generators.
      *
      * With no callback is a no-op (can safely take a null).
      *
@@ -481,7 +481,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
+     * Skips elements while the predicate returns true, and keeps everything after the predicate returns false just once.
      *
      * @param callable(mixed):bool $predicate a callback returning boolean value
      */
