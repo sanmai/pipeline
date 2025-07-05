@@ -37,7 +37,7 @@ $string = take(['Hello', ' ', 'World'])->reduce(fn($carry, $item) => $carry . $i
 
 ## `fold()`
 
-Similar to `reduce()`, but with a required initial value, making it more predictable and type-safe.
+Similar to `reduce()`, but with a required initial value, making it more predictable and type-safe. **This is the recommended method for aggregations.**
 
 **Signature**: `fold($initial, ?callable $func = null): mixed`
 
@@ -48,6 +48,29 @@ Similar to `reduce()`, but with a required initial value, making it more predict
 
 -   `fold()` is the recommended method for most aggregation tasks due to its explicit nature.
 -   The type of the result is determined by the type of the initial value.
+
+### Why Choose `fold()` Over `reduce()`?
+
+While `reduce()` offers convenience with its implicit initial value, `fold()` provides better clarity and type safety:
+
+```php
+// With reduce(): What's the initial value? What type will we get?
+$result = take($items)->reduce($buildArray);
+
+// With fold(): Clear initial value and expected type
+$result = take($items)->fold([], $buildArray);  // Clearly building an array
+
+// Type-safe aggregation with fold()
+$stats = take($numbers)->fold(
+    ['sum' => 0, 'count' => 0, 'avg' => 0.0],
+    function($acc, $num) {
+        $acc['sum'] += $num;
+        $acc['count']++;
+        $acc['avg'] = $acc['sum'] / $acc['count'];
+        return $acc;
+    }
+);
+```
 
 **Examples**:
 

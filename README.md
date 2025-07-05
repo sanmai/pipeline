@@ -3,6 +3,7 @@
 ![CI](https://github.com/sanmai/pipeline/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sanmai/pipeline/badge.svg?branch=main)](https://coveralls.io/github/sanmai/pipeline?branch=main)
 [![Type Coverage](https://shepherd.dev/github/sanmai/pipeline/coverage.svg)](https://shepherd.dev/github/sanmai/pipeline)
+[![Documentation](https://readthedocs.org/projects/php-functional-pipeline/badge/?version=latest)](https://php-functional-pipeline.readthedocs.io/en/latest/)
 
 Pipeline is a PHP library that brings the power of streaming pipelines to your code. Inspired by the pipe operator (`|>`), typical in functional programming languages, Pipeline lets you chain a series of operations on your data concisely, clearly, and readably. This approach simplifies complex data transformations and makes your code more maintainable and easier to test. 
 
@@ -25,6 +26,17 @@ composer require sanmai/pipeline
 The latest version requires PHP 7.4 or above, including PHP 8.2 and later.
 
 Some earlier versions work under PHP 5.6 and above, but they are not as feature-complete.
+
+# Documentation
+
+**[Read the full documentation](https://php-functional-pipeline.readthedocs.io/)**
+
+The documentation includes:
+
+- [Quick start guide](https://php-functional-pipeline.readthedocs.io/en/latest/quickstart/installation/) to get up and running
+- Full [Pipeline API reference](https://php-functional-pipeline.readthedocs.io/en/latest/api/creation/) for a deep dive
+- [Cookbook with practical recipes](https://php-functional-pipeline.readthedocs.io/en/latest/cookbook/) and patterns
+- [Best practices](https://php-functional-pipeline.readthedocs.io/en/latest/advanced/best-practices/) with tips for effective usage
 
 # Use
 
@@ -253,6 +265,30 @@ This mutability offers flexibility but requires careful consideration, especiall
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
+
+# Type Safety with Generics
+
+Pipeline includes generic type annotations that provide better type safety when using static analysis tools like PHPStan, Psalm, or PHPStorm.
+
+```php
+use function Pipeline\fromArray;
+
+// Create a type-safe pipeline
+/** @var Standard<string, int> $numbers */
+$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+
+// PHPStan/Psalm understand the types
+$doubled = $numbers->map(fn(int $n): int => $n * 2);     // Still Standard<string, int>
+$strings = $numbers->cast(fn(int $n): string => "#$n");  // Still Standard<string, string>*
+
+// Terminal operations return concrete types
+$list = $strings->toList();   // list<string>
+$assoc = $strings->toAssoc(); // array<string, string>
+```
+
+**Note**: Due to the library's mutable design, type transformations return the same instance. Static analyzers understand the type changes through PHPDoc annotations.
+
+For more details, see the [Generic Type Support documentation](docs/generics.md).
 
 # Methods
 

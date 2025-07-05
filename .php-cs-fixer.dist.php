@@ -41,6 +41,7 @@ $config
         'header_comment' => ['comment_type' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
         '@PER-CS' => true,
         '@PER-CS:risky' => true,
+        '@PHP82Migration' => true,
 
         '@PHPUnit100Migration:risky' => true,
         '@PHP74Migration' => true,

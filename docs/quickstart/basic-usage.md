@@ -69,10 +69,15 @@ $pipeline->append([1, 2, 3]);
 The `map()` method applies a callback to each element in the pipeline.
 
 ```php
+use function Pipeline\take;
+
 // Double each number
 $result = take([1, 2, 3])
     ->map(fn($x) => $x * 2)
     ->toList(); // [2, 4, 6]
+
+// Note: With arrays, some operations like filter() execute immediately.
+// Use ->stream() first if you need lazy processing throughout.
 
 // Extract a property from an array of objects
 $users = [
@@ -107,12 +112,12 @@ The `cast()` method provides a simple way to change the type of elements.
 ```php
 // Convert strings to integers
 $result = take(['1', '2', '3'])
-    ->cast('intval')
+    ->cast(intval(...))
     ->toList(); // [1, 2, 3]
 
 // Convert strings to uppercase
 $result = take(['hello', 'world'])
-    ->cast('strtoupper')
+    ->cast(strtoupper(...))
     ->toList(); // ['HELLO', 'WORLD']
 ```
 
@@ -209,7 +214,7 @@ $errorCount = take(new SplFileObject('app.log'))
 
 // Process a CSV file
 $data = take(new SplFileObject('data.csv'))
-    ->map('str_getcsv')
+    ->map(str_getcsv(...))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```

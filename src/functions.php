@@ -20,6 +20,14 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use function is_array;
+
+/**
+ * @template TMapKey
+ * @template TMapValue
+ * @param null|callable(TMapValue, TMapKey): TMapValue $func
+ * @return Standard<TMapKey, TMapValue>
+ */
 function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
@@ -31,30 +39,51 @@ function map(?callable $func = null): Standard
     return $pipeline->map($func);
 }
 
-function take(?iterable $input = null, iterable ...$inputs): Standard
+/**
+ * @template TTakeKey
+ * @template TTakeValue
+ * @param null|iterable<TTakeKey, TTakeValue> $input
+ * @param iterable<TTakeKey, TTakeValue> ...$inputs
+ * @return Immutable<TTakeKey, TTakeValue>|Standard<TTakeKey, TTakeValue>
+ */
+function take(?iterable $input = null, iterable ...$inputs): Standard|Immutable
 {
-    $pipeline = new Standard($input);
+    $pipeline = is_array($input) ? new Immutable($input) : new Standard($input);
 
     foreach ($inputs as $input) {
-        $pipeline->append($input);
+        $pipeline = $pipeline->append($input);
     }
 
     return $pipeline;
 }
 
-function fromArray(array $input): Standard
+/**
+ * @template TArrayKey of array-key
+ * @template TArrayValue
+ * @param array<TArrayKey, TArrayValue> $input
+ * @return Immutable<TArrayKey, TArrayValue>
+ */
+function fromArray(array $input): Immutable
 {
-    return new Standard($input);
+    return new Immutable($input);
 }
 
 /**
  * @param mixed ...$values
+ * @return Standard<int|string, mixed>
  */
-function fromValues(...$values): Standard
+function fromValues(...$values): Immutable
 {
-    return new Standard($values);
+    return new Immutable($values);
 }
 
+/**
+ * @template TZipKey
+ * @template TZipValue
+ * @param iterable<TZipKey, TZipValue> $base
+ * @param iterable<TZipKey, TZipValue> ...$inputs
+ * @return Standard<TZipKey, TZipValue>
+ */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
     $result = take($base);

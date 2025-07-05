@@ -52,60 +52,53 @@ use function mt_rand;
 use function array_keys;
 
 /**
- * Immutable pipeline.
+ * Concrete pipeline with sensible default callbacks.
  *
- * @template-implements IteratorAggregate<mixed, mixed>
+ * @template TKey
+ * @template TValue
+ * @implements IteratorAggregate<TKey, TValue>
  */
 class Immutable implements IteratorAggregate, Countable
 {
     /**
-     * The source of data for this pipeline.
-     *
-     * @var iterable<mixed, mixed>
+     * @param array<TKey, TValue> $pipeline
      */
-    private $pipeline;
+    public function __construct(private readonly array $pipeline) {}
 
     /**
-     * The original input iterable, used to create fresh iterators.
-     *
-     * @var iterable<mixed, mixed>
+     * @psalm-suppress TypeDoesNotContainType
+     * @phpstan-assert-if-false non-empty-array $this->pipeline
      */
-    private $originalInput;
-
-    /**
-     * Constructor with an optional source of data.
-     */
-    public function __construct(?iterable $input = null)
+    private function empty(): bool
     {
-        if (null === $input) {
-            $this->pipeline = new EmptyIterator();
-            $this->originalInput = new EmptyIterator();
-        } else {
-            $this->pipeline = $input;
-            $this->originalInput = $input;
-        }
+        return [] === $this->pipeline;
     }
 
     /**
-     * Appends the contents of an iterable to the end of the pipeline.
+     * Appends the contents of an interable to the end of the pipeline.
+     *
+     * @return self<TKey, TValue>|Standard<TKey, TValue>
      */
     public function append(?iterable $values = null): self
     {
         if (null === $values) {
+            // No-op: an empty array or null.
             return $this;
         }
 
-        $newPipeline = new \AppendIterator();
-        $newPipeline->append($this->getIterator());
-        $newPipeline->append(self::generatorFromIterable($values));
+        if (!is_array($values)) {
+            $pipeline = new Standard($this->pipeline);
+            return $pipeline->append($values);
+        }
 
-        return new self($newPipeline);
+        return $this->join($this->pipeline, $values);
     }
 
     /**
      * Appends a list of values to the end of the pipeline.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
     public function push(...$vector): self
     {
@@ -113,404 +106,366 @@ class Immutable implements IteratorAggregate, Countable
     }
 
     /**
-     * Prepends the pipeline with the contents of an iterable.
+     * Prepends the pipeline with the contents of an array.
+     *
+     * @return self<TKey, TValue>
      */
-    public function prepend(?iterable $values = null): self
+    public function prepend(array $values): self
     {
-        if (null === $values) {
-            return $this;
-        }
-
-        $newPipeline = new \AppendIterator();
-        $newPipeline->append(self::generatorFromIterable($values));
-        $newPipeline->append($this->getIterator());
-
-        return new self($newPipeline);
+        return $this->join($values, $this->pipeline);
     }
 
     /**
      * Prepends the pipeline with a list of values.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
     public function unshift(...$vector): self
     {
         return $this->prepend($vector);
     }
 
-    public function flatten(): self
+    /**
+     * @return self<TKey, TValue>
+     */
+    private function join(array $left, array $right): self
     {
-        return new self(self::flattenIterable($this->getIterator()));
+        return new self(array_merge($left, $right));
     }
 
-    private static function flattenIterable(iterable $iterable): Generator
-    {
-        foreach ($iterable as $item) {
-            if (is_iterable($item)) {
-                yield from self::flattenIterable($item);
-            } else {
-                yield $item;
-            }
-        }
-    }
-
-    public function unpack(?callable $func = null): self
-    {
-        return new self(self::unpackIterable($this->getIterator(), $func));
-    }
-
-    private static function unpackIterable(iterable $iterable, ?callable $func): Generator
-    {
-        foreach ($iterable as $item) {
-            if (is_array($item)) {
-                if (null !== $func) {
-                    yield $func(...$item);
-                } else {
-                    yield from $item;
-                }
-            }
-        }
-    }
-
+    /**
+     * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
+     *
+     * @param int<1, max> $length        the size of each chunk
+     * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     *
+     * @return self<int, list<TValue>>
+     */
     public function chunk(int $length, bool $preserve_keys = false): self
     {
-        return new self(self::chunkIterable($this->getIterator(), $length, $preserve_keys));
-    }
-
-    private static function chunkIterable(iterable $iterable, int $length, bool $preserve_keys): Generator
-    {
-        $chunk = [];
-        foreach ($iterable as $key => $value) {
-            $chunk[$key] = $value;
-            if (count($chunk) === $length) {
-                yield $preserve_keys ? $chunk : array_values($chunk);
-                $chunk = [];
-            }
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return $this;
         }
 
-        if (!empty($chunk)) {
-            yield $preserve_keys ? $chunk : array_values($chunk);
-        }
+        // Array shortcut
+        return new self(array_chunk($this->pipeline, $length, $preserve_keys));
+
     }
 
-    public function map(?callable $func = null): self
-    {
-        return new self(self::mapIterable($this->getIterator(), $func));
-    }
 
-    private static function mapIterable(iterable $iterable, ?callable $func): Generator
-    {
-        if (null === $func) {
-            $func = fn($value) => $value;
-        }
-
-        foreach ($iterable as $key => $value) {
-            yield $key => $func($value, $key);
-        }
-    }
-
+    /**
+     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
+     *
+     * With no callback is a no-op (can safely take a null).
+     *
+     * @template TCastValue
+     * @param ?callable(TValue, TKey): TCastValue $func a callback must return a value
+     *
+     * @psalm-suppress RedundantCondition
+     *
+     * @return self<TKey, TCastValue>
+     */
     public function cast(?callable $func = null): self
     {
-        return new self(self::castIterable($this->getIterator(), $func));
-    }
-
-    private static function castIterable(iterable $iterable, ?callable $func): Generator
-    {
         if (null === $func) {
-            $func = fn($value) => (string) $value;
+            return $this;
         }
 
-        foreach ($iterable as $key => $value) {
-            yield $key => $func($value, $key);
+        if ($this->empty()) {
+            return $this;
         }
+
+        return new self(array_map($func, $this->pipeline));
     }
 
-    public function filter(?callable $func = null, bool $strict = false): self
+
+    /**
+     * Removes elements unless a callback returns true.
+     *
+     * With no callback drops all null and false values (not unlike array_filter does by default).
+     *
+     * @param ?callable(TValue, TKey):bool $func
+     * @param bool      $strict When true, only `null` and `false` are filtered out
+     *
+     * @return self<TKey, TValue>
+     */
+    public function filter(?callable $func = null, bool $strict = true): self
     {
-        return new self(self::filterIterable($this->getIterator(), $func, $strict));
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $func = self::resolvePredicate($func, $strict);
+
+        // We got an array, that's what we need. Moving along.
+        return new self(array_filter($this->pipeline, $func));
     }
 
-    private static function filterIterable(iterable $iterable, ?callable $func, bool $strict): Generator
+    /**
+     * Resolves a nullable predicate into a sensible non-null callable.
+     */
+    private static function resolvePredicate(?callable $func, bool $strict): callable
     {
+        if (null === $func && $strict) {
+            return self::strictPredicate(...);
+        }
+
         if (null === $func) {
-            $func = fn($value) => $strict ? $value !== null : (bool) $value;
+            return self::nonStrictPredicate(...);
         }
 
-        foreach ($iterable as $key => $value) {
-            if ($func($value, $key)) {
-                yield $key => $value;
-            }
+        // Handle strict mode for user provided predicates.
+        if ($strict) {
+            return static function ($value) use ($func) {
+                return self::strictPredicate($func($value));
+            };
         }
+
+        return self::resolveStringPredicate($func);
     }
 
-    public function skipWhile(callable $predicate): self
+    private static function strictPredicate(mixed $value): bool
     {
-        return new self(self::skipWhileIterable($this->getIterator(), $predicate));
+        return null !== $value && false !== $value;
     }
 
-    private static function skipWhileIterable(iterable $iterable, callable $predicate): Generator
+    private static function nonStrictPredicate(mixed $value): bool
     {
-        $skipping = true;
-        foreach ($iterable as $key => $value) {
-            if ($skipping && $predicate($value, $key)) {
-                continue;
-            }
-            $skipping = false;
-            yield $key => $value;
-        }
+        return (bool) $value;
     }
 
+    /**
+     * Resolves a string/callable predicate into a sensible non-null callable.
+     */
+    private static function resolveStringPredicate(callable $func): callable
+    {
+        if (!is_string($func)) {
+            return $func;
+        }
+
+        // Strings usually are internal functions, which typically require exactly one parameter.
+        return static fn($value) => $func($value);
+    }
+
+
+
+    /**
+     * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
+     *
+     * @template T
+     *
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T         $initial The initial initial value for a $carry
+     *
+     * @return int|T
+     */
     public function reduce(?callable $func = null, $initial = null)
     {
-        if (null === $func) {
-            $func = fn($carry, $item) => $carry + $item;
-        }
-
-        return array_reduce($this->toList(), $func, $initial);
+        return $this->fold($initial ?? 0, $func);
     }
 
+    /**
+     * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
+     *
+     * @template T
+     *
+     * @param T         $initial initial value for a $carry
+     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     *
+     * @return T
+     */
     public function fold($initial, ?callable $func = null)
     {
-        return $this->reduce($func, $initial);
+        if ($this->empty()) {
+            return $initial;
+        }
+
+        return new self(array_reduce($this->pipeline, $func ?? self::defaultReducer(...), $initial));
+    }
+
+    /**
+     * @param mixed $carry
+     * @param mixed $item
+     * @return mixed
+     */
+    private static function defaultReducer($carry, $item)
+    {
+        $carry += $item;
+
+        return $carry;
     }
 
     #[Override]
     public function getIterator(): Traversable
     {
-        // Always return a fresh iterator from the original input
-        return self::generatorFromIterable($this->originalInput);
+        /** @var ArrayIterator<TKey, TValue> */
+        return new ArrayIterator($this->pipeline);
     }
 
+    /**
+     * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
+     * @return list<mixed>
+     */
     public function toList(): array
     {
-        return iterator_to_array($this->getIterator(), false);
+        return array_values($this->pipeline);
+    }
+
+    public function toArray(bool $preserve_keys): array
+    {
+        if ($preserve_keys) {
+            return $this->toAssoc();
+        }
+
+        return $this->toList();
     }
 
     /**
-     * @deprecated Use toList() or toAssoc() instead
+     * Returns all values preserving keys. This is a terminal operation.
+     * @return array<(int&TKey)|(string&TKey), TValue>
      */
-    public function toArray(bool $preserve_keys = false): array
-    {
-        return iterator_to_array($this->getIterator(), $preserve_keys);
-    }
-
     public function toAssoc(): array
     {
-        return iterator_to_array($this->getIterator(), true);
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return [];
+        }
+
+        return $this->pipeline;
     }
+
 
     /**
-     * @deprecated Use toAssoc() instead
+     * {@inheritdoc}
+     *
+     * This is a terminal operation.
+     *
+     * @see \Countable::count()
      */
-    public function toArrayPreservingKeys(): array
-    {
-        return $this->toAssoc();
-    }
-
-    public function runningCount(?int &$count): self
-    {
-        return new self(self::runningCountIterable($this->getIterator(), $count));
-    }
-
-    private static function runningCountIterable(iterable $iterable, ?int &$count): Generator
-    {
-        $count = 0;
-        foreach ($iterable as $key => $value) {
-            $count++;
-            yield $key => $value;
-        }
-    }
-
     #[Override]
     public function count(): int
     {
-        return iterator_count($this->getIterator());
+        return count($this->pipeline);
     }
 
-    public function stream(): self
+    /**
+     * @return Standard<TKey, TValue>
+     */
+    public function stream()
     {
-        return new self(self::makeNonRewindable($this->getIterator()));
+        return new Standard($this->pipeline);
     }
 
-    private static function makeNonRewindable(iterable $input): Generator
-    {
-        if ($input instanceof Generator) {
-            return $input;
-        }
-
-        return self::generatorFromIterable($input);
-    }
-
-    private static function generatorFromIterable(iterable $input): Generator
-    {
-        yield from $input;
-    }
-
+    /**
+     * Extracts a slice from the inputs. Keys are not discarded intentionally.
+     *
+     * @see \array_slice()
+     *
+     * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
+     * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
+     *
+     * @return self<TKey, TValue>
+     */
     public function slice(int $offset, ?int $length = null): self
     {
-        return new self(self::sliceIterable($this->getIterator(), $offset, $length));
-    }
-
-    private static function sliceIterable(iterable $iterable, int $offset, ?int $length): Generator
-    {
-        $i = 0;
-        foreach ($iterable as $key => $value) {
-            if ($i >= $offset) {
-                if (null === $length || $i < $offset + $length) {
-                    yield $key => $value;
-                } else {
-                    break;
-                }
-            }
-            $i++;
-        }
-    }
-
-    public function zip(iterable ...$inputs): self
-    {
-        return new self(self::zipIterable($this->getIterator(), ...$inputs));
-    }
-
-    private static function zipIterable(iterable ...$iterables): Generator
-    {
-        $iterators = [];
-        foreach ($iterables as $iterable) {
-            $iterators[] = self::generatorFromIterable($iterable);
+        if ($this->empty()) {
+            // With non-primed pipeline just move along.
+            return $this;
         }
 
-        while (true) {
-            $values = [];
-            $allDone = true;
-            foreach ($iterators as $iterator) {
-                if ($iterator->valid()) {
-                    $allDone = false;
-                    $values[] = $iterator->current();
-                    $iterator->next();
-                } else {
-                    $values[] = null;
-                }
-            }
-
-            if ($allDone) {
-                break;
-            }
-
-            yield $values;
-        }
-    }
-
-    public function reservoir(int $size, ?callable $weightFunc = null): array
-    {
-        $reservoir = [];
-        $count = 0;
-
-        foreach ($this->getIterator() as $item) {
-            $count++;
-            if (count($reservoir) < $size) {
-                $reservoir[] = $item;
-            } else {
-                $weight = $weightFunc ? $weightFunc($item, $count) : mt_rand(0, $count - 1);
-                if ($weight < $size) {
-                    $reservoir[$weight] = $item;
-                }
-            }
+        if (0 === $length) {
+            return new self([]);
         }
 
-        return $reservoir;
+        return new self(array_slice($this->pipeline, $offset, $length, preserve_keys: true));
     }
 
+
+    /**
+     * Find lowest value using the standard comparison rules. Returns null for empty sequences.
+     *
+     * @return null|mixed
+     */
     public function min()
     {
-        return min(iterator_to_array($this->getIterator(), false));
+        if ($this->empty()) {
+            return null;
+        }
+
+        return min($this->pipeline);
     }
 
+    /**
+     * Find highest value using the standard comparison rules. Returns null for empty sequences.
+     *
+     * @return null|mixed
+     */
     public function max()
     {
-        return max(iterator_to_array($this->getIterator(), false));
+        if ($this->empty()) {
+            return null;
+        }
+
+        return max($this->pipeline);
     }
 
+    /**
+     * @return self<int, TValue>
+     */
     public function values(): self
     {
-        return new self(self::valuesIterable($this->getIterator()));
-    }
-
-    private static function valuesIterable(iterable $iterable): Generator
-    {
-        foreach ($iterable as $value) {
-            yield $value;
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
         }
+
+        return new self(array_values($this->pipeline));
     }
 
+    /**
+     * @return self<int, TKey>
+     */
     public function keys(): self
     {
-        return new self(self::keysIterable($this->getIterator()));
-    }
-
-    private static function keysIterable(iterable $iterable): Generator
-    {
-        foreach ($iterable as $key => $_) {
-            yield $key;
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
         }
+
+        return new self(array_keys($this->pipeline));
     }
 
+
+    /**
+     * @return self<TValue, TKey>
+     */
     public function flip(): self
     {
-        return new self(self::flipIterable($this->getIterator()));
-    }
-
-    private static function flipIterable(iterable $iterable): Generator
-    {
-        foreach ($iterable as $key => $value) {
-            yield $value => $key;
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
         }
+
+        return new self(array_flip($this->pipeline));
     }
 
+    /**
+     * @return self<int, array{TKey, TValue}>
+     */
     public function tuples(): self
     {
-        return new self(self::tuplesIterable($this->getIterator()));
-    }
-
-    private static function tuplesIterable(iterable $iterable): Generator
-    {
-        foreach ($iterable as $key => $value) {
-            yield [$key, $value];
-        }
-    }
-
-    public function runningVariance(?Helper\RunningVariance &$variance, ?callable $castFunc = null): self
-    {
-        return new self(self::runningVarianceIterable($this->getIterator(), $variance, $castFunc));
-    }
-
-    private static function runningVarianceIterable(iterable $iterable, ?Helper\RunningVariance &$variance, ?callable $castFunc): Generator
-    {
-        if (null === $variance) {
-            $variance = new Helper\RunningVariance();
+        if ($this->empty()) {
+            // No-op: null.
+            return $this;
         }
 
-        foreach ($iterable as $key => $value) {
-            $variance->observe($castFunc ? $castFunc($value) : $value);
-            yield $key => $value;
-        }
-    }
-
-    public function finalVariance(?callable $castFunc = null, ?Helper\RunningVariance $variance = null): Helper\RunningVariance
-    {
-        if (null === $variance) {
-            $variance = new Helper\RunningVariance();
-        }
-
-        foreach ($this->getIterator() as $value) {
-            $variance->observe($castFunc ? $castFunc($value) : $value);
-        }
-
-        return $variance;
-    }
-
-    public function each(callable $func): void
-    {
-        foreach ($this->getIterator() as $key => $value) {
-            $func($value, $key);
-        }
+        return new self(array_map(
+            fn($key, $value) => [$key, $value],
+            array_keys($this->pipeline),
+            $this->pipeline
+        ));
     }
 }
