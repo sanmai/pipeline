@@ -689,11 +689,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function stream()
     {
-        if ($this->empty()) {
-            return $this;
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
+        $this->pipeline = self::makeNonRewindable($this->pipeline ?? []);
 
         return $this;
     }
