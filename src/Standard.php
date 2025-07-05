@@ -53,7 +53,9 @@ use function array_keys;
 /**
  * Concrete pipeline with sensible default callbacks.
  *
- * @template-implements IteratorAggregate<mixed, mixed>
+ * @template TValue
+ * @template TKey
+ * @implements IteratorAggregate<TKey, TValue>
  */
 class Standard implements IteratorAggregate, Countable
 {
@@ -66,6 +68,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Constructor with an optional source of data.
+     * @param ?iterable<TKey, TValue> $input The initial data source, if any.
      */
     public function __construct(?iterable $input = null)
     {
@@ -292,7 +295,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func A callback must either return a value or yield values (return a generator).
+     * @param ?callable() $func A callback must either return a value or yield values (return a generator).
      *
      * @return $this
      */
