@@ -124,7 +124,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TValue>
      */
-    public function append(?iterable $values = null): self
+    public function append(?iterable $values = null)
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -143,7 +143,7 @@ class Standard implements IteratorAggregate, Countable
      * @param mixed ...$vector
      * @return self<TKey, TValue>
      */
-    public function push(...$vector): self
+    public function push(...$vector)
     {
         return $this->append($vector);
     }
@@ -153,7 +153,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TValue>
      */
-    public function prepend(?iterable $values = null): self
+    public function prepend(?iterable $values = null)
     {
         // Do we need to do anything here?
         if ($this->willReplace($values)) {
@@ -172,7 +172,7 @@ class Standard implements IteratorAggregate, Countable
      * @param mixed ...$vector
      * @return self<TKey, TValue>
      */
-    public function unshift(...$vector): self
+    public function unshift(...$vector)
     {
         return $this->prepend($vector);
     }
@@ -207,7 +207,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TValue>
      */
-    private function join(iterable $left, iterable $right): self
+    private function join(iterable $left, iterable $right)
     {
         // We got two arrays, that's what we will use.
         if (is_array($left) && is_array($right)) {
@@ -236,7 +236,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<int, mixed>
      */
-    public function flatten(): self
+    public function flatten()
     {
         return $this->map(static function (iterable $args = []) {
             yield from $args;
@@ -250,7 +250,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<int, mixed>
      */
-    public function unpack(?callable $func = null): self
+    public function unpack(?callable $func = null)
     {
         if (null === $func) {
             return $this->flatten();
@@ -270,7 +270,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<int, list<TValue>>
      */
-    public function chunk(int $length, bool $preserve_keys = false): self
+    public function chunk(int $length, bool $preserve_keys = false)
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -314,7 +314,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TMapValue>
      */
-    public function map(?callable $func = null): self
+    public function map(?callable $func = null)
     {
         if (null === $func) {
             return $this;
@@ -380,7 +380,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TCastValue>
      */
-    public function cast(?callable $func = null): self
+    public function cast(?callable $func = null)
     {
         if (null === $func) {
             return $this;
@@ -426,7 +426,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TValue>
      */
-    public function filter(?callable $func = null, bool $strict = false): self
+    public function filter(?callable $func = null, bool $strict = false)
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -499,7 +499,7 @@ class Standard implements IteratorAggregate, Countable
      * @param callable $predicate a callback returning boolean value
      * @return self<TKey, TValue>
      */
-    public function skipWhile(callable $predicate): self
+    public function skipWhile(callable $predicate)
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -669,7 +669,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function runningCount(
         ?int &$count
-    ): self {
+    ) {
         $count ??= 0;
 
         $this->cast(static function ($input) use (&$count) {
@@ -740,7 +740,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<TKey, TValue>
      */
-    public function slice(int $offset, ?int $length = null): self
+    public function slice(int $offset, ?int $length = null)
     {
         if ($this->empty()) {
             // With non-primed pipeline just move along.
@@ -870,7 +870,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @return self<int, list<mixed>>
      */
-    public function zip(iterable ...$inputs): self
+    public function zip(iterable ...$inputs)
     {
         if ([] === $inputs) {
             return $this;
@@ -1124,7 +1124,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return self<int, TValue>
      */
-    public function values(): self
+    public function values()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1152,7 +1152,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return self<int, TKey>
      */
-    public function keys(): self
+    public function keys()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1180,7 +1180,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return self<TValue, TKey>
      */
-    public function flip(): self
+    public function flip()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1208,7 +1208,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @return self<int, array{TKey, TValue}>
      */
-    public function tuples(): self
+    public function tuples()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1238,7 +1238,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
+    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc)
     {
         if (null === $castFunc) {
             $castFunc = floatval(...);
@@ -1270,7 +1270,7 @@ class Standard implements IteratorAggregate, Countable
     public function runningVariance(
         ?Helper\RunningVariance &$variance,
         ?callable $castFunc = null
-    ): self {
+    ) {
         $variance ??= new Helper\RunningVariance();
 
         $this->feedRunningVariance($variance, $castFunc);
@@ -1329,5 +1329,12 @@ class Standard implements IteratorAggregate, Countable
                 $this->discard();
             }
         }
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        $pipeline = new Standard($this->pipeline);
+
+        return $pipeline->$name(...$arguments);
     }
 }

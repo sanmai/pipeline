@@ -46,7 +46,7 @@ function map(?callable $func = null): Standard
  * @param iterable<TTakeKey, TTakeValue> ...$inputs
  * @return Immutable<TTakeKey, TTakeValue>|Standard<TTakeKey, TTakeValue>
  */
-function take(?iterable $input = null, iterable ...$inputs): Standard
+function take(?iterable $input = null, iterable ...$inputs): Standard|Immutable
 {
     $pipeline = is_array($input) ? new Immutable($input) : new Standard($input);
 
@@ -61,20 +61,20 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
  * @template TArrayKey of array-key
  * @template TArrayValue
  * @param array<TArrayKey, TArrayValue> $input
- * @return Standard<TArrayKey, TArrayValue>
+ * @return Immutable<TArrayKey, TArrayValue>
  */
-function fromArray(array $input): Standard
+function fromArray(array $input): Immutable
 {
-    return new Standard($input);
+    return new Immutable($input);
 }
 
 /**
  * @param mixed ...$values
  * @return Standard<int|string, mixed>
  */
-function fromValues(...$values): Standard
+function fromValues(...$values): Immutable
 {
-    return new Standard($values);
+    return new Immutable($values);
 }
 
 /**
