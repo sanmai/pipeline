@@ -39,7 +39,6 @@ use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
-use function assert;
 use function count;
 use function is_array;
 use function is_string;
@@ -125,9 +124,6 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Static analyzer hints
-        assert(null !== $values);
-
         return $this->join($this->pipeline, $values);
     }
 
@@ -151,9 +147,6 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Static analyzer hints
-        assert(null !== $values);
-
         return $this->join($values, $this->pipeline);
     }
 
@@ -171,6 +164,8 @@ class Standard implements IteratorAggregate, Countable
      * Determines if the internal pipeline will be replaced when appending/prepending.
      *
      * Utility method for appending/prepending methods.
+     *
+     * @phpstan-assert-if-false iterable $values
      */
     private function willReplace(?iterable $values = null): bool
     {
