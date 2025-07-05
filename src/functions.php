@@ -22,9 +22,6 @@ namespace Pipeline;
 
 use Generator;
 
-/**
- * @param null|callable(mixed):(mixed|Generator) $func
- */
 function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
