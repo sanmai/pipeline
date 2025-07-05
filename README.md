@@ -162,7 +162,23 @@ Pipeline is an iterator and can be used as any other iterable.
 
 Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
 
-In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obvious mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
+# Mutability and State
+
+In general, Pipeline instances are mutable. This means that every Pipeline-returning method (non-terminal operations) returns the *very same Pipeline instance*. Operations modify the pipeline in place, and subsequent operations will act on this modified state. This design allows for a fluid, chainable interface.
+
+For example, if you have multiple references to the same pipeline instance, any operation performed through one reference will affect all other references, as they all point to the same underlying object. This is a key characteristic to understand when designing your data processing flows.
+
+```php
+$pipelineA = take([1, 2, 3]);
+$pipelineB = $pipelineA; // $pipelineB now references the same pipeline as $pipelineA
+
+$pipelineA->map(fn($x) => $x * 2); // This modifies the shared pipeline
+
+// Both $pipelineA and $pipelineB will now yield [2, 4, 6]
+var_dump($pipelineB->toList()); // Output: [2, 4, 6]
+```
+
+This mutability offers flexibility but requires careful consideration, especially in scenarios where you might expect independent pipeline branches.
 
 # Caveats
 
@@ -240,11 +256,39 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 - Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this.
 
+# Deprecated Methods
+
+- `toArray()` and `toArrayPreservingKeys()`: These methods are deprecated. Use `toList()` to get an array with all values (keys ignored) or `toAssoc()` to get an associative array (keys preserved).
+
 # Classes and interfaces: overview
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
+
+# Type Safety with Generics
+
+Pipeline includes generic type annotations that provide better type safety when using static analysis tools like PHPStan, Psalm, or PHPStorm.
+
+```php
+use function Pipeline\fromArray;
+
+// Create a type-safe pipeline
+/** @var Standard<string, int> $numbers */
+$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+
+// PHPStan/Psalm understand the types
+$doubled = $numbers->map(fn(int $n): int => $n * 2);     // Still Standard<string, int>
+$strings = $numbers->cast(fn(int $n): string => "#$n");  // Still Standard<string, string>*
+
+// Terminal operations return concrete types
+$list = $strings->toList();   // list<string>
+$assoc = $strings->toAssoc(); // array<string, string>
+```
+
+**Note**: Due to the library's mutable design, type transformations return the same instance. Static analyzers understand the type changes through PHPDoc annotations.
+
+For more details, see the [Generic Type Support documentation](docs/generics.md).
 
 # Methods
 

@@ -160,7 +160,7 @@ final class StaticAnalysisTest extends TestCase
                 return $this;
             }
 
-            public function zip(iterable ...$inputs)
+            public function zip(iterable ...$inputs): self
             {
                 return $this;
             }
@@ -180,7 +180,7 @@ final class StaticAnalysisTest extends TestCase
                 return 0;
             }
 
-            public function flip()
+            public function flip(): self
             {
                 return $this;
             }

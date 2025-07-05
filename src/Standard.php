@@ -54,25 +54,27 @@ use function array_keys;
 /**
  * Concrete pipeline with sensible default callbacks.
  *
- * @template-implements IteratorAggregate<mixed, mixed>
+ * @template TKey
+ * @template TValue
+ * @implements IteratorAggregate<TKey, TValue>
  */
 class Standard implements IteratorAggregate, Countable
 {
     /**
      * Pre-primed pipeline.
      *
-     * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
+     * @var array<TKey, TValue>|Iterator<TKey, TValue>
      */
     private array|Iterator $pipeline;
 
     /**
      * Constructor with an optional source of data.
+     *
+     * @param null|iterable<TKey, TValue> $input
      */
     public function __construct(?iterable $input = null)
     {
-        if (null !== $input) {
-            $this->replace($input);
-        }
+        $this->immutablePipeline = new Immutable($input);
     }
 
     private function replace(iterable $input): void
@@ -112,57 +114,59 @@ class Standard implements IteratorAggregate, Countable
 
     private function discard(): void
     {
-        unset($this->pipeline);
+        // In an immutable context, discarding the pipeline is not meaningful.
+        // The internal immutable pipeline is replaced, not discarded.
+    }
+
+    private function resetPipeline(): void
+    {
+        $this->immutablePipeline = new Immutable();
     }
 
     /**
      * Appends the contents of an interable to the end of the pipeline.
+     *
+     * @return self<TKey, TValue>
      */
-    public function append(?iterable $values = null): self
+    public function append(?iterable $values = null)
     {
-        // Do we need to do anything here?
-        if ($this->willReplace($values)) {
-            return $this;
-        }
+        $this->immutablePipeline = $this->immutablePipeline->append($values);
 
-        // Static analyzer hints
-        assert(null !== $values);
-
-        return $this->join($this->pipeline, $values);
+        return $this;
     }
 
     /**
      * Appends a list of values to the end of the pipeline.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
-    public function push(...$vector): self
+    public function push(...$vector)
     {
-        return $this->append($vector);
+        $this->immutablePipeline = $this->immutablePipeline->push(...$vector);
+
+        return $this;
     }
 
     /**
      * Prepends the pipeline with the contents of an iterable.
+     *
+     * @return self<TKey, TValue>
      */
-    public function prepend(?iterable $values = null): self
+    public function prepend(?iterable $values = null)
     {
-        // Do we need to do anything here?
-        if ($this->willReplace($values)) {
-            return $this;
-        }
+        $this->immutablePipeline = $this->immutablePipeline->prepend($values);
 
-        // Static analyzer hints
-        assert(null !== $values);
-
-        return $this->join($values, $this->pipeline);
+        return $this;
     }
 
     /**
      * Prepends the pipeline with a list of values.
      *
      * @param mixed ...$vector
+     * @return self<TKey, TValue>
      */
-    public function unshift(...$vector): self
+    public function unshift(...$vector)
     {
         return $this->prepend($vector);
     }
@@ -194,8 +198,10 @@ class Standard implements IteratorAggregate, Countable
      * Replace the internal pipeline with a combination of two non-empty iterables, array-optimized.
      *
      * Utility method for appending/prepending methods.
+     *
+     * @return self<TKey, TValue>
      */
-    private function join(iterable $left, iterable $right): self
+    private function join(iterable $left, iterable $right)
     {
         // We got two arrays, that's what we will use.
         if (is_array($left) && is_array($right)) {
@@ -222,13 +228,13 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Flattens inputs: arrays become lists.
      *
-     * @return $this
+     * @return self<int, mixed>
      */
-    public function flatten(): self
+    public function flatten()
     {
-        return $this->map(static function (iterable $args = []) {
-            yield from $args;
-        });
+        $this->immutablePipeline = $this->immutablePipeline->flatten();
+
+        return $this;
     }
 
     /**
@@ -236,18 +242,13 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param ?callable $func
      *
-     * @return $this
+     * @return self<int, mixed>
      */
-    public function unpack(?callable $func = null): self
+    public function unpack(?callable $func = null)
     {
-        if (null === $func) {
-            return $this->flatten();
-        }
+        $this->immutablePipeline = $this->immutablePipeline->unpack($func);
 
-        return $this->map(static function (iterable $args = []) use ($func) {
-            /** @psalm-suppress InvalidArgument */
-            return $func(...$args);
-        });
+        return $this;
     }
 
     /**
@@ -256,27 +257,11 @@ class Standard implements IteratorAggregate, Countable
      * @param int<1, max> $length        the size of each chunk
      * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
-     * @return $this
+     * @return self<int, list<TValue>>
      */
-    public function chunk(int $length, bool $preserve_keys = false): self
+    public function chunk(int $length, bool $preserve_keys = false)
     {
-        // No-op: an empty array or null.
-        if ($this->empty()) {
-            return $this;
-        }
-
-        // Array shortcut
-        if (is_array($this->pipeline)) {
-            $this->pipeline = array_chunk($this->pipeline, $length, $preserve_keys);
-
-            return $this;
-        }
-
-        $this->pipeline = self::toChunks(
-            self::makeNonRewindable($this->pipeline),
-            $length,
-            $preserve_keys
-        );
+        $this->immutablePipeline = $this->immutablePipeline->chunk($length, $preserve_keys);
 
         return $this;
     }
@@ -297,43 +282,14 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func a callback must either return a value or yield values (return a generator)
+     * @template TMapValue
+     * @param ?callable(TValue, TKey): TMapValue $func a callback must either return a value or yield values (return a generator)
      *
-     * @return $this
+     * @return self<TKey, TMapValue>
      */
-    public function map(?callable $func = null): self
+    public function map(?callable $func = null)
     {
-        if (null === $func) {
-            return $this;
-        }
-
-        // That's the standard case for any next stages.
-        if (isset($this->pipeline)) {
-            $this->pipeline = self::apply($this->pipeline, $func);
-
-            return $this;
-        }
-
-        // Let's check what we got for a start.
-        $value = $func();
-
-        // Generator is a generator, moving along
-        if ($value instanceof Generator) {
-            // It is possible to detect if callback is a generator like so:
-            // (new \ReflectionFunction($func))->isGenerator();
-            // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
-            // But, again, we could add a direct internal method to replace the pipeline, e.g. as done by unpack()
-            $this->pipeline = $value;
-
-            return $this;
-        }
-
-        // Not a generator means we were given a simple value to be treated as an array.
-        // We do not cast to an array here because casting a null to an array results in
-        // an empty array; that's surprising and not how it works for other values.
-        $this->pipeline = [
-            $value,
-        ];
+        $this->immutablePipeline = $this->immutablePipeline->map($func);
 
         return $this;
     }
@@ -360,37 +316,16 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @param ?callable $func a callback must return a value
+     * @template TCastValue
+     * @param ?callable(TValue, TKey): TCastValue $func a callback must return a value
      *
      * @psalm-suppress RedundantCondition
      *
-     * @return $this
+     * @return self<TKey, TCastValue>
      */
-    public function cast(?callable $func = null): self
+    public function cast(?callable $func = null)
     {
-        if (null === $func) {
-            return $this;
-        }
-
-        // We got an array, that's what we need. Moving along.
-        if (isset($this->pipeline) && is_array($this->pipeline)) {
-            $this->pipeline = array_map($func, $this->pipeline);
-
-            return $this;
-        }
-
-        if (isset($this->pipeline)) {
-            $this->pipeline = self::applyOnce($this->pipeline, $func);
-
-            return $this;
-        }
-
-        // Else get the seed value.
-        // We do not cast to an array here because casting a null to an array results in
-        // an empty array; that's surprising and not how it works for other values.
-        $this->pipeline = [
-            $func(),
-        ];
+        $this->immutablePipeline = $this->immutablePipeline->cast($func);
 
         return $this;
     }
@@ -407,12 +342,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable $func
+     * @param ?callable(TValue, TKey):bool $func
      * @param bool      $strict When true, only `null` and `false` are filtered out
      *
-     * @return $this
+     * @return self<TKey, TValue>
      */
-    public function filter(?callable $func = null, bool $strict = false): self
+    public function filter(?callable $func = null, bool $strict = false)
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -483,63 +418,32 @@ class Standard implements IteratorAggregate, Countable
      * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
      * @param callable $predicate a callback returning boolean value
+     * @return self<TKey, TValue>
      */
-    public function skipWhile(callable $predicate): self
+    public function skipWhile(callable $predicate)
     {
-        // No-op: an empty array or null.
-        if ($this->empty()) {
-            return $this;
-        }
-
-        $predicate = self::resolveStringPredicate($predicate);
-
-        $this->filter(static function ($value) use ($predicate): bool {
-            static $done = false;
-
-            if ($predicate($value) && !$done) {
-                return false;
-            }
-
-            $done = true;
-
-            return true;
-        });
+        $this->immutablePipeline = $this->immutablePipeline->skipWhile($predicate);
 
         return $this;
     }
 
-    /**
-     * Reduces input values to a single value. Defaults to summation. This is a terminal operation.
-     *
-     * @template T
-     *
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
-     * @param T         $initial The initial initial value for a $carry
-     *
-     * @return int|T
-     */
     public function reduce(?callable $func = null, $initial = null)
     {
-        return $this->fold($initial ?? 0, $func);
+        $result = $this->immutablePipeline->reduce($func, $initial);
+        $this->resetPipeline();
+
+        return $result;
     }
 
-    /**
-     * Reduces input values to a single value. Defaults to summation. Requires an initial value. This is a terminal operation.
-     *
-     * @template T
-     *
-     * @param T         $initial initial value for a $carry
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
-     *
-     * @return T
-     */
     public function fold($initial, ?callable $func = null)
     {
+        if (null === $func) {
+            $func = self::defaultReducer(...);
+        }
+
         if ($this->empty()) {
             return $initial;
         }
-
-        $func ??= self::defaultReducer(...);
 
         if (is_array($this->pipeline)) {
             return array_reduce($this->pipeline, $func, $initial);
@@ -575,6 +479,7 @@ class Standard implements IteratorAggregate, Countable
             return $this->pipeline;
         }
 
+        /** @var ArrayIterator<TKey, TValue> */
         return new ArrayIterator($this->pipeline);
     }
 
@@ -584,19 +489,10 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toList(): array
     {
-        // No-op: an empty array or null.
-        if ($this->empty()) {
-            return [];
-        }
+        $result = $this->immutablePipeline->toList();
+        $this->resetPipeline();
 
-        // We got what we need, moving along.
-        if (is_array($this->pipeline)) {
-            return array_values($this->pipeline);
-        }
-
-        // Because `yield from` does not reset keys we have to ignore them on export by default to return every item.
-        // http://php.net/manual/en/language.generators.syntax.php#control-structures.yield.from
-        return iterator_to_array($this, preserve_keys: false);
+        return $result;
     }
 
     /**
@@ -604,11 +500,10 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toArray(bool $preserve_keys = false): array
     {
-        if ($preserve_keys) {
-            return $this->toAssoc();
-        }
+        $result = $this->immutablePipeline->toArray($preserve_keys);
+        $this->resetPipeline();
 
-        return $this->toList();
+        return $result;
     }
 
     /**
@@ -617,26 +512,22 @@ class Standard implements IteratorAggregate, Countable
      */
     public function toArrayPreservingKeys(): array
     {
-        return $this->toAssoc();
+        $result = $this->immutablePipeline->toArrayPreservingKeys();
+        $this->resetPipeline();
+
+        return $result;
     }
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     * @return array<(int&TKey)|(string&TKey), TValue>
      */
     public function toAssoc(): array
     {
-        // No-op: an empty array or null.
-        if ($this->empty()) {
-            return [];
-        }
+        $result = $this->immutablePipeline->toAssoc();
+        $this->resetPipeline();
 
-        // We got what we need, moving along.
-        if (is_array($this->pipeline)) {
-            return $this->pipeline;
-        }
-
-        // Preserve keys by default.
-        return iterator_to_array($this);
+        return $result;
     }
 
     /**
@@ -650,7 +541,7 @@ class Standard implements IteratorAggregate, Countable
      */
     public function runningCount(
         ?int &$count
-    ): self {
+    ) {
         $count ??= 0;
 
         $this->cast(static function ($input) use (&$count) {
@@ -673,27 +564,18 @@ class Standard implements IteratorAggregate, Countable
     public function count(): int
     {
         if ($this->empty()) {
-            // With non-primed pipeline just return zero.
             return 0;
         }
 
-        if (is_array($this->pipeline)) {
-            return count($this->pipeline);
-        }
-
-        return iterator_count($this->pipeline);
+        return $result;
     }
 
     /**
-     * @return $this
+     * @return self<TKey, TValue>
      */
-    public function stream()
+    public function stream(): self
     {
-        if ($this->empty()) {
-            return $this;
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
+        $this->immutablePipeline = $this->immutablePipeline->stream();
 
         return $this;
     }
@@ -720,58 +602,16 @@ class Standard implements IteratorAggregate, Countable
      * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
      * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
-     * @return $this
+     * @return self<TKey, TValue>
      */
     public function slice(int $offset, ?int $length = null)
     {
-        if ($this->empty()) {
-            // With non-primed pipeline just move along.
-            return $this;
-        }
-
-        if (0 === $length) {
-            // We're not consuming anything assuming total laziness.
-            $this->discard();
-
-            return $this;
-        }
-
-        // Shortcut to array_slice() for actual arrays.
-        if (is_array($this->pipeline)) {
-            $this->pipeline = array_slice($this->pipeline, $offset, $length, true);
-
-            return $this;
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
-
-        if ($offset < 0) {
-            // If offset is negative, the sequence will start that far from the end of the array.
-            $this->pipeline = self::tail($this->pipeline, -$offset);
-        }
-
-        if ($offset > 0) {
-            // If offset is non-negative, the sequence will start at that offset in the array.
-            $this->pipeline = self::skip($this->pipeline, $offset);
-        }
-
-        if ($length < 0) {
-            // If length is given and is negative then the sequence will stop that many elements from the end of the array.
-            $this->pipeline = self::head($this->pipeline, -$length);
-        }
-
-        if ($length > 0) {
-            // If length is given and is positive, then the sequence will have up to that many elements in it.
-            $this->pipeline = self::take($this->pipeline, $length);
-        }
+        $this->immutablePipeline = $this->immutablePipeline->slice($offset, $length);
 
         return $this;
     }
 
-    /**
-     * @psalm-param positive-int $skip
-     */
-    private static function skip(Iterator $input, int $skip): Generator
+    public function zip(iterable ...$inputs): \Pipeline\Standard
     {
         // Consume until seen enough.
         foreach ($input as $_) {
@@ -850,7 +690,7 @@ class Standard implements IteratorAggregate, Countable
      * Performs a lazy zip operation on iterables, not unlike that of
      * array_map with first argument set to null. Also known as transposition.
      *
-     * @return $this
+     * @return self<int, list<mixed>>
      */
     public function zip(iterable ...$inputs)
     {
@@ -889,237 +729,36 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    /**
-     * @return Iterator[]
-     */
-    private static function toIterators(iterable ...$inputs): array
-    {
-        return array_map(static function (iterable $input): Iterator {
-            while ($input instanceof IteratorAggregate) {
-                $input = $input->getIterator();
-            }
-
-            if ($input instanceof Iterator) {
-                return $input;
-            }
-
-            // IteratorAggregate and Iterator are out of picture, which leaves... an array.
-
-            /** @var array $input */
-            return new ArrayIterator($input);
-        }, $inputs);
-    }
-
-    /**
-     * Reservoir sampling method with an optional weighting function. Uses the most optimal algorithm.
-     *
-     * @see https://en.wikipedia.org/wiki/Reservoir_sampling
-     *
-     * @param int       $size       The desired sample size
-     * @param ?callable $weightFunc The optional weighting function
-     */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
-        if ($this->empty()) {
-            return [];
-        }
+        $result = $this->immutablePipeline->reservoir($size, $weightFunc);
+        $this->resetPipeline();
 
-        if ($size <= 0) {
-            // Discard the state to emulate full consumption
-            $this->discard();
-
-            return [];
-        }
-
-        // Algorithms below assume inputs are non-rewindable
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
-
-        $result = null === $weightFunc ?
-            self::reservoirRandom($this->pipeline, $size) :
-            self::reservoirWeighted($this->pipeline, $size, $weightFunc);
-
-        return iterator_to_array($result, true);
+        return $result;
     }
 
-    private static function drainValues(Generator $input): Generator
-    {
-        while ($input->valid()) {
-            yield $input->current();
-            // @infection-ignore-all
-            $input->next();
-        }
-    }
-
-    /**
-     * Simple and slow algorithm, commonly known as Algorithm R.
-     *
-     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Simple_algorithm
-     *
-     * @psalm-param positive-int $size
-     */
-    private static function reservoirRandom(Generator $input, int $size): Generator
-    {
-        // Take an initial sample (AKA fill the reservoir array)
-        foreach (self::take($input, $size) as $output) {
-            yield $output;
-        }
-
-        // Fetch the next value
-        $input->next();
-
-        // Return if there's nothing more to fetch
-        if (!$input->valid()) {
-            return;
-        }
-
-        $counter = $size;
-
-        // Produce replacement elements with gradually decreasing probability
-        foreach (self::drainValues($input) as $value) {
-            $key = mt_rand(0, $counter);
-
-            if ($key < $size) {
-                yield $key => $value;
-            }
-
-            ++$counter;
-        }
-    }
-
-    /**
-     * Weighted random sampling.
-     *
-     * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
-     *
-     * @psalm-param positive-int $size
-     */
-    private static function reservoirWeighted(Generator $input, int $size, callable $weightFunc): Generator
-    {
-        $sum = 0.0;
-
-        // Take an initial sample (AKA fill the reservoir array)
-        foreach (self::take($input, $size) as $output) {
-            yield $output;
-            $sum += $weightFunc($output);
-        }
-
-        // Fetch the next value
-        $input->next();
-
-        // Return if there's nothing more to fetch
-        if (!$input->valid()) {
-            return;
-        }
-
-        foreach (self::drainValues($input) as $value) {
-            $weight = $weightFunc($value);
-            $sum += $weight;
-
-            // probability for this item
-            $probability = $weight / $sum;
-
-            // @infection-ignore-all
-            if (self::random() <= $probability) {
-                yield mt_rand(0, $size - 1) => $value;
-            }
-        }
-    }
-
-    /**
-     * Returns a pseudorandom value between zero (inclusive) and one (exclusive).
-     *
-     * @infection-ignore-all
-     */
-    private static function random(): float
-    {
-        return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
-    }
-
-    /**
-     * Find lowest value using the standard comparison rules. Returns null for empty sequences.
-     *
-     * @return null|mixed
-     */
     public function min()
     {
-        if ($this->empty()) {
-            return null;
-        }
+        $result = $this->immutablePipeline->min();
+        $this->resetPipeline();
 
-        if (is_array($this->pipeline)) {
-            /** @psalm-suppress ArgumentTypeCoercion */
-            return min($this->pipeline);
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
-
-        $min = null;
-
-        foreach ($this->pipeline as $min) {
-            break;
-        }
-
-        // Return if there's nothing more to fetch
-        if (!$this->pipeline->valid()) {
-            return $min;
-        }
-
-        foreach ($this->pipeline as $value) {
-            if ($value < $min) {
-                $min = $value;
-            }
-        }
-
-        return $min;
+        return $result;
     }
 
-    /**
-     * Find highest value using the standard comparison rules. Returns null for empty sequences.
-     *
-     * @return null|mixed
-     */
     public function max()
     {
-        if ($this->empty()) {
-            return null;
-        }
+        $result = $this->immutablePipeline->max();
+        $this->resetPipeline();
 
-        if (is_array($this->pipeline)) {
-            /** @psalm-suppress ArgumentTypeCoercion */
-            return max($this->pipeline);
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
-
-        // Everything is greater than null
-        $max = null;
-
-        foreach ($this->pipeline as $value) {
-            if ($value > $max) {
-                $max = $value;
-            }
-        }
-
-        return $max;
+        return $result;
     }
 
     /**
-     * @return $this
+     * @return self<int, TValue>
      */
     public function values()
     {
-        if ($this->empty()) {
-            // No-op: null.
-            return $this;
-        }
-
-        if (is_array($this->pipeline)) {
-            $this->pipeline = array_values($this->pipeline);
-
-            return $this;
-        }
-
-        $this->pipeline = self::valuesOnly($this->pipeline);
+        $this->immutablePipeline = $this->immutablePipeline->values();
 
         return $this;
     }
@@ -1132,7 +771,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<int, TKey>
      */
     public function keys()
     {
@@ -1160,7 +799,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<TValue, TKey>
      */
     public function flip()
     {
@@ -1188,7 +827,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return $this
+     * @return self<int, array{TKey, TValue}>
      */
     public function tuples()
     {
@@ -1220,7 +859,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
+    private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc)
     {
         if (null === $castFunc) {
             $castFunc = floatval(...);
@@ -1247,12 +886,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param-out Helper\RunningVariance $variance
      *
-     * @return $this
+     * @return self<TKey, TValue>
      */
     public function runningVariance(
         ?Helper\RunningVariance &$variance,
         ?callable $castFunc = null
-    ): self {
+    ) {
         $variance ??= new Helper\RunningVariance();
 
         $this->feedRunningVariance($variance, $castFunc);
@@ -1270,24 +909,10 @@ class Standard implements IteratorAggregate, Countable
         ?callable $castFunc = null,
         ?Helper\RunningVariance $variance = null
     ): Helper\RunningVariance {
-        $variance ??= new Helper\RunningVariance();
+        $result = $this->immutablePipeline->finalVariance($castFunc, $variance);
+        $this->resetPipeline();
 
-        if ($this->empty()) {
-            // No-op: an empty array.
-            return $variance;
-        }
-
-        $this->feedRunningVariance($variance, $castFunc);
-
-        if (is_array($this->pipeline)) {
-            // We are done!
-            return $variance;
-        }
-
-        // Consume every available item
-        $_ = iterator_count($this->pipeline);
-
-        return $variance;
+        return $result;
     }
 
     /**
@@ -1298,18 +923,16 @@ class Standard implements IteratorAggregate, Countable
      */
     public function each(callable $func, bool $discard = true): void
     {
-        if ($this->empty()) {
-            return;
-        }
+        // The discard parameter is handled by the Immutable class internally.
+        // We just delegate the call.
+        $this->immutablePipeline->each($func);
+        $this->resetPipeline();
+    }
 
-        try {
-            foreach ($this->pipeline as $key => $value) {
-                $func($value, $key);
-            }
-        } finally {
-            if ($discard) {
-                $this->discard();
-            }
-        }
+    public function __call(string $name, array $arguments)
+    {
+        $pipeline = new Standard($this->pipeline);
+
+        return $pipeline->$name(...$arguments);
     }
 }
