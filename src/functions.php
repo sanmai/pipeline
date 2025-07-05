@@ -20,17 +20,32 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use Generator;
+
+/**
+ * @template TKey
+ * @template TValue
+ * @param ?callable():(TValue|Generator<TKey, TValue>) $func
+ * @return Standard<TKey, TValue>
+ */
 function map(?callable $func = null): Standard
 {
-    $pipeline = new Standard();
+    $value = $func();
 
-    if (null === $func) {
-        return $pipeline;
+    if ($value instanceof Generator) {
+        return new Standard($value);
     }
 
-    return $pipeline->map($func);
+    return new Standard([$value]);
 }
 
+/**
+ * @template TKey
+ * @template TValue
+ * @param ?iterable<TKey, TValue> $input
+ * @param iterable<TKey, TValue> ...$inputs
+ * @return Standard<TKey, TValue>
+ */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
     $pipeline = new Standard($input);
@@ -42,19 +57,32 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
     return $pipeline;
 }
 
+/**
+ * @template TValue
+ * @param array<TValue> $input
+ * @return Standard<array-key, TValue>
+ */
 function fromArray(array $input): Standard
 {
     return new Standard($input);
 }
 
 /**
- * @param mixed ...$values
+ * @template TValue
+ * @param TValue ...$values
+ * @return Standard<array-key, TValue>
  */
 function fromValues(...$values): Standard
 {
     return new Standard($values);
 }
 
+/**
+ * @template TKey
+ * @template TValue
+ * @param iterable<TKey, TValue> $base
+ * @return Standard<TKey, TValue>
+ */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
     $result = take($base);
