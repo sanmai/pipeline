@@ -511,7 +511,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param ?callable $func A reducer such as fn($carry, $item), must return updated carry value.
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated $carry.
      * @param T $initial The initial value for the $carry.
      *
      * @return int|T
@@ -526,8 +526,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param T $initial Initial value for a $carry.
-     * @param ?callable $func A reducer such as fn($carry, $item), must return updated carry value.
+     * @param T $initial Initial value for the $carry.
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated $carry.
      *
      * @return T
      */
