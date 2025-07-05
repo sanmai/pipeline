@@ -393,9 +393,6 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    /**
-     * @param callable(mixed):mixed $func
-     */
     private static function applyOnce(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
@@ -408,7 +405,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable(mixed):bool $func
+     * @param ?callable $func A callback that accepts a single value and returns a boolean value.
      * @param bool $strict When true, only `null` and `false` are filtered out.
      *
      * @return $this
@@ -483,7 +480,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Skips elements while the predicate returns true, and keeps everything after the predicate returns false just once.
      *
-     * @param callable(mixed):bool $predicate A callback returning boolean value.
+     * @param callable $predicate A callback returning boolean value.
      */
     public function skipWhile(callable $predicate): self
     {
@@ -514,8 +511,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param ?callable(mixed, mixed):mixed $func A reducer such as function (mixed $carry, mixed $item) { must return updated $carry }
-     * @param T $initial The initial value for the $carry
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated carry value.
+     * @param T $initial The initial value for the $carry.
      *
      * @return int|T
      */
@@ -529,8 +526,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param T $initial initial value for a $carry
-     * @param ?callable(mixed, mixed):mixed $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T $initial Initial value for a $carry.
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated carry value.
      *
      * @return T
      */
@@ -686,6 +683,8 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Converts the pipeline to a non-rewindable stream.
+     *
      * @return $this
      */
     public function stream()
@@ -913,7 +912,7 @@ class Standard implements IteratorAggregate, Countable
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling
      *
      * @param int       $size       The desired sample size.
-     * @param ?callable(mixed):(int|float) $weightFunc The optional weighting function.
+     * @param ?callable $weightFunc The optional weighting function.
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
@@ -1268,7 +1267,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Computes final statistics for the sequence.
      *
-     * @param ?callable(mixed):(?float) $castFunc The cast callback, returning ?float; null values are not counted.
+     * @param ?callable $castFunc The cast callback, returning ?float; null values are not counted.
      * @param ?Helper\RunningVariance $variance The optional instance of RunningVariance.
      */
     public function finalVariance(
