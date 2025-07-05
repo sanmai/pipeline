@@ -20,8 +20,6 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
-use Generator;
-
 function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
