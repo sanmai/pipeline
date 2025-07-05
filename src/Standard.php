@@ -407,7 +407,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable $func
+     * @param null|callable(mixed):bool $func
      * @param bool      $strict When true, only `null` and `false` are filtered out
      *
      * @return $this
@@ -482,7 +482,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
      *
-     * @param callable $predicate a callback returning boolean value
+     * @param callable(mixed):bool $predicate a callback returning boolean value
      */
     public function skipWhile(callable $predicate): self
     {
@@ -1259,7 +1259,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Computes final statistics for the sequence.
      *
-     * @param ?callable               $castFunc the cast callback, returning ?float; null values are not counted
+     * @param ?callable(mixed):(?float) $castFunc the cast callback, returning ?float; null values are not counted
      * @param ?Helper\RunningVariance $variance the optional instance of RunningVariance
      */
     public function finalVariance(
@@ -1280,7 +1280,7 @@ class Standard implements IteratorAggregate, Countable
             return $variance;
         }
 
-        // Consume every available item
+        // Consume every available item (fastest way to do it)
         $_ = iterator_count($this->pipeline);
 
         return $variance;
