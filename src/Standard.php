@@ -184,7 +184,7 @@ class Standard implements IteratorAggregate, Countable
             return false;
         }
 
-        // Handle edge cases there
+        // Handle edge cases in there
         $this->replace($values);
 
         return true;
