@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace Pipeline\Contracts;
 
 use IteratorAggregate;
-use Override;
 
 /**
  * @template TOutput
