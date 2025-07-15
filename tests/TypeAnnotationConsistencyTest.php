@@ -26,7 +26,9 @@ use ReflectionMethod;
 
 use function Pipeline\take;
 use function preg_match;
+use function str_replace;
 use function trim;
+use function str_contains;
 
 /**
  * @coversNothing
@@ -35,6 +37,15 @@ use function trim;
  */
 class TypeAnnotationConsistencyTest extends TestCase
 {
+    private static function firstMatch(string $pattern, string $subject): string
+    {
+        if (!preg_match($pattern, $subject, $matches)) {
+            return '';
+        }
+
+        return trim($matches[1]);
+    }
+
     /**
      * @dataProvider providePublicMethods
      */
@@ -45,77 +56,27 @@ class TypeAnnotationConsistencyTest extends TestCase
 
         if (false === $docComment) {
             $this->markTestSkipped("Method {$methodName} has no docblock");
-            return;
         }
 
         // Extract annotations
-        $returnType = null;
-        if (preg_match('/@return\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
-            $returnType = trim($matches[1]);
+        $returnType = self::firstMatch('/@return           \s+(.+?<.*?>.*?)(?:\n|\*\/)/xs', $docComment);
+        $selfOutType = self::firstMatch('/@phpstan-self-out\s+(.+?<.*?>.*?)(?:\n|\*\/)/xs', $docComment);
+
+        if (!str_contains($returnType, 'Standard')) {
+            $this->markTestSkipped("Method {$methodName} does not return Standard type");
         }
 
-        $selfOutType = null;
-        if (preg_match('/@phpstan-self-out\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
-            $selfOutType = trim($matches[1]);
-        }
+        $expectedSelfOutType = str_replace('Standard', 'self', $returnType);
 
-        // Skip if no relevant annotations
-        if (null === $returnType && null === $selfOutType) {
-            $this->markTestSkipped("Method {$methodName} has no @return or @phpstan-self-out annotations");
-            return;
-        }
-
-        // Skip terminal operations
-        if (null !== $returnType && preg_match('/@return\s+(int|list|array|null|mixed|T(?!\w))/', "@return {$returnType}")) {
-            $this->markTestSkipped("Method {$methodName} is a terminal operation");
-            return;
-        }
-
-        // Validate Standard<Type> methods have matching @phpstan-self-out
-        if (preg_match('/Standard<(.+?)>/', $returnType, $returnMatches)) {
-            $returnGeneric = trim($returnMatches[1]);
-
-            $this->assertNotNull(
-                $selfOutType,
-                "Method {$methodName} has @return Standard<{$returnGeneric}> but no @phpstan-self-out annotation"
-            );
-
-            // Check if @phpstan-self-out has matching type
-            if (!preg_match('/self<(.+?)>/', $selfOutType, $selfOutMatches)) {
-                $this->fail("Method {$methodName} has invalid @phpstan-self-out format: {$selfOutType}");
-                return;
-            }
-
-            $selfOutGeneric = trim($selfOutMatches[1]);
-
-            $this->assertEquals(
-                $returnGeneric,
-                $selfOutGeneric,
-                "Method {$methodName} has mismatched types: @return Standard<{$returnGeneric}> vs @phpstan-self-out self<{$selfOutGeneric}>"
-            );
-            return;
-        }
-
-        // Validate methods returning $this with @phpstan-self-out
-        if ('$this' === $returnType && null !== $selfOutType) {
-            $this->assertMatchesRegularExpression(
-                '/self<.+>/',
-                $selfOutType,
-                "Method {$methodName} returns \$this but has invalid @phpstan-self-out format"
-            );
-            return;
-        }
-
-        $this->markTestSkipped("Method {$methodName} does not require validation");
+        $this->assertSame($expectedSelfOutType, $selfOutType, "Method {$methodName} has mismatched @return $returnType and @phpstan-self-out $selfOutType annotations");
     }
 
-    public static function providePublicMethods(): array
+    public static function providePublicMethods(): iterable
     {
         $class = new ReflectionClass(\Pipeline\Standard::class);
 
         return take($class->getMethods(ReflectionMethod::IS_PUBLIC))
             ->filter(fn($method) => !$method->isConstructor() && !$method->isDestructor())
-            ->map(fn($method) => [$method])
-            ->toList();
+            ->map(fn($method) => [$method]);
     }
 }
