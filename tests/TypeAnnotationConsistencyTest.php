@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -37,15 +38,6 @@ use function str_contains;
  */
 class TypeAnnotationConsistencyTest extends TestCase
 {
-    private static function firstMatch(string $pattern, string $subject): string
-    {
-        if (!preg_match($pattern, $subject, $matches)) {
-            return '';
-        }
-
-        return trim($matches[1]);
-    }
-
     /**
      * @dataProvider providePublicMethods
      */
@@ -63,20 +55,29 @@ class TypeAnnotationConsistencyTest extends TestCase
         $selfOutType = self::firstMatch('/@phpstan-self-out\s+(.+?<.*?>.*?)(?:\n|\*\/)/xs', $docComment);
 
         if (!str_contains($returnType, 'Standard')) {
-            $this->markTestSkipped("Method {$methodName} does not return Standard type");
+            $this->markTestSkipped("Method {$methodName} does not return the Standard type");
         }
 
         $expectedSelfOutType = str_replace('Standard', 'self', $returnType);
 
-        $this->assertSame($expectedSelfOutType, $selfOutType, "Method {$methodName} has mismatched @return $returnType and @phpstan-self-out $selfOutType annotations");
+        $this->assertSame($expectedSelfOutType, $selfOutType, "Method {$methodName} has mismatched return '$returnType' and phpstan-self-out '$selfOutType' annotations");
     }
 
     public static function providePublicMethods(): iterable
     {
-        $class = new ReflectionClass(\Pipeline\Standard::class);
+        $class = new ReflectionClass(Standard::class);
 
         return take($class->getMethods(ReflectionMethod::IS_PUBLIC))
-            ->filter(fn($method) => !$method->isConstructor() && !$method->isDestructor())
-            ->map(fn($method) => [$method]);
+            ->filter(static fn(ReflectionMethod $method) => !$method->isConstructor() && !$method->isDestructor())
+            ->map(static fn(ReflectionMethod $method) => yield $method->getName() => [$method]);
+    }
+
+    private static function firstMatch(string $pattern, string $subject): string
+    {
+        if (!preg_match($pattern, $subject, $matches)) {
+            return '';
+        }
+
+        return trim($matches[1]);
     }
 }
