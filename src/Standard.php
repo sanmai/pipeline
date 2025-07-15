@@ -381,7 +381,7 @@ class Standard implements Countable, Output
      *
      * @template TCast
      *
-     * @param null|(callable(TOutput): TCast) $func A callback must return a value.
+     * @param null|(callable(TOutput): TCast)|(callable(): TCast) $func A callback must return a value.
      *
      * @return Standard<TCast>
      */
@@ -871,7 +871,8 @@ class Standard implements Countable, Output
      * Performs a lazy zip operation on iterables, not unlike that of
      * array_map with first argument set to null. Also known as transposition.
      *
-     * @return $this
+     * @param iterable<mixed> ...$inputs
+     * @return Standard<array{TOutput, ...}>
      */
     public function zip(iterable ...$inputs)
     {

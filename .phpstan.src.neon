@@ -13,3 +13,4 @@ parameters:
         - "#array_flip expects array.*, array given#"
         - "#(Function|Method) .* should return .* but returns .*mixed>#"
         - "#Parameter .* of method .*::map\\(\\) expects#"
+        - "#array_map expects .callable.mixed.: mixed#"
