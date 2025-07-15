@@ -246,29 +246,35 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
-# Type Safety with Generics
+# Type Safety
 
-Pipeline includes generic type annotations that provide better type safety when using static analysis tools like PHPStan, Psalm, or PHPStorm.
+Good news if you're using PHPStan, Psalm, or a smart IDE - Pipeline has better type annotations now!
 
 ```php
 use function Pipeline\fromArray;
 
-// Create a type-safe pipeline
-/** @var Standard<string, int> $numbers */
-$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+// ✅ GOOD: Chaining methods - PHPStan tracks type transformations
+$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3])
+    ->map(fn(int $n): int => $n * 2)              // Returns Standard<int>
+    ->cast(fn(int $n): string => "#$n");          // Returns Standard<string>
 
-// PHPStan/Psalm understand the types
-$doubled = $numbers->map(fn(int $n): int => $n * 2);     // Still Standard<string, int>
-$strings = $numbers->cast(fn(int $n): string => "#$n");  // Still Standard<string, string>*
+foreach ($pipeline as $value) {
+    echo strlen($value); // PHPStan knows $value is string
+}
 
-// Terminal operations return concrete types
-$list = $strings->toList();   // list<string>
-$assoc = $strings->toAssoc(); // array<string, string>
+// ❌ BAD: Separate statements - PHPStan loses track
+$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline->map(fn(int $n): int => $n * 2);       // PHPStan still thinks it's Standard<int>
+$pipeline->cast(fn(int $n): string => "#$n");    // PHPStan still thinks it's Standard<int>
+
+foreach ($pipeline as $value) {
+    echo strlen($value); // ERROR: PHPStan thinks $value is int!
+}
 ```
 
-**Note**: Due to the library's mutable design, type transformations return the same instance. Static analyzers understand the type changes through PHPDoc annotations.
+**Important:** Type tracking only works with method chaining. While Pipeline actually mutates and returns the same instance, the type annotations pretend to return new instances (e.g., `Standard<string>` instead of `self`). PHPStan can only track these "new" types when you chain the calls.
 
-For more details, see the [Generic Type Support documentation](docs/generics.md).
+Want to know more? Check out the [type safety guide](docs/generics.md).
 
 # Methods
 

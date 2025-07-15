@@ -249,6 +249,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|callable(mixed...): (TUnpack|Generator<array-key, TUnpack, mixed, mixed>) $func A callback that accepts any number of arguments and returns a single value.
      *
+     * @phpstan-self-out self<TUnpack>
      * @return Standard<TUnpack>
      */
     public function unpack(?callable $func = null): self
@@ -316,6 +317,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|(callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>))|(callable(TOutput): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>)) $func A callback must either return a value or yield values (return a generator).
      *
+     * @phpstan-self-out self<TMapValue>
      * @return Standard<TMapValue>
      */
     public function map(?callable $func = null): self
@@ -381,6 +383,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|(callable(TOutput): TCast)|(callable(): TCast) $func A callback must return a value.
      *
+     * @phpstan-self-out self<TCast>
      * @return Standard<TCast>
      */
     public function cast(?callable $func = null): self

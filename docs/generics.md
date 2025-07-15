@@ -1,10 +1,10 @@
-# Generic Type Support
+# Type Safety Guide
 
-Pipeline library includes generic type annotations that provide better type safety when using static analysis tools like PHPStan, Psalm, or PHPStorm.
+So you want your IDE to be smarter about Pipeline? Great! We've added type annotations that help PHPStan, Psalm, and PHPStorm understand exactly what's flowing through your pipelines.
 
-## Overview
+## How it works
 
-The `Standard` class now includes `@template` annotations that allow static analyzers to track types through pipeline transformations:
+The `Standard` class now uses generic types (those `@template` things in the PHPDocs). Don't worry if you've never used them - your IDE handles all the magic:
 
 ```php
 /**
@@ -14,132 +14,142 @@ The `Standard` class now includes `@template` annotations that allow static anal
 class Standard implements IteratorAggregate, Countable
 ```
 
-## Basic Usage
+Basically, this tells your tools "hey, this pipeline has keys of type TKey and values of type TValue."
 
-### Type-Safe Pipeline Creation
+## Getting Started
+
+### Creating pipelines with known types
+
+Here's the cool part - you often don't need to do anything special:
 
 ```php
 use function Pipeline\fromArray;
 use function Pipeline\fromValues;
 
-// Create a pipeline with known types
-/** @var Standard<int, string> $strings */
+// Your IDE figures this out automatically
 $strings = fromValues('hello', 'world', 'test');
 
-// Or from an associative array
-/** @var Standard<string, int> $numbers */  
+// Same with arrays
 $numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
 ```
 
-### Type Preservation with Filter
-
-The `filter()` method preserves both key and value types:
+But if you want to be explicit (or your IDE needs a hint), you can add type annotations:
 
 ```php
 /** @var Standard<int, string> $strings */
-$strings = fromValues('hello', 'world', 'test', 'php');
-
-// Still Standard<int, string>
-$longStrings = $strings->filter(fn(string $s): bool => strlen($s) > 4);
-
-// Result is list<string>
-$result = $longStrings->toList(); // ['hello', 'world']
+$strings = fromValues('hello', 'world', 'test');
 ```
 
-### Type Transformation with Map
+### Filtering keeps your types intact
 
-The `map()` method can transform value types while preserving keys:
+When you filter a pipeline, the types stay the same - you just have fewer items:
 
 ```php
-/** @var Standard<string, int> $numbers */
-$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline = fromValues('hello', 'world', 'test', 'php');
 
-// Transforms to Standard<string, string>
-$strings = $numbers->map(fn(int $n): string => "Number: $n");
+// Your IDE knows $s is a string
+$pipeline->filter(fn($s) => strlen($s) > 4);
 
-// Result is array<string, string>
-$result = $strings->toAssoc(); // ['a' => 'Number: 1', 'b' => 'Number: 2', ...]
+// And it knows you'll get back a list of strings
+$result = $pipeline->toList(); // ['hello', 'world']
 ```
 
-### Type Transformation with Cast
+### Transforming types with map()
 
-The `cast()` method is similar to `map()` but doesn't treat generators specially:
+This is where it gets fun - `map()` can change your value types:
 
 ```php
-/** @var Standard<int, float> $floats */
-$floats = fromValues(1.5, 2.7, 3.9);
+$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
 
-// Transforms to Standard<int, int>
-$integers = $floats->cast(fn(float $f): int => (int) round($f));
+// Transform numbers to strings (modifies the same instance)
+$pipeline->map(fn($n) => "Number: $n");
 
-// Result is list<int>
-$result = $integers->toList(); // [2, 3, 4]
+// Your IDE knows the result has string values
+$result = $pipeline->toAssoc(); // ['a' => 'Number: 1', 'b' => 'Number: 2', ...]
 ```
 
-## Terminal Operations
+Notice how your IDE knew `$n` was an integer? That's the type system at work!
 
-Terminal operations return concrete types:
+### Using cast() for simpler transformations
+
+`cast()` is like `map()` but simpler - it's perfect when you just want to change types:
 
 ```php
-/** @var Standard<string, mixed> $data */
+$pipeline = fromValues(1.5, 2.7, 3.9);
+
+// Round floats to integers (modifies the same instance)
+$pipeline->cast(fn($f) => (int) round($f));
+
+$result = $pipeline->toList(); // [2, 3, 4]
+```
+
+## Getting data out
+
+When you're done transforming, you need to get your data out. These methods give you regular PHP arrays and values:
+
+```php
 $data = take($someIterable);
 
-// Returns list<mixed> - numeric keys, values only
+// Get just the values as a list
 $list = $data->toList();
 
-// Returns array<string, mixed> - preserves keys
+// Keep the keys too
 $assoc = $data->toAssoc();
 
-// Returns int
+// Or just count items
 $count = $data->count();
 ```
 
-## Advanced Type Tracking
+Your IDE knows exactly what type each method returns!
 
-### Reduce with Type Safety
+## More cool stuff
 
-The `reduce()` and `fold()` methods support typed accumulators:
+### Type-safe reduce operations
 
-```php
-/** @var Standard<int, string> $words */
-$words = fromValues('hello', 'world', 'test');
-
-// Type-safe reduction
-$totalLength = $words->reduce(
-    fn(int $carry, string $word): int => $carry + strlen($word),
-    0 // initial value
-); // Returns int
-```
-
-### Conditional Types
-
-Some methods return different types based on arguments:
+Even `reduce()` and `fold()` get type checking:
 
 ```php
-/** @var Standard<int, string> $strings */
-$strings = fromValues('a', 'b', 'c');
+$pipeline = fromValues('hello', 'world', 'test');
 
-// With callback: transforms type
-$lengths = $strings->map(fn(string $s): int => strlen($s)); // Standard<int, int>
-
-// Without callback: preserves type  
-$same = $strings->map(); // Standard<int, string>
+// Your IDE knows $carry is int and $word is string
+$totalLength = $pipeline->reduce(
+    fn($carry, $word) => $carry + strlen($word),
+    0 // start from zero
+);
+// Note: pipeline is now consumed and can't be used again
 ```
 
-## Static Analysis Tools
+### Methods that adapt to your usage
+
+Some methods behave differently based on arguments:
+
+```php
+$pipeline = fromValues('a', 'b', 'c');
+
+// With a callback - transforms the type
+$pipeline->map(fn($s) => strlen($s));
+$lengths = $pipeline->toList(); // [1, 1, 1]
+
+// Without a callback on a fresh pipeline - acts as pass-through
+$pipeline2 = fromValues('x', 'y', 'z');
+$pipeline2->map(); // no-op
+$same = $pipeline2->toList(); // ['x', 'y', 'z']
+```
+
+## Setting up your tools
 
 ### PHPStan
 
-Add to your `phpstan.neon`:
+Just add Pipeline to your project and PHPStan will understand it. For best results, use a high level:
 
 ```neon
 parameters:
-    level: max
+    level: 7  # or max
 ```
 
 ### Psalm
 
-The library includes Psalm annotations. Use error level 2 or lower:
+We've included Psalm annotations too. Works best with:
 
 ```xml
 <psalm errorLevel="2">
@@ -149,78 +159,113 @@ The library includes Psalm annotations. Use error level 2 or lower:
 
 ### IDE Support
 
-Modern IDEs like PHPStorm will automatically recognize the generic annotations and provide:
-- Accurate autocompletion
-- Type hints for callback parameters
-- Return type information
+PHPStorm, VS Code (with plugins), and other modern IDEs will automatically:
+- Suggest the right types in callbacks
+- Autocomplete methods based on your data
+- Warn you about type mismatches
 
-## Backward Compatibility
+## Don't worry about breaking changes
 
-The generic type annotations are implemented using PHPDoc only, ensuring full backward compatibility:
+All these type improvements are just PHPDoc comments. That means:
 
-- No runtime changes
-- No breaking changes to method signatures  
-- Existing code continues to work unchanged
-- Child classes can override methods with any return type
+- Your existing code works exactly the same
+- No runtime performance impact
+- You can ignore the types if you want
+- Everything is 100% backward compatible
 
-## Limitations
+## Things to know
 
-Due to PHP's type system and the library's mutable design:
+Pipeline works a bit differently than you might expect:
 
-1. Each pipeline instance maintains the same generic types throughout its lifetime
-2. Type transformations (like `map()`) return the same instance with updated behavior
-3. Pipelines cannot be reused after terminal operations due to generator exhaustion
-4. Some operations internally change types in ways that static analyzers cannot track:
-   - `chunk()` transforms values into arrays
-   - `flip()` swaps keys and values
-   - `values()` resets keys to sequential integers
-   - `keys()` makes values from keys
+1. **Pipelines are mutable** - when you call `map()`, you're modifying the same pipeline, not creating a new one:
+   ```php
+   $pipeline = fromValues(1, 2, 3);
+   $same = $pipeline->map(fn($n) => $n * 2); // $same === $pipeline
+   ```
 
-### Static Analysis Warnings
+2. **Type tracking requires method chaining** - This is the most important limitation:
+   ```php
+   // ✅ GOOD: PHPStan tracks the type changes
+   $result = fromArray(['a' => 1, 'b' => 2])
+       ->map(fn($n) => $n * 2)
+       ->cast(fn($n) => new Foo($n))
+       ->toList(); // PHPStan knows this is list<Foo>
+   
+   // ❌ BAD: PHPStan loses track of type changes
+   $pipeline = fromArray(['a' => 1, 'b' => 2]);
+   $pipeline->map(fn($n) => $n * 2);
+   $pipeline->cast(fn($n) => new Foo($n));
+   $result = $pipeline->toList(); // PHPStan thinks this is list<int>!
+   ```
+   
+   This happens because we annotate methods as returning `Standard<NewType>` to track type changes, but actually return `$this`. PHPStan only sees these "new" types when you use the return value directly (method chaining).
 
-When running static analyzers on the library itself, you may see warnings about type mismatches. These are due to the internal implementation details and do not affect the type safety of user code.
+3. **One-time use** - after you call `toList()` or `reduce()`, the pipeline is exhausted:
+   ```php
+   $pipeline = fromValues(1, 2, 3);
+   $first = $pipeline->toList();  // Works fine
+   $second = $pipeline->toList(); // ERROR! Already consumed
+   ```
 
-For user code, the generic annotations provide accurate type information for:
-- Pipeline creation
-- Filter operations (type-preserving)
-- Map/cast operations (type-transforming)
-- Terminal operations (toList, toAssoc)
+4. **Some operations confuse static analyzers**:
+   - `chunk()` turns your values into arrays of values
+   - `flip()` swaps keys and values around
+   - `values()` gives you new numeric keys
+   - `keys()` makes the keys become your values
 
-### Working with Dynamic Types
+For these tricky operations, you might need to help your IDE with a type hint.
 
-If you need operations that change types dynamically, you can:
+### About those warnings
+
+If you run static analysis on the Pipeline library itself, you'll see some warnings. Don't worry - that's just because we do some clever stuff internally. Your code that uses Pipeline will get proper type checking for:
+
+- Creating pipelines
+- Filtering (keeps types)
+- Mapping (changes types)
+- Getting results (toList, toAssoc, etc.)
+
+### When types get tricky
+
+For operations that swap types around, you might need to help your IDE:
 
 ```php
-// Start with known types
-/** @var Standard<string, int> $numbers */
-$numbers = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+// Start with string keys and int values
+$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
 
-// After flip(), keys and values are swapped
-// Annotate the new type manually
-/** @var Standard<int, string> $flipped */
-$flipped = $numbers->flip();
+// flip() swaps keys and values
+$pipeline->flip();
 
-// Continue with correct types
-$result = $flipped->toAssoc(); // array<int, string>
+// Your IDE might not track this automatically, so you can hint:
+/** @var Standard<int, string> $pipeline */
+
+// Now it knows the types again
+$result = $pipeline->toAssoc(); // array<int, string>
 ```
 
-## Best Practices
+## Tips for best results
 
-1. **Annotate pipeline creation** for better type inference:
+1. **Help your IDE when needed**:
    ```php
-   /** @var Standard<int, User> $users */
-   $users = take($userRepository->findAll());
+   // When the source isn't obvious, add a hint
+   /** @var Standard<int, User> $pipeline */
+   $pipeline = take($userRepository->findAll());
    ```
 
-2. **Use specific callbacks** to help type inference:
+2. **Use arrow functions for better type inference**:
    ```php
-   // Good: Type inference works
-   $names = $users->map(fn(User $user): string => $user->getName());
+   // Your IDE can figure this out
+   $pipeline->map(fn($user) => $user->getName());
+   $names = $pipeline->toList();
    
-   // Less ideal: May need additional annotations
-   $names = $users->map([$this, 'getName']);
+   // Method references might need help
+   $pipeline2 = take($users);
+   $pipeline2->map([$this, 'getName']);
    ```
 
-3. **Leverage IDE support** - Let your IDE suggest parameter types in callbacks
+3. **Trust your IDE** - Modern IDEs are pretty smart about figuring out types
 
-4. **Run static analysis** in CI to catch type errors early
+4. **Add static analysis to CI** - Catch type issues before they hit production
+
+## That's it!
+
+The type system is here to help you, not get in your way. Use as much or as little as you want - Pipeline will keep working just like it always has, but now with better IDE support when you need it.
