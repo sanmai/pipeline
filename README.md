@@ -502,6 +502,69 @@ $variance->getCount();
 // int(100)
 ```
 
+## Type Safety
+
+The library provides extensive generic type tracking, whether you prefer method chaining or not.
+
+Given the following type:
+
+```php
+class Foo
+{
+    public function __construct(
+        public int $n,
+    ) {}
+
+    public function bar(): string
+    {
+        return "{$this->n}\n";
+    }
+}
+```
+
+A static analyzer will correctly infer that these examples are sound:
+
+```php
+$pipeline = Pipeline\take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->map(fn(int $n): int => $n * 2)
+    ->cast(fn(int $n): Foo => new Foo($n));
+
+foreach ($pipeline as $value) {
+    echo $value->bar();
+}
+
+$pipeline = Pipeline\take(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline->map(fn(int $n): int => $n * 2);
+$pipeline->cast(fn(int $n): FooB => new FooB($n));
+
+foreach ($pipeline as $value) {
+    echo $value->bar();
+}
+```
+
+But if you were to change the signature of the class:
+
+```diff
+ class Foo
+ {
+     public function __construct(
+-        public int $n,
++        public string $n,
+     ) {}
+
+-    public function bar(): string
++    public function baz(): string
+     {
+         return "{$this->n}\n";
+     }
+ }
+```
+
+PHPStan will correctly note that:
+
+- The first parameter of class `Foo` constructor expects `string` but `int` given.
+- There is a call to an undefined method `Foo::bar()`.
+
 # Contributions
 
 Contributions to documentation and test cases are welcome. Bug reports are welcome too. 
