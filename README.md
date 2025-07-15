@@ -562,7 +562,7 @@ But if you were to change the signature of the class:
 
 PHPStan will correctly note that:
 
-- Parameter #1 `$n` of class `Foo` constructor expects string, int given.
+- The first parameter of class `Foo` constructor expects string, int given.
 - There is a call to an undefined method `Foo::bar()`.
 
 # Contributions
