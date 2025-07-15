@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -19,11 +20,12 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use Generator;
+
 /**
- * @template TMapKey
  * @template TMapValue
- * @param null|callable(TMapValue, TMapKey): TMapValue $func
- * @return Standard<TMapKey, TMapValue>
+ * @param null|(callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>)) $func
+ * @return Standard<TMapValue>
  */
 function map(?callable $func = null): Standard
 {
@@ -37,11 +39,10 @@ function map(?callable $func = null): Standard
 }
 
 /**
- * @template TTakeKey
- * @template TTakeValue
- * @param null|iterable<TTakeKey, TTakeValue> $input
- * @param iterable<TTakeKey, TTakeValue> ...$inputs
- * @return Standard<TTakeKey, TTakeValue>
+ * @template TTake
+ * @param null|iterable<TTake> $input
+ * @param iterable<TTake> ...$inputs
+ * @return Standard<TTake>
  */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
@@ -55,10 +56,9 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
 }
 
 /**
- * @template TArrayKey of array-key
- * @template TArrayValue
- * @param array<TArrayKey, TArrayValue> $input
- * @return Standard<TArrayKey, TArrayValue>
+ * @template T
+ * @param array<T> $input
+ * @return Standard<T>
  */
 function fromArray(array $input): Standard
 {
@@ -66,8 +66,9 @@ function fromArray(array $input): Standard
 }
 
 /**
- * @param mixed ...$values
- * @return Standard<int, mixed>
+ * @template TValue
+ * @param TValue ...$values
+ * @return Standard<TValue>
  */
 function fromValues(...$values): Standard
 {
@@ -75,11 +76,9 @@ function fromValues(...$values): Standard
 }
 
 /**
- * @template TZipKey
- * @template TZipValue
- * @param iterable<TZipKey, TZipValue> $base
- * @param iterable<TZipKey, TZipValue> ...$inputs
- * @return Standard<TZipKey, TZipValue>
+ * @param iterable<mixed> $base
+ * @param iterable<mixed> ...$inputs
+ * @return Standard<array<int, mixed>>
  */
 function zip(iterable $base, iterable ...$inputs): Standard
 {

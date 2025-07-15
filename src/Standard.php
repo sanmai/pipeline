@@ -39,7 +39,6 @@ use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
-use function assert;
 use function count;
 use function is_array;
 use function is_string;
@@ -54,23 +53,22 @@ use function array_keys;
 /**
  * Concrete pipeline with sensible default callbacks.
  *
- * @template TKey
- * @template TValue
- * @implements IteratorAggregate<TKey, TValue>
+ * @template TOutput
+ * @template-implements IteratorAggregate<array-key, TOutput>
  */
 class Standard implements IteratorAggregate, Countable
 {
     /**
      * Pre-primed pipeline.
      *
-     * @var array<TKey, TValue>|Iterator<TKey, TValue>
+     * This is not a full `iterable` per se because we exclude IteratorAggregate before assigning a value.
      */
     private array|Iterator $pipeline;
 
     /**
      * Constructor with an optional source of data.
      *
-     * @param null|iterable<TKey, TValue> $input
+     * @param null|iterable<TOutput> $input
      */
     public function __construct(?iterable $input = null)
     {
@@ -87,7 +85,7 @@ class Standard implements IteratorAggregate, Countable
             return;
         }
 
-        // IteratorAggregate is a nuance best we avoid dealing with.
+        // IteratorAggregate is a nuance we'd best avoid dealing with.
         // For example, CallbackFilterIterator needs a plain Iterator.
         while ($input instanceof IteratorAggregate) {
             $input = $input->getIterator();
@@ -120,9 +118,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Appends the contents of an interable to the end of the pipeline.
+     * Appends the contents of an iterable to the end of the pipeline.
      *
-     * @return self<TKey, TValue>
+     * @param null|iterable<TOutput> $values
+     *
+     * @return Standard<TOutput>
      */
     public function append(?iterable $values = null): self
     {
@@ -131,17 +131,15 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Static analyzer hints
-        assert(null !== $values);
-
         return $this->join($this->pipeline, $values);
     }
 
     /**
      * Appends a list of values to the end of the pipeline.
      *
-     * @param mixed ...$vector
-     * @return self<TKey, TValue>
+     * @param TOutput ...$vector
+     *
+     * @return Standard<TOutput>
      */
     public function push(...$vector): self
     {
@@ -151,7 +149,9 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Prepends the pipeline with the contents of an iterable.
      *
-     * @return self<TKey, TValue>
+     * @param null|iterable<TOutput> $values
+     *
+     * @return Standard<TOutput>
      */
     public function prepend(?iterable $values = null): self
     {
@@ -160,17 +160,15 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Static analyzer hints
-        assert(null !== $values);
-
         return $this->join($values, $this->pipeline);
     }
 
     /**
      * Prepends the pipeline with a list of values.
      *
-     * @param mixed ...$vector
-     * @return self<TKey, TValue>
+     * @param TOutput ...$vector
+     *
+     * @return Standard<TOutput>
      */
     public function unshift(...$vector): self
     {
@@ -178,9 +176,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Determine if the internal pipeline will be replaced when appending/prepending.
+     * Determines if the internal pipeline will be replaced when appending/prepending.
      *
      * Utility method for appending/prepending methods.
+     *
+     * @phpstan-assert-if-false iterable $values
      */
     private function willReplace(?iterable $values = null): bool
     {
@@ -194,18 +194,18 @@ class Standard implements IteratorAggregate, Countable
             return false;
         }
 
-        // Handle edge cases there
+        // Handle edge cases in there
         $this->replace($values);
 
         return true;
     }
 
     /**
-     * Replace the internal pipeline with a combination of two non-empty iterables, array-optimized.
+     * Replaces the internal pipeline with a combination of two non-empty iterables, array-optimized.
      *
      * Utility method for appending/prepending methods.
      *
-     * @return self<TKey, TValue>
+     * @return Standard<TOutput>
      */
     private function join(iterable $left, iterable $right): self
     {
@@ -223,7 +223,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Replace the internal pipeline with a combination of two non-empty iterables, generator-way.
+     * Replaces the internal pipeline with a combination of two non-empty iterables, generator-way.
      */
     private static function joinYield(iterable $left, iterable $right): Generator
     {
@@ -233,8 +233,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Flattens inputs: arrays become lists.
-     *
-     * @return self<int, mixed>
+     * @return Standard<mixed>
      */
     public function flatten(): self
     {
@@ -246,9 +245,11 @@ class Standard implements IteratorAggregate, Countable
     /**
      * An extra variant of `map` which unpacks arrays into arguments. Flattens inputs if no callback provided.
      *
-     * @param ?callable $func
+     * @template TUnpack
      *
-     * @return self<TKey, mixed>
+     * @param null|callable(mixed...): (TUnpack|Generator<array-key, TUnpack, mixed, mixed>) $func A callback that accepts any number of arguments and returns a single value.
+     *
+     * @return Standard<TUnpack>
      */
     public function unpack(?callable $func = null): self
     {
@@ -256,19 +257,21 @@ class Standard implements IteratorAggregate, Countable
             return $this->flatten();
         }
 
-        return $this->map(static function (iterable $args = []) use ($func) {
-            /** @psalm-suppress InvalidArgument */
-            return $func(...$args);
-        });
+        return $this->map(
+            /** @param iterable<int|string, mixed> $args */
+            static function (iterable $args = []) use ($func) {
+                return $func(...$args);
+            }
+        );
     }
 
     /**
      * Chunks the pipeline into arrays with length elements. The last chunk may contain less than length elements.
      *
-     * @param int<1, max> $length        the size of each chunk
-     * @param bool        $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     * @param int<1, max> $length The size of each chunk.
+     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
-     * @return self<int, list<TValue>>
+     * @return Standard<list<TOutput>>
      */
     public function chunk(int $length, bool $preserve_keys = false): self
     {
@@ -310,9 +313,10 @@ class Standard implements IteratorAggregate, Countable
      * With no callback is a no-op (can safely take a null).
      *
      * @template TMapValue
-     * @param ?callable(TValue, TKey): TMapValue $func a callback must either return a value or yield values (return a generator)
      *
-     * @return self<TKey, TMapValue>
+     * @param null|(callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>))|(callable(TOutput): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>)) $func A callback must either return a value or yield values (return a generator).
+     *
+     * @return Standard<TMapValue>
      */
     public function map(?callable $func = null): self
     {
@@ -369,16 +373,15 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Takes a callback that for each input value expected to return another single value. Unlike map(), it assumes no special treatment for generators.
+     * Takes a callback that for each input value is expected to return another single value. Unlike map(), it assumes no special treatment for generators.
      *
      * With no callback is a no-op (can safely take a null).
      *
-     * @template TCastValue
-     * @param ?callable(TValue, TKey): TCastValue $func a callback must return a value
+     * @template TCast
      *
-     * @psalm-suppress RedundantCondition
+     * @param null|(callable(TOutput): TCast)|(callable(): TCast) $func A callback must return a value.
      *
-     * @return self<TKey, TCastValue>
+     * @return Standard<TCast>
      */
     public function cast(?callable $func = null): self
     {
@@ -421,10 +424,10 @@ class Standard implements IteratorAggregate, Countable
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
-     * @param ?callable(TValue, TKey):bool $func
-     * @param bool      $strict When true, only `null` and `false` are filtered out
+     * @param null|callable(TOutput): bool $func A callback that accepts a single value and returns a boolean value.
+     * @param bool $strict When true, only `null` and `false` are filtered out.
      *
-     * @return self<TKey, TValue>
+     * @return Standard<TOutput>
      */
     public function filter(?callable $func = null, bool $strict = false): self
     {
@@ -494,10 +497,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Skips elements while the predicate returns true, and keeps everything after the predicate return false just once.
+     * Skips elements while the predicate returns true, and keeps everything after the predicate returns false just once.
      *
-     * @param callable $predicate a callback returning boolean value
-     * @return self<TKey, TValue>
+     * @param callable(TOutput): bool $predicate A callback returning boolean value.
+     *
+     * @return Standard<TOutput>
      */
     public function skipWhile(callable $predicate): self
     {
@@ -528,8 +532,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
-     * @param T         $initial The initial initial value for a $carry
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated $carry.
+     * @param T $initial The initial value for the $carry.
      *
      * @return int|T
      */
@@ -543,8 +547,8 @@ class Standard implements IteratorAggregate, Countable
      *
      * @template T
      *
-     * @param T         $initial initial value for a $carry
-     * @param ?callable $func    function (mixed $carry, mixed $item) { must return updated $carry }
+     * @param T $initial Initial value for the $carry.
+     * @param ?callable $func A reducer such as fn($carry, $item), must return updated $carry.
      *
      * @return T
      */
@@ -590,13 +594,12 @@ class Standard implements IteratorAggregate, Countable
             return $this->pipeline;
         }
 
-        /** @var ArrayIterator<TKey, TValue> */
         return new ArrayIterator($this->pipeline);
     }
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
-     * @return list<mixed>
+     * @return list<TOutput>
      */
     public function toList(): array
     {
@@ -616,7 +619,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @deprecated Use toList() or toAssoc() instead
+     * @deprecated Use toList() or toAssoc() instead.
      */
     public function toArray(bool $preserve_keys = false): array
     {
@@ -629,7 +632,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
-     * @deprecated Use toAssoc() instead
+     * @deprecated Use toAssoc() instead.
      */
     public function toArrayPreservingKeys(): array
     {
@@ -638,7 +641,8 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
-     * @return array<TKey, TValue>
+     *
+     * @return array<array-key, TOutput>
      */
     public function toAssoc(): array
     {
@@ -659,11 +663,11 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Counts seen values online.
      *
-     * @param ?int &$count the current count; initialized unless provided
+     * @param ?int &$count The current count; initialized unless provided.
      *
      * @param-out int $count
      *
-     * @return $this
+     * @return Standard<TOutput>
      */
     public function runningCount(
         ?int &$count
@@ -702,15 +706,13 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return self<TKey, TValue>
+     * Converts the pipeline to a non-rewindable stream.
+     *
+     * @return Standard<TOutput>
      */
     public function stream()
     {
-        if ($this->empty()) {
-            return $this;
-        }
-
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
+        $this->pipeline = self::makeNonRewindable($this->pipeline ?? []);
 
         return $this;
     }
@@ -737,9 +739,9 @@ class Standard implements IteratorAggregate, Countable
      * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
      * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
-     * @return self<TKey, TValue>
+     * @return Standard<TOutput>
      */
-    public function slice(int $offset, ?int $length = null): self
+    public function slice(int $offset, ?int $length = null)
     {
         if ($this->empty()) {
             // With non-primed pipeline just move along.
@@ -867,9 +869,10 @@ class Standard implements IteratorAggregate, Countable
      * Performs a lazy zip operation on iterables, not unlike that of
      * array_map with first argument set to null. Also known as transposition.
      *
-     * @return self<int, list<mixed>>
+     * @param iterable<mixed> ...$inputs
+     * @return Standard<array{TOutput, ...}>
      */
-    public function zip(iterable ...$inputs): self
+    public function zip(iterable ...$inputs)
     {
         if ([] === $inputs) {
             return $this;
@@ -928,12 +931,12 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Reservoir sampling method with an optional weighting function. Uses the most optimal algorithm.
+     * Performs reservoir sampling with an optional weighting function. Uses the most optimal algorithm.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling
      *
-     * @param int       $size       The desired sample size
-     * @param ?callable $weightFunc The optional weighting function
+     * @param int       $size       The desired sample size.
+     * @param ?callable $weightFunc The optional weighting function.
      */
     public function reservoir(int $size, ?callable $weightFunc = null): array
     {
@@ -968,7 +971,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Simple and slow algorithm, commonly known as Algorithm R.
+     * Implements the simple and slow algorithm, commonly known as Algorithm R.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Simple_algorithm
      *
@@ -1004,7 +1007,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Weighted random sampling.
+     * Performs weighted random sampling.
      *
      * @see https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Chao
      *
@@ -1053,7 +1056,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Find lowest value using the standard comparison rules. Returns null for empty sequences.
+     * Finds the lowest value using the standard comparison rules. Returns null for empty sequences.
      *
      * @return null|mixed
      */
@@ -1091,7 +1094,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Find highest value using the standard comparison rules. Returns null for empty sequences.
+     * Finds the highest value using the standard comparison rules. Returns null for empty sequences.
      *
      * @return null|mixed
      */
@@ -1121,9 +1124,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return self<int, TValue>
+     * Extracts only the values from the pipeline, discarding keys.
+     *
+     * @return Standard<TOutput>
      */
-    public function values(): self
+    public function values()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1149,9 +1154,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return self<int, TKey>
+     * Extracts only the keys from the pipeline, discarding values.
+     *
+     * @return Standard<array-key>
      */
-    public function keys(): self
+    public function keys()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1177,9 +1184,12 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return self<TValue, TKey>
+     * Swaps keys and values in the pipeline.
+     * The new values will be the original keys, and the new keys will be the original values.
+     *
+     * @return Standard<array-key>&IteratorAggregate<TOutput, array-key>
      */
-    public function flip(): self
+    public function flip()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1205,9 +1215,11 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return self<int, array{TKey, TValue}>
+     * Converts each key-value pair into a tuple [key, value].
+     *
+     * @return Standard<array{0: array-key, 1: TOutput}>
      */
-    public function tuples(): self
+    public function tuples()
     {
         if ($this->empty()) {
             // No-op: null.
@@ -1237,6 +1249,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    /** @return self<TOutput> */
     private function feedRunningVariance(Helper\RunningVariance $variance, ?callable $castFunc): self
     {
         if (null === $castFunc) {
@@ -1259,12 +1272,12 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Feeds in an instance of RunningVariance.
      *
-     * @param ?Helper\RunningVariance &$variance the instance of RunningVariance; initialized unless provided
-     * @param ?callable               $castFunc  the cast callback, returning ?float; null values are not counted
+     * @param ?Helper\RunningVariance &$variance The instance of RunningVariance; initialized unless provided.
+     * @param ?callable $castFunc The cast callback, returning ?float; null values are not counted.
      *
      * @param-out Helper\RunningVariance $variance
      *
-     * @return self<TKey, TValue>
+     * @return Standard<TOutput>
      */
     public function runningVariance(
         ?Helper\RunningVariance &$variance,
@@ -1280,8 +1293,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Computes final statistics for the sequence.
      *
-     * @param ?callable               $castFunc the cast callback, returning ?float; null values are not counted
-     * @param ?Helper\RunningVariance $variance the optional instance of RunningVariance
+     * @param ?callable $castFunc The cast callback, returning ?float; null values are not counted.
+     * @param ?Helper\RunningVariance $variance The optional instance of RunningVariance.
      */
     public function finalVariance(
         ?callable $castFunc = null,
@@ -1301,7 +1314,7 @@ class Standard implements IteratorAggregate, Countable
             return $variance;
         }
 
-        // Consume every available item
+        // Consume every available item (fastest way to do it)
         $_ = iterator_count($this->pipeline);
 
         return $variance;
@@ -1310,8 +1323,8 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
-     * @param callable $func
-     * @param bool $discard Whenever to discard the pipeline's iterator.
+     * @param callable $func A callback such as fn($value, $key); return value is ignored.
+     * @param bool $discard Whether to discard the pipeline's iterator.
      */
     public function each(callable $func, bool $discard = true): void
     {
