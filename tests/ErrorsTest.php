@@ -36,28 +36,15 @@ use function is_callable;
  */
 final class ErrorsTest extends TestCase
 {
-    private function expectExceptionFallback(string $exception, string $php70fallback): void
-    {
-        if (class_exists($exception)) {
-            $this->expectException($exception);
-        } else {
-            // fallback for PHP 7.0
-            $this->expectException($php70fallback);
-        }
-    }
-
     public function testInvalidInitialGeneratorWithArguments(): void
     {
-        // PHP 7.1+ fails with: Too few arguments to function...
-        // PHP 7.0 fails with: Missing argument 1 for...
-        $this->expectExceptionMessage('argument');
-        $this->expectExceptionFallback(ArgumentCountError::class, Warning::class);
+        $this->expectException(ArgumentCountError::class);
 
         $pipeline = new Standard();
         $pipeline->map(function ($unused) {
             $this->fail('Shall never be called');
 
-            return $unused;
+            yield $unused;
         });
     }
 
@@ -74,10 +61,8 @@ final class ErrorsTest extends TestCase
         })->unpack();
 
         $this->expectException(TypeError::class);
-        // Older PHPUnit on 7.1 does not have this method
-        if (is_callable([$this, 'expectExceptionMessageMatches'])) {
-            $this->expectExceptionMessageMatches('/must .* (iterable|Traversable)/');
-        }
+        $this->expectExceptionMessageMatches('/must .* (iterable|Traversable)/');
+
         $pipeline->toList();
     }
 }
