@@ -24,7 +24,7 @@ use Generator;
 
 /**
  * @template TMapValue
- * @param null|callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>) $func
+ * @param null|(callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>)) $func
  * @return Standard<TMapValue>
  */
 function map(?callable $func = null): Standard
@@ -66,13 +66,20 @@ function fromArray(array $input): Standard
 }
 
 /**
- * @param mixed ...$values
+ * @template TValue
+ * @param TValue ...$values
+ * @return Standard<TValue>
  */
 function fromValues(...$values): Standard
 {
     return new Standard($values);
 }
 
+/**
+ * @param iterable<mixed> $base
+ * @param iterable<mixed> ...$inputs
+ * @return Standard<array<int, mixed>>
+ */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
     $result = take($base);

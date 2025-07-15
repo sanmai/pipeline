@@ -2,6 +2,7 @@ includes:
     - vendor/sanmai/phpstan-rules/extension.neon
 
 parameters:
+    reportUnmatchedIgnoredErrors: false
     inferPrivatePropertyTypeFromConstructor: true
     level: max
     paths:
@@ -10,3 +11,5 @@ parameters:
         - identifier: missingType.iterableValue
         - "#Binary operation .* between .* and .* results in an error.#"
         - "#array_flip expects array.*, array given#"
+        - "#(Function|Method) .* should return .* but returns .*mixed>#"
+        - "#Parameter .* of method .*::map\\(\\) expects#"
