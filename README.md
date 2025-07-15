@@ -262,17 +262,17 @@ foreach ($pipeline as $value) {
     echo strlen($value); // PHPStan knows $value is string
 }
 
-// ❌ BAD: Separate statements - PHPStan loses track
+// ✅ ALSO GOOD: Separate statements - PHPStan tracks type changes!
 $pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
-$pipeline->map(fn(int $n): int => $n * 2);       // PHPStan still thinks it's Standard<int>
-$pipeline->cast(fn(int $n): string => "#$n");    // PHPStan still thinks it's Standard<int>
+$pipeline->map(fn(int $n): int => $n * 2);       // PHPStan knows it's now Standard<int>
+$pipeline->cast(fn(int $n): string => "#$n");    // PHPStan knows it's now Standard<string>
 
 foreach ($pipeline as $value) {
-    echo strlen($value); // ERROR: PHPStan thinks $value is int!
+    echo strlen($value); // PHPStan knows $value is string
 }
 ```
 
-**Important:** Type tracking only works with method chaining. While Pipeline actually mutates and returns the same instance, the type annotations pretend to return new instances (e.g., `Standard<string>` instead of `self`). PHPStan can only track these "new" types when you chain the calls.
+The library now provides complete type tracking for PHPStan in both coding styles - whether you prefer method chaining or separate statements. This is achieved through the use of both `@return` and `@phpstan-self-out` annotations.
 
 Want to know more? Check out the [type safety guide](docs/generics.md).
 

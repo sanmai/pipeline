@@ -183,22 +183,22 @@ Pipeline works a bit differently than you might expect:
    $same = $pipeline->map(fn($n) => $n * 2); // $same === $pipeline
    ```
 
-2. **Type tracking requires method chaining** - This is the most important limitation:
+2. **Type tracking works with both chaining and separate statements** - Thanks to `@phpstan-self-out`:
    ```php
-   // ✅ GOOD: PHPStan tracks the type changes
+   // ✅ GOOD: Method chaining - PHPStan tracks the type changes
    $result = fromArray(['a' => 1, 'b' => 2])
        ->map(fn($n) => $n * 2)
        ->cast(fn($n) => new Foo($n))
        ->toList(); // PHPStan knows this is list<Foo>
    
-   // ❌ BAD: PHPStan loses track of type changes
+   // ✅ ALSO GOOD: Separate statements - PHPStan still tracks the type changes!
    $pipeline = fromArray(['a' => 1, 'b' => 2]);
    $pipeline->map(fn($n) => $n * 2);
    $pipeline->cast(fn($n) => new Foo($n));
-   $result = $pipeline->toList(); // PHPStan thinks this is list<int>!
+   $result = $pipeline->toList(); // PHPStan knows this is list<Foo>!
    ```
    
-   This happens because we annotate methods as returning `Standard<NewType>` to track type changes, but actually return `$this`. PHPStan only sees these "new" types when you use the return value directly (method chaining).
+   This works because Pipeline uses both `@return Standard<NewType>` (for method chaining) and `@phpstan-self-out self<NewType>` (for tracking mutations). This dual annotation approach gives you complete type safety regardless of your coding style.
 
 3. **One-time use** - after you call `toList()` or `reduce()`, the pipeline is exhausted:
    ```php

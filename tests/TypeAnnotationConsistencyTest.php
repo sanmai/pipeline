@@ -24,27 +24,54 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
 
+use function Pipeline\take;
 use function preg_match;
 use function trim;
 
+/**
+ * @coversNothing
+ *
+ * @internal
+ */
 class TypeAnnotationConsistencyTest extends TestCase
 {
     /**
-     * @dataProvider provideMethodsWithGenericReturns
-     * @coversNothing
+     * @dataProvider providePublicMethods
      */
-    public function testGenericReturnHasMatchingSelfOut(string $methodName, ?string $returnType, ?string $selfOutType): void
+    public function testGenericReturnHasMatchingSelfOut(ReflectionMethod $method): void
     {
-        if (null === $returnType) {
-            $this->markTestSkipped("Method {$methodName} has no @return annotation");
+        $methodName = $method->getName();
+        $docComment = $method->getDocComment();
+
+        if (false === $docComment) {
+            $this->markTestSkipped("Method {$methodName} has no docblock");
+            return;
         }
 
-        // Skip terminal operations and those that don't return self
-        if (preg_match('/@return\s+(int|list|array|null|mixed|T(?!\w))/', $returnType)) {
-            $this->markTestSkipped("Method {$methodName} is a terminal operation or has non-Standard return type");
+        // Extract annotations
+        $returnType = null;
+        if (preg_match('/@return\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
+            $returnType = trim($matches[1]);
         }
 
-        // Extract the generic type from @return Standard<Type>
+        $selfOutType = null;
+        if (preg_match('/@phpstan-self-out\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
+            $selfOutType = trim($matches[1]);
+        }
+
+        // Skip if no relevant annotations
+        if (null === $returnType && null === $selfOutType) {
+            $this->markTestSkipped("Method {$methodName} has no @return or @phpstan-self-out annotations");
+            return;
+        }
+
+        // Skip terminal operations
+        if (null !== $returnType && preg_match('/@return\s+(int|list|array|null|mixed|T(?!\w))/', "@return {$returnType}")) {
+            $this->markTestSkipped("Method {$methodName} is a terminal operation");
+            return;
+        }
+
+        // Validate Standard<Type> methods have matching @phpstan-self-out
         if (preg_match('/Standard<(.+?)>/', $returnType, $returnMatches)) {
             $returnGeneric = trim($returnMatches[1]);
 
@@ -69,52 +96,26 @@ class TypeAnnotationConsistencyTest extends TestCase
             return;
         }
 
+        // Validate methods returning $this with @phpstan-self-out
         if ('$this' === $returnType && null !== $selfOutType) {
-            // Method returns $this but has @phpstan-self-out - that's fine
-            $this->assertTrue(true, "Method {$methodName} returns \$this and has @phpstan-self-out");
+            $this->assertMatchesRegularExpression(
+                '/self<.+>/',
+                $selfOutType,
+                "Method {$methodName} returns \$this but has invalid @phpstan-self-out format"
+            );
             return;
         }
 
-        $this->markTestSkipped("Method {$methodName} does not return Standard<Type>");
+        $this->markTestSkipped("Method {$methodName} does not require validation");
     }
 
-    public static function provideMethodsWithGenericReturns(): array
+    public static function providePublicMethods(): array
     {
         $class = new ReflectionClass(\Pipeline\Standard::class);
-        $methods = [];
 
-        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($method->isConstructor() || $method->isDestructor()) {
-                continue;
-            }
-
-            $docComment = $method->getDocComment();
-            if (false === $docComment) {
-                continue;
-            }
-
-            // Extract @return annotation
-            $returnType = null;
-            if (preg_match('/@return\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
-                $returnType = trim($matches[1]);
-            }
-
-            // Extract @phpstan-self-out annotation
-            $selfOutType = null;
-            if (preg_match('/@phpstan-self-out\s+(.+?)(?:\n|\*\/)/s', $docComment, $matches)) {
-                $selfOutType = trim($matches[1]);
-            }
-
-            // Only include methods that have either annotation
-            if (null !== $returnType || null !== $selfOutType) {
-                $methods[$method->getName()] = [
-                    $method->getName(),
-                    $returnType,
-                    $selfOutType,
-                ];
-            }
-        }
-
-        return $methods;
+        return take($class->getMethods(ReflectionMethod::IS_PUBLIC))
+            ->filter(fn($method) => !$method->isConstructor() && !$method->isDestructor())
+            ->map(fn($method) => [$method])
+            ->toList();
     }
 }
