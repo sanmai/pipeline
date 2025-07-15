@@ -577,6 +577,7 @@ class Standard implements Countable, Output
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
      * @return list<mixed>
      */
+    #[Override]
     public function toList(): array
     {
         // No-op: an empty array or null.
@@ -618,6 +619,7 @@ class Standard implements Countable, Output
     /**
      * Returns all values preserving keys. This is a terminal operation.
      */
+    #[Override]
     public function toAssoc(): array
     {
         // No-op: an empty array or null.

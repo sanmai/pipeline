@@ -53,7 +53,7 @@ use function array_keys;
 
 /**
  * @template TOutput
- * @template-implements IteratorAggregate<array-key, TOutput>
+ * @extends IteratorAggregate<array-key, TOutput>
  */
 interface Output extends IteratorAggregate
 {
