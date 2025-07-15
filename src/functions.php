@@ -42,6 +42,11 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
     return $pipeline;
 }
 
+/**
+ * @template T
+ * @param array<T> $input
+ * @return Standard<T>
+ */
 function fromArray(array $input): Standard
 {
     return new Standard($input);

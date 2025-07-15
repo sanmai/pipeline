@@ -52,15 +52,19 @@ use function mt_rand;
 use function array_keys;
 
 /**
- * TODO: template definition
+ * @template TOutput
+ * @template-implements IteratorAggregate<array-key, TOutput>
  */
-interface Output
+interface Output extends IteratorAggregate
 {
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     * @return array<array-key, TOutput>
      */
     public function toAssoc(): array;
 
-
+    /**
+     * @return list<TOutput>
+     */
     public function toList(): array;
 }

@@ -54,9 +54,10 @@ use function array_keys;
 /**
  * Concrete pipeline with sensible default callbacks.
  *
- * @template-implements IteratorAggregate<mixed, mixed>
+ * @template TOutput
+ * @template-implements Output<TOutput>
  */
-class Standard implements IteratorAggregate, Countable, Output
+class Standard implements Countable, Output
 {
     /**
      * Pre-primed pipeline.
