@@ -20,6 +20,13 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use Generator;
+
+/**
+ * @template TMapValue
+ * @param null|callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>) $func
+ * @return Standard<TMapValue>
+ */
 function map(?callable $func = null): Standard
 {
     $pipeline = new Standard();
@@ -31,6 +38,12 @@ function map(?callable $func = null): Standard
     return $pipeline->map($func);
 }
 
+/**
+ * @template TTake
+ * @param null|iterable<TTake> $input
+ * @param iterable<TTake> ...$inputs
+ * @return Standard<TTake>
+ */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
     $pipeline = new Standard($input);

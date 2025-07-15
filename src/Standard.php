@@ -68,6 +68,8 @@ class Standard implements Countable, Output
 
     /**
      * Constructor with an optional source of data.
+     *
+     * @param null|iterable<TOutput> $input
      */
     public function __construct(?iterable $input = null)
     {
