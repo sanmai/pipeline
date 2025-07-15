@@ -246,36 +246,6 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
-# Type Safety
-
-Good news if you're using PHPStan, Psalm, or a smart IDE - Pipeline has better type annotations now!
-
-```php
-use function Pipeline\fromArray;
-
-// ✅ GOOD: Chaining methods - PHPStan tracks type transformations
-$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3])
-    ->map(fn(int $n): int => $n * 2)              // Returns Standard<int>
-    ->cast(fn(int $n): string => "#$n");          // Returns Standard<string>
-
-foreach ($pipeline as $value) {
-    echo strlen($value); // PHPStan knows $value is string
-}
-
-// ✅ ALSO GOOD: Separate statements - PHPStan tracks type changes!
-$pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
-$pipeline->map(fn(int $n): int => $n * 2);       // PHPStan knows it's now Standard<int>
-$pipeline->cast(fn(int $n): string => "#$n");    // PHPStan knows it's now Standard<string>
-
-foreach ($pipeline as $value) {
-    echo strlen($value); // PHPStan knows $value is string
-}
-```
-
-The library now provides complete type tracking for PHPStan in both coding styles - whether you prefer method chaining or separate statements. This is achieved through the use of both `@return` and `@phpstan-self-out` annotations.
-
-Want to know more? Check out the [type safety guide](docs/generics.md).
-
 # Methods
 
 ## `__construct()`
@@ -531,6 +501,69 @@ $variance->getStandardDeviation();
 $variance->getCount();
 // int(100)
 ```
+
+## Type Safety
+
+The library provides extensive generic type tracking, whether you prefer method chaining or not.
+
+Given the following type:
+
+```php
+class Foo
+{
+    public function __construct(
+        public int $n,
+    ) {}
+
+    public function bar(): string
+    {
+        return "{$this->n}\n";
+    }
+}
+```
+
+A static analyzer will correctly infer that these examples are correct:
+
+```php
+$pipeline = Pipeline\take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->map(fn(int $n): int => $n * 2)
+    ->cast(fn(int $n): Foo => new Foo($n));
+
+foreach ($pipeline as $value) {
+    echo $value->bar();
+}
+
+$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline->map(fn(int $n): int => $n * 2);
+$pipeline->cast(fn(int $n): FooB => new FooB($n));
+
+foreach ($pipeline as $value) {
+    echo $value->bar();
+}
+```
+
+But if you were to change the signature of the class:
+
+```diff
+ class Foo
+ {
+     public function __construct(
+-        public int $n,
++        public string $n,
+     ) {}
+
+-    public function bar(): string
++    public function baz(): string
+     {
+         return "{$this->n}\n";
+     }
+ }
+```
+
+PHPStan will correctly note that:
+
+- Parameter #1 `$n` of class `Foo` constructor expects string, int given.
+- There is a call to an undefined method `Foo::bar()`.
 
 # Contributions
 
