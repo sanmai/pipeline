@@ -55,9 +55,9 @@ use function array_keys;
  * Concrete pipeline with sensible default callbacks.
  *
  * @template TOutput
- * @template-implements Output<TOutput>
+ * @template-implements IteratorAggregate<array-key, TOutput>
  */
-class Standard implements Countable, Output
+class Standard implements Countable, IteratorAggregate
 {
     /**
      * Pre-primed pipeline.
@@ -600,9 +600,8 @@ class Standard implements Countable, Output
 
     /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
-     * @return list<mixed>
+     * @return list<TOutput>
      */
-    #[Override]
     public function toList(): array
     {
         // No-op: an empty array or null.
@@ -643,8 +642,9 @@ class Standard implements Countable, Output
 
     /**
      * Returns all values preserving keys. This is a terminal operation.
+     *
+     * @return array<array-key, TOutput>
      */
-    #[Override]
     public function toAssoc(): array
     {
         // No-op: an empty array or null.
