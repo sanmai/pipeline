@@ -122,6 +122,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|iterable<TOutput> $values
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function append(?iterable $values = null): self
@@ -139,6 +140,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param TOutput ...$vector
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function push(...$vector): self
@@ -151,6 +153,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|iterable<TOutput> $values
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function prepend(?iterable $values = null): self
@@ -168,6 +171,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param TOutput ...$vector
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function unshift(...$vector): self
@@ -233,6 +237,7 @@ class Standard implements IteratorAggregate, Countable
 
     /**
      * Flattens inputs: arrays become lists.
+     * @phpstan-self-out self<mixed>
      * @return Standard<mixed>
      */
     public function flatten(): self
@@ -272,6 +277,7 @@ class Standard implements IteratorAggregate, Countable
      * @param int<1, max> $length The size of each chunk.
      * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
+     * @phpstan-self-out self<list<TOutput>>
      * @return Standard<list<TOutput>>
      */
     public function chunk(int $length, bool $preserve_keys = false): self
@@ -430,6 +436,7 @@ class Standard implements IteratorAggregate, Countable
      * @param null|callable(TOutput): bool $func A callback that accepts a single value and returns a boolean value.
      * @param bool $strict When true, only `null` and `false` are filtered out.
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function filter(?callable $func = null, bool $strict = false): self
@@ -504,6 +511,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param callable(TOutput): bool $predicate A callback returning boolean value.
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function skipWhile(callable $predicate): self
@@ -670,6 +678,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param-out int $count
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function runningCount(
@@ -711,6 +720,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Converts the pipeline to a non-rewindable stream.
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function stream()
@@ -742,6 +752,7 @@ class Standard implements IteratorAggregate, Countable
      * @param int  $offset If offset is non-negative, the sequence will start at that offset. If offset is negative, the sequence will start that far from the end.
      * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function slice(int $offset, ?int $length = null)
@@ -1129,6 +1140,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Extracts only the values from the pipeline, discarding keys.
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function values()
@@ -1159,6 +1171,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Extracts only the keys from the pipeline, discarding values.
      *
+     * @phpstan-self-out self<array-key>
      * @return Standard<array-key>
      */
     public function keys()
@@ -1190,6 +1203,7 @@ class Standard implements IteratorAggregate, Countable
      * Swaps keys and values in the pipeline.
      * The new values will be the original keys, and the new keys will be the original values.
      *
+     * @phpstan-self-out self<array-key>&IteratorAggregate<TOutput, array-key>
      * @return Standard<array-key>&IteratorAggregate<TOutput, array-key>
      */
     public function flip()
@@ -1220,6 +1234,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Converts each key-value pair into a tuple [key, value].
      *
+     * @phpstan-self-out self<array{0: array-key, 1: TOutput}>
      * @return Standard<array{0: array-key, 1: TOutput}>
      */
     public function tuples()
@@ -1280,6 +1295,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param-out Helper\RunningVariance $variance
      *
+     * @phpstan-self-out self<TOutput>
      * @return Standard<TOutput>
      */
     public function runningVariance(
