@@ -18,6 +18,7 @@
         "infection/infection": ">=0.30.3",
         "league/pipeline": "^0.3 || ^1.0",
         "php-coveralls/php-coveralls": "^2.4.1",
+        "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2",
         "phpunit/phpunit": ">=9.4 <12",
         "sanmai/phpstan-rules": "^0.3.0",
@@ -40,7 +41,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "ergebnis/composer-normalize": true,
-            "infection/extension-installer": true
+            "infection/extension-installer": true,
+            "phpstan/extension-installer": true
         },
         "sort-packages": true
     },

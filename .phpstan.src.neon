@@ -1,6 +1,3 @@
-includes:
-    - vendor/sanmai/phpstan-rules/extension.neon
-
 parameters:
     inferPrivatePropertyTypeFromConstructor: true
     level: max

@@ -262,7 +262,7 @@ final class SliceTest extends TestCase
             [-PHP_INT_MAX, 0],
         ];
 
-        foreach ($inputs as $array) {
+        foreach ($inputs as $array) { // @phpstan-ignore-line
             foreach ($argsList as $args) {
                 // First with keys:
                 $args = $args + [null, null, true];
