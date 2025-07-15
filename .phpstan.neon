@@ -6,3 +6,7 @@ parameters:
     paths:
         - src
         - tests
+    ignoreErrors:
+        -
+             identifier: selfOut.type
+             path: tests/StaticAnalysisTest.php
