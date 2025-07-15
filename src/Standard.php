@@ -27,6 +27,7 @@ use EmptyIterator;
 use Generator;
 use Iterator;
 use IteratorAggregate;
+use Pipeline\Contracts\Output;
 use Traversable;
 use Override;
 
@@ -55,7 +56,7 @@ use function array_keys;
  *
  * @template-implements IteratorAggregate<mixed, mixed>
  */
-class Standard implements IteratorAggregate, Countable
+class Standard implements IteratorAggregate, Countable, Output
 {
     /**
      * Pre-primed pipeline.
