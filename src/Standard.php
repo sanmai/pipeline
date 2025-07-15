@@ -234,7 +234,6 @@ class Standard implements Countable, Output
 
     /**
      * Flattens inputs: arrays become lists.
-     *
      * @return Standard<mixed>
      */
     public function flatten(): self
