@@ -12,6 +12,7 @@
         "@default": true,
         "NotIdenticalNotEqual": false,
         "DecrementInteger": false,
+        "ReturnRemoval": false,
         "LessThan": {
             "ignore": [
                 "Pipeline\\Helper\\RunningVariance"
