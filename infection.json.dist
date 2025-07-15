@@ -10,7 +10,6 @@
             "assert.*"
         ],
         "@default": true,
-        "IdenticalEqual": false,
         "NotIdenticalNotEqual": false,
         "DecrementInteger": false,
         "LessThan": {
