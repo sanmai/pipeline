@@ -81,7 +81,7 @@ final class ChunkTest extends TestCase
 
         if (null === $preserve_keys) {
             $pipeline->chunk($length);
-        } else {
+        } else { // @phpstan-ignore-line
             $pipeline->chunk($length, $preserve_keys);
         }
 

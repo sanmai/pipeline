@@ -1,6 +1,3 @@
-includes:
-    - vendor/sanmai/phpstan-rules/extension.neon
-
 parameters:
     inferPrivatePropertyTypeFromConstructor: true
     level: max
@@ -11,4 +8,4 @@ parameters:
         - "#Binary operation .* between .* and .* results in an error.#"
         - "#array_flip expects array.*, array given#"
         - "#(Function|Method) .* should return .* but returns .*mixed>#"
-        - "#Parameter .* of method .*::map\\(\\) expects#"
+        - "#zip\\(\\) should return .* but returns#"

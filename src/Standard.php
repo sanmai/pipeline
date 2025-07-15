@@ -884,6 +884,7 @@ class Standard implements IteratorAggregate, Countable
      * array_map with first argument set to null. Also known as transposition.
      *
      * @param iterable<mixed> ...$inputs
+     * @phpstan-self-out self<array{TOutput, ...}>
      * @return Standard<array{TOutput, ...}>
      */
     public function zip(iterable ...$inputs)

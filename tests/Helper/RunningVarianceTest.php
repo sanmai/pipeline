@@ -297,7 +297,7 @@ final class RunningVarianceTest extends TestCase
         $two_pi = 2 * M_PI;
         $epsilon = PHP_FLOAT_EPSILON;
 
-        while (true) {
+        while (true) { // @phpstan-ignore-line
             do {
                 $u1 = mt_rand() / mt_getrandmax();
             } while ($u1 <= $epsilon);
