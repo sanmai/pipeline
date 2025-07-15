@@ -8,4 +8,4 @@ parameters:
         - "#Binary operation .* between .* and .* results in an error.#"
         - "#array_flip expects array.*, array given#"
         - "#(Function|Method) .* should return .* but returns .*mixed>#"
-        - "#zip\\(\\) should return .* but returns#"
+        - "#zip\\(\\) should return .* but returns .*#"
