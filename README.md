@@ -533,7 +533,7 @@ foreach ($pipeline as $value) {
     echo $value->bar();
 }
 
-$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline = Pipeline\take(['a' => 1, 'b' => 2, 'c' => 3]);
 $pipeline->map(fn(int $n): int => $n * 2);
 $pipeline->cast(fn(int $n): FooB => new FooB($n));
 
