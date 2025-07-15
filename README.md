@@ -522,7 +522,7 @@ class Foo
 }
 ```
 
-A static analyzer will correctly infer that these examples are correct:
+A static analyzer will correctly infer that these examples are sound:
 
 ```php
 $pipeline = Pipeline\take(['a' => 1, 'b' => 2, 'c' => 3])
