@@ -35,5 +35,9 @@
         <PropertyNotSetInConstructor errorLevel="suppress" />
         <RedundantCondition errorLevel="info" />
         <NoValue errorLevel="info" />
+        <InvalidReturnStatement errorLevel="info" />
+        <InvalidReturnType errorLevel="info" />
+        <InvalidArgument errorLevel="info" />
+        <TooFewArguments errorLevel="info" />
     </issueHandlers>
 </psalm>

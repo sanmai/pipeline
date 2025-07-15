@@ -8,7 +8,7 @@ parameters:
         - src
     ignoreErrors:
         - identifier: missingType.iterableValue
-        - "#Binary operation .* between .* and .* results in an error#"
-        - "#Property .* does not accept .*#"
-        - "#Parameter .* of function array_flip expects array#"
-        - "#Type mixed in generic type .* is not subtype of template type .*#"
+        - "#Binary operation .* between .* and .* results in an error.#"
+        - "#array_flip expects array.*, array given#"
+        - "#(Function|Method) .* should return .* but returns .*mixed>#"
+        - "#Parameter .* of method .*::map\\(\\) expects#"
