@@ -118,6 +118,10 @@ class Standard implements Countable, Output
 
     /**
      * Appends the contents of an iterable to the end of the pipeline.
+     *
+     * @param null|iterable<TOutput> $values
+     *
+     * @return Standard<TOutput>
      */
     public function append(?iterable $values = null): self
     {
@@ -132,7 +136,9 @@ class Standard implements Countable, Output
     /**
      * Appends a list of values to the end of the pipeline.
      *
-     * @param mixed ...$vector
+     * @param TOutput ...$vector
+     *
+     * @return Standard<TOutput>
      */
     public function push(...$vector): self
     {
@@ -141,6 +147,10 @@ class Standard implements Countable, Output
 
     /**
      * Prepends the pipeline with the contents of an iterable.
+     *
+     * @param null|iterable<TOutput> $values
+     *
+     * @return Standard<TOutput>
      */
     public function prepend(?iterable $values = null): self
     {
@@ -155,7 +165,9 @@ class Standard implements Countable, Output
     /**
      * Prepends the pipeline with a list of values.
      *
-     * @param mixed ...$vector
+     * @param TOutput ...$vector
+     *
+     * @return Standard<TOutput>
      */
     public function unshift(...$vector): self
     {
