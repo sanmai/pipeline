@@ -776,35 +776,44 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $this->pipeline = self::makeNonRewindable($this->pipeline);
+        $this->pipeline = self::sliceToIterator(
+            self::makeNonRewindable($this->pipeline),
+            $offset,
+            $length
+        );
 
+        return $this;
+    }
+
+    private static function sliceToIterator(Iterator $stream, int $offset, ?int $length): Iterator
+    {
         if ($offset < 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
-            $this->pipeline = self::tail($this->pipeline, -$offset);
+            $stream = self::tail($stream, -$offset);
         }
 
         if ($offset > 0) {
             // If offset is non-negative, the sequence will start at that offset in the array.
-            $this->pipeline = self::skip($this->pipeline, $offset);
+            $stream = self::skip($stream, $offset);
         }
 
         if ($length < 0) {
             // If length is given and is negative then the sequence will stop that many elements from the end of the array.
-            $this->pipeline = self::head($this->pipeline, -$length);
+            $stream = self::head($stream, -$length);
         }
 
         if ($length > 0) {
             // If length is given and is positive, then the sequence will have up to that many elements in it.
-            $this->pipeline = self::take($this->pipeline, $length);
+            $stream = self::take($stream, $length);
         }
 
-        return $this;
+        return $stream;
     }
 
     /**
      * @psalm-param positive-int $skip
      */
-    private static function skip(Iterator $input, int $skip): Generator
+    private static function skip(Iterator $input, int $skip): Iterator
     {
         // Consume until seen enough.
         foreach ($input as $_) {
@@ -826,7 +835,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @psalm-param positive-int $take
      */
-    private static function take(Generator $input, int $take): Generator
+    private static function take(Iterator $input, int $take): Iterator
     {
         while ($input->valid()) {
             yield $input->key() => $input->current();
@@ -840,7 +849,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private static function tail(iterable $input, int $length): Generator
+    private static function tail(iterable $input, int $length): Iterator
     {
         $buffer = [];
 
@@ -865,7 +874,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Allocates a buffer of $length, and reads records into it, proceeding with FIFO when buffer is full.
      */
-    private static function head(iterable $input, int $length): Generator
+    private static function head(iterable $input, int $length): Iterator
     {
         $buffer = [];
 
