@@ -23,9 +23,10 @@ namespace Pipeline;
 use Generator;
 
 /**
+ * @template TMapKey
  * @template TMapValue
- * @param null|(callable(): (TMapValue|Generator<array-key, TMapValue, mixed, mixed>)) $func
- * @return Standard<TMapValue>
+ * @param null|(callable(): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>)) $func
+ * @return Standard<TMapKey, TMapValue>
  */
 function map(?callable $func = null): Standard
 {
@@ -39,10 +40,11 @@ function map(?callable $func = null): Standard
 }
 
 /**
+ * @template TKey
  * @template TTake
- * @param null|iterable<TTake> $input
- * @param iterable<TTake> ...$inputs
- * @return Standard<TTake>
+ * @param null|iterable<TKey, TTake> $input
+ * @param iterable<TKey, TTake> ...$inputs
+ * @return Standard<TKey, TTake>
  */
 function take(?iterable $input = null, iterable ...$inputs): Standard
 {
@@ -58,7 +60,7 @@ function take(?iterable $input = null, iterable ...$inputs): Standard
 /**
  * @template T
  * @param array<T> $input
- * @return Standard<T>
+ * @return Standard<array-key, T>
  */
 function fromArray(array $input): Standard
 {
@@ -68,7 +70,7 @@ function fromArray(array $input): Standard
 /**
  * @template TValue
  * @param TValue ...$values
- * @return Standard<TValue>
+ * @return Standard<array-key, TValue>
  */
 function fromValues(...$values): Standard
 {
@@ -78,7 +80,7 @@ function fromValues(...$values): Standard
 /**
  * @param iterable<mixed> $base
  * @param iterable<mixed> ...$inputs
- * @return Standard<array<int, mixed>>
+ * @return Standard<array-key, array<int, mixed>>
  */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
