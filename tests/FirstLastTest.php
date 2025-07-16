@@ -51,8 +51,7 @@ final class FirstLastTest extends TestCase
     {
         $pipeline = map(function () {
             yield 'a';
-            yield 'b';
-            yield 'c';
+            $this->fail('Should never reach this');
         });
         $this->assertSame('a', $pipeline->first());
     }
