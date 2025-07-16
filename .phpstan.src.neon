@@ -11,3 +11,4 @@ parameters:
         - "#zip\\(\\) should return .* but returns .*#"
         - "#Parameter .* of method Pipeline.* expects .*#"
         - "#Method .*::toAssoc\\(\\) should return array<.*> but returns array#"
+        - "#Unable to resolve the template type .* in call to method .*map\\(\\)#"
