@@ -657,7 +657,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Returns all values preserving keys. This is a terminal operation.
      *
-     * @return array<TKey&array-key, TValue>
+     * @return array<TKey, TValue>
      */
     public function toAssoc(): array
     {
