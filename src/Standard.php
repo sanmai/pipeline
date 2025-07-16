@@ -787,14 +787,14 @@ class Standard implements IteratorAggregate, Countable
 
     private static function sliceToIterator(Generator $stream, int $offset, ?int $length): Iterator
     {
-        if ($offset > 0) {
+        if ($offset < 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
-            $stream = self::skip($stream, $offset);
+            $stream = self::tail($stream, -$offset);
         }
 
-        if ($offset < 0) {
+        if ($offset > 0) {
             // If offset is non-negative, the sequence will start at that offset in the array.
-            $stream = self::tail($stream, -$offset);
+            $stream = self::skip($stream, $offset);
         }
 
         if ($length < 0) {
