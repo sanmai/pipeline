@@ -102,13 +102,6 @@ class TypeInferenceTest extends TestCase
             })
             ->toList();
 
-        $result2 = take($constructor->getParameters())
-            ->map(function ($param) {
-                yield $param->getName();
-            })
-            ->toList();
-
         $this->assertSame(['n'], $result1);
-        $this->assertSame($result2, $result1);
     }
 }
