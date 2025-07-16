@@ -776,8 +776,7 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Transform the pipeline through offset and length operations
-        $this->pipeline = self::applySliceTransformations(
+        $this->pipeline = self::sliceToIterator(
             self::makeNonRewindable($this->pipeline),
             $offset,
             $length
@@ -786,11 +785,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    /**
-     * Applies slice transformations based on offset and length.
-     * Each transformation flows naturally into the next.
-     */
-    private static function applySliceTransformations(Generator $stream, int $offset, ?int $length): Iterator
+    private static function sliceToIterator(Generator $stream, int $offset, ?int $length): Iterator
     {
         if ($offset > 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
