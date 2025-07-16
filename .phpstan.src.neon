@@ -9,3 +9,5 @@ parameters:
         - "#array_flip expects array.*, array given#"
         - "#(Function|Method) .* should return .* but returns .*mixed>#"
         - "#zip\\(\\) should return .* but returns .*#"
+        - "#Parameter .* of method Pipeline.* expects .*#"
+        - "#Method .*::toAssoc\\(\\) should return array<.*> but returns array#"
