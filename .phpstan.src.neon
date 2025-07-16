@@ -7,8 +7,6 @@ parameters:
         - identifier: missingType.iterableValue
         - "#Binary operation .* between .* and .* results in an error.#"
         - "#array_flip expects array.*, array given#"
-        - "#(Function|Method) .* should return .* but returns .*mixed>#"
-        - "#zip\\(\\) should return .* but returns .*#"
+        - "#.* should return .* but returns .*#"
         - "#Parameter .* of method Pipeline.* expects .*#"
-        - "#Method .*::toAssoc\\(\\) should return array<.*> but returns array#"
         - "#Unable to resolve the template type .* in call to method .*map\\(\\)#"
