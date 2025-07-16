@@ -35,6 +35,7 @@ nav:
   - Reference:
       - Method Index: reference/method-index.md
       - Changelog: reference/changelog.md
+      - Type Safety: generics.md
 
 markdown_extensions:
   - admonition
