@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -16,10 +15,9 @@
  * limitations under the License.
  */
 
-include 'vendor/autoload.php';
+declare(strict_types=1);
 
-
-use function Pipeline\take;
+namespace Tests\Pipeline\Fixtures;
 
 class Foo
 {
@@ -31,28 +29,4 @@ class Foo
     {
         return "{$this->n}\n";
     }
-}
-
-
-$foos = take(['a' => 1, 'b' => 2, 'c' => 3])
-    ->map(fn(int $n): int => $n * 2)
-    ->cast(fn(int $n): Foo => new Foo($n));
-
-foreach ($foos as $value) {
-    echo $value->bar();
-}
-
-$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
-$pipeline->map(fn(int $n): int => $n * 2);
-$pipeline->cast(fn(int $n): Foo => new Foo($n));
-
-foreach ($pipeline as $value) {
-    echo $value->bar();
-}
-
-$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
-$pipeline->map(static fn(int $n) => yield new Foo($n * 2) => $n * 2);
-
-foreach ($pipeline as $foo => $value) {
-    echo $foo->bar();
 }
