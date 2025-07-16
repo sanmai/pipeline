@@ -785,7 +785,7 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    private static function sliceToIterator(Generator $stream, int $offset, ?int $length): Iterator
+    private static function sliceToIterator(Iterator $stream, int $offset, ?int $length): Iterator
     {
         if ($offset < 0) {
             // If offset is negative, the sequence will start that far from the end of the array.
