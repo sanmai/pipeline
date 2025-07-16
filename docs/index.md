@@ -10,7 +10,7 @@
 - **Fluent Interface**: Chain operations together for clean, readable, and expressive code.
 - **Zero Dependencies**: Requires only PHP 8.2+, with no external libraries.
 - **Generator-Based**: Leverages PHP generators for efficient, stream-based processing.
-- **Type-Safe**: Fully compatible with static analysis tools like PHPStan, Psalm, and Phan.
+- **Type-Safe**: Fully compatible with static analysis tools like PHPStan, Psalm, and Phan. [Learn more about Type Safety](generics.md).
 
 ## Core Concepts
 
