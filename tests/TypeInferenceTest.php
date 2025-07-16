@@ -89,4 +89,26 @@ class TypeInferenceTest extends TestCase
             echo $value->bar();
         }
     }
+
+    public function testExample5(): void
+    {
+        $reflection = new ReflectionClass(Foo::class);
+        $constructor = $reflection->getConstructor();
+        $this->assertNotNull($constructor);
+
+        $result1 = take($constructor->getParameters())
+            ->cast(function ($param) {
+                return $param->getName();
+            })
+            ->toList();
+
+        $result2 = take($constructor->getParameters())
+            ->map(function ($param) {
+                yield $param->getName();
+            })
+            ->toList();
+
+        $this->assertSame(['n'], $result1);
+        $this->assertSame($result2, $result1);
+    }
 }
