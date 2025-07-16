@@ -44,7 +44,7 @@ class TypeInferenceTest extends TestCase
         $this->expectOutputString("2\n4\n6\n");
 
         $foos = take(['a' => 1, 'b' => 2, 'c' => 3])
-            ->map(fn(int $n): int => $n * 2)
+            ->cast(fn(int $n): int => $n * 2)
             ->cast(fn(int $n): Foo => new Foo($n));
 
         foreach ($foos as $value) {
@@ -57,7 +57,7 @@ class TypeInferenceTest extends TestCase
         $this->expectOutputString("2\n4\n6\n");
 
         $foos2 = take(['a' => 1, 'b' => 2, 'c' => 3]);
-        $foos2->map(fn(int $n): int => $n * 2);
+        $foos2->cast(fn(int $n): int => $n * 2);
         $foos2->cast(fn(int $n): Foo => new Foo($n));
 
         foreach ($foos2 as $value) {
