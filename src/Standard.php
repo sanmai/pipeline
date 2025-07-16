@@ -124,7 +124,7 @@ class Standard implements IteratorAggregate, Countable
      * @param null|iterable<TKey, TValue> $values
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function append(?iterable $values = null): self
     {
@@ -142,7 +142,7 @@ class Standard implements IteratorAggregate, Countable
      * @param TValue ...$vector
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function push(...$vector): self
     {
@@ -156,7 +156,7 @@ class Standard implements IteratorAggregate, Countable
      * @param null|iterable<TKey, TValue> $values
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function prepend(?iterable $values = null): self
     {
@@ -174,7 +174,7 @@ class Standard implements IteratorAggregate, Countable
      * @param TValue ...$vector
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function unshift(...$vector): self
     {
@@ -211,7 +211,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * Utility method for appending/prepending methods.
      *
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     private function join(iterable $left, iterable $right): self
     {
@@ -240,7 +240,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Flattens inputs: arrays become lists.
      * @phpstan-self-out self<array-key, mixed>
-     * @return self<array-key, mixed>
+     * @return Standard<array-key, mixed>
      */
     public function flatten(): self
     {
@@ -255,10 +255,10 @@ class Standard implements IteratorAggregate, Countable
      * @template TUnpackKey
      * @template TUnpack
      *
-     * @param null|callable(mixed...): (TUnpack|Generator<TUnpackKey, TUnpack>) $func A callback that accepts any number of arguments and returns a single value.
+     * @param null|callable(mixed...): (TUnpack|Generator<TUnpackKey, TUnpack, mixed, mixed>) $func A callback that accepts any number of arguments and returns a single value.
      *
      * @phpstan-self-out self<TUnpackKey, TUnpack>
-     * @return self<TUnpackKey, TUnpack>
+     * @return Standard<TUnpackKey, TUnpack>
      */
     public function unpack(?callable $func = null): self
     {
@@ -281,7 +281,7 @@ class Standard implements IteratorAggregate, Countable
      * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
      * @phpstan-self-out self<array-key, array<TKey, TValue>>
-     * @return self<array-key, array<TKey, TValue>>
+     * @return Standard<array-key, array<TKey, TValue>>
      */
     public function chunk(int $length, bool $preserve_keys = false): self
     {
@@ -325,21 +325,16 @@ class Standard implements IteratorAggregate, Countable
      * @template TMapKey
      * @template TMapValue
      *
-     * @param null|callable(TValue): Generator<TMapKey, TMapValue> $func A callback must either return a value or yield values (return a generator).
+     * @param null|(callable(): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>))|(callable(TValue): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>)) $func A callback must either return a value or yield values (return a generator).
      *
      * @phpstan-self-out self<TMapKey, TMapValue>
-     * @return self<TMapKey, TMapValue>
+     * @return Standard<TMapKey, TMapValue>
      */
     public function map(?callable $func = null): self
     {
         if (null === $func) {
             return $this;
         }
-
-        /**
-         * This is the actual type that we can get here.
-         * @var (callable(): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>))|(callable(TValue): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>)) $func
-         */
 
         // That's the standard case for any next stages.
         if (isset($this->pipeline)) {
@@ -399,7 +394,7 @@ class Standard implements IteratorAggregate, Countable
      * @param null|(callable(TValue): TCast)|(callable(): TCast) $func A callback must return a value.
      *
      * @phpstan-self-out self<TKey, TCast>
-     * @return self<TKey, TCast>
+     * @return Standard<TKey, TCast>
      */
     public function cast(?callable $func = null): self
     {
@@ -446,7 +441,7 @@ class Standard implements IteratorAggregate, Countable
      * @param bool $strict When true, only `null` and `false` are filtered out.
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function filter(?callable $func = null, bool $strict = false): self
     {
@@ -521,7 +516,7 @@ class Standard implements IteratorAggregate, Countable
      * @param callable(TValue): bool $predicate A callback returning boolean value.
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function skipWhile(callable $predicate): self
     {
@@ -688,7 +683,7 @@ class Standard implements IteratorAggregate, Countable
      * @param-out int $count
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function runningCount(
         ?int &$count
@@ -730,7 +725,7 @@ class Standard implements IteratorAggregate, Countable
      * Converts the pipeline to a non-rewindable stream.
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function stream()
     {
@@ -762,7 +757,7 @@ class Standard implements IteratorAggregate, Countable
      * @param ?int $length If length is given and is positive, then the sequence will have up to that many elements in it. If length is given and is negative then the sequence will stop that many elements from the end.
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function slice(int $offset, ?int $length = null)
     {
@@ -903,7 +898,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param iterable<mixed> ...$inputs
      * @phpstan-self-out self<TKey, array{TValue, ...}>
-     * @return self<TKey, array{TValue, ...}>
+     * @return Standard<TKey, array{TValue, ...}>
      */
     public function zip(iterable ...$inputs)
     {
@@ -1160,7 +1155,7 @@ class Standard implements IteratorAggregate, Countable
      * Extracts only the values from the pipeline, discarding keys.
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function values()
     {
@@ -1191,7 +1186,7 @@ class Standard implements IteratorAggregate, Countable
      * Extracts only the keys from the pipeline, discarding values.
      *
      * @phpstan-self-out self<array-key, TKey>
-     * @return self<array-key, TKey>
+     * @return Standard<array-key, TKey>
      */
     public function keys()
     {
@@ -1223,7 +1218,7 @@ class Standard implements IteratorAggregate, Countable
      * The new values will be the original keys, and the new keys will be the original values.
      *
      * @phpstan-self-out self<TValue, TKey>
-     * @return self<TValue, TKey>
+     * @return Standard<TValue, TKey>
      */
     public function flip()
     {
@@ -1254,7 +1249,7 @@ class Standard implements IteratorAggregate, Countable
      * Converts each key-value pair into a tuple [key, value].
      *
      * @phpstan-self-out self<array-key, array{0: TKey, 1: TValue}>
-     * @return self<array-key, array{0: TKey, 1: TValue}>
+     * @return Standard<array-key, array{0: TKey, 1: TValue}>
      */
     public function tuples()
     {
@@ -1315,7 +1310,7 @@ class Standard implements IteratorAggregate, Countable
      * @param-out Helper\RunningVariance $variance
      *
      * @phpstan-self-out self<TKey, TValue>
-     * @return self<TKey, TValue>
+     * @return Standard<TKey, TValue>
      */
     public function runningVariance(
         ?Helper\RunningVariance &$variance,
