@@ -50,3 +50,9 @@ foreach ($pipeline as $value) {
     echo $value->bar();
 }
 
+$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline->map(static fn(int $n) => yield new Foo($n * 2) => $n * 2);
+
+foreach ($pipeline as $foo => $value) {
+    echo $foo->bar();
+}
