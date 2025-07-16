@@ -26,6 +26,7 @@ export XDEBUG_MODE=coverage
 PHPSTAN=vendor/bin/phpstan
 PHPSTAN_ARGS_TESTS=analyse src tests --level=2 -c .phpstan.neon
 PHPSTAN_ARGS_SRC=analyse -c .phpstan.src.neon
+PHPSTAN_ARGS_TYPES=analyze --level=max tests/TypeInferenceTest.php
 
 # Psalm
 PSALM=vendor/bin/psalm
@@ -62,6 +63,7 @@ ci-infection: ci-phpunit
 ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC) --no-progress
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS) --no-progress
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TYPES) --no-progress
 
 ci-psalm: ci-cs psalm.xml.dist
 	$(SILENT) $(PHP) $(PSALM) $(PSALM_ARGS) --no-cache --shepherd
@@ -100,6 +102,7 @@ analyze: phpstan psalm
 phpstan: cs .phpstan.src.neon .phpstan.neon
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_SRC)
 	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TESTS)
+	$(SILENT) $(PHP) $(PHPSTAN) $(PHPSTAN_ARGS_TYPES)
 
 .PHONY: psalm
 psalm: cs psalm.xml.dist

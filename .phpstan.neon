@@ -1,4 +1,5 @@
 parameters:
+    reportUnmatchedIgnoredErrors: false
     excludePaths:
         - %currentWorkingDirectory%/tests/ErrorsTest.php
         - %currentWorkingDirectory%/tests/Benchmarks/

@@ -325,7 +325,7 @@ class Standard implements IteratorAggregate, Countable
      * @template TMapKey
      * @template TMapValue
      *
-     * @param null|(callable(): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>))|(callable(TValue): (TMapValue|Generator<TMapKey, TMapValue, mixed, mixed>)) $func A callback must either return a value or yield values (return a generator).
+     * @param null|(callable(TValue): (Generator<TMapKey, TMapValue, mixed, mixed>)) $func A callback must either return a value or yield values (return a generator).
      *
      * @phpstan-self-out self<TMapKey, TMapValue>
      * @return Standard<TMapKey, TMapValue>
@@ -344,10 +344,10 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Let's check what we got for a start.
-        $value = $func();
+        $value = $func(); // @phpstan-ignore-line
 
         // Generator is a generator, moving along
-        if ($value instanceof Generator) {
+        if ($value instanceof Generator) { // @phpstan-ignore-line
             // It is possible to detect if callback is a generator like so:
             // (new \ReflectionFunction($func))->isGenerator();
             // Yet this will restrict users from replacing the pipeline and has unknown performance impact.
@@ -360,7 +360,7 @@ class Standard implements IteratorAggregate, Countable
         // Not a generator means we were given a simple value to be treated as an array.
         // We do not cast to an array here because casting a null to an array results in
         // an empty array; that's surprising and not how it works for other values.
-        $this->pipeline = [
+        $this->pipeline = [ // @phpstan-ignore-line
             $value,
         ];
 
