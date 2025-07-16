@@ -1152,6 +1152,43 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Returns the first element in the pipeline. This is a terminal operation.
+     *
+     * @return null|TValue
+     */
+    public function first()
+    {
+        if ($this->empty()) {
+            return null;
+        }
+
+        foreach ($this->pipeline as $value) {
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the last element in the pipeline. This is a terminal operation.
+     *
+     * @return null|TValue
+     */
+    public function last()
+    {
+        if ($this->empty()) {
+            return null;
+        }
+
+        $last = null;
+        foreach ($this->pipeline as $value) {
+            $last = $value;
+        }
+
+        return $last;
+    }
+
+    /**
      * Extracts only the values from the pipeline, discarding keys.
      *
      * @phpstan-self-out self<TKey, TValue>

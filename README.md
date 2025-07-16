@@ -147,6 +147,8 @@ All entry points always return an instance of the pipeline.
 | `flip()`    | Swaps keys and values. | `array_flip` |
 | `tuples()`    | Converts stream to [key, value] tuples. | |
 | `max()`     | Finds the highest value. | `max` |
+| `first()`   | Returns the first element. | `array_first` |
+| `last()`    | Returns the last element. | `array_last` |
 | `min()`     | Finds the lowest value. | `min` |
 | `count()`     | Counts values. Eagerly executed.| `array_count` |
 | `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
