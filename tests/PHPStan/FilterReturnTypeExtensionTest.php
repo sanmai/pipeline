@@ -23,6 +23,7 @@ namespace Tests\Pipeline\PHPStan;
 use PHPStan\Reflection\MethodReflection;
 use PHPUnit\Framework\TestCase;
 use Pipeline\PHPStan\FilterReturnTypeExtension;
+use Pipeline\PHPStan\FilterTypeNarrowingHelper;
 use Pipeline\Standard;
 
 /**
@@ -32,9 +33,8 @@ use Pipeline\Standard;
  * For comprehensive type narrowing testing, see tests/Inference/FilterTypeNarrowingSimpleTest.php
  * which tests the actual behavior through PHPStan analysis.
  *
- * Additional PHPStan-specific testing can be done using:
- * - The data file: tests/PHPStan/data/filter-type-narrowing.php
- * - PHPStan's TypeInferenceTestCase framework (if installed separately)
+ * Additional PHPStan-specific testing can be done using PHPStan's TypeInferenceTestCase
+ * framework (if installed separately)
  *
  * @covers \Pipeline\PHPStan\FilterReturnTypeExtension
  */
@@ -95,5 +95,46 @@ final class FilterReturnTypeExtensionTest extends TestCase
     {
         $extension = new FilterReturnTypeExtension();
         $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
+    }
+
+    /**
+     * Test that the extension can be instantiated with a custom helper.
+     */
+    public function testExtensionInstantiationWithCustomHelper(): void
+    {
+        $helper = new FilterTypeNarrowingHelper();
+        $extension = new FilterReturnTypeExtension($helper);
+        $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
+    }
+
+    /**
+     * Test that the extension uses dependency injection properly.
+     */
+    public function testExtensionDependencyInjection(): void
+    {
+        // Test with explicit helper
+        $helper = new FilterTypeNarrowingHelper();
+        $extension = new FilterReturnTypeExtension($helper);
+        $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
+
+        // Test with null (should create default helper)
+        $extensionWithDefault = new FilterReturnTypeExtension(null);
+        $this->assertInstanceOf(FilterReturnTypeExtension::class, $extensionWithDefault);
+
+        // Both should work the same way
+        $this->assertSame(Standard::class, $extension->getClass());
+        $this->assertSame(Standard::class, $extensionWithDefault->getClass());
+
+        // Test the coalesce operator: helper ?? new FilterTypeNarrowingHelper()
+        // This tests that null helper creates a new instance (kills coalesce mutation)
+        $extensionWithExplicitNull = new FilterReturnTypeExtension(null);
+        $this->assertTrue($extensionWithExplicitNull->isMethodSupported($this->createMethodReflection('filter')));
+    }
+
+    private function createMethodReflection(string $methodName): MethodReflection
+    {
+        $methodReflection = $this->createMock(MethodReflection::class);
+        $methodReflection->method('getName')->willReturn($methodName);
+        return $methodReflection;
     }
 }

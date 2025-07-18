@@ -50,6 +50,12 @@ use function is_array;
 
 final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
+    private FilterTypeNarrowingHelper $helper;
+
+    public function __construct(?FilterTypeNarrowingHelper $helper = null)
+    {
+        $this->helper = $helper ?? new FilterTypeNarrowingHelper();
+    }
     #[Override]
     public function getClass(): string
     {
@@ -69,32 +75,13 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
         $parametersAcceptor = ParametersAcceptorSelector::selectFromArgs($scope, $args, $methodReflection->getVariants());
         $returnType = $parametersAcceptor->getReturnType();
 
-        if (!$returnType->isObject()->yes()) {
+        // Check if return type has the expected structure for type narrowing
+        $keyValueTypes = $this->helper->extractKeyAndValueTypes($returnType);
+        if (null === $keyValueTypes) {
             return $returnType;
         }
 
-        // Check if return type has generic types
-        if (!method_exists($returnType, 'getTypes')) {
-            return $returnType;
-        }
-
-        $classNames = $returnType->getObjectClassNames();
-        if (!in_array(\Pipeline\Standard::class, $classNames, true)) {
-            return $returnType;
-        }
-
-        // Get the generic types (TKey, TValue)
-        $genericTypes = $returnType->getTypes();
-        if (!is_array($genericTypes) || 2 !== count($genericTypes)) {
-            return $returnType;
-        }
-
-        [$keyType, $valueType] = $genericTypes;
-
-        // Ensure we have Type objects
-        if (!$keyType instanceof Type || !$valueType instanceof Type) {
-            return $returnType;
-        }
+        [$keyType, $valueType] = $keyValueTypes;
 
         // Check for strict mode filter(strict: true) which removes falsy values
         $isStrictMode = false;
@@ -123,24 +110,15 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
         }
 
         if ($isStrictMode) {
-            // Remove falsy types from the value type
+            // Remove falsy types from the value type using helper
             if ($valueType instanceof UnionType) {
-                $filteredTypes = [];
-                foreach ($valueType->getTypes() as $type) {
-                    // Skip only null and false (strict mode behavior)
-                    if ($type->isNull()->yes()) {
-                        continue;
-                    }
-                    if ($type->isFalse()->yes()) {
-                        continue;
-                    }
-
-                    $filteredTypes[] = $type;
-                }
+                $filteredTypes = $this->helper->removeFalsyTypesFromUnion($valueType);
 
                 if ([] !== $filteredTypes && count($filteredTypes) < count($valueType->getTypes())) {
-                    $newValueType = 1 === count($filteredTypes) ? $filteredTypes[0] : TypeCombinator::union(...$filteredTypes);
-                    return new GenericObjectType(\Pipeline\Standard::class, [$keyType, $newValueType]);
+                    $result = $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
+                    if (null !== $result) {
+                        return $result;
+                    }
                 }
             } elseif ($valueType->isNull()->yes() || $valueType->isFalse()->yes()) {
                 // If the entire type is falsy, filter() would return empty
@@ -157,64 +135,35 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
             return $returnType;
         }
 
-        // Get the callback type to understand what we're dealing with
-        $callbackType = $scope->getType($callbackArg);
-
-        // Map type check functions to their corresponding types
-        $typeMap = [
-            'is_string' => new StringType(),
-            'is_int' => new IntegerType(),
-            'is_float' => new FloatType(),
-            'is_bool' => new BooleanType(),
-            'is_array' => new ArrayType(new MixedType(), new MixedType()),
-            'is_object' => new ObjectType('object'),
-        ];
-
+        // Determine the target type using helper
         $targetType = null;
         $functionName = null;
 
         // Handle string callbacks (e.g., 'is_string')
         if ($callbackArg instanceof \PhpParser\Node\Scalar\String_) {
-            $functionName = $callbackArg->value;
-            if (isset($typeMap[$functionName])) {
-                $targetType = $typeMap[$functionName];
+            $functionName = $this->helper->extractFunctionNameFromStringCallback($callbackArg);
+            if (null !== $functionName) {
+                $targetType = $this->helper->getTargetTypeForFunction($functionName);
             }
         }
         // Handle first-class callable syntax (e.g., is_string(...))
-        elseif ($callbackArg instanceof FuncCall && $callbackArg->name instanceof Name) {
-            // Check if it's a first-class callable (has VariadicPlaceholder)
-            $isFirstClassCallable = false;
-            foreach ($callbackArg->args as $arg) {
-                if (!$arg instanceof VariadicPlaceholder) {
-                    continue;
-                }
-                $isFirstClassCallable = true;
-                break;
-            }
-
-            if (!$isFirstClassCallable) {
-                return $returnType;
-            }
-
-            $functionName = $callbackArg->name->toString();
-            if (isset($typeMap[$functionName])) {
-                $targetType = $typeMap[$functionName];
+        elseif ($callbackArg instanceof FuncCall) {
+            $functionName = $this->helper->extractFunctionNameFromFirstClassCallable($callbackArg);
+            if (null !== $functionName) {
+                $targetType = $this->helper->getTargetTypeForFunction($functionName);
             }
         }
 
         if (null !== $targetType) {
-            // If the value type is a union, filter it
+            // Filter the value type using helper
             if ($valueType instanceof UnionType) {
-                $filteredTypes = [];
-                foreach ($valueType->getTypes() as $type) {
-                    if ($targetType->isSuperTypeOf($type)->yes()) {
-                        $filteredTypes[] = $type;
-                    }
-                }
+                $filteredTypes = $this->helper->filterUnionTypeByTarget($valueType, $targetType);
 
                 if ([] !== $filteredTypes) {
-                    $newValueType = 1 === count($filteredTypes) ? $filteredTypes[0] : TypeCombinator::union(...$filteredTypes);
-                    return new GenericObjectType(\Pipeline\Standard::class, [$keyType, $newValueType]);
+                    $result = $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
+                    if (null !== $result) {
+                        return $result;
+                    }
                 }
             } elseif ($targetType->isSuperTypeOf($valueType)->yes()) {
                 // Value type already matches, return as-is
