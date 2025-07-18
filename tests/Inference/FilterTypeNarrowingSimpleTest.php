@@ -50,7 +50,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(is_string(...)), PHPStan should know this contains only strings
         $result = $pipeline
             ->filter(is_string(...))
-            ->map(fn(string $s) => strtoupper($s))
+            ->cast(fn(string $s) => strtoupper($s))
             ->toList();
 
         $this->assertSame(['HELLO', 'WORLD'], $result);
@@ -67,7 +67,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter('is_string'), PHPStan should know this contains only strings
         $result = $pipeline
             ->filter('is_string')
-            ->map(fn(string $s) => strlen($s))
+            ->cast(fn(string $s) => strlen($s))
             ->toList();
 
         $this->assertSame([5, 5], $result);
@@ -84,7 +84,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(strict: true), PHPStan should know null and false are removed
         $result = $pipeline
             ->filter(strict: true)
-            ->map(fn(string $s) => strlen($s))
+            ->map(fn(string $s) => yield strlen($s))
             ->toList();
 
         $this->assertSame([5, 5, 0], $result);
@@ -116,7 +116,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(is_int(...)), PHPStan should know this contains only ints
         $result = $pipeline
             ->filter(is_int(...))
-            ->map(fn(int $n) => $n * $n)
+            ->map(fn(int $n) => yield $n * $n)
             ->toList();
 
         $this->assertSame([1, 1764], $result);
@@ -133,7 +133,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter('is_array'), PHPStan should know this contains only arrays
         $result = $pipeline
             ->filter('is_array')
-            ->map(fn(array $arr) => count($arr))
+            ->cast(fn(array $arr) => count($arr))
             ->toList();
 
         $this->assertSame([2, 3], $result);
@@ -151,7 +151,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter(strict: true)  // Removes null
             ->filter(is_string(...))  // Keeps only strings
-            ->map(fn(string $s) => strtoupper($s))
+            ->cast(fn(string $s) => strtoupper($s))
             ->toList();
 
         $this->assertSame(['HELLO', 'WORLD'], $result);

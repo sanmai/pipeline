@@ -11,9 +11,7 @@ parameters:
         -
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
-        -
-             message: "#Unable to resolve the template type TMapKey#"
-             path: tests/Inference/FilterTypeNarrowingSimpleTest.php
+
 services:
     -
         class: Pipeline\PHPStan\FilterReturnTypeExtension
