@@ -502,11 +502,7 @@ class Standard implements IteratorAggregate, Countable
      */
     private static function resolveStringPredicate(callable $func): callable
     {
-        if (!is_string($func)) {
-            return $func;
-        }
-
-        // Strings usually are internal functions, which typically require exactly one parameter.
+        // Make sure we pass only one argument the callback, as CallbackFilterIterator provides three
         return static fn($value) => $func($value);
     }
 
