@@ -44,6 +44,7 @@ use function array_filter;
 use function in_array;
 use function count;
 use function method_exists;
+use function is_array;
 
 final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
@@ -78,16 +79,17 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
         }
 
         // Get the generic types (TKey, TValue)
-        if (!$returnType instanceof GenericObjectType) {
-            return $returnType;
-        }
-
         $genericTypes = $returnType->getTypes();
-        if (2 !== count($genericTypes)) {
+        if (!is_array($genericTypes) || 2 !== count($genericTypes)) {
             return $returnType;
         }
 
         [$keyType, $valueType] = $genericTypes;
+
+        // Ensure we have Type objects
+        if (!$keyType instanceof Type || !$valueType instanceof Type) {
+            return $returnType;
+        }
 
         // Check for strict mode filter(strict: true) which removes falsy values
         $isStrictMode = false;
