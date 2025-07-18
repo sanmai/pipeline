@@ -56,6 +56,14 @@ final class FilterTest extends TestCase
         $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
 
+    public function testStandardFunctions(): void
+    {
+        $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
+        $pipeline->filter(is_int(...));
+
+        $this->assertSame([1, 2], iterator_to_array($pipeline));
+    }
+
     public function testFilterAnyFalseValueDefaultCallback(): void
     {
         $pipeline = map(function () {
