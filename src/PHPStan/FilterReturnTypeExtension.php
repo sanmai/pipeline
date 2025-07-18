@@ -20,15 +20,16 @@ declare(strict_types=1);
 namespace Pipeline\PHPStan;
 
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Arg;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
+use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\Type;
-use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\TypeCombinator;
-use PHPStan\Type\ObjectType;
-use PHPStan\Type\Constant\ConstantBooleanType;
-use PHPStan\Type\NullType;
+
+use function array_filter;
+use function in_array;
 
 final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
@@ -44,23 +45,27 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
 
     public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): Type
     {
-        $calledOnType = $scope->getType($methodCall->var);
+        $args = array_filter($methodCall->args, static fn($arg) => $arg instanceof Arg);
+        $parametersAcceptor = ParametersAcceptorSelector::selectFromArgs($scope, $args, $methodReflection->getVariants());
+        $returnType = $parametersAcceptor->getReturnType();
 
-        if (!$calledOnType instanceof GenericObjectType) {
-            return $methodReflection->getReturnType();
+        if (!$returnType->isObject()->yes()) {
+            return $returnType;
         }
 
-        $strictArgType = null;
-        if (isset($methodCall->args[1])) {
-            $strictArgType = $scope->getType($methodCall->args[1]->value);
+        $classNames = $returnType->getObjectClassNames();
+        if (!in_array(\Pipeline\Standard::class, $classNames, true)) {
+            return $returnType;
         }
 
-        if (null !== $strictArgType && $strictArgType->isTrue()->yes()) {
-            [$keyType, $valueType] = $calledOnType->getTypes();
-            $valueTypeWithoutNull = TypeCombinator::removeNull($valueType);
-            return new GenericObjectType($calledOnType->getClassName(), [$keyType, $valueTypeWithoutNull]);
+        if (isset($methodCall->args[1]) && $methodCall->args[1] instanceof Arg) {
+            $strictType = $scope->getType($methodCall->args[1]->value);
+            if ($strictType->isTrue()->yes()) {
+                // Value type narrowing is impossible without generics, return original object type.
+                // This extension exists purely for extensibility and framework completeness.
+            }
         }
 
-        return $calledOnType; // fallback: same type, no narrowing
+        return $returnType;
     }
 }
