@@ -11,3 +11,5 @@ parameters:
         -
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
+services:
+    - Pipeline\PHPStan\FilterReturnTypeExtension
