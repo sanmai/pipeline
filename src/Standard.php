@@ -1181,6 +1181,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         foreach ($this->pipeline as $value) {
+            // Nothing
         }
 
         return $value ?? null;
