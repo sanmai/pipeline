@@ -11,3 +11,6 @@ parameters:
         -
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
+        -
+             identifier: argument.type
+             path: tests/Inference/
