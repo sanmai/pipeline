@@ -26,7 +26,7 @@ export XDEBUG_MODE=coverage
 PHPSTAN=vendor/bin/phpstan
 PHPSTAN_ARGS_TESTS=analyse src tests --level=2 -c .phpstan.neon
 PHPSTAN_ARGS_SRC=analyse -c .phpstan.src.neon
-PHPSTAN_ARGS_TYPES=analyze --level=max tests/TypeInferenceTest.php
+PHPSTAN_ARGS_TYPES=analyze --level=max tests/TypeInferenceTest.php tests/FilterTypeNarrowingSimpleTest.php
 
 # Psalm
 PSALM=vendor/bin/psalm
