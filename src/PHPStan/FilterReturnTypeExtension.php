@@ -40,6 +40,7 @@ use PHPStan\Type\ArrayType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\MixedType;
+use Override;
 
 use function array_filter;
 use function in_array;
@@ -49,16 +50,19 @@ use function is_array;
 
 final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
+    #[Override]
     public function getClass(): string
     {
         return \Pipeline\Standard::class;
     }
 
+    #[Override]
     public function isMethodSupported(MethodReflection $methodReflection): bool
     {
         return 'filter' === $methodReflection->getName();
     }
 
+    #[Override]
     public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): Type
     {
         $args = array_filter($methodCall->args, static fn($arg) => $arg instanceof Arg);
