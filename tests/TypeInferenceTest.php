@@ -22,8 +22,11 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionClass;
 use ReflectionMethod;
+use SplFileInfo;
 use Tests\Pipeline\Fixtures\Foo;
 
 use function Pipeline\take;
@@ -103,5 +106,25 @@ class TypeInferenceTest extends TestCase
             ->toList();
 
         $this->assertSame(['n'], $result1);
+    }
+
+    public function testExtractFixtureNamesFromTests(): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Fixtures', RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        $result = take($iterator)
+            ->filter(fn(SplFileInfo $file) => 'php' === $file->getExtension())
+            ->map(fn(SplFileInfo $file) => yield from $file->openFile('r'))
+            ->filter(fn(string $line) => str_contains($line, 'class'))
+            ->cast(fn(string $line) => preg_match("#class (.+)\s#", $line, $matches) ? $matches[1] : null)
+            ->filter(strict: true)
+            ->map(fn(string $className) => yield $className => $className)
+            ->toAssoc()
+        ;
+
+        /** @var array<string, string> $result */
+        $this->assertSame(['Foo' => 'Foo'], $result);
     }
 }
