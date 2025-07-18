@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -20,16 +21,29 @@ declare(strict_types=1);
 namespace Pipeline\PHPStan;
 
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Name;
 use PhpParser\Node\Arg;
+use PhpParser\Node\VariadicPlaceholder;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\UnionType;
+use PHPStan\Type\StringType;
+use PHPStan\Type\IntegerType;
+use PHPStan\Type\FloatType;
+use PHPStan\Type\BooleanType;
+use PHPStan\Type\ArrayType;
+use PHPStan\Type\ObjectType;
+use PHPStan\Type\Generic\GenericObjectType;
 
 use function array_filter;
 use function in_array;
+use function count;
+use function method_exists;
 
 final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
@@ -53,16 +67,169 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
             return $returnType;
         }
 
+        // Check if return type has generic types
+        if (!method_exists($returnType, 'getTypes')) {
+            return $returnType;
+        }
+
         $classNames = $returnType->getObjectClassNames();
         if (!in_array(\Pipeline\Standard::class, $classNames, true)) {
             return $returnType;
         }
 
-        if (isset($methodCall->args[1]) && $methodCall->args[1] instanceof Arg) {
+        // Get the generic types (TKey, TValue)
+        $genericTypes = [];
+        if ($returnType instanceof GenericObjectType) {
+            $genericTypes = $returnType->getTypes();
+        }
+
+        if (2 !== count($genericTypes)) {
+            return $returnType;
+        }
+
+        [$keyType, $valueType] = $genericTypes;
+
+        // Check for strict mode filter(strict: true) which removes falsy values
+        $isStrictMode = false;
+
+        // Check if this is filter(strict: true) with named parameter
+        foreach ($methodCall->args as $i => $arg) {
+            if (!$arg instanceof Arg) {
+                continue;
+            }
+            if (null === $arg->name || 'strict' !== $arg->name->toString()) {
+                continue;
+            }
+            $strictType = $scope->getType($arg->value);
+            if ($strictType->isTrue()->yes()) {
+                $isStrictMode = true;
+                break;
+            }
+        }
+
+        // Also check if second parameter is true (positional argument)
+        if (!$isStrictMode && isset($methodCall->args[1]) && $methodCall->args[1] instanceof Arg) {
             $strictType = $scope->getType($methodCall->args[1]->value);
             if ($strictType->isTrue()->yes()) {
-                // Value type narrowing is impossible without generics, return original object type.
-                // This extension exists purely for extensibility and framework completeness.
+                $isStrictMode = true;
+            }
+        }
+
+        if ($isStrictMode) {
+            // Remove falsy types from the value type
+            if ($valueType instanceof UnionType) {
+                $filteredTypes = [];
+                foreach ($valueType->getTypes() as $type) {
+                    // Skip null, false, 0, 0.0, '', '0', empty array
+                    if ($type->isNull()->yes()) {
+                        continue;
+                    }
+                    if ($type->isFalse()->yes()) {
+                        continue;
+                    }
+                    if ($type->isInteger()->yes()) {
+                        $constantIntegers = $type->getConstantScalarValues();
+                        if (1 === count($constantIntegers) && 0 === $constantIntegers[0]) {
+                            continue;
+                        }
+                    }
+                    if ($type->isFloat()->yes()) {
+                        $constantFloats = $type->getConstantScalarValues();
+                        if (1 === count($constantFloats) && 0.0 === $constantFloats[0]) {
+                            continue;
+                        }
+                    }
+                    if ($type->isString()->yes()) {
+                        $constantStrings = $type->getConstantStrings();
+                        if (1 === count($constantStrings) && in_array($constantStrings[0]->getValue(), ['', '0'], true)) {
+                            continue;
+                        }
+                    }
+                    if ($type->isArray()->yes() && $type->isIterableAtLeastOnce()->no()) {
+                        continue;
+                    }
+
+                    $filteredTypes[] = $type;
+                }
+
+                if ([] !== $filteredTypes && count($filteredTypes) < count($valueType->getTypes())) {
+                    $newValueType = 1 === count($filteredTypes) ? $filteredTypes[0] : TypeCombinator::union(...$filteredTypes);
+                    return new GenericObjectType(\Pipeline\Standard::class, [$keyType, $newValueType]);
+                }
+            } elseif ($valueType->isNull()->yes() || $valueType->isFalse()->yes()) {
+                // If the entire type is falsy, filter() would return empty
+                return new GenericObjectType(\Pipeline\Standard::class, [$keyType, new \PHPStan\Type\NeverType()]);
+            }
+        }
+
+        $callbackArg = null;
+        if (isset($methodCall->args[0]) && $methodCall->args[0] instanceof Arg) {
+            $callbackArg = $methodCall->args[0]->value;
+        }
+
+        if (null === $callbackArg) {
+            return $returnType;
+        }
+
+        // Get the callback type to understand what we're dealing with
+        $callbackType = $scope->getType($callbackArg);
+
+        // Map type check functions to their corresponding types
+        $typeMap = [
+            'is_string' => new StringType(),
+            'is_int' => new IntegerType(),
+            'is_float' => new FloatType(),
+            'is_bool' => new BooleanType(),
+            'is_array' => new ArrayType(new IntegerType(), new StringType()),
+            'is_object' => new ObjectType('object'),
+        ];
+
+        $targetType = null;
+        $functionName = null;
+
+        // Handle string callbacks (e.g., 'is_string')
+        if ($callbackArg instanceof \PhpParser\Node\Scalar\String_) {
+            $functionName = $callbackArg->value;
+            if (isset($typeMap[$functionName])) {
+                $targetType = $typeMap[$functionName];
+            }
+        }
+        // Handle first-class callable syntax (e.g., is_string(...))
+        elseif ($callbackArg instanceof FuncCall && $callbackArg->name instanceof Name) {
+            // Check if it's a first-class callable (has VariadicPlaceholder)
+            $isFirstClassCallable = false;
+            foreach ($callbackArg->args as $arg) {
+                if ($arg instanceof VariadicPlaceholder) {
+                    $isFirstClassCallable = true;
+                    break;
+                }
+            }
+
+            if ($isFirstClassCallable) {
+                $functionName = $callbackArg->name->toString();
+                if (isset($typeMap[$functionName])) {
+                    $targetType = $typeMap[$functionName];
+                }
+            }
+        }
+
+        if (null !== $targetType) {
+            // If the value type is a union, filter it
+            if ($valueType instanceof UnionType) {
+                $filteredTypes = [];
+                foreach ($valueType->getTypes() as $type) {
+                    if ($targetType->isSuperTypeOf($type)->yes()) {
+                        $filteredTypes[] = $type;
+                    }
+                }
+
+                if ([] !== $filteredTypes) {
+                    $newValueType = 1 === count($filteredTypes) ? $filteredTypes[0] : TypeCombinator::union(...$filteredTypes);
+                    return new GenericObjectType(\Pipeline\Standard::class, [$keyType, $newValueType]);
+                }
+            } elseif ($targetType->isSuperTypeOf($valueType)->yes()) {
+                // Value type already matches, return as-is
+                return $returnType;
             }
         }
 

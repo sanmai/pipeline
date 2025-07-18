@@ -12,4 +12,7 @@ parameters:
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
 services:
-    - Pipeline\PHPStan\FilterReturnTypeExtension
+    -
+        class: Pipeline\PHPStan\FilterReturnTypeExtension
+        tags:
+            - phpstan.broker.dynamicMethodReturnTypeExtension
