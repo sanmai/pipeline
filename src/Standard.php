@@ -73,9 +73,11 @@ class Standard implements IteratorAggregate, Countable
      */
     public function __construct(?iterable $input = null)
     {
-        if (null !== $input) {
-            $this->replace($input);
+        if (null === $input) {
+            return;
         }
+
+        $this->replace($input);
     }
 
     private function replace(iterable $input): void
