@@ -20,19 +20,80 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\PHPStan;
 
+use PHPStan\Reflection\MethodReflection;
 use PHPUnit\Framework\TestCase;
 use Pipeline\PHPStan\FilterReturnTypeExtension;
 use Pipeline\Standard;
 
 /**
+ * Tests for FilterReturnTypeExtension.
+ *
+ * This test focuses on the basic functionality that can be easily unit tested.
+ * For comprehensive type narrowing testing, see tests/Inference/FilterTypeNarrowingSimpleTest.php
+ * which tests the actual behavior through PHPStan analysis.
+ *
+ * Additional PHPStan-specific testing can be done using:
+ * - The data file: tests/PHPStan/data/filter-type-narrowing.php
+ * - PHPStan's TypeInferenceTestCase framework (if installed separately)
+ *
  * @covers \Pipeline\PHPStan\FilterReturnTypeExtension
  */
-class FilterReturnTypeExtensionTest extends TestCase
+final class FilterReturnTypeExtensionTest extends TestCase
 {
-    public function testItBounds()
-    {
-        $class = new FilterReturnTypeExtension();
+    private FilterReturnTypeExtension $extension;
 
-        $this->assertSame(Standard::class, $class->getClass());
+    protected function setUp(): void
+    {
+        $this->extension = new FilterReturnTypeExtension();
+    }
+
+    public function testGetClass(): void
+    {
+        $this->assertSame(Standard::class, $this->extension->getClass());
+    }
+
+    public function testIsMethodSupportedForFilter(): void
+    {
+        $methodReflection = $this->createMock(MethodReflection::class);
+        $methodReflection
+            ->method('getName')
+            ->willReturn('filter');
+
+        $this->assertTrue($this->extension->isMethodSupported($methodReflection));
+    }
+
+    public function testIsMethodNotSupportedForOtherMethods(): void
+    {
+        $unsupportedMethods = ['map', 'cast', 'reduce', 'each', 'count'];
+
+        foreach ($unsupportedMethods as $methodName) {
+            $methodReflection = $this->createMock(MethodReflection::class);
+            $methodReflection
+                ->method('getName')
+                ->willReturn($methodName);
+
+            $this->assertFalse(
+                $this->extension->isMethodSupported($methodReflection),
+                "Method '{$methodName}' should not be supported"
+            );
+        }
+    }
+
+    public function testExtensionImplementsCorrectInterface(): void
+    {
+        $this->assertInstanceOf(
+            \PHPStan\Type\DynamicMethodReturnTypeExtension::class,
+            $this->extension
+        );
+    }
+
+    /**
+     * Test that the extension can be instantiated without errors.
+     * This ensures all dependencies are properly imported.
+     */
+    public function testExtensionInstantiation(): void
+    {
+        $extension = new FilterReturnTypeExtension();
+        $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
     }
 }
