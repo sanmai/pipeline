@@ -39,6 +39,7 @@ use PHPStan\Type\BooleanType;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Generic\GenericObjectType;
+use PHPStan\Type\MixedType;
 
 use function array_filter;
 use function in_array;
@@ -161,7 +162,7 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
             'is_int' => new IntegerType(),
             'is_float' => new FloatType(),
             'is_bool' => new BooleanType(),
-            'is_array' => new ArrayType(new IntegerType(), new StringType()),
+            'is_array' => new ArrayType(new MixedType(), new MixedType()),
             'is_object' => new ObjectType('object'),
         ];
 
