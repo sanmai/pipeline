@@ -28,7 +28,9 @@ use ReflectionClass;
 use ReflectionMethod;
 use SplFileInfo;
 use Tests\Pipeline\Fixtures\Foo;
+use Iterator;
 
+use function is_string;
 use function Pipeline\take;
 use function preg_match;
 use function str_replace;
@@ -114,9 +116,11 @@ class TypeInferenceTest extends TestCase
             new RecursiveDirectoryIterator(__DIR__ . '/Fixtures', RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
+        /** @var Iterator<SplFileInfo> $iterator */
         $result = take($iterator)
             ->filter(fn(SplFileInfo $file) => 'php' === $file->getExtension())
             ->map(fn(SplFileInfo $file) => yield from $file->openFile('r'))
+            ->filter(is_string(...))
             ->filter(fn(string $line) => str_contains($line, 'class'))
             ->cast(fn(string $line) => preg_match("#class (.+)\s#", $line, $matches) ? $matches[1] : null)
             ->filter(strict: true)
