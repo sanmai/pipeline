@@ -18,13 +18,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Pipeline;
+namespace Tests\Pipeline\Inference;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
-use function Pipeline\take;
 use function count;
+use function Pipeline\take;
 use function strlen;
 use function strtoupper;
 
@@ -32,7 +32,10 @@ use function strtoupper;
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
  * These tests verify that PHPStan correctly understands type narrowing after filter operations.
  *
- * @covers \Pipeline\PHPStan\FilterReturnTypeExtension
+ * @coversNothing
+ * @group integration
+ *
+ * @internal
  */
 class FilterTypeNarrowingSimpleTest extends TestCase
 {

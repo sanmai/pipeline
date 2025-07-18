@@ -18,27 +18,25 @@
 
 declare(strict_types=1);
 
-namespace Tests\Pipeline;
+namespace Tests\Pipeline\Inference;
 
+use Iterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
-use ReflectionMethod;
 use SplFileInfo;
 use Tests\Pipeline\Fixtures\Foo;
-use Iterator;
 
-use function is_string;
 use function Pipeline\take;
 use function preg_match;
-use function str_replace;
-use function trim;
 use function str_contains;
+use function dirname;
 
 /**
  * @coversNothing
+ * @group integration
  *
  * @internal
  */
@@ -113,7 +111,7 @@ class TypeInferenceTest extends TestCase
     public function testExtractFixtureNamesFromTests(): void
     {
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Fixtures', RecursiveDirectoryIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator(dirname(__DIR__) . '/Fixtures', RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
         /** @var Iterator<SplFileInfo> $iterator */
