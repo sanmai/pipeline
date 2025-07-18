@@ -120,32 +120,11 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
             if ($valueType instanceof UnionType) {
                 $filteredTypes = [];
                 foreach ($valueType->getTypes() as $type) {
-                    // Skip null, false, 0, 0.0, '', '0', empty array
+                    // Skip only null and false (strict mode behavior)
                     if ($type->isNull()->yes()) {
                         continue;
                     }
                     if ($type->isFalse()->yes()) {
-                        continue;
-                    }
-                    if ($type->isInteger()->yes()) {
-                        $constantIntegers = $type->getConstantScalarValues();
-                        if (1 === count($constantIntegers) && 0 === $constantIntegers[0]) {
-                            continue;
-                        }
-                    }
-                    if ($type->isFloat()->yes()) {
-                        $constantFloats = $type->getConstantScalarValues();
-                        if (1 === count($constantFloats) && 0.0 === $constantFloats[0]) {
-                            continue;
-                        }
-                    }
-                    if ($type->isString()->yes()) {
-                        $constantStrings = $type->getConstantStrings();
-                        if (1 === count($constantStrings) && in_array($constantStrings[0]->getValue(), ['', '0'], true)) {
-                            continue;
-                        }
-                    }
-                    if ($type->isArray()->yes() && $type->isIterableAtLeastOnce()->no()) {
                         continue;
                     }
 
