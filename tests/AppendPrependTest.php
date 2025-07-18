@@ -27,9 +27,6 @@ use function count;
 use function is_numeric;
 use function key;
 use function Pipeline\take;
-use function reset;
-
-use const PHP_VERSION_ID;
 
 /**
  * @covers \Pipeline\Standard
@@ -80,8 +77,6 @@ final class AppendPrependTest extends TestCase
      */
     public function testPush(array $expected, ?array $initialValue, ...$iterables): void
     {
-        $this->skipOnPHP7($expected);
-
         $pipeline = take($initialValue);
 
         foreach ($iterables as $iterable) {
@@ -137,8 +132,6 @@ final class AppendPrependTest extends TestCase
      */
     public function testUnshift(array $expected, ?array $initialValue, ...$iterables): void
     {
-        $this->skipOnPHP7($expected);
-
         $pipeline = take($initialValue);
 
         foreach ($iterables as $iterable) {
@@ -168,12 +161,5 @@ final class AppendPrependTest extends TestCase
 
         $preserve_keys = !is_numeric(key($expected));
         $this->assertSame($expected, $pipeline->toArray($preserve_keys));
-    }
-
-    private function skipOnPHP7(array $expected): void
-    {
-        if (!is_numeric(reset($expected)) && PHP_VERSION_ID < 80000) {
-            $this->markTestSkipped('PHP 7 fails with an error: Cannot unpack array with string keys');
-        }
     }
 }
