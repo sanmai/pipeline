@@ -45,8 +45,9 @@ use function method_exists;
  *
  * This class implements the "how" - each step of type narrowing as focused methods.
  * The main extension acts as the orchestrator, defining the "what" and "when".
+ * @final
  */
-final class FilterTypeNarrowingHelper
+class FilterTypeNarrowingHelper
 {
     /**
      * Get the type map for supported type checking functions.
@@ -222,7 +223,7 @@ final class FilterTypeNarrowingHelper
         }
 
         $genericTypes = $returnType->getTypes();
-        if (!is_array($genericTypes) || 2 !== count($genericTypes)) {
+        if (2 !== count($genericTypes)) {
             return null;
         }
 

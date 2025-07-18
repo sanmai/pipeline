@@ -175,6 +175,23 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $this->assertNotContains($floatType, $filteredTypes);
     }
 
+    public function testFilterUnionTypeByTargetWithMultipleMatches(): void
+    {
+        $stringType1 = new StringType();
+        $stringType2 = new StringType();
+        $intType = new IntegerType();
+        $targetType = new StringType();
+
+        $unionType = new UnionType([$stringType1, $intType, $stringType2]);
+        $filteredTypes = $this->helper->filterUnionTypeByTarget($unionType, $targetType);
+
+        // This test kills the ArrayOneItem mutation - we need ALL matching types, not just one
+        $this->assertCount(2, $filteredTypes);
+        $this->assertContains($stringType1, $filteredTypes);
+        $this->assertContains($stringType2, $filteredTypes);
+        $this->assertNotContains($intType, $filteredTypes);
+    }
+
     public function testCreateGenericTypeWithFilteredValues(): void
     {
         $keyType = new IntegerType();
@@ -230,6 +247,42 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
         // Don't mock getTypes since it doesn't exist on the base Type interface
         $this->assertFalse($this->helper->isValidReturnTypeStructure($mockType));
+    }
+
+    public function testIsValidReturnTypeStructureWithInvalidGenericTypes(): void
+    {
+        // Test that kills the LogicalAnd mutation: both keyType AND valueType must be Type instances
+        $mockType = $this->createMock(GenericObjectType::class);
+        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
+        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
+        $mockType->method('getTypes')->willReturn([new StringType(), 'not_a_type_instance']);
+
+        $this->assertFalse($this->helper->isValidReturnTypeStructure($mockType));
+    }
+
+    public function testExtractKeyAndValueTypesWithInvalidStructure(): void
+    {
+        // Test that kills the LogicalOr mutation in extractKeyAndValueTypes
+        $mockType = $this->createMock(Type::class);
+        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
+        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
+        // This type doesn't have getTypes method, so the method_exists check will fail
+
+        $result = $this->helper->extractKeyAndValueTypes($mockType);
+        $this->assertNull($result);
+    }
+
+    public function testExtractKeyAndValueTypesWithWrongCountGetTypes(): void
+    {
+        // Test that kills the LogicalOr mutation: (!is_array($genericTypes) || 2 !== count($genericTypes))
+        // We need to test the case where getTypes() returns an array with wrong count
+        $mockType = $this->createMock(GenericObjectType::class);
+        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
+        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
+        $mockType->method('getTypes')->willReturn([new StringType()]); // Array with wrong count (1 instead of 2)
+
+        $result = $this->helper->extractKeyAndValueTypes($mockType);
+        $this->assertNull($result);
     }
 
     public function testExtractKeyAndValueTypes(): void

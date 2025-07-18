@@ -48,7 +48,10 @@ use function count;
 use function method_exists;
 use function is_array;
 
-final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
+/**
+ * @final
+ */
+class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
 {
     private FilterTypeNarrowingHelper $helper;
 
