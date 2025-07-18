@@ -78,11 +78,11 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
         }
 
         // Get the generic types (TKey, TValue)
-        $genericTypes = [];
-        if ($returnType instanceof GenericObjectType) {
-            $genericTypes = $returnType->getTypes();
+        if (!$returnType instanceof GenericObjectType) {
+            return $returnType;
         }
 
+        $genericTypes = $returnType->getTypes();
         if (2 !== count($genericTypes)) {
             return $returnType;
         }
@@ -178,17 +178,20 @@ final class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtensio
             // Check if it's a first-class callable (has VariadicPlaceholder)
             $isFirstClassCallable = false;
             foreach ($callbackArg->args as $arg) {
-                if ($arg instanceof VariadicPlaceholder) {
-                    $isFirstClassCallable = true;
-                    break;
+                if (!$arg instanceof VariadicPlaceholder) {
+                    continue;
                 }
+                $isFirstClassCallable = true;
+                break;
             }
 
-            if ($isFirstClassCallable) {
-                $functionName = $callbackArg->name->toString();
-                if (isset($typeMap[$functionName])) {
-                    $targetType = $typeMap[$functionName];
-                }
+            if (!$isFirstClassCallable) {
+                return $returnType;
+            }
+
+            $functionName = $callbackArg->name->toString();
+            if (isset($typeMap[$functionName])) {
+                $targetType = $typeMap[$functionName];
             }
         }
 

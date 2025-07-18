@@ -22,7 +22,11 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
 use function Pipeline\take;
+use function count;
+use function strlen;
+use function strtoupper;
 
 /**
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
@@ -44,7 +48,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter(is_string(...))
             ->map(fn(string $s) => strtoupper($s))
-            ->toArray();
+            ->toList();
 
         $this->assertSame(['HELLO', 'WORLD'], $result);
     }
@@ -61,7 +65,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter('is_string')
             ->map(fn(string $s) => strlen($s))
-            ->toArray();
+            ->toList();
 
         $this->assertSame([5, 5], $result);
     }
@@ -78,7 +82,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter(strict: true)
             ->map(fn(string $s) => strlen($s))
-            ->toArray();
+            ->toList();
 
         $this->assertSame([5, 5, 0], $result);
     }
@@ -93,7 +97,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // Strict mode should only remove null and false
         $result = $pipeline
             ->filter(strict: true)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([0, '', '0', 'hello', 0.0, []], $result);
     }
@@ -110,7 +114,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter(is_int(...))
             ->map(fn(int $n) => $n * $n)
-            ->toArray();
+            ->toList();
 
         $this->assertSame([1, 1764], $result);
     }
@@ -127,7 +131,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter('is_array')
             ->map(fn(array $arr) => count($arr))
-            ->toArray();
+            ->toList();
 
         $this->assertSame([2, 3], $result);
     }
@@ -145,7 +149,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
             ->filter(strict: true)  // Removes null
             ->filter(is_string(...))  // Keeps only strings
             ->map(fn(string $s) => strtoupper($s))
-            ->toArray();
+            ->toList();
 
         $this->assertSame(['HELLO', 'WORLD'], $result);
     }
@@ -162,7 +166,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $result = $pipeline
             ->filter(strict: true)
             ->filter(is_string(...))
-            ->toArray();
+            ->toList();
 
         $this->assertSame(['hello', 'world'], $result);
     }
