@@ -166,9 +166,11 @@ final class ReservoirTest extends TestCase
 
         $this->assertSame($expected, $pipeline->reservoir($size, $weightFn));
 
-        if ($size <= 0) {
-            $this->assertSame([], $pipeline->toList());
+        if ($size > 0) {
+            return;
         }
+
+        $this->assertSame([], $pipeline->toList());
     }
 
     /**
