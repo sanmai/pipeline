@@ -90,7 +90,7 @@ class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
         $isStrictMode = false;
 
         // Check if this is filter(strict: true) with named parameter
-        foreach ($methodCall->args as $i => $arg) {
+        foreach ($methodCall->args as $arg) {
             if (!$arg instanceof Arg) {
                 continue;
             }
