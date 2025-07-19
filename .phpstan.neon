@@ -11,6 +11,9 @@ parameters:
         -
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
+        -
+             identifier: class.extendsFinalByPhpDoc
+             path: tests/
 
 services:
     -

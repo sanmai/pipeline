@@ -223,6 +223,7 @@ class FilterTypeNarrowingHelper
         }
 
         $genericTypes = $returnType->getTypes();
+        /** @var array $genericTypes */
         if (2 !== count($genericTypes)) {
             return null;
         }
