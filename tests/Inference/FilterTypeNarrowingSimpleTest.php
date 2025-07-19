@@ -52,7 +52,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(is_string(...)), PHPStan should know this contains only strings
         $filtered = $pipeline->filter(is_string(...));
         assertType('Pipeline\Standard<int, string>', $filtered);
-        
+
         $result = $filtered
             ->cast(fn(string $s) => strtoupper($s))
             ->toList();
@@ -72,7 +72,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter('is_string'), PHPStan should know this contains only strings
         $filtered = $pipeline->filter('is_string');
         assertType('Pipeline\Standard<int, string>', $filtered);
-        
+
         $result = $filtered
             ->cast(fn(string $s) => strlen($s))
             ->toList();
@@ -92,7 +92,7 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(strict: true), PHPStan should know null and false are removed
         $filtered = $pipeline->filter(strict: true);
         assertType('Pipeline\Standard<int, string>', $filtered);
-        
+
         $result = $filtered
             ->map(fn(string $s) => yield strlen($s))
             ->toList();

@@ -55,7 +55,7 @@ class StrictModeDetectorTest extends TestCase
     {
         $arg = new Arg(new ConstFetch(new Name('true')));
         $scope = $this->createMock(Scope::class);
-        
+
         $scope->expects($this->once())
             ->method('getType')
             ->with($arg->value)
@@ -70,7 +70,7 @@ class StrictModeDetectorTest extends TestCase
     {
         $arg = new Arg(new ConstFetch(new Name('false')));
         $scope = $this->createMock(Scope::class);
-        
+
         $scope->expects($this->once())
             ->method('getType')
             ->with($arg->value)
@@ -85,7 +85,7 @@ class StrictModeDetectorTest extends TestCase
     {
         $arg = new Arg(new ConstFetch(new Name('someConstant')));
         $scope = $this->createMock(Scope::class);
-        
+
         $scope->expects($this->once())
             ->method('getType')
             ->with($arg->value)
@@ -100,7 +100,7 @@ class StrictModeDetectorTest extends TestCase
     {
         $arg = new Arg(new ConstFetch(new Name('variable')));
         $scope = $this->createMock(Scope::class);
-        
+
         $scope->expects($this->once())
             ->method('getType')
             ->with($arg->value)
@@ -111,3 +111,4 @@ class StrictModeDetectorTest extends TestCase
         $this->assertFalse($result);
     }
 }
+

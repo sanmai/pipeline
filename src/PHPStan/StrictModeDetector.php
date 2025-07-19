@@ -36,8 +36,9 @@ class StrictModeDetector
         if (null === $strictArg) {
             return false;
         }
-        
+
         $strictType = $scope->getType($strictArg->value);
         return $strictType->isTrue()->yes();
     }
 }
+

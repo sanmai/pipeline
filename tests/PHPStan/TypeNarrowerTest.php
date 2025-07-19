@@ -226,3 +226,4 @@ class TypeNarrowerTest extends TestCase
         $this->assertNull($result);
     }
 }
+

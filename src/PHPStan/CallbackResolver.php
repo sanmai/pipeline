@@ -33,10 +33,10 @@ class CallbackResolver
     public function __construct(
         private FilterTypeNarrowingHelper $helper
     ) {}
-    
+
     /**
      * Resolve a callback argument to its target type.
-     * 
+     *
      * @return Type|null The type that the callback filters for, or null if unknown
      */
     public function resolveCallbackType(?Arg $callbackArg): ?Type
@@ -44,9 +44,9 @@ class CallbackResolver
         if (null === $callbackArg) {
             return null;
         }
-        
+
         $callbackExpr = $callbackArg->value;
-        
+
         // Handle string callbacks (e.g., 'is_string')
         if ($callbackExpr instanceof String_) {
             $functionName = $this->helper->extractFunctionNameFromStringCallback($callbackExpr);
@@ -54,7 +54,7 @@ class CallbackResolver
                 return $this->helper->getTargetTypeForFunction($functionName);
             }
         }
-        
+
         // Handle first-class callable syntax (e.g., is_string(...))
         if ($callbackExpr instanceof FuncCall) {
             $functionName = $this->helper->extractFunctionNameFromFirstClassCallable($callbackExpr);
@@ -62,7 +62,8 @@ class CallbackResolver
                 return $this->helper->getTargetTypeForFunction($functionName);
             }
         }
-        
+
         return null;
     }
 }
+

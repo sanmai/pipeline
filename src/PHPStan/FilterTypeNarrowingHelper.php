@@ -232,7 +232,7 @@ class FilterTypeNarrowingHelper
 
         return [$keyType, $valueType];
     }
-    
+
     /**
      * Remove all falsy values from a union type for default filter.
      *
@@ -247,11 +247,11 @@ class FilterTypeNarrowingHelper
             if ($type->isNull()->yes()) {
                 continue;
             }
-            
+
             if ($type->isFalse()->yes()) {
                 continue;
             }
-            
+
             // Skip literal 0
             if ($type->isInteger()->yes() && $type->isConstantScalarValue()->yes()) {
                 $values = $type->getConstantScalarValues();
@@ -259,7 +259,7 @@ class FilterTypeNarrowingHelper
                     continue;
                 }
             }
-            
+
             // Skip literal 0.0
             if ($type->isFloat()->yes() && $type->isConstantScalarValue()->yes()) {
                 $values = $type->getConstantScalarValues();
@@ -267,7 +267,7 @@ class FilterTypeNarrowingHelper
                     continue;
                 }
             }
-            
+
             // Skip empty string
             if ($type->isString()->yes() && $type->isConstantScalarValue()->yes()) {
                 $values = $type->getConstantScalarValues();
@@ -275,14 +275,18 @@ class FilterTypeNarrowingHelper
                     continue;
                 }
             }
-            
+
             // Skip empty array
-            if ($type->isArray()->yes() && method_exists($type, 'isConstantArray') && $type->isConstantArray()->yes()) {
-                if (0 === $type->getArraySize()->getValue()) {
-                    continue;
+            if ($type->isArray()->yes() && $type->isConstantArray()->yes()) {
+                $arraySize = $type->getArraySize();
+                if ($arraySize->isConstantScalarValue()->yes()) {
+                    $values = $arraySize->getConstantScalarValues();
+                    if (in_array(0, $values, true)) {
+                        continue;
+                    }
                 }
             }
-            
+
             $filteredTypes[] = $type;
         }
 

@@ -69,7 +69,7 @@ class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
     {
         // Step 1: Parse arguments
         $args = $this->argumentParser->extractArgs($methodCall);
-        
+
         // Step 2: Get the return type from PHPStan
         $parametersAcceptor = ParametersAcceptorSelector::selectFromArgs($scope, $args, $methodReflection->getVariants());
         $returnType = $parametersAcceptor->getReturnType();

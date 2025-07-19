@@ -25,6 +25,9 @@ use PHPStan\Type\NeverType;
 use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
 
+use function count;
+use function method_exists;
+
 /**
  * Applies type narrowing logic based on filter parameters.
  */
@@ -33,17 +36,17 @@ class TypeNarrower
     public function __construct(
         private FilterTypeNarrowingHelper $helper
     ) {}
-    
+
     /**
      * Narrow the pipeline type based on strict mode.
-     * 
+     *
      * @return Type|null The narrowed type, or null if no narrowing occurred
      */
     public function narrowForStrictMode(Type $keyType, Type $valueType): ?Type
     {
         if ($valueType instanceof UnionType) {
             $filteredTypes = $this->helper->removeFalsyTypesFromUnion($valueType);
-            
+
             if ([] !== $filteredTypes && count($filteredTypes) < count($valueType->getTypes())) {
                 return $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
             }
@@ -51,38 +54,38 @@ class TypeNarrower
             // If the entire type is falsy, filter() would return empty
             return new GenericObjectType(\Pipeline\Standard::class, [$keyType, new NeverType()]);
         }
-        
+
         return null;
     }
-    
+
     /**
      * Narrow the pipeline type based on a callback that filters to a specific type.
-     * 
+     *
      * @return Type|null The narrowed type, or null if no narrowing occurred
      */
     public function narrowForCallback(Type $keyType, Type $valueType, Type $targetType): ?Type
     {
         if ($valueType instanceof UnionType) {
             $filteredTypes = $this->helper->filterUnionTypeByTarget($valueType, $targetType);
-            
+
             if ([] !== $filteredTypes) {
                 return $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Narrow the pipeline type based on default filter (removes all falsy values).
-     * 
+     *
      * @return Type|null The narrowed type, or null if no narrowing occurred
      */
     public function narrowForDefaultFilter(Type $keyType, Type $valueType): ?Type
     {
         if ($valueType instanceof UnionType) {
             $filteredTypes = $this->helper->removeFalsyValuesFromUnion($valueType);
-            
+
             if ([] !== $filteredTypes && count($filteredTypes) < count($valueType->getTypes())) {
                 return $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
             }
@@ -90,10 +93,10 @@ class TypeNarrower
             // If the entire type is falsy, filter() would return empty
             return new GenericObjectType(\Pipeline\Standard::class, [$keyType, new NeverType()]);
         }
-        
+
         return null;
     }
-    
+
     /**
      * Check if a type is entirely falsy (would be removed by default filter).
      */
@@ -103,34 +106,39 @@ class TypeNarrower
         if ($type->isNull()->yes()) {
             return true;
         }
-        
+
         if ($type->isFalse()->yes()) {
             return true;
         }
-        
+
         // Check for literal 0
         if ($type->isInteger()->yes() && $type->isConstantScalarValue()->yes()) {
             $value = $type->getConstantScalarValues()[0] ?? null;
             return 0 === $value;
         }
-        
+
         // Check for literal 0.0
         if ($type->isFloat()->yes() && $type->isConstantScalarValue()->yes()) {
             $value = $type->getConstantScalarValues()[0] ?? null;
             return 0.0 === $value;
         }
-        
+
         // Check for empty string
         if ($type->isString()->yes() && $type->isConstantScalarValue()->yes()) {
             $value = $type->getConstantScalarValues()[0] ?? null;
             return '' === $value;
         }
-        
+
         // Check for empty array
-        if ($type->isArray()->yes() && method_exists($type, 'isConstantArray') && $type->isConstantArray()->yes()) {
-            return 0 === $type->getArraySize()->getValue();
+        if ($type->isArray()->yes() && $type->isConstantArray()->yes()) {
+            $arraySize = $type->getArraySize();
+            if ($arraySize->isConstantScalarValue()->yes()) {
+                $values = $arraySize->getConstantScalarValues();
+                return in_array(0, $values, true);
+            }
         }
-        
+
         return false;
     }
 }
+

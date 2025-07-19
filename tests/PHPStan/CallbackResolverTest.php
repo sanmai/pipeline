@@ -60,12 +60,12 @@ class CallbackResolverTest extends TestCase
     public function testResolveCallbackTypeHandlesStringCallback(): void
     {
         $arg = new Arg(new String_('is_string'));
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromStringCallback')
             ->with($arg->value)
             ->willReturn('is_string');
-            
+
         $this->helper->expects($this->once())
             ->method('getTargetTypeForFunction')
             ->with('is_string')
@@ -79,12 +79,12 @@ class CallbackResolverTest extends TestCase
     public function testResolveCallbackTypeReturnsNullWhenStringCallbackNotRecognized(): void
     {
         $arg = new Arg(new String_('unknown_function'));
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromStringCallback')
             ->with($arg->value)
             ->willReturn(null);
-            
+
         $this->helper->expects($this->never())
             ->method('getTargetTypeForFunction');
 
@@ -97,12 +97,12 @@ class CallbackResolverTest extends TestCase
     {
         $funcCall = new FuncCall(new Name('is_int'));
         $arg = new Arg($funcCall);
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromFirstClassCallable')
             ->with($funcCall)
             ->willReturn('is_int');
-            
+
         $this->helper->expects($this->once())
             ->method('getTargetTypeForFunction')
             ->with('is_int')
@@ -117,12 +117,12 @@ class CallbackResolverTest extends TestCase
     {
         $funcCall = new FuncCall(new Name('unknown_function'));
         $arg = new Arg($funcCall);
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromFirstClassCallable')
             ->with($funcCall)
             ->willReturn(null);
-            
+
         $this->helper->expects($this->never())
             ->method('getTargetTypeForFunction');
 
@@ -134,12 +134,12 @@ class CallbackResolverTest extends TestCase
     public function testResolveCallbackTypeReturnsNullWhenTargetTypeNotFound(): void
     {
         $arg = new Arg(new String_('custom_function'));
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromStringCallback')
             ->with($arg->value)
             ->willReturn('custom_function');
-            
+
         $this->helper->expects($this->once())
             ->method('getTargetTypeForFunction')
             ->with('custom_function')
@@ -153,10 +153,10 @@ class CallbackResolverTest extends TestCase
     public function testResolveCallbackTypeIgnoresOtherExpressionTypes(): void
     {
         $arg = new Arg(new Variable('callback'));
-        
+
         $this->helper->expects($this->never())
             ->method('extractFunctionNameFromStringCallback');
-            
+
         $this->helper->expects($this->never())
             ->method('extractFunctionNameFromFirstClassCallable');
 
@@ -171,17 +171,17 @@ class CallbackResolverTest extends TestCase
     public function testResolveCallbackTypeHandlesKnownFunctions(string $functionName, string $expectedTypeClass): void
     {
         $arg = new Arg(new String_($functionName));
-        
+
         $expectedType = match ($expectedTypeClass) {
             ArrayType::class => new ArrayType(new MixedType(), new MixedType()),
             ObjectType::class => new ObjectType('object'),
             default => new $expectedTypeClass(),
         };
-        
+
         $this->helper->expects($this->once())
             ->method('extractFunctionNameFromStringCallback')
             ->willReturn($functionName);
-            
+
         $this->helper->expects($this->once())
             ->method('getTargetTypeForFunction')
             ->with($functionName)
@@ -202,3 +202,4 @@ class CallbackResolverTest extends TestCase
         yield 'is_object' => ['is_object', ObjectType::class];
     }
 }
+

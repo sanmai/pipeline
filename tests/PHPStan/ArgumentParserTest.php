@@ -172,3 +172,4 @@ class ArgumentParserTest extends TestCase
         $this->assertSame($arg2, $strictArg);
     }
 }
+

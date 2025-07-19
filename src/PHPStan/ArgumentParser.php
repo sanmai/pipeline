@@ -23,6 +23,9 @@ namespace Pipeline\PHPStan;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\MethodCall;
 
+use function array_filter;
+use function array_values;
+
 /**
  * Parses and extracts arguments from method calls.
  */
@@ -31,7 +34,7 @@ class ArgumentParser
     /**
      * Extract only Arg instances from method call arguments.
      * Filters out VariadicPlaceholder and other non-Arg types.
-     * 
+     *
      * @return array<int, Arg>
      */
     public function extractArgs(MethodCall $methodCall): array
@@ -43,17 +46,21 @@ class ArgumentParser
             )
         );
     }
-    
+
     /**
      * Get the callback argument if present (first argument).
+     * 
+     * @param array<int, Arg> $args
      */
     public function getCallbackArg(array $args): ?Arg
     {
         return $args[0] ?? null;
     }
-    
+
     /**
      * Get the strict mode argument if present (second argument or named 'strict').
+     * 
+     * @param array<int, Arg> $args
      */
     public function getStrictArg(array $args): ?Arg
     {
@@ -63,8 +70,9 @@ class ArgumentParser
                 return $arg;
             }
         }
-        
+
         // Check positional second parameter
         return $args[1] ?? null;
     }
 }
+
