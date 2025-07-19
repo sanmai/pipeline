@@ -232,4 +232,60 @@ class FilterTypeNarrowingHelper
 
         return [$keyType, $valueType];
     }
+    
+    /**
+     * Remove all falsy values from a union type for default filter.
+     *
+     * @return Type[]
+     */
+    public function removeFalsyValuesFromUnion(UnionType $unionType): array
+    {
+        $filteredTypes = [];
+
+        foreach ($unionType->getTypes() as $type) {
+            // Skip all falsy types
+            if ($type->isNull()->yes()) {
+                continue;
+            }
+            
+            if ($type->isFalse()->yes()) {
+                continue;
+            }
+            
+            // Skip literal 0
+            if ($type->isInteger()->yes() && $type->isConstantScalarValue()->yes()) {
+                $values = $type->getConstantScalarValues();
+                if (in_array(0, $values, true)) {
+                    continue;
+                }
+            }
+            
+            // Skip literal 0.0
+            if ($type->isFloat()->yes() && $type->isConstantScalarValue()->yes()) {
+                $values = $type->getConstantScalarValues();
+                if (in_array(0.0, $values, true)) {
+                    continue;
+                }
+            }
+            
+            // Skip empty string
+            if ($type->isString()->yes() && $type->isConstantScalarValue()->yes()) {
+                $values = $type->getConstantScalarValues();
+                if (in_array('', $values, true)) {
+                    continue;
+                }
+            }
+            
+            // Skip empty array
+            if ($type->isArray()->yes() && method_exists($type, 'isConstantArray') && $type->isConstantArray()->yes()) {
+                if (0 === $type->getArraySize()->getValue()) {
+                    continue;
+                }
+            }
+            
+            $filteredTypes[] = $type;
+        }
+
+        return $filteredTypes;
+    }
 }

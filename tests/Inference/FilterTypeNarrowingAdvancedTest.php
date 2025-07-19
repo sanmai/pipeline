@@ -23,15 +23,15 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int|null|false> $pipeline */
         $pipeline = take(['hello', 42, null, false, 'world']);
-        assertType('Pipeline\Standard<int, string|int|false|null>', $pipeline);
+        assertType('Pipeline\Standard<int, int|string|false|null>', $pipeline);
         
         // Test named parameter strict: true
         $filtered = $pipeline->filter(strict: true);
-        assertType('Pipeline\Standard<int, string|int>', $filtered);
+        assertType('Pipeline\Standard<int, int|string>', $filtered);
         
         $result = [];
         foreach ($filtered as $value) {
-            assertType('string|int', $value);
+            assertType('int|string', $value);
             $result[] = $value;
         }
         
@@ -56,9 +56,9 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int|null|false> $pipeline */
         $pipeline = take(['hello', 42, null, false, 'world', 0]);
-        assertType('Pipeline\Standard<int, string|int|false|null>', $pipeline);
+        assertType('Pipeline\Standard<int, int|string|false|null>', $pipeline);
         
-        // Test is_string with strict mode
+        // Test is_string with strict mode - strict is ignored when callback is provided
         $filtered = $pipeline->filter('is_string', true);
         assertType('Pipeline\Standard<int, string>', $filtered);
         
@@ -70,7 +70,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int|float> $pipeline */
         $pipeline = take([1, 'hello', 2.5, 42, 'world']);
-        assertType('Pipeline\Standard<int, string|int|float>', $pipeline);
+        assertType('Pipeline\Standard<int, float|int|string>', $pipeline);
         
         $filtered = $pipeline->filter(is_int(...));
         assertType('Pipeline\Standard<int, int>', $filtered);
@@ -83,7 +83,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int|float> $pipeline */
         $pipeline = take([1, 'hello', 2.5, 42, 3.14]);
-        assertType('Pipeline\Standard<int, string|int|float>', $pipeline);
+        assertType('Pipeline\Standard<int, float|int|string>', $pipeline);
         
         $filtered = $pipeline->filter('is_float');
         assertType('Pipeline\Standard<int, float>', $filtered);
@@ -96,7 +96,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|bool|int> $pipeline */
         $pipeline = take([true, 'hello', false, 42]);
-        assertType('Pipeline\Standard<int, string|bool|int>', $pipeline);
+        assertType('Pipeline\Standard<int, bool|int|string>', $pipeline);
         
         $filtered = $pipeline->filter(is_bool(...));
         assertType('Pipeline\Standard<int, bool>', $filtered);
@@ -109,7 +109,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|array<mixed>|int> $pipeline */
         $pipeline = take(['hello', [1, 2], 42, ['a', 'b']]);
-        assertType('Pipeline\Standard<int, string|array<mixed>|int>', $pipeline);
+        assertType('Pipeline\Standard<int, array<mixed>|int|string>', $pipeline);
         
         $filtered = $pipeline->filter('is_array');
         assertType('Pipeline\Standard<int, array<mixed>>', $filtered);
@@ -125,7 +125,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
         
         /** @var Standard<int, string|object|int> $pipeline */
         $pipeline = take(['hello', $obj1, 42, $obj2]);
-        assertType('Pipeline\Standard<int, string|object|int>', $pipeline);
+        assertType('Pipeline\Standard<int, int|object|string>', $pipeline);
         
         $filtered = $pipeline->filter(is_object(...));
         assertType('Pipeline\Standard<int, object>', $filtered);
@@ -138,7 +138,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|null|false|0> $pipeline */
         $pipeline = take(['hello', null, false, 0, 'world']);
-        assertType('Pipeline\Standard<int, string|false|0|null>', $pipeline);
+        assertType('Pipeline\Standard<int, 0|string|false|null>', $pipeline);
         
         // Default filter removes all falsy values
         $filtered = $pipeline->filter();
@@ -166,11 +166,11 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int> $pipeline */
         $pipeline = take(['hello', 42, 'world']);
-        assertType('Pipeline\Standard<int, string|int>', $pipeline);
+        assertType('Pipeline\Standard<int, int|string>', $pipeline);
         
         // Unknown callback doesn't narrow types
         $filtered = $pipeline->filter('unknown_function');
-        assertType('Pipeline\Standard<int, string|int>', $filtered);
+        assertType('Pipeline\Standard<int, int|string>', $filtered);
         
         // This would fail at runtime, but PHPStan doesn't know
         $this->expectNotToPerformAssertions();
@@ -194,7 +194,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         /** @var Standard<int, string|int|float|null|false> $pipeline */
         $pipeline = take(['hello', 42, 3.14, null, false, 'world']);
-        assertType('Pipeline\Standard<int, string|int|float|false|null>', $pipeline);
+        assertType('Pipeline\Standard<int, float|int|string|false|null>', $pipeline);
         
         // Chain multiple filters
         $filtered = $pipeline

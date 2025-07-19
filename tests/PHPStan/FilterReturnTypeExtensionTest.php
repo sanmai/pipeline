@@ -22,8 +22,12 @@ namespace Tests\Pipeline\PHPStan;
 
 use PHPStan\Reflection\MethodReflection;
 use PHPUnit\Framework\TestCase;
+use Pipeline\PHPStan\ArgumentParser;
+use Pipeline\PHPStan\CallbackResolver;
 use Pipeline\PHPStan\FilterReturnTypeExtension;
 use Pipeline\PHPStan\FilterTypeNarrowingHelper;
+use Pipeline\PHPStan\StrictModeDetector;
+use Pipeline\PHPStan\TypeNarrower;
 use Pipeline\Standard;
 
 /**
@@ -117,8 +121,8 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $extension = new FilterReturnTypeExtension($helper);
         $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
 
-        // Test with null (should create default helper)
-        $extensionWithDefault = new FilterReturnTypeExtension(null);
+        // Test with null (should create default components)
+        $extensionWithDefault = new FilterReturnTypeExtension();
         $this->assertInstanceOf(FilterReturnTypeExtension::class, $extensionWithDefault);
 
         // Both should work the same way
@@ -283,6 +287,96 @@ final class FilterReturnTypeExtensionTest extends TestCase
         // The mutation (null !== $keyValueTypes) would cause the early return when it shouldn't
         // By verifying the helper was called, we prove the code continued past the null check
         $this->assertSame($returnType, $result2);
+    }
+
+    /**
+     * Test that the extension properly integrates all components.
+     */
+    public function testComponentIntegration(): void
+    {
+        // Create mocks for all components
+        $helper = $this->createMock(FilterTypeNarrowingHelper::class);
+        $argumentParser = $this->createMock(ArgumentParser::class);
+        $strictModeDetector = $this->createMock(StrictModeDetector::class);
+        $callbackResolver = $this->createMock(CallbackResolver::class);
+        $typeNarrower = $this->createMock(TypeNarrower::class);
+        
+        $extension = new FilterReturnTypeExtension(
+            $helper,
+            $argumentParser,
+            $strictModeDetector,
+            $callbackResolver,
+            $typeNarrower
+        );
+        
+        // Setup method call
+        $methodReflection = $this->createMethodReflection('filter');
+        $methodCall = $this->createMock(\PhpParser\Node\Expr\MethodCall::class);
+        $scope = $this->createMock(\PHPStan\Analyser\Scope::class);
+        
+        // Setup arguments
+        $arg = new \PhpParser\Node\Arg(
+            new \PhpParser\Node\Expr\ConstFetch(new \PhpParser\Node\Name('true'))
+        );
+        $methodCall->args = [$arg];
+        
+        // Setup expectations
+        $argumentParser->expects($this->once())
+            ->method('extractArgs')
+            ->with($methodCall)
+            ->willReturn([$arg]);
+            
+        $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
+        $returnType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
+            new \PHPStan\Type\IntegerType(),
+            new \PHPStan\Type\UnionType([
+                new \PHPStan\Type\StringType(),
+                new \PHPStan\Type\NullType()
+            ])
+        ]);
+        $parametersAcceptor->method('getReturnType')->willReturn($returnType);
+        $methodReflection->method('getVariants')->willReturn([$parametersAcceptor]);
+        
+        $helper->expects($this->once())
+            ->method('extractKeyAndValueTypes')
+            ->with($returnType)
+            ->willReturn([
+                new \PHPStan\Type\IntegerType(),
+                new \PHPStan\Type\UnionType([
+                    new \PHPStan\Type\StringType(),
+                    new \PHPStan\Type\NullType()
+                ])
+            ]);
+            
+        $argumentParser->expects($this->once())
+            ->method('getStrictArg')
+            ->with([$arg])
+            ->willReturn($arg);
+            
+        $argumentParser->expects($this->once())
+            ->method('getCallbackArg')
+            ->with([$arg])
+            ->willReturn(null);
+            
+        $strictModeDetector->expects($this->once())
+            ->method('isStrictMode')
+            ->with($arg, $scope)
+            ->willReturn(true);
+            
+        $expectedNarrowedType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
+            new \PHPStan\Type\IntegerType(),
+            new \PHPStan\Type\StringType()
+        ]);
+            
+        $typeNarrower->expects($this->once())
+            ->method('narrowForStrictMode')
+            ->willReturn($expectedNarrowedType);
+            
+        // Execute
+        $result = $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
+        
+        // Assert
+        $this->assertSame($expectedNarrowedType, $result);
     }
 
     private function createMethodReflection(string $methodName): MethodReflection
