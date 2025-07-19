@@ -27,6 +27,7 @@ use PHPStan\Type\UnionType;
 
 use function count;
 use function method_exists;
+use function in_array;
 
 /**
  * Applies type narrowing logic based on filter parameters.
@@ -141,4 +142,3 @@ class TypeNarrower
         return false;
     }
 }
-

@@ -66,4 +66,3 @@ class CallbackResolver
         return null;
     }
 }
-

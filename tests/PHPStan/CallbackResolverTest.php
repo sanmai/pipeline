@@ -42,6 +42,7 @@ use Pipeline\PHPStan\FilterTypeNarrowingHelper;
 class CallbackResolverTest extends TestCase
 {
     private CallbackResolver $resolver;
+    /** @var FilterTypeNarrowingHelper&\PHPUnit\Framework\MockObject\MockObject */
     private FilterTypeNarrowingHelper $helper;
 
     protected function setUp(): void
@@ -202,4 +203,3 @@ class CallbackResolverTest extends TestCase
         yield 'is_object' => ['is_object', ObjectType::class];
     }
 }
-

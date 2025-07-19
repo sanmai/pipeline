@@ -111,4 +111,3 @@ class StrictModeDetectorTest extends TestCase
         $this->assertFalse($result);
     }
 }
-

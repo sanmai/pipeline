@@ -39,6 +39,7 @@ use Pipeline\PHPStan\TypeNarrower;
 class TypeNarrowerTest extends TestCase
 {
     private TypeNarrower $narrower;
+    /** @var FilterTypeNarrowingHelper&\PHPUnit\Framework\MockObject\MockObject */
     private FilterTypeNarrowingHelper $helper;
 
     protected function setUp(): void
@@ -226,4 +227,3 @@ class TypeNarrowerTest extends TestCase
         $this->assertNull($result);
     }
 }
-

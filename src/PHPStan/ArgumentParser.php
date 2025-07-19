@@ -49,7 +49,7 @@ class ArgumentParser
 
     /**
      * Get the callback argument if present (first argument).
-     * 
+     *
      * @param array<int, Arg> $args
      */
     public function getCallbackArg(array $args): ?Arg
@@ -59,7 +59,7 @@ class ArgumentParser
 
     /**
      * Get the strict mode argument if present (second argument or named 'strict').
-     * 
+     *
      * @param array<int, Arg> $args
      */
     public function getStrictArg(array $args): ?Arg
@@ -75,4 +75,3 @@ class ArgumentParser
         return $args[1] ?? null;
     }
 }
-

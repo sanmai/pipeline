@@ -41,4 +41,3 @@ class StrictModeDetector
         return $strictType->isTrue()->yes();
     }
 }
-
