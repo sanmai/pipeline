@@ -27,6 +27,7 @@ use function count;
 use function Pipeline\take;
 use function strlen;
 use function strtoupper;
+use function PHPStan\Testing\assertType;
 
 /**
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
@@ -46,10 +47,13 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, array<mixed>|string|false> $pipeline */
         $pipeline = take(['hello', ['array'], false, 'world']);
+        assertType('Pipeline\Standard<int, array<mixed>|string|false>', $pipeline);
 
         // After filter(is_string(...)), PHPStan should know this contains only strings
-        $result = $pipeline
-            ->filter(is_string(...))
+        $filtered = $pipeline->filter(is_string(...));
+        assertType('Pipeline\Standard<int, string>', $filtered);
+        
+        $result = $filtered
             ->cast(fn(string $s) => strtoupper($s))
             ->toList();
 
@@ -63,10 +67,13 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, int|string|null> $pipeline */
         $pipeline = take([1, 'hello', null, 'world', 42]);
+        assertType('Pipeline\Standard<int, int|string|null>', $pipeline);
 
         // After filter('is_string'), PHPStan should know this contains only strings
-        $result = $pipeline
-            ->filter('is_string')
+        $filtered = $pipeline->filter('is_string');
+        assertType('Pipeline\Standard<int, string>', $filtered);
+        
+        $result = $filtered
             ->cast(fn(string $s) => strlen($s))
             ->toList();
 
@@ -80,10 +87,13 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, string|null|false> $pipeline */
         $pipeline = take(['hello', null, false, 'world', '']);
+        assertType('Pipeline\Standard<int, string|false|null>', $pipeline);
 
         // After filter(strict: true), PHPStan should know null and false are removed
-        $result = $pipeline
-            ->filter(strict: true)
+        $filtered = $pipeline->filter(strict: true);
+        assertType('Pipeline\Standard<int, string>', $filtered);
+        
+        $result = $filtered
             ->map(fn(string $s) => yield strlen($s))
             ->toList();
 

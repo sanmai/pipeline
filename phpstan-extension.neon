@@ -1,0 +1,5 @@
+services:
+    -
+        class: Pipeline\PHPStan\FilterReturnTypeExtension
+        tags:
+            - phpstan.broker.dynamicMethodReturnTypeExtension
