@@ -386,7 +386,7 @@ final class FilterReturnTypeExtensionTest extends TestCase
     public function testConstructorWithAllNullParameters(): void
     {
         $extension = new FilterReturnTypeExtension(null, null, null, null, null);
-        
+
         // Test that the extension works with all default components
         $this->assertSame(Standard::class, $extension->getClass());
         $this->assertTrue($extension->isMethodSupported($this->createMethodReflection('filter')));
@@ -420,34 +420,34 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $methodCall->args = [$arg];
 
         $argumentParser->expects($this->once())->method('extractArgs')->willReturn([$arg]);
-        
+
         $returnType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\IntegerType()])
+            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\IntegerType()]),
         ]);
-        
+
         $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
         $parametersAcceptor->method('getReturnType')->willReturn($returnType);
         $methodReflection->method('getVariants')->willReturn([$parametersAcceptor]);
 
         $helper->expects($this->once())->method('extractKeyAndValueTypes')->willReturn([
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\IntegerType()])
+            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\IntegerType()]),
         ]);
 
         $argumentParser->expects($this->once())->method('getCallbackArg')->willReturn($arg);
         $argumentParser->expects($this->once())->method('getStrictArg')->willReturn($arg);
-        
+
         // Callback resolution should be called because callback is present
         $callbackResolver->expects($this->once())->method('resolveCallbackType')->with($arg)->willReturn(new \PHPStan\Type\StringType());
-        
+
         $narrowedType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\StringType()
+            new \PHPStan\Type\StringType(),
         ]);
-        
+
         $typeNarrower->expects($this->once())->method('narrowForCallback')->willReturn($narrowedType);
-        
+
         // Strict mode detector should NOT be called because callback takes precedence
         $strictModeDetector->expects($this->never())->method('isStrictMode');
 
@@ -482,38 +482,41 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $methodCall->args = [];
 
         $argumentParser->expects($this->once())->method('extractArgs')->willReturn([]);
-        
+
         $returnType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\NullType()])
+            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\NullType()]),
         ]);
-        
+
         $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
         $parametersAcceptor->method('getReturnType')->willReturn($returnType);
         $methodReflection->method('getVariants')->willReturn([$parametersAcceptor]);
 
         $helper->expects($this->once())->method('extractKeyAndValueTypes')->willReturn([
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\NullType()])
+            new \PHPStan\Type\UnionType([new \PHPStan\Type\StringType(), new \PHPStan\Type\NullType()]),
         ]);
 
         $argumentParser->expects($this->once())->method('getCallbackArg')->willReturn(null);
         $argumentParser->expects($this->once())->method('getStrictArg')->willReturn(null);
-        
+
         // No callback, not strict mode, so should call default filter
         $strictModeDetector->expects($this->once())->method('isStrictMode')->with(null, $scope)->willReturn(false);
-        
+
         $narrowedType = new \PHPStan\Type\Generic\GenericObjectType(Standard::class, [
             new \PHPStan\Type\IntegerType(),
-            new \PHPStan\Type\StringType()
+            new \PHPStan\Type\StringType(),
         ]);
-        
+
         $typeNarrower->expects($this->once())->method('narrowForDefaultFilter')->willReturn($narrowedType);
 
         $result = $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
         $this->assertSame($narrowedType, $result);
     }
 
+    /**
+     * @return MethodReflection&\PHPUnit\Framework\MockObject\MockObject
+     */
     private function createMethodReflection(string $methodName): MethodReflection
     {
         $methodReflection = $this->createMock(MethodReflection::class);
