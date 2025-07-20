@@ -33,6 +33,9 @@ use function Pipeline\take;
 use function preg_match;
 use function str_contains;
 use function dirname;
+use function microtime;
+use function random_int;
+use function uniqid;
 
 /**
  * @coversNothing
@@ -128,5 +131,47 @@ class TypeInferenceTest extends TestCase
 
         /** @var array<string, string> $result */
         $this->assertSame(['Foo' => 'Foo'], $result);
+    }
+
+    /**
+     * Test that demonstrates the issue with calling getConstantScalarValues()
+     * on non-constant types during PHPStan analysis.
+     *
+     * This test creates a scenario where PHPStan's type inference would need
+     * to analyze a filter operation on union types containing non-constant scalars.
+     */
+    public function testFilterTypeInferenceWithMixedConstantAndNonConstantTypes(): void
+    {
+        // Create a scenario that PHPStan needs to analyze
+        // This involves union types with both constant and non-constant values
+
+        /** @var array<int|float|string> $mixedInput */
+        $mixedInput = [1, 2.5, 'hello'];
+
+        // Add some values that create non-constant types at analysis time
+        if (random_int(0, 1)) {
+            $mixedInput[] = random_int(1, 100);  // Non-constant int
+        }
+
+        if (random_int(0, 1)) {
+            $mixedInput[] = microtime(true);     // Non-constant float
+        }
+
+        if (random_int(0, 1)) {
+            $mixedInput[] = uniqid();           // Non-constant string
+        }
+
+        // This filter operation will trigger PHPStan's FilterReturnTypeExtension
+        // The type narrowing helper must handle both constant and non-constant types
+        $pipeline = take($mixedInput);
+        $filtered = $pipeline->filter();
+
+        // The important part is that this compiles and runs without errors
+        // PHPStan should not crash when analyzing this due to calling
+        // getConstantScalarValues() on non-constant types
+        $result = $filtered->toList();
+
+        // We can't predict exact count due to random values, but should have some
+        $this->assertNotEmpty($result);
     }
 }
