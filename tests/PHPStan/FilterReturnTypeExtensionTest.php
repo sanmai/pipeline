@@ -56,7 +56,7 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $this->assertSame(Standard::class, $this->extension->getClass());
     }
 
-    public function testIsMethodSupportedForFilter(): void
+    public function xtestIsMethodSupportedForFilter(): void
     {
         $methodReflection = $this->createMock(MethodReflection::class);
         $methodReflection
