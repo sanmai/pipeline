@@ -356,11 +356,7 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $mock = $this->createMock(Type::class);
 
         foreach ($config as $method => $returnValue) {
-            if ('getConstantScalarValues' === $method || 'getArraySize' === $method) {
-                $mock->method($method)->willReturn($returnValue);
-            } else {
-                $mock->method($method)->willReturn($returnValue);
-            }
+            $mock->method($method)->willReturn($returnValue);
         }
 
         return $mock;
