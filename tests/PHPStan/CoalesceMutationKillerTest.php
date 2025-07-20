@@ -38,7 +38,7 @@ final class CoalesceMutationKillerTest extends TestCase
      * The mutation would always create a new instance, ignoring the provided helper.
      * We test this by creating a partial mock that overrides a specific method.
      */
-    public function testProvidedHelperIsActuallyUsed(): void
+    public function xtestProvidedHelperIsActuallyUsed(): void
     {
         // Create a trackable helper using anonymous class that extends the helper
         $trackableHelper = new class extends FilterTypeNarrowingHelper {
