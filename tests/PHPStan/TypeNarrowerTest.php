@@ -226,4 +226,155 @@ class TypeNarrowerTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    public function testNarrowForDefaultFilterWithUnionType(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new UnionType([new StringType(), new NullType(), new ConstantBooleanType(false)]);
+        $filteredTypes = [new StringType()];
+        $expectedType = new GenericObjectType(\Pipeline\Standard::class, [$keyType, new StringType()]);
+
+        $this->helper->expects($this->once())
+            ->method('removeFalsyValuesFromUnion')
+            ->with($valueType)
+            ->willReturn($filteredTypes);
+
+        $this->helper->expects($this->once())
+            ->method('createGenericTypeWithFilteredValues')
+            ->with($keyType, $filteredTypes)
+            ->willReturn($expectedType);
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertSame($expectedType, $result);
+    }
+
+    public function testNarrowForDefaultFilterReturnsNullWhenNoTypesRemoved(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new UnionType([new StringType(), new IntegerType()]);
+        $filteredTypes = [new StringType(), new IntegerType()];
+
+        $this->helper->expects($this->once())
+            ->method('removeFalsyValuesFromUnion')
+            ->with($valueType)
+            ->willReturn($filteredTypes);
+
+        $this->helper->expects($this->never())
+            ->method('createGenericTypeWithFilteredValues');
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertNull($result);
+    }
+
+    public function testNarrowForDefaultFilterReturnsNullWhenFilteredTypesEmpty(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new UnionType([new NullType(), new ConstantBooleanType(false)]);
+
+        $this->helper->expects($this->once())
+            ->method('removeFalsyValuesFromUnion')
+            ->with($valueType)
+            ->willReturn([]);
+
+        $this->helper->expects($this->never())
+            ->method('createGenericTypeWithFilteredValues');
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertNull($result);
+    }
+
+    public function testNarrowForDefaultFilterWithNullType(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new NullType();
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+    }
+
+    public function testNarrowForDefaultFilterWithFalseType(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new ConstantBooleanType(false);
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+    }
+
+    public function testNarrowForDefaultFilterWithEmptyStringType(): void
+    {
+        $keyType = new IntegerType();
+        $emptyStringType = $this->createMock(Type::class);
+        $emptyStringType->method('isNull')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $emptyStringType->method('isFalse')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $emptyStringType->method('isInteger')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $emptyStringType->method('isFloat')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $emptyStringType->method('isString')->willReturn(\PHPStan\TrinaryLogic::createYes());
+        $emptyStringType->method('isArray')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $emptyStringType->method('isConstantScalarValue')->willReturn(\PHPStan\TrinaryLogic::createYes());
+        $emptyStringType->method('getConstantScalarValues')->willReturn(['']);
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $emptyStringType);
+
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+    }
+
+    public function testNarrowForDefaultFilterWithNonFalsyType(): void
+    {
+        $keyType = new IntegerType();
+        $valueType = new StringType();
+
+        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
+
+        $this->assertNull($result);
+    }
+
+    public function testNarrowForDefaultFilterWithRealTypes(): void
+    {
+        // Test with real FilterTypeNarrowingHelper to exercise isFalsyType private method
+        $realHelper = new FilterTypeNarrowingHelper();
+        $realNarrower = new TypeNarrower($realHelper);
+
+        $keyType = new IntegerType();
+
+        // Test with zero integer (should be removed)
+        $zeroType = new \PHPStan\Type\Constant\ConstantIntegerType(0);
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $zeroType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+
+        // Test with zero float (should be removed)
+        $zeroFloatType = new \PHPStan\Type\Constant\ConstantFloatType(0.0);
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $zeroFloatType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+
+        // Test with empty string (should be removed)
+        $emptyStringType = new \PHPStan\Type\Constant\ConstantStringType('');
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $emptyStringType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+
+        // Test with non-empty string (should return null - no narrowing)
+        $nonEmptyStringType = new \PHPStan\Type\Constant\ConstantStringType('hello');
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $nonEmptyStringType);
+        $this->assertNull($result);
+
+        // Test with empty array (should be removed) - this tests the missing isFalsyType array handling
+        $emptyArrayType = new \PHPStan\Type\Constant\ConstantArrayType([], []);
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $emptyArrayType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+    }
 }

@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline\PHPStan;
 
 use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\VariadicPlaceholder;
@@ -92,6 +93,10 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         // Not a first-class callable (no VariadicPlaceholder)
         $notFirstClass = new FuncCall(new Name('is_string'), []);
         $this->assertNull($this->helper->extractFunctionNameFromFirstClassCallable($notFirstClass));
+
+        // FuncCall with non-Name name (e.g., Variable or other expression)
+        $nonNameFuncCall = new FuncCall(new Variable('func'), [new VariadicPlaceholder()]);
+        $this->assertNull($this->helper->extractFunctionNameFromFirstClassCallable($nonNameFuncCall));
     }
 
     public function testIsFirstClassCallable(): void
@@ -301,6 +306,30 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $invalidType = $this->createMock(Type::class);
         $invalidType->method('isObject')->willReturn(TrinaryLogic::createNo());
         $result = $this->helper->extractKeyAndValueTypes($invalidType);
+        $this->assertNull($result);
+    }
+
+    public function testExtractKeyAndValueTypesMethodExistsEdgeCase(): void
+    {
+        // Test the method_exists check (line 222)
+        $mockType = $this->createMock(Type::class);
+        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
+        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
+        // Don't mock getTypes - this should trigger the method_exists check
+
+        $result = $this->helper->extractKeyAndValueTypes($mockType);
+        $this->assertNull($result);
+    }
+
+    public function testExtractKeyAndValueTypesWrongGenericCount(): void
+    {
+        // Test the count check (line 228)
+        $mockType = $this->createMock(GenericObjectType::class);
+        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
+        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
+        $mockType->method('getTypes')->willReturn([new StringType()]); // Wrong count - should be 2
+
+        $result = $this->helper->extractKeyAndValueTypes($mockType);
         $this->assertNull($result);
     }
 
