@@ -182,6 +182,8 @@ class FilterTypeNarrowingHelper
 
     /**
      * Check if the return type has the expected structure for type narrowing.
+     *
+     * @phpstan-assert-if-true \PHPStan\Type\Generic\GenericObjectType $returnType
      */
     public function isValidReturnTypeStructure(Type $returnType): bool
     {
