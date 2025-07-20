@@ -113,25 +113,16 @@ class TypeNarrower
         }
 
         // Check for literal 0
-        if ($type->isInteger()->yes() && $type->isConstantScalarValue()->yes()) {
-            $value = $type->getConstantScalarValues()[0] ?? null;
-            return 0 === $value;
-        }
-
         // Check for literal 0.0
-        if ($type->isFloat()->yes() && $type->isConstantScalarValue()->yes()) {
-            $value = $type->getConstantScalarValues()[0] ?? null;
-            return 0.0 === $value;
-        }
-
         // Check for empty string
-        if ($type->isString()->yes() && $type->isConstantScalarValue()->yes()) {
+
+        if ($type->isConstantScalarValue()->yes()) {
             $value = $type->getConstantScalarValues()[0] ?? null;
-            return '' === $value;
+            return 0 === $value || 0.0 === $value || '' === $value;
         }
 
         // Check for empty array
-        if ($type->isArray()->yes() && $type->isConstantArray()->yes()) {
+        if ($type->isArray()->yes()) {
             $arraySize = $type->getArraySize();
             if ($arraySize->isConstantScalarValue()->yes()) {
                 $values = $arraySize->getConstantScalarValues();

@@ -245,28 +245,21 @@ class FilterTypeNarrowingHelper
                 continue;
             }
 
+            $values = $type->getConstantScalarValues();
+
             // Skip literal 0
-            if ($type->isInteger()->yes() && $type->isConstantScalarValue()->yes()) {
-                $values = $type->getConstantScalarValues();
-                if (in_array(0, $values, true)) {
-                    continue;
-                }
+            if (in_array(0, $values, true)) {
+                continue;
             }
 
             // Skip literal 0.0
-            if ($type->isFloat()->yes() && $type->isConstantScalarValue()->yes()) {
-                $values = $type->getConstantScalarValues();
-                if (in_array(0.0, $values, true)) {
-                    continue;
-                }
+            if (in_array(0.0, $values, true)) {
+                continue;
             }
 
             // Skip empty string
-            if ($type->isString()->yes() && $type->isConstantScalarValue()->yes()) {
-                $values = $type->getConstantScalarValues();
-                if (in_array('', $values, true)) {
-                    continue;
-                }
+            if (in_array('', $values, true)) {
+                continue;
             }
 
             // Skip empty array
