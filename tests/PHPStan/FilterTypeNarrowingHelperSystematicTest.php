@@ -78,12 +78,15 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
     // Case D: Not constant scalar
     public function testRemoveFalsyValuesWithNonConstantScalar(): void
     {
-        $this->markTestIncomplete();
 
         $nonConstantType = $this->createMockType([
             'isNull' => TrinaryLogic::createNo(),
             'isFalse' => TrinaryLogic::createNo(),
             'isConstantScalarValue' => TrinaryLogic::createNo(),
+            'isInteger' => TrinaryLogic::createNo(),
+            'isFloat' => TrinaryLogic::createNo(),
+            'isString' => TrinaryLogic::createNo(),
+            'isArray' => TrinaryLogic::createNo(),
         ]);
         $stringType = new StringType();
 
