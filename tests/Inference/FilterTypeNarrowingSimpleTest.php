@@ -118,20 +118,6 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     /**
      * Tests that is_int(...) narrows types correctly.
      */
-    public function xtestFilterWithIsInt(): void
-    {
-        /** @var Standard<int, int|string|float> $pipeline */
-        $pipeline = take([1, 'hello', 3.14, 42, 'world', 2.71]);
-
-        // After filter(is_int(...)), PHPStan should know this contains only ints
-        $result = $pipeline
-            ->filter(is_int(...))
-            ->map(fn(int $n) => yield $n * $n)
-            ->toList();
-
-        $this->assertSame([1, 1764], $result);
-    }
-
     /**
      * Tests that 'is_array' string callback narrows types correctly.
      */
@@ -152,21 +138,6 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     /**
      * Tests that multiple filters work together for type narrowing.
      */
-    public function xtestChainedFilters(): void
-    {
-        /** @var Standard<int, int|string|null> $pipeline */
-        $pipeline = take([1, 'hello', null, 42, 'world']);
-
-        // Chain filters: first remove nulls, then keep only strings
-        $result = $pipeline
-            ->filter(strict: true)  // Removes null
-            ->filter(is_string(...))  // Keeps only strings
-            ->cast(fn(string $s) => strtoupper($s))
-            ->toList();
-
-        $this->assertSame(['HELLO', 'WORLD'], $result);
-    }
-
     /**
      * Tests that the extension works with complex union types.
      */

@@ -120,34 +120,6 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $this->assertNull($this->helper->getTargetTypeForFunction('custom_function'));
     }
 
-    public function xtestRemoveFalsyTypesFromUnion(): void
-    {
-        $stringType = new StringType();
-        $intType = new IntegerType();
-        $nullType = $this->createMockNullType();
-        $falseType = $this->createMockFalseType();
-
-        $unionType = new UnionType([$stringType, $intType, $nullType, $falseType]);
-        $filteredTypes = $this->helper->removeFalsyTypesFromUnion($unionType);
-
-        $this->assertCount(2, $filteredTypes);
-        $this->assertContains($stringType, $filteredTypes);
-        $this->assertContains($intType, $filteredTypes);
-        $this->assertNotContains($nullType, $filteredTypes);
-        $this->assertNotContains($falseType, $filteredTypes);
-    }
-
-    public function xtestRemoveFalsyTypesWithOnlyNullAndFalse(): void
-    {
-        $nullType = $this->createMockNullType();
-        $falseType = $this->createMockFalseType();
-
-        $unionType = new UnionType([$nullType, $falseType]);
-        $filteredTypes = $this->helper->removeFalsyTypesFromUnion($unionType);
-
-        $this->assertCount(0, $filteredTypes);
-    }
-
     public function testRemoveFalsyTypesWithMixedOrder(): void
     {
         $stringType = new StringType();
@@ -265,31 +237,6 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $this->assertFalse($this->helper->isValidReturnTypeStructure($mockType));
     }
 
-    public function xtestExtractKeyAndValueTypesWithInvalidStructure(): void
-    {
-        // Test that kills the LogicalOr mutation in extractKeyAndValueTypes
-        $mockType = $this->createMock(Type::class);
-        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
-        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
-        // This type doesn't have getTypes method, so the method_exists check will fail
-
-        $result = $this->helper->extractKeyAndValueTypes($mockType);
-        $this->assertNull($result);
-    }
-
-    public function xtestExtractKeyAndValueTypesWithWrongCountGetTypes(): void
-    {
-        // Test that kills the LogicalOr mutation: (!is_array($genericTypes) || 2 !== count($genericTypes))
-        // We need to test the case where getTypes() returns an array with wrong count
-        $mockType = $this->createMock(GenericObjectType::class);
-        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
-        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
-        $mockType->method('getTypes')->willReturn([new StringType()]); // Array with wrong count (1 instead of 2)
-
-        $result = $this->helper->extractKeyAndValueTypes($mockType);
-        $this->assertNull($result);
-    }
-
     public function testExtractKeyAndValueTypes(): void
     {
         $keyType = new IntegerType();
@@ -306,30 +253,6 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $invalidType = $this->createMock(Type::class);
         $invalidType->method('isObject')->willReturn(TrinaryLogic::createNo());
         $result = $this->helper->extractKeyAndValueTypes($invalidType);
-        $this->assertNull($result);
-    }
-
-    public function xtestExtractKeyAndValueTypesMethodExistsEdgeCase(): void
-    {
-        // Test the method_exists check (line 222)
-        $mockType = $this->createMock(Type::class);
-        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
-        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
-        // Don't mock getTypes - this should trigger the method_exists check
-
-        $result = $this->helper->extractKeyAndValueTypes($mockType);
-        $this->assertNull($result);
-    }
-
-    public function xtestExtractKeyAndValueTypesWrongGenericCount(): void
-    {
-        // Test the count check (line 228)
-        $mockType = $this->createMock(GenericObjectType::class);
-        $mockType->method('isObject')->willReturn(TrinaryLogic::createYes());
-        $mockType->method('getObjectClassNames')->willReturn([Standard::class]);
-        $mockType->method('getTypes')->willReturn([new StringType()]); // Wrong count - should be 2
-
-        $result = $this->helper->extractKeyAndValueTypes($mockType);
         $this->assertNull($result);
     }
 

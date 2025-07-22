@@ -59,38 +59,6 @@ class ArgumentParserTest extends TestCase
         $this->assertInstanceOf(Arg::class, $args[1]);
     }
 
-    public function xtestExtractArgsReturnsEmptyArrayWhenNoArgs(): void
-    {
-        $methodCall = new MethodCall(
-            new Variable('pipeline'),
-            new Identifier('filter'),
-            []
-        );
-
-        $args = $this->parser->extractArgs($methodCall);
-
-        $this->assertSame([], $args);
-    }
-
-    public function xtestExtractArgsReindexesArray(): void
-    {
-        $methodCall = new MethodCall(
-            new Variable('pipeline'),
-            new Identifier('filter'),
-            [
-                1 => new Arg(new Variable('callback')),
-                3 => new VariadicPlaceholder(),
-                5 => new Arg(new Variable('strict')),
-            ]
-        );
-
-        $args = $this->parser->extractArgs($methodCall);
-
-        $this->assertCount(2, $args);
-        $this->assertArrayHasKey(0, $args);
-        $this->assertArrayHasKey(1, $args);
-    }
-
     public function testGetCallbackArgReturnsFirstArg(): void
     {
         $arg1 = new Arg(new Variable('callback'));
@@ -102,28 +70,10 @@ class ArgumentParserTest extends TestCase
         $this->assertSame($arg1, $callbackArg);
     }
 
-    public function xtestGetCallbackArgReturnsNullWhenNoArgs(): void
-    {
-        $callbackArg = $this->parser->getCallbackArg([]);
-
-        $this->assertNull($callbackArg);
-    }
-
     public function testGetStrictArgReturnsSecondArgWhenPositional(): void
     {
         $arg1 = new Arg(new Variable('callback'));
         $arg2 = new Arg(new Variable('strict'));
-        $args = [$arg1, $arg2];
-
-        $strictArg = $this->parser->getStrictArg($args);
-
-        $this->assertSame($arg2, $strictArg);
-    }
-
-    public function xtestGetStrictArgReturnsNamedParameter(): void
-    {
-        $arg1 = new Arg(new Variable('callback'));
-        $arg2 = new Arg(new Variable('value'), false, false, [], new Identifier('strict'));
         $args = [$arg1, $arg2];
 
         $strictArg = $this->parser->getStrictArg($args);
@@ -143,32 +93,4 @@ class ArgumentParserTest extends TestCase
         $this->assertSame($arg3, $strictArg);
     }
 
-    public function xtestGetStrictArgReturnsNullWhenOnlyOneArg(): void
-    {
-        $arg1 = new Arg(new Variable('callback'));
-        $args = [$arg1];
-
-        $strictArg = $this->parser->getStrictArg($args);
-
-        $this->assertNull($strictArg);
-    }
-
-    public function xtestGetStrictArgReturnsNullWhenNoArgs(): void
-    {
-        $strictArg = $this->parser->getStrictArg([]);
-
-        $this->assertNull($strictArg);
-    }
-
-    public function xtestGetStrictArgHandlesArgWithNullName(): void
-    {
-        $arg1 = new Arg(new Variable('callback'));
-        $arg2 = new Arg(new Variable('value'));
-        $arg2->name = null;
-        $args = [$arg1, $arg2];
-
-        $strictArg = $this->parser->getStrictArg($args);
-
-        $this->assertSame($arg2, $strictArg);
-    }
 }

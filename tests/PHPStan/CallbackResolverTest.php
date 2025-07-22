@@ -51,32 +51,6 @@ class CallbackResolverTest extends TestCase
         $this->resolver = new CallbackResolver($this->helper);
     }
 
-    public function xtestResolveCallbackTypeReturnsNullWhenArgIsNull(): void
-    {
-        $result = $this->resolver->resolveCallbackType(null);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestResolveCallbackTypeHandlesStringCallback(): void
-    {
-        $arg = new Arg(new String_('is_string'));
-
-        $this->helper->expects($this->once())
-            ->method('extractFunctionNameFromStringCallback')
-            ->with($arg->value)
-            ->willReturn('is_string');
-
-        $this->helper->expects($this->once())
-            ->method('getTargetTypeForFunction')
-            ->with('is_string')
-            ->willReturn(new StringType());
-
-        $result = $this->resolver->resolveCallbackType($arg);
-
-        $this->assertInstanceOf(StringType::class, $result);
-    }
-
     public function testResolveCallbackTypeReturnsNullWhenStringCallbackNotRecognized(): void
     {
         $arg = new Arg(new String_('unknown_function'));
@@ -92,26 +66,6 @@ class CallbackResolverTest extends TestCase
         $result = $this->resolver->resolveCallbackType($arg);
 
         $this->assertNull($result);
-    }
-
-    public function xtestResolveCallbackTypeHandlesFirstClassCallable(): void
-    {
-        $funcCall = new FuncCall(new Name('is_int'));
-        $arg = new Arg($funcCall);
-
-        $this->helper->expects($this->once())
-            ->method('extractFunctionNameFromFirstClassCallable')
-            ->with($funcCall)
-            ->willReturn('is_int');
-
-        $this->helper->expects($this->once())
-            ->method('getTargetTypeForFunction')
-            ->with('is_int')
-            ->willReturn(new IntegerType());
-
-        $result = $this->resolver->resolveCallbackType($arg);
-
-        $this->assertInstanceOf(IntegerType::class, $result);
     }
 
     public function testResolveCallbackTypeReturnsNullWhenFirstClassCallableNotRecognized(): void
@@ -132,67 +86,9 @@ class CallbackResolverTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function xtestResolveCallbackTypeReturnsNullWhenTargetTypeNotFound(): void
-    {
-        $arg = new Arg(new String_('custom_function'));
-
-        $this->helper->expects($this->once())
-            ->method('extractFunctionNameFromStringCallback')
-            ->with($arg->value)
-            ->willReturn('custom_function');
-
-        $this->helper->expects($this->once())
-            ->method('getTargetTypeForFunction')
-            ->with('custom_function')
-            ->willReturn(null);
-
-        $result = $this->resolver->resolveCallbackType($arg);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestResolveCallbackTypeIgnoresOtherExpressionTypes(): void
-    {
-        $arg = new Arg(new Variable('callback'));
-
-        $this->helper->expects($this->never())
-            ->method('extractFunctionNameFromStringCallback');
-
-        $this->helper->expects($this->never())
-            ->method('extractFunctionNameFromFirstClassCallable');
-
-        $result = $this->resolver->resolveCallbackType($arg);
-
-        $this->assertNull($result);
-    }
-
     /**
      * @dataProvider provideKnownFunctions
      */
-    public function xtestResolveCallbackTypeHandlesKnownFunctions(string $functionName, string $expectedTypeClass): void
-    {
-        $arg = new Arg(new String_($functionName));
-
-        $expectedType = match ($expectedTypeClass) {
-            ArrayType::class => new ArrayType(new MixedType(), new MixedType()),
-            ObjectType::class => new ObjectType('object'),
-            default => new $expectedTypeClass(),
-        };
-
-        $this->helper->expects($this->once())
-            ->method('extractFunctionNameFromStringCallback')
-            ->willReturn($functionName);
-
-        $this->helper->expects($this->once())
-            ->method('getTargetTypeForFunction')
-            ->with($functionName)
-            ->willReturn($expectedType);
-
-        $result = $this->resolver->resolveCallbackType($arg);
-
-        $this->assertInstanceOf($expectedTypeClass, $result);
-    }
-
     public static function provideKnownFunctions(): iterable
     {
         yield 'is_string' => ['is_string', StringType::class];

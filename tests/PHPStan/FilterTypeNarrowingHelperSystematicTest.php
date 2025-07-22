@@ -75,30 +75,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $this->assertNotContains($falseType, $result);
     }
 
-    // Case D: Not constant scalar
-    public function xtestRemoveFalsyValuesWithNonConstantScalar(): void
-    {
-
-        $nonConstantType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createNo(),
-            'isInteger' => TrinaryLogic::createNo(),
-            'isFloat' => TrinaryLogic::createNo(),
-            'isString' => TrinaryLogic::createNo(),
-            'isArray' => TrinaryLogic::createNo(),
-        ]);
-        $stringType = new StringType();
-
-        $unionType = new UnionType([$nonConstantType, $stringType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Non-constant scalar should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($nonConstantType, $result);
-        $this->assertContains($stringType, $result);
-    }
-
     // Case F: Is integer AND contains 0
     public function testRemoveFalsyValuesWithZeroInteger(): void
     {
@@ -117,30 +93,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertContains($stringType, $result);
         $this->assertNotContains($zeroIntType, $result);
-    }
-
-    // Case G: Is integer AND doesn't contain 0
-    public function xtestRemoveFalsyValuesWithNonZeroInteger(): void
-    {
-        $nonZeroIntType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'isInteger' => TrinaryLogic::createYes(),
-            'isFloat' => TrinaryLogic::createNo(),
-            'isString' => TrinaryLogic::createNo(),
-            'isArray' => TrinaryLogic::createNo(),
-            'getConstantScalarValues' => [5],
-        ]);
-        $stringType = new StringType();
-
-        $unionType = new UnionType([$nonZeroIntType, $stringType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Non-zero integer should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($nonZeroIntType, $result);
-        $this->assertContains($stringType, $result);
     }
 
     // Case I: Is float AND contains 0.0
@@ -164,30 +116,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $this->assertNotContains($zeroFloatType, $result);
     }
 
-    // Case J: Is float AND doesn't contain 0.0
-    public function xtestRemoveFalsyValuesWithNonZeroFloat(): void
-    {
-        $nonZeroFloatType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'isInteger' => TrinaryLogic::createNo(),
-            'isFloat' => TrinaryLogic::createYes(),
-            'isString' => TrinaryLogic::createNo(),
-            'isArray' => TrinaryLogic::createNo(),
-            'getConstantScalarValues' => [3.14],
-        ]);
-        $stringType = new StringType();
-
-        $unionType = new UnionType([$nonZeroFloatType, $stringType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Non-zero float should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($nonZeroFloatType, $result);
-        $this->assertContains($stringType, $result);
-    }
-
     // Case L: Is string AND contains ''
     public function testRemoveFalsyValuesWithEmptyString(): void
     {
@@ -208,30 +136,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertContains($intType, $result);
         $this->assertNotContains($emptyStringType, $result);
-    }
-
-    // Case M: Is string AND doesn't contain ''
-    public function xtestRemoveFalsyValuesWithNonEmptyString(): void
-    {
-        $nonEmptyStringType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'isInteger' => TrinaryLogic::createNo(),
-            'isFloat' => TrinaryLogic::createNo(),
-            'isString' => TrinaryLogic::createYes(),
-            'isArray' => TrinaryLogic::createNo(),
-            'getConstantScalarValues' => ['hello'],
-        ]);
-        $intType = new IntegerType();
-
-        $unionType = new UnionType([$nonEmptyStringType, $intType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Non-empty string should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($nonEmptyStringType, $result);
-        $this->assertContains($intType, $result);
     }
 
     // Case O: Is array AND constant array AND size is 0
@@ -263,36 +167,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         $this->assertNotContains($emptyArrayType, $result);
     }
 
-    // Case P: Is array AND constant array AND size is not 0
-    public function xtestRemoveFalsyValuesWithNonEmptyArray(): void
-    {
-        $arraySize = $this->createMockType([
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'getConstantScalarValues' => [3],
-        ]);
-
-        $nonEmptyArrayType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'isInteger' => TrinaryLogic::createNo(),
-            'isFloat' => TrinaryLogic::createNo(),
-            'isString' => TrinaryLogic::createNo(),
-            'isArray' => TrinaryLogic::createYes(),
-            'isConstantArray' => TrinaryLogic::createYes(),
-            'getArraySize' => $arraySize,
-        ]);
-        $stringType = new StringType();
-
-        $unionType = new UnionType([$nonEmptyArrayType, $stringType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Non-empty array should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($nonEmptyArrayType, $result);
-        $this->assertContains($stringType, $result);
-    }
-
     // Case Q: Is array AND not constant array
     public function testRemoveFalsyValuesWithNonConstantArray(): void
     {
@@ -314,35 +188,6 @@ final class FilterTypeNarrowingHelperSystematicTest extends TestCase
         // Non-constant array should be kept (can't determine if empty)
         $this->assertCount(2, $result);
         $this->assertContains($nonConstantArrayType, $result);
-        $this->assertContains($stringType, $result);
-    }
-
-    // Case: Array with non-constant size
-    public function xtestRemoveFalsyValuesWithArrayNonConstantSize(): void
-    {
-        $arraySize = $this->createMockType([
-            'isConstantScalarValue' => TrinaryLogic::createNo(),
-        ]);
-
-        $arrayWithNonConstantSizeType = $this->createMockType([
-            'isNull' => TrinaryLogic::createNo(),
-            'isFalse' => TrinaryLogic::createNo(),
-            'isConstantScalarValue' => TrinaryLogic::createYes(),
-            'isInteger' => TrinaryLogic::createNo(),
-            'isFloat' => TrinaryLogic::createNo(),
-            'isString' => TrinaryLogic::createNo(),
-            'isArray' => TrinaryLogic::createYes(),
-            'isConstantArray' => TrinaryLogic::createYes(),
-            'getArraySize' => $arraySize,
-        ]);
-        $stringType = new StringType();
-
-        $unionType = new UnionType([$arrayWithNonConstantSizeType, $stringType]);
-        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
-
-        // Array with non-constant size should be kept
-        $this->assertCount(2, $result);
-        $this->assertContains($arrayWithNonConstantSizeType, $result);
         $this->assertContains($stringType, $result);
     }
 

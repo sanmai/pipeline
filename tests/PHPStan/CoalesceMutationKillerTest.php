@@ -30,58 +30,6 @@ use Pipeline\PHPStan\FilterTypeNarrowingHelper;
 final class CoalesceMutationKillerTest extends TestCase
 {
     /**
-     * Kill the coalesce mutation by testing that the extension uses the provided helper.
-     *
-     * Original: $this->helper = $helper ?? new FilterTypeNarrowingHelper();
-     * Mutated:  $this->helper = new FilterTypeNarrowingHelper() ?? $helper;
-     *
-     * The mutation would always create a new instance, ignoring the provided helper.
-     * We test this by creating a partial mock that overrides a specific method.
-     */
-    public function xtestProvidedHelperIsActuallyUsed(): void
-    {
-        // Create a trackable helper using anonymous class that extends the helper
-        $trackableHelper = new class extends FilterTypeNarrowingHelper {
-            public bool $extractKeyAndValueTypesCalled = false;
-
-            public function extractKeyAndValueTypes($returnType): ?array
-            {
-                $this->extractKeyAndValueTypesCalled = true;
-                // Return null immediately to avoid complex type checking in the test
-                return null;
-            }
-        };
-
-        // Create extension with our trackable helper
-        $extension = new FilterReturnTypeExtension($trackableHelper);
-
-        // Create a minimal method call to trigger helper usage
-        $methodReflection = $this->createMock(\PHPStan\Reflection\MethodReflection::class);
-        $methodReflection->method('getName')->willReturn('filter');
-
-        // Create a simple method call
-        $methodCall = $this->createMock(\PhpParser\Node\Expr\MethodCall::class);
-        $methodCall->args = [];
-
-        // Create a mock scope
-        $scope = $this->createMock(\PHPStan\Analyser\Scope::class);
-
-        // Mock method reflection to return a type that triggers helper usage
-        $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
-        $returnType = $this->createMock(\PHPStan\Type\Type::class);
-        $parametersAcceptor->method('getReturnType')->willReturn($returnType);
-        $methodReflection->method('getVariants')->willReturn([$parametersAcceptor]);
-
-        // This should trigger the helper method
-        $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
-
-        // Verify our specific helper instance was actually used
-        // If the mutation were active (new Helper() ?? $trackableHelper),
-        // it would create a new instance and our trackable flag would remain false
-        $this->assertTrue($trackableHelper->extractKeyAndValueTypesCalled, 'The provided helper should be used, not a new instance');
-    }
-
-    /**
      * Additional test: verify that when null is passed, behavior is correct
      */
     public function testNullHelperCreatesWorkingInstance(): void

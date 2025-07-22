@@ -89,36 +89,6 @@ class TypeNarrowerTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function xtestNarrowForStrictModeReturnsNullWhenFilteredTypesEmpty(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new UnionType([new NullType(), new ConstantBooleanType(false)]);
-
-        $this->helper->expects($this->once())
-            ->method('removeFalsyTypesFromUnion')
-            ->with($valueType)
-            ->willReturn([]);
-
-        $this->helper->expects($this->never())
-            ->method('createGenericTypeWithFilteredValues');
-
-        $result = $this->narrower->narrowForStrictMode($keyType, $valueType);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestNarrowForStrictModeWithNullType(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new NullType();
-
-        $result = $this->narrower->narrowForStrictMode($keyType, $valueType);
-
-        $this->assertInstanceOf(GenericObjectType::class, $result);
-        $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
-        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
-    }
-
     public function testNarrowForStrictModeWithFalseType(): void
     {
         $keyType = new IntegerType();
@@ -140,30 +110,6 @@ class TypeNarrowerTest extends TestCase
 
         $this->assertNull($result);
     }
-
-    public function xtestNarrowForCallbackWithUnionType(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new UnionType([new StringType(), new IntegerType()]);
-        $targetType = new StringType();
-        $filteredTypes = [new StringType()];
-        $expectedType = new GenericObjectType(\Pipeline\Standard::class, [$keyType, new StringType()]);
-
-        $this->helper->expects($this->once())
-            ->method('filterUnionTypeByTarget')
-            ->with($valueType, $targetType)
-            ->willReturn($filteredTypes);
-
-        $this->helper->expects($this->once())
-            ->method('createGenericTypeWithFilteredValues')
-            ->with($keyType, $filteredTypes)
-            ->willReturn($expectedType);
-
-        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
-
-        $this->assertSame($expectedType, $result);
-    }
-
     public function testNarrowForCallbackReturnsNullWhenNoMatchingTypes(): void
     {
         $keyType = new IntegerType();
@@ -177,50 +123,6 @@ class TypeNarrowerTest extends TestCase
 
         $this->helper->expects($this->never())
             ->method('createGenericTypeWithFilteredValues');
-
-        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestNarrowForCallbackWithExactTypeMatch(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new StringType();
-        $targetType = new StringType();
-
-        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestNarrowForCallbackWithNoTypeMatch(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new IntegerType();
-        $targetType = new StringType();
-
-        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestNarrowForCallbackWithSubtype(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new IntegerType();
-        $targetType = new MixedType(); // MixedType is supertype of IntegerType
-
-        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
-
-        $this->assertNull($result);
-    }
-
-    public function xtestNarrowForCallbackWithMixedType(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new MixedType();
-        $targetType = new StringType();
 
         $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
 
@@ -267,25 +169,6 @@ class TypeNarrowerTest extends TestCase
 
         $this->assertNull($result);
     }
-
-    public function xtestNarrowForDefaultFilterReturnsNullWhenFilteredTypesEmpty(): void
-    {
-        $keyType = new IntegerType();
-        $valueType = new UnionType([new NullType(), new ConstantBooleanType(false)]);
-
-        $this->helper->expects($this->once())
-            ->method('removeFalsyValuesFromUnion')
-            ->with($valueType)
-            ->willReturn([]);
-
-        $this->helper->expects($this->never())
-            ->method('createGenericTypeWithFilteredValues');
-
-        $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
-
-        $this->assertNull($result);
-    }
-
     public function testNarrowForDefaultFilterWithNullType(): void
     {
         $keyType = new IntegerType();
@@ -304,26 +187,6 @@ class TypeNarrowerTest extends TestCase
         $valueType = new ConstantBooleanType(false);
 
         $result = $this->narrower->narrowForDefaultFilter($keyType, $valueType);
-
-        $this->assertInstanceOf(GenericObjectType::class, $result);
-        $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
-        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
-    }
-
-    public function xtestNarrowForDefaultFilterWithEmptyStringType(): void
-    {
-        $keyType = new IntegerType();
-        $emptyStringType = $this->createMock(Type::class);
-        $emptyStringType->method('isNull')->willReturn(\PHPStan\TrinaryLogic::createNo());
-        $emptyStringType->method('isFalse')->willReturn(\PHPStan\TrinaryLogic::createNo());
-        $emptyStringType->method('isInteger')->willReturn(\PHPStan\TrinaryLogic::createNo());
-        $emptyStringType->method('isFloat')->willReturn(\PHPStan\TrinaryLogic::createNo());
-        $emptyStringType->method('isString')->willReturn(\PHPStan\TrinaryLogic::createYes());
-        $emptyStringType->method('isArray')->willReturn(\PHPStan\TrinaryLogic::createNo());
-        $emptyStringType->method('isConstantScalarValue')->willReturn(\PHPStan\TrinaryLogic::createYes());
-        $emptyStringType->method('getConstantScalarValues')->willReturn(['']);
-
-        $result = $this->narrower->narrowForDefaultFilter($keyType, $emptyStringType);
 
         $this->assertInstanceOf(GenericObjectType::class, $result);
         $this->assertSame(\Pipeline\Standard::class, $result->getClassName());
