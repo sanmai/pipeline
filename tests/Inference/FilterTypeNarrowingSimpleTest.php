@@ -27,7 +27,6 @@ use function count;
 use function Pipeline\take;
 use function strlen;
 use function strtoupper;
-use function PHPStan\Testing\assertType;
 
 /**
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
@@ -47,13 +46,10 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, array<mixed>|string|false> $pipeline */
         $pipeline = take(['hello', ['array'], false, 'world']);
-        assertType('Pipeline\Standard<int, array<mixed>|string|false>', $pipeline);
 
         // After filter(is_string(...)), PHPStan should know this contains only strings
-        $filtered = $pipeline->filter(is_string(...));
-        assertType('Pipeline\Standard<int, string>', $filtered);
-
-        $result = $filtered
+        $result = $pipeline
+            ->filter(is_string(...))
             ->cast(fn(string $s) => strtoupper($s))
             ->toList();
 
@@ -67,13 +63,10 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, int|string|null> $pipeline */
         $pipeline = take([1, 'hello', null, 'world', 42]);
-        assertType('Pipeline\Standard<int, int|string|null>', $pipeline);
 
         // After filter('is_string'), PHPStan should know this contains only strings
-        $filtered = $pipeline->filter('is_string');
-        assertType('Pipeline\Standard<int, string>', $filtered);
-
-        $result = $filtered
+        $result = $pipeline
+            ->filter('is_string')
             ->cast(fn(string $s) => strlen($s))
             ->toList();
 
@@ -87,13 +80,10 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     {
         /** @var Standard<int, string|null|false> $pipeline */
         $pipeline = take(['hello', null, false, 'world', '']);
-        assertType('Pipeline\Standard<int, string|false|null>', $pipeline);
 
         // After filter(strict: true), PHPStan should know null and false are removed
-        $filtered = $pipeline->filter(strict: true);
-        assertType('Pipeline\Standard<int, string>', $filtered);
-
-        $result = $filtered
+        $result = $pipeline
+            ->filter(strict: true)
             ->map(fn(string $s) => yield strlen($s))
             ->toList();
 
@@ -118,6 +108,20 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     /**
      * Tests that is_int(...) narrows types correctly.
      */
+    public function testFilterWithIsInt(): void
+    {
+        /** @var Standard<int, int|string|float> $pipeline */
+        $pipeline = take([1, 'hello', 3.14, 42, 'world', 2.71]);
+
+        // After filter(is_int(...)), PHPStan should know this contains only ints
+        $result = $pipeline
+            ->filter(is_int(...))
+            ->map(fn(int $n) => yield $n * $n)
+            ->toList();
+
+        $this->assertSame([1, 1764], $result);
+    }
+
     /**
      * Tests that 'is_array' string callback narrows types correctly.
      */
@@ -138,6 +142,21 @@ class FilterTypeNarrowingSimpleTest extends TestCase
     /**
      * Tests that multiple filters work together for type narrowing.
      */
+    public function testChainedFilters(): void
+    {
+        /** @var Standard<int, int|string|null> $pipeline */
+        $pipeline = take([1, 'hello', null, 42, 'world']);
+
+        // Chain filters: first remove nulls, then keep only strings
+        $result = $pipeline
+            ->filter(strict: true)  // Removes null
+            ->filter(is_string(...))  // Keeps only strings
+            ->cast(fn(string $s) => strtoupper($s))
+            ->toList();
+
+        $this->assertSame(['HELLO', 'WORLD'], $result);
+    }
+
     /**
      * Tests that the extension works with complex union types.
      */

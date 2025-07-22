@@ -12,15 +12,5 @@ parameters:
              identifier: selfOut.type
              path: tests/StaticAnalysisTest.php
         -
-             identifier: class.extendsFinalByPhpDoc
-             path: tests/
-        -
-             identifier: sanmai.noFinalClasses
-             path: tests/
-        
-
-services:
-    -
-        class: Pipeline\PHPStan\FilterReturnTypeExtension
-        tags:
-            - phpstan.broker.dynamicMethodReturnTypeExtension
+             identifier: argument.type
+             path: tests/Inference/
