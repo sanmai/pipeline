@@ -86,6 +86,67 @@ class CallbackResolverTest extends TestCase
         $this->assertNull($result);
     }
 
+    public function testResolveCallbackTypeReturnsNullForNullArg(): void
+    {
+        $result = $this->resolver->resolveCallbackType(null);
+        $this->assertNull($result);
+    }
+
+    public function testResolveCallbackTypeWithStringCallback(): void
+    {
+        $arg = new Arg(new String_('is_string'));
+
+        $this->helper->expects($this->once())
+            ->method('extractFunctionNameFromStringCallback')
+            ->with($arg->value)
+            ->willReturn('is_string');
+
+        $this->helper->expects($this->once())
+            ->method('getTargetTypeForFunction')
+            ->with('is_string')
+            ->willReturn(new StringType());
+
+        $result = $this->resolver->resolveCallbackType($arg);
+
+        $this->assertInstanceOf(StringType::class, $result);
+    }
+
+    public function testResolveCallbackTypeWithFirstClassCallable(): void
+    {
+        $funcCall = new FuncCall(new Name('is_int'));
+        $arg = new Arg($funcCall);
+
+        $this->helper->expects($this->once())
+            ->method('extractFunctionNameFromFirstClassCallable')
+            ->with($funcCall)
+            ->willReturn('is_int');
+
+        $this->helper->expects($this->once())
+            ->method('getTargetTypeForFunction')
+            ->with('is_int')
+            ->willReturn(new IntegerType());
+
+        $result = $this->resolver->resolveCallbackType($arg);
+
+        $this->assertInstanceOf(IntegerType::class, $result);
+    }
+
+    public function testResolveCallbackTypeWithUnsupportedExpressionType(): void
+    {
+        $variable = new Variable('callback');
+        $arg = new Arg($variable);
+
+        $this->helper->expects($this->never())
+            ->method('extractFunctionNameFromStringCallback');
+
+        $this->helper->expects($this->never())
+            ->method('extractFunctionNameFromFirstClassCallable');
+
+        $result = $this->resolver->resolveCallbackType($arg);
+
+        $this->assertNull($result);
+    }
+
     /**
      * @dataProvider provideKnownFunctions
      */

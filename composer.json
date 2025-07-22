@@ -15,6 +15,7 @@
     "require-dev": {
         "dg/bypass-finals": "^1.9",
         "ergebnis/composer-normalize": "^2.8",
+        "esi/phpunit-coverage-check": ">2",
         "friendsofphp/php-cs-fixer": "^3.17",
         "infection/infection": ">=0.30.3",
         "league/pipeline": "^0.3 || ^1.0",

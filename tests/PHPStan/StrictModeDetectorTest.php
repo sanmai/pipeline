@@ -51,4 +51,39 @@ class StrictModeDetectorTest extends TestCase
         $this->assertFalse($result);
     }
 
+    public function testIsStrictModeReturnsTrueWhenArgIsTrue(): void
+    {
+        $trueExpr = new ConstFetch(new Name('true'));
+        $arg = new Arg($trueExpr);
+
+        $scope = $this->createMock(Scope::class);
+        $trueType = new ConstantBooleanType(true);
+
+        $scope->expects($this->once())
+            ->method('getType')
+            ->with($trueExpr)
+            ->willReturn($trueType);
+
+        $result = $this->detector->isStrictMode($arg, $scope);
+
+        $this->assertTrue($result);
+    }
+
+    public function testIsStrictModeReturnsFalseWhenArgIsNotTrue(): void
+    {
+        $falseExpr = new ConstFetch(new Name('false'));
+        $arg = new Arg($falseExpr);
+
+        $scope = $this->createMock(Scope::class);
+        $falseType = new ConstantBooleanType(false);
+
+        $scope->expects($this->once())
+            ->method('getType')
+            ->with($falseExpr)
+            ->willReturn($falseType);
+
+        $result = $this->detector->isStrictMode($arg, $scope);
+
+        $this->assertFalse($result);
+    }
 }

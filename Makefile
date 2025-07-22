@@ -50,6 +50,7 @@ all: test
 ci-test: SILENT=
 ci-test: prerequisites
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP)
+	$(SILENT) $(PHP) vendor/bin/coverage-check build/logs/clover.xml 100
 
 ci-analyze: SILENT=
 ci-analyze: prerequisites ci-phpunit ci-infection ci-phpstan ci-psalm
@@ -90,6 +91,7 @@ test-prerequisites: prerequisites composer.lock
 phpunit: cs
 	rm -fr build/logs/*
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
+	$(SILENT) $(PHP) vendor/bin/coverage-check build/logs/clover.xml 100
 
 .PHONY: infection
 infection: phpunit

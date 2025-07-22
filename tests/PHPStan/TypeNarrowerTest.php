@@ -203,6 +203,30 @@ class TypeNarrowerTest extends TestCase
         $this->assertNull($result);
     }
 
+    public function testNarrowForCallbackReturnsTypeWhenTypesMatch(): void
+    {
+        // Test line 73: when filterUnionTypeByTarget returns non-empty types
+        $keyType = new IntegerType();
+        $valueType = new UnionType([new StringType(), new IntegerType()]);
+        $targetType = new StringType();
+        $filteredTypes = [new StringType()];
+        $expectedType = new GenericObjectType(\Pipeline\Standard::class, [$keyType, new StringType()]);
+
+        $this->helper->expects($this->once())
+            ->method('filterUnionTypeByTarget')
+            ->with($valueType, $targetType)
+            ->willReturn($filteredTypes);
+
+        $this->helper->expects($this->once())
+            ->method('createGenericTypeWithFilteredValues')
+            ->with($keyType, $filteredTypes)
+            ->willReturn($expectedType);
+
+        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
+
+        $this->assertSame($expectedType, $result);
+    }
+
     public function testNarrowForDefaultFilterWithRealTypes(): void
     {
         // Test with real FilterTypeNarrowingHelper to exercise isFalsyType private method

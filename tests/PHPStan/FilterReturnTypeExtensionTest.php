@@ -51,14 +51,41 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $this->extension = new FilterReturnTypeExtension();
     }
 
-    /**
-     * Test that the extension can be instantiated with a custom helper.
-     */
-    public function xxtestExtensionInstantiationWithCustomHelper(): void
+    public function testGetClass(): void
+    {
+        $this->assertSame(Standard::class, $this->extension->getClass());
+    }
+
+    public function testIsMethodSupportedReturnsTrueForFilter(): void
+    {
+        $methodReflection = $this->createMethodReflection('filter');
+        $this->assertTrue($this->extension->isMethodSupported($methodReflection));
+    }
+
+    public function testIsMethodSupportedReturnsFalseForOtherMethods(): void
+    {
+        $methodReflection = $this->createMethodReflection('map');
+        $this->assertFalse($this->extension->isMethodSupported($methodReflection));
+    }
+
+    public function testExtensionInstantiationWithAllParameters(): void
     {
         $helper = new FilterTypeNarrowingHelper();
-        $extension = new FilterReturnTypeExtension($helper);
+        $argumentParser = new ArgumentParser();
+        $strictModeDetector = new StrictModeDetector();
+        $callbackResolver = new CallbackResolver($helper);
+        $typeNarrower = new TypeNarrower($helper);
+
+        $extension = new FilterReturnTypeExtension(
+            $helper,
+            $argumentParser,
+            $strictModeDetector,
+            $callbackResolver,
+            $typeNarrower
+        );
+
         $this->assertInstanceOf(FilterReturnTypeExtension::class, $extension);
+        $this->assertSame(Standard::class, $extension->getClass());
     }
 
     /**
@@ -149,6 +176,103 @@ final class FilterReturnTypeExtensionTest extends TestCase
 
         // Assert
         $this->assertSame($expectedNarrowedType, $result);
+    }
+
+    public function testGetTypeFromMethodCallWithInvalidReturnTypeStructure(): void
+    {
+        // Test line 80: when extractKeyAndValueTypes returns null
+        $helper = $this->createMock(FilterTypeNarrowingHelper::class);
+        $argumentParser = $this->createMock(ArgumentParser::class);
+
+        $extension = new FilterReturnTypeExtension($helper, $argumentParser);
+
+        $methodReflection = $this->createMethodReflection('filter');
+        $methodCall = $this->createMock(\PhpParser\Node\Expr\MethodCall::class);
+        $methodCall->args = [];
+        $scope = $this->createMock(\PHPStan\Analyser\Scope::class);
+
+        $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
+        $invalidReturnType = $this->createMock(\PHPStan\Type\Type::class);
+
+        // Mock the method reflection to return the parameters acceptor
+        $methodReflection->expects($this->once())
+            ->method('getVariants')
+            ->willReturn([$parametersAcceptor]);
+
+        $parametersAcceptor->expects($this->once())
+            ->method('getReturnType')
+            ->willReturn($invalidReturnType);
+
+        $argumentParser->expects($this->once())
+            ->method('extractArgs')
+            ->with($methodCall)
+            ->willReturn([]);
+
+        $helper->expects($this->once())
+            ->method('extractKeyAndValueTypes')
+            ->with($invalidReturnType)
+            ->willReturn(null);
+
+        $result = $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
+
+        // Should return the original type when extraction fails
+        $this->assertSame($invalidReturnType, $result);
+    }
+
+    public function testGetTypeFromMethodCallWithNoNarrowing(): void
+    {
+        // Test line 116: when no narrowing occurs in default filter
+        $helper = $this->createMock(FilterTypeNarrowingHelper::class);
+        $argumentParser = $this->createMock(ArgumentParser::class);
+        $typeNarrower = $this->createMock(TypeNarrower::class);
+
+        $extension = new FilterReturnTypeExtension($helper, $argumentParser, null, null, $typeNarrower);
+
+        $methodReflection = $this->createMethodReflection('filter');
+        $methodCall = $this->createMock(\PhpParser\Node\Expr\MethodCall::class);
+        $methodCall->args = [];
+        $scope = $this->createMock(\PHPStan\Analyser\Scope::class);
+
+        $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
+        $returnType = $this->createMock(\PHPStan\Type\Type::class);
+        $keyType = new \PHPStan\Type\IntegerType();
+        $valueType = new \PHPStan\Type\StringType();
+
+        // Mock the method reflection to return the parameters acceptor
+        $methodReflection->expects($this->once())
+            ->method('getVariants')
+            ->willReturn([$parametersAcceptor]);
+
+        $parametersAcceptor->expects($this->once())
+            ->method('getReturnType')
+            ->willReturn($returnType);
+
+        $argumentParser->expects($this->any())
+            ->method('extractArgs')
+            ->willReturn([]);
+
+        $argumentParser->expects($this->any())
+            ->method('getStrictArg')
+            ->willReturn(null);
+
+        $argumentParser->expects($this->any())
+            ->method('getCallbackArg')
+            ->willReturn(null);
+
+        $helper->expects($this->once())
+            ->method('extractKeyAndValueTypes')
+            ->with($returnType)
+            ->willReturn([$keyType, $valueType]);
+
+        $typeNarrower->expects($this->once())
+            ->method('narrowForDefaultFilter')
+            ->with($keyType, $valueType)
+            ->willReturn(null); // No narrowing occurred
+
+        $result = $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
+
+        // Should return the original type when no narrowing occurs
+        $this->assertSame($returnType, $result);
     }
 
     /**
