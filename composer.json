@@ -13,6 +13,7 @@
         "php": ">=8.2"
     },
     "require-dev": {
+        "dg/bypass-finals": "^1.9",
         "ergebnis/composer-normalize": "^2.8",
         "friendsofphp/php-cs-fixer": "^3.17",
         "infection/infection": ">=0.30.3",
