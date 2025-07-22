@@ -24,6 +24,7 @@
         "phpstan/phpstan": "^2",
         "phpunit/phpunit": ">=9.4 <12",
         "sanmai/phpstan-rules": "^0.3.0",
+        "sanmai/phpunit-double-colon-syntax": "^0.1.1",
         "vimeo/psalm": ">=2"
     },
     "autoload": {

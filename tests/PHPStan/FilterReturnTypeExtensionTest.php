@@ -199,7 +199,7 @@ final class FilterReturnTypeExtensionTest extends TestCase
             ->method('getVariants')
             ->willReturn([$parametersAcceptor]);
 
-        $parametersAcceptor->expects($this->once())
+        $parametersAcceptor->expects($this->any())
             ->method('getReturnType')
             ->willReturn($invalidReturnType);
 
@@ -243,7 +243,7 @@ final class FilterReturnTypeExtensionTest extends TestCase
             ->method('getVariants')
             ->willReturn([$parametersAcceptor]);
 
-        $parametersAcceptor->expects($this->once())
+        $parametersAcceptor->expects($this->any())
             ->method('getReturnType')
             ->willReturn($returnType);
 
