@@ -28,6 +28,7 @@ use function Pipeline\take;
 use function strlen;
 use function strtoupper;
 use function round;
+use function PHPStan\Testing\assertType;
 
 /**
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
@@ -51,6 +52,9 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter(is_string(...)), PHPStan should know this contains only strings
         $filtered = $pipeline->filter(is_string(...));
 
+        // PHPStan should understand $filtered contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
         $result = $filtered
             ->cast(fn(string $s) => strtoupper($s))
             ->toList();
@@ -69,6 +73,9 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         // After filter('is_string'), PHPStan should know this contains only strings
         $filtered = $pipeline->filter('is_string');
 
+        // PHPStan should understand $filtered contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
         $result = $filtered
             ->cast(fn(string $s) => strlen($s))
             ->toList();
@@ -86,6 +93,9 @@ class FilterTypeNarrowingSimpleTest extends TestCase
 
         // After filter(strict: true), PHPStan should know null and false are removed
         $filtered = $pipeline->filter(strict: true);
+
+        // PHPStan should understand null and false are removed
+        assertType('Pipeline\\Standard<int, string>', $filtered);
 
         $result = $filtered
             ->map(fn(string $s) => yield strlen($s))
@@ -118,8 +128,11 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take([1, 'hello', 3.14, 42, 'world', 2.71]);
 
         // After filter(is_int(...)), PHPStan should know this contains only ints
-        $result = $pipeline
-            ->filter(is_int(...))
+        $intFiltered = $pipeline->filter(is_int(...));
+        // PHPStan should understand $intFiltered contains only ints
+        assertType('Pipeline\\Standard<int, int>', $intFiltered);
+
+        $result = $intFiltered
             ->map(fn(int $n) => yield $n * $n)
             ->toList();
 
@@ -135,8 +148,11 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take([[1, 2], 'hello', null, [3, 4, 5]]);
 
         // After filter('is_array'), PHPStan should know this contains only arrays
-        $result = $pipeline
-            ->filter('is_array')
+        $arrayFiltered = $pipeline->filter('is_array');
+        // PHPStan should understand $arrayFiltered contains only arrays
+        assertType('Pipeline\\Standard<int, array<mixed>>', $arrayFiltered);
+
+        $result = $arrayFiltered
             ->cast(fn(array $arr) => count($arr))
             ->toList();
 
@@ -189,6 +205,9 @@ class FilterTypeNarrowingSimpleTest extends TestCase
 
         // Filter strings with is_string - should preserve all values
         $filtered = $pipeline->filter('is_string');
+
+        // PHPStan should understand $filtered still contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
 
         $result = $filtered
             ->cast(fn(string $s) => strtoupper($s))
