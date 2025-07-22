@@ -23,6 +23,7 @@ namespace Tests\Pipeline\PHPStan;
 use PHPUnit\Framework\TestCase;
 use Pipeline\PHPStan\FilterReturnTypeExtension;
 use Pipeline\PHPStan\FilterTypeNarrowingHelper;
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\PHPStan\FilterReturnTypeExtension
@@ -37,9 +38,6 @@ final class CoalesceMutationKillerTest extends TestCase
         $extension = new FilterReturnTypeExtension(null);
 
         // This should work because null ?? new Helper() creates a working helper
-        $this->assertSame('Pipeline\\Standard', $extension->getClass());
-
-        // The mutation (new Helper() ?? null) would also work here,
-        // so this alone doesn't kill the mutation
+        $this->assertSame(Standard::class, $extension->getClass());
     }
 }
