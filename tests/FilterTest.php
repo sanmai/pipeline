@@ -76,7 +76,7 @@ final class FilterTest extends TestCase
             yield null;
         });
 
-        $pipeline->filter(strict: false);
+        $pipeline->filter();
 
         $this->assertCount(0, $pipeline->toList());
     }
@@ -93,7 +93,7 @@ final class FilterTest extends TestCase
             yield null;
         });
 
-        $pipeline->filter();
+        $pipeline->filter(strict: true);
 
         $this->assertCount(5, $pipeline->toList());
     }
