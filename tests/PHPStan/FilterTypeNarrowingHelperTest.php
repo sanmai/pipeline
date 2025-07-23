@@ -32,6 +32,7 @@ use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\ObjectWithoutClassType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
@@ -68,7 +69,7 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $this->assertInstanceOf(FloatType::class, $typeMap['is_float']);
         $this->assertInstanceOf(BooleanType::class, $typeMap['is_bool']);
         $this->assertInstanceOf(ArrayType::class, $typeMap['is_array']);
-        $this->assertInstanceOf(ObjectType::class, $typeMap['is_object']);
+        $this->assertInstanceOf(ObjectWithoutClassType::class, $typeMap['is_object']);
     }
 
     public function testExtractFunctionNameFromStringCallback(): void
@@ -115,7 +116,7 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         $this->assertInstanceOf(FloatType::class, $this->helper->getTargetTypeForFunction('is_float'));
         $this->assertInstanceOf(BooleanType::class, $this->helper->getTargetTypeForFunction('is_bool'));
         $this->assertInstanceOf(ArrayType::class, $this->helper->getTargetTypeForFunction('is_array'));
-        $this->assertInstanceOf(ObjectType::class, $this->helper->getTargetTypeForFunction('is_object'));
+        $this->assertInstanceOf(ObjectWithoutClassType::class, $this->helper->getTargetTypeForFunction('is_object'));
 
         $this->assertNull($this->helper->getTargetTypeForFunction('custom_function'));
     }

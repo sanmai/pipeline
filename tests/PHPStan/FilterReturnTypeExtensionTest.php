@@ -219,6 +219,45 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $this->assertSame($invalidReturnType, $result);
     }
 
+    public function testTryCallbackFilteringWithNullCallback(): void
+    {
+        // Test the tryCallbackFiltering method with null callback
+        $helper = $this->createMock(FilterTypeNarrowingHelper::class);
+        $argumentParser = $this->createMock(ArgumentParser::class);
+        $callbackResolver = $this->createMock(CallbackResolver::class);
+        $strictModeDetector = $this->createMock(StrictModeDetector::class);
+        $typeNarrower = $this->createMock(TypeNarrower::class);
+
+        $extension = new FilterReturnTypeExtension($helper, $argumentParser, $strictModeDetector, $callbackResolver, $typeNarrower);
+
+        $methodReflection = $this->createMethodReflection('filter');
+        $methodCall = $this->createMock(\PhpParser\Node\Expr\MethodCall::class);
+        $methodCall->args = [];
+        $scope = $this->createMock(\PHPStan\Analyser\Scope::class);
+
+        $parametersAcceptor = $this->createMock(\PHPStan\Reflection\ParametersAcceptor::class);
+        $returnType = $this->createMock(\PHPStan\Type\Type::class);
+        $keyType = new \PHPStan\Type\IntegerType();
+        $valueType = new \PHPStan\Type\StringType();
+
+        $parametersAcceptor->method('getReturnType')->willReturn($returnType);
+        $methodReflection->method('getVariants')->willReturn([$parametersAcceptor]);
+
+        $argumentParser->method('extractArgs')->willReturn([]);
+        $argumentParser->method('getStrictArg')->willReturn(null);
+        $argumentParser->method('getCallbackArg')->willReturn(null);
+
+        $helper->method('extractKeyAndValueTypes')->willReturn([$keyType, $valueType]);
+
+        $strictModeDetector->method('isStrictMode')->willReturn(false);
+        $typeNarrower->method('narrowForDefaultFilter')->willReturn(null);
+
+        $result = $extension->getTypeFromMethodCall($methodReflection, $methodCall, $scope);
+
+        $this->assertSame($returnType, $result);
+    }
+
+
     public function testGetTypeFromMethodCallWithNoNarrowing(): void
     {
         // Test line 116: when no narrowing occurs in default filter

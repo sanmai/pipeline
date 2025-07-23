@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Pipeline\PHPStan;
 
+use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
@@ -87,32 +88,64 @@ class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
         $callbackArg = $this->argumentParser->getCallbackArg($args);
 
         // Step 5: Handle callback filtering (takes precedence over strict mode)
-        if (null !== $callbackArg) {
-            $targetType = $this->callbackResolver->resolveCallbackType($callbackArg);
-            if (null !== $targetType) {
-                $narrowedType = $this->typeNarrower->narrowForCallback($keyType, $valueType, $targetType);
-                if (null !== $narrowedType) {
-                    return $narrowedType;
-                }
-            }
+        $callbackResult = $this->tryCallbackFiltering($callbackArg, $keyType, $valueType);
+        if (null !== $callbackResult) {
+            return $callbackResult;
         }
 
         // Step 6: Check for strict mode (only if no callback)
-        if ($this->strictModeDetector->isStrictMode($strictArg, $scope)) {
-            $narrowedType = $this->typeNarrower->narrowForStrictMode($keyType, $valueType);
-            if (null !== $narrowedType) {
-                return $narrowedType;
-            }
+        $strictModeResult = $this->tryStrictModeFiltering($strictArg, $scope, $keyType, $valueType);
+        if (null !== $strictModeResult) {
+            return $strictModeResult;
         }
 
         // Step 7: Default filter (no callback, no strict) - removes all falsy values
-        if (null === $callbackArg) {
-            $narrowedType = $this->typeNarrower->narrowForDefaultFilter($keyType, $valueType);
-            if (null !== $narrowedType) {
-                return $narrowedType;
-            }
+        $defaultFilterResult = $this->tryDefaultFiltering($callbackArg, $keyType, $valueType);
+        if (null !== $defaultFilterResult) {
+            return $defaultFilterResult;
         }
 
         return $returnType;
+    }
+
+    /**
+     * Try callback filtering and return the result if successful.
+     */
+    private function tryCallbackFiltering(?Arg $callbackArg, Type $keyType, Type $valueType): ?Type
+    {
+        if (null === $callbackArg) {
+            return null;
+        }
+
+        $targetType = $this->callbackResolver->resolveCallbackType($callbackArg);
+        if (null === $targetType) {
+            return null;
+        }
+
+        return $this->typeNarrower->narrowForCallback($keyType, $valueType, $targetType);
+    }
+
+    /**
+     * Try strict mode filtering and return the result if successful.
+     */
+    private function tryStrictModeFiltering(?Arg $strictArg, Scope $scope, Type $keyType, Type $valueType): ?Type
+    {
+        if (!$this->strictModeDetector->isStrictMode($strictArg, $scope)) {
+            return null;
+        }
+
+        return $this->typeNarrower->narrowForStrictMode($keyType, $valueType);
+    }
+
+    /**
+     * Try default filtering and return the result if successful.
+     */
+    private function tryDefaultFiltering(?Arg $callbackArg, Type $keyType, Type $valueType): ?Type
+    {
+        if (null !== $callbackArg) {
+            return null;
+        }
+
+        return $this->typeNarrower->narrowForDefaultFilter($keyType, $valueType);
     }
 }

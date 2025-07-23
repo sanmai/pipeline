@@ -67,9 +67,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
         $filtered = $pipeline->filter('is_object');
 
         // PHPStan should understand $filtered contains only objects
-        // Note: Our extension currently doesn't properly narrow this case
-        // This indicates a bug in our FilterReturnTypeExtension for is_object
-        assertType('Pipeline\\Standard<int, DateTime|stdClass|string>', $filtered);
+        assertType('Pipeline\\Standard<int, DateTime|stdClass>', $filtered);
 
         $result = $filtered->toList();
         $this->assertCount(3, $result);

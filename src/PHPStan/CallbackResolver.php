@@ -50,17 +50,21 @@ class CallbackResolver
         // Handle string callbacks (e.g., 'is_string')
         if ($callbackExpr instanceof String_) {
             $functionName = $this->helper->extractFunctionNameFromStringCallback($callbackExpr);
-            if (null !== $functionName) {
-                return $this->helper->getTargetTypeForFunction($functionName);
+            if (null === $functionName) {
+                return null;
             }
+
+            return $this->helper->getTargetTypeForFunction($functionName);
         }
 
         // Handle first-class callable syntax (e.g., is_string(...))
         if ($callbackExpr instanceof FuncCall) {
             $functionName = $this->helper->extractFunctionNameFromFirstClassCallable($callbackExpr);
-            if (null !== $functionName) {
-                return $this->helper->getTargetTypeForFunction($functionName);
+            if (null === $functionName) {
+                return null;
             }
+
+            return $this->helper->getTargetTypeForFunction($functionName);
         }
 
         return null;

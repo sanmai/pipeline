@@ -30,6 +30,7 @@ use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\ObjectWithoutClassType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeCombinator;
@@ -62,7 +63,7 @@ class FilterTypeNarrowingHelper
             'is_float' => new FloatType(),
             'is_bool' => new BooleanType(),
             'is_array' => new ArrayType(new MixedType(), new MixedType()),
-            'is_object' => new ObjectType('object'),
+            'is_object' => new ObjectWithoutClassType(),
         ];
     }
 
@@ -265,11 +266,16 @@ class FilterTypeNarrowingHelper
             // Skip empty array
             if ($type->isArray()->yes() && $type->isConstantArray()->yes()) {
                 $arraySize = $type->getArraySize();
-                if ($arraySize->isConstantScalarValue()->yes()) {
-                    $values = $arraySize->getConstantScalarValues();
-                    if (in_array(0, $values, true)) {
-                        continue;
-                    }
+                if (!$arraySize->isConstantScalarValue()->yes()) {
+                    // Non-constant array size, keep it (can't determine if empty)
+                    $filteredTypes[] = $type;
+                    continue;
+                }
+
+                $values = $arraySize->getConstantScalarValues();
+                if (in_array(0, $values, true)) {
+                    // Empty array, skip it
+                    continue;
                 }
             }
 

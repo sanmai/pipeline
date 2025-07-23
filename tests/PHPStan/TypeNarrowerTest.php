@@ -263,5 +263,17 @@ class TypeNarrowerTest extends TestCase
         $result = $realNarrower->narrowForDefaultFilter($keyType, $emptyArrayType);
         $this->assertInstanceOf(GenericObjectType::class, $result);
         $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+
+        // Test with null type (should be removed) - tests isFalsyType for null
+        $nullType = new \PHPStan\Type\NullType();
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $nullType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
+
+        // Test with false type (should be removed) - tests isFalsyType for false
+        $falseType = new \PHPStan\Type\Constant\ConstantBooleanType(false);
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $falseType);
+        $this->assertInstanceOf(GenericObjectType::class, $result);
+        $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
     }
 }

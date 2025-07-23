@@ -66,15 +66,16 @@ class TypeNarrower
      */
     public function narrowForCallback(Type $keyType, Type $valueType, Type $targetType): ?Type
     {
-        if ($valueType instanceof UnionType) {
-            $filteredTypes = $this->helper->filterUnionTypeByTarget($valueType, $targetType);
-
-            if ([] !== $filteredTypes) {
-                return $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
-            }
+        if (!($valueType instanceof UnionType)) {
+            return null;
         }
 
-        return null;
+        $filteredTypes = $this->helper->filterUnionTypeByTarget($valueType, $targetType);
+        if ([] === $filteredTypes) {
+            return null;
+        }
+
+        return $this->helper->createGenericTypeWithFilteredValues($keyType, $filteredTypes);
     }
 
     /**
@@ -122,14 +123,16 @@ class TypeNarrower
         }
 
         // Check for empty array
-        if ($type->isArray()->yes()) {
-            $arraySize = $type->getArraySize();
-            if ($arraySize->isConstantScalarValue()->yes()) {
-                $values = $arraySize->getConstantScalarValues();
-                return in_array(0, $values, true);
-            }
+        if (!$type->isArray()->yes()) {
+            return false;
         }
 
-        return false;
+        $arraySize = $type->getArraySize();
+        if (!$arraySize->isConstantScalarValue()->yes()) {
+            return false;
+        }
+
+        $values = $arraySize->getConstantScalarValues();
+        return in_array(0, $values, true);
     }
 }
