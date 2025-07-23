@@ -81,6 +81,7 @@ class FilterTypeNarrowingAdvancedTest extends TestCase
     {
         // Create a resource (file handle)
         $resource = fopen('php://memory', 'r');
+        $this->assertIsResource($resource, 'Failed to create memory resource');
 
         /** @var Standard<int, mixed> $pipeline */
         $pipeline = take(['string', 42, $resource, 3.14, true]);
