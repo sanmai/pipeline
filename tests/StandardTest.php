@@ -371,19 +371,6 @@ final class StandardTest extends TestCase
         ], $pipeline->toAssoc());
     }
 
-    public function testToArrayWithArrayPreservingKeys(): void
-    {
-        $pipeline = fromArray([
-            'a' => 1,
-            'b' => 2,
-        ]);
-
-        $this->assertSame([
-            'a' => 1,
-            'b' => 2,
-        ], $pipeline->toArrayPreservingKeys());
-    }
-
     public function testToArrayDefault(): void
     {
         $pipeline = fromArray([
@@ -394,7 +381,7 @@ final class StandardTest extends TestCase
         $this->assertSame([
             1,
             2,
-        ], $pipeline->toArray());
+        ], $pipeline->toArray(preserve_keys: false));
     }
 
     public function testToArrayWithKeys(): void

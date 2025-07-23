@@ -634,22 +634,13 @@ class Standard implements IteratorAggregate, Countable
     /**
      * @deprecated Use toList() or toAssoc() instead.
      */
-    public function toArray(bool $preserve_keys = false): array
+    public function toArray(bool $preserve_keys): array
     {
         if ($preserve_keys) {
             return $this->toAssoc();
         }
 
         return $this->toList();
-    }
-
-    /**
-     * Returns all values preserving keys. This is a terminal operation.
-     * @deprecated Use toAssoc() instead.
-     */
-    public function toArrayPreservingKeys(): array
-    {
-        return $this->toAssoc();
     }
 
     /**
