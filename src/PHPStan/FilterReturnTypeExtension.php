@@ -142,10 +142,6 @@ class FilterReturnTypeExtension implements DynamicMethodReturnTypeExtension
      */
     private function tryDefaultFiltering(?Arg $callbackArg, Type $keyType, Type $valueType): ?Type
     {
-        if (null !== $callbackArg) {
-            return null;
-        }
-
         return $this->typeNarrower->narrowForDefaultFilter($keyType, $valueType);
     }
 }

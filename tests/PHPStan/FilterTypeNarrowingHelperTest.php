@@ -265,6 +265,34 @@ final class FilterTypeNarrowingHelperTest extends TestCase
         return $mock;
     }
 
+    public function testRemoveFalsyValuesWithNonConstantArraySize(): void
+    {
+        // Coverage for FilterTypeNarrowingHelper.php:271-272 - non-constant array size handling
+        $stringType = new StringType();
+
+        // Create a mock array type that is an array but has non-constant size
+        $arrayType = $this->createMock(Type::class);
+        $arrayType->method('isNull')->willReturn(TrinaryLogic::createNo());
+        $arrayType->method('isFalse')->willReturn(TrinaryLogic::createNo());
+        $arrayType->method('isConstantScalarValue')->willReturn(TrinaryLogic::createNo());
+        $arrayType->method('isArray')->willReturn(TrinaryLogic::createYes());
+        $arrayType->method('isConstantArray')->willReturn(TrinaryLogic::createYes());
+
+        // Mock array size that is NOT constant scalar value
+        $arraySize = $this->createMock(Type::class);
+        $arraySize->method('isConstantScalarValue')->willReturn(TrinaryLogic::createNo());
+
+        $arrayType->method('getArraySize')->willReturn($arraySize);
+
+        $unionType = new UnionType([$arrayType, $stringType]);
+        $result = $this->helper->removeFalsyValuesFromUnion($unionType);
+
+        // Should keep both types (non-constant array size can't be determined if empty)
+        $this->assertCount(2, $result);
+        $this->assertContains($arrayType, $result);
+        $this->assertContains($stringType, $result);
+    }
+
     private function createMockFalseType(): Type
     {
         $mock = $this->createMock(Type::class);

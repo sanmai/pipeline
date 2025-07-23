@@ -276,4 +276,44 @@ class TypeNarrowerTest extends TestCase
         $this->assertInstanceOf(GenericObjectType::class, $result);
         $this->assertInstanceOf(NeverType::class, $result->getTypes()[1]);
     }
+
+    public function testNarrowForCallbackWithNonUnionType(): void
+    {
+        // Coverage for TypeNarrower.php:70 - when valueType is not UnionType
+        $keyType = new IntegerType();
+        $valueType = new StringType(); // This is NOT a UnionType
+        $targetType = new StringType();
+
+        $result = $this->narrower->narrowForCallback($keyType, $valueType, $targetType);
+
+        // Should return null when valueType is not a UnionType
+        $this->assertNull($result);
+    }
+
+    public function testNarrowForDefaultFilterWithNonConstantArraySize(): void
+    {
+        // Coverage for TypeNarrower.php:132 - when array size is not constant scalar value
+        $realHelper = new FilterTypeNarrowingHelper();
+        $realNarrower = new TypeNarrower($realHelper);
+
+        $keyType = new IntegerType();
+
+        // Create a mock array type that has non-constant size
+        $arrayType = $this->createMock(\PHPStan\Type\Type::class);
+        $arrayType->method('isNull')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $arrayType->method('isFalse')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $arrayType->method('isConstantScalarValue')->willReturn(\PHPStan\TrinaryLogic::createNo());
+        $arrayType->method('isArray')->willReturn(\PHPStan\TrinaryLogic::createYes());
+
+        // Mock array size that is NOT constant scalar value
+        $arraySize = $this->createMock(\PHPStan\Type\Type::class);
+        $arraySize->method('isConstantScalarValue')->willReturn(\PHPStan\TrinaryLogic::createNo());
+
+        $arrayType->method('getArraySize')->willReturn($arraySize);
+
+        $result = $realNarrower->narrowForDefaultFilter($keyType, $arrayType);
+
+        // Should return null because array with non-constant size is not considered falsy
+        $this->assertNull($result);
+    }
 }

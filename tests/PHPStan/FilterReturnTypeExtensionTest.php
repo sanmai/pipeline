@@ -436,6 +436,7 @@ final class FilterReturnTypeExtensionTest extends TestCase
         $this->assertSame($narrowedType, $result);
     }
 
+
     /**
      * @return MethodReflection&\PHPUnit\Framework\MockObject\MockObject
      */
