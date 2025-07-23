@@ -76,9 +76,26 @@ final class FilterTest extends TestCase
             yield null;
         });
 
-        $pipeline->filter();
+        $pipeline->filter(strict: false);
 
         $this->assertCount(0, $pipeline->toList());
+    }
+
+    public function testFilterAnyFalseValueDefaultCallbackStrict(): void
+    {
+        $pipeline = map(function () {
+            yield false;
+            yield 0;
+            yield 0.0;
+            yield '';
+            yield '0';
+            yield [];
+            yield null;
+        });
+
+        $pipeline->filter();
+
+        $this->assertCount(5, $pipeline->toList());
     }
 
     public function testFilterAnyFalseValueCustomCallback(): void
@@ -94,7 +111,7 @@ final class FilterTest extends TestCase
             yield 1;
         });
 
-        $pipeline->filter('intval');
+        $pipeline->filter('intval', strict: false);
 
         $this->assertSame([1], $pipeline->toList());
     }
