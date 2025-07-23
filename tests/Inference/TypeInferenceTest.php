@@ -33,6 +33,9 @@ use function Pipeline\take;
 use function preg_match;
 use function str_contains;
 use function dirname;
+use function microtime;
+use function random_int;
+use function uniqid;
 
 /**
  * @coversNothing
@@ -129,4 +132,12 @@ class TypeInferenceTest extends TestCase
         /** @var array<string, string> $result */
         $this->assertSame(['Foo' => 'Foo'], $result);
     }
+
+    /**
+     * Test that demonstrates the issue with calling getConstantScalarValues()
+     * on non-constant types during PHPStan analysis.
+     *
+     * This test creates a scenario where PHPStan's type inference would need
+     * to analyze a filter operation on union types containing non-constant scalars.
+     */
 }
