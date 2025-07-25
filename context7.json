@@ -1,0 +1,31 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Pipeline",
+  "description": "PHP library for functional programming with lazy evaluation, providing streaming pipelines similar to the pipe operator",
+  "folders": [
+    "docs",
+    "src"
+  ],
+  "excludeFolders": [
+    "tests",
+    "coverage",
+    "iter",
+    "vendor",
+    ".github"
+  ],
+  "excludeFiles": [
+    "*.xml",
+    "*.lock",
+    "Makefile",
+    "Dockerfile"
+  ],
+  "rules": [
+    "Use lazy evaluation with generators for memory efficiency",
+    "Prefer explicit operations over implicit magic",
+    "Chain methods fluently as the Pipeline returns the same instance",
+    "Use stream() to ensure lazy evaluation paths",
+    "Avoid iterator_to_array() - use toList() or toAssoc() instead",
+    "No exceptions are thrown by the library itself",
+    "Remember that pipelines cannot be rewound after consumption"
+  ]
+}
