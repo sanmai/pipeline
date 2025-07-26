@@ -4,7 +4,7 @@
   "description": "PHP library for functional programming with lazy evaluation, providing streaming pipelines similar to the pipe operator",
   "folders": [],
   "excludeFolders": [
-    "src",
+    "src"
   ],
   "excludeFiles": [],
   "rules": [
