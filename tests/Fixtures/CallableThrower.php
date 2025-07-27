@@ -30,7 +30,6 @@ class CallableThrower
         $this->args[] = $args;
         $this->callCount++;
 
-        // @phpstan-ignore-next-line
         if (1 === $this->callCount) {
             throw new ArgumentCountError();
         }
