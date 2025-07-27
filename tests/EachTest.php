@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArgumentCountError;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
@@ -181,7 +182,16 @@ final class EachTest extends TestCase
     {
         $this->expectOutputString("123");
 
-        $pipeline = take(new \ArrayIterator(['1', '2', '3']));
+        $pipeline = take(new ArrayIterator(['1', '2', '3']));
         $pipeline->each(printf(...));
+    }
+
+    public function testArgumentCountError(): void
+    {
+        $pipeline = fromArray(['1', '2', '3']);
+
+        $this->expectException(ArgumentCountError::class);
+        $this->expectExceptionMessage('Too few arguments');
+        $pipeline->each(static function ($a, $b, $c): void {});
     }
 }

@@ -1395,6 +1395,9 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    /**
+     * @param callable(TValue, TKey=): void $func
+     */
     private function eachInternal(callable $func): void
     {
         if ($this->empty()) {
@@ -1405,11 +1408,18 @@ class Standard implements IteratorAggregate, Countable
             try {
                 $func($value, $key);
             } catch (ArgumentCountError) {
-                // If there were too many arguments passed, we wrap it to prevent the errors later
-                // But if there are too little arguments passed, it will blow up just a line later
-                $func = fn($a) => $func($a);
-                $func($value);
+                // Optimization to reduce the number of argument count errors when calling internal callables.
+                // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
+                // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
+                // are too little arguments passed, it will blow up just a line later.
+                $func = self::wrapInternalCallable($func);
+                $func($value, $key);
             }
         }
+    }
+
+    private static function wrapInternalCallable(callable $func): callable
+    {
+        return static fn($value) => $func($value);
     }
 }
