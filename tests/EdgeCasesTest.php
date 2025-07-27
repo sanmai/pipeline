@@ -28,8 +28,6 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 use function iterator_to_array;
-use function Pipeline\fromArray;
-use function Pipeline\fromValues;
 use function Pipeline\map;
 use function range;
 

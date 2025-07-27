@@ -62,6 +62,7 @@ $config
         'strict_comparison' => true,
         'yoda_style' => true,
         'array_indentation' => true,
+        'no_unused_imports' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
