@@ -41,7 +41,6 @@ use function array_slice;
 use function array_values;
 use function count;
 use function is_array;
-use function is_string;
 use function iterator_count;
 use function iterator_to_array;
 use function max;

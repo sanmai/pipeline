@@ -26,8 +26,6 @@ use Pipeline\Standard;
 use IteratorIterator;
 
 use function Pipeline\fromArray;
-use function round;
-use function sqrt;
 use function Pipeline\take;
 use function Pipeline\map;
 
