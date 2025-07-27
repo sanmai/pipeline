@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use ArgumentCountError;
 use ArrayIterator;
 use CallbackFilterIterator;
 use Countable;
@@ -1380,23 +1381,45 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
-     * @param callable $func A callback such as fn($value, $key); return value is ignored.
+     * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
      * @param bool $discard Whether to discard the pipeline's iterator.
      */
     public function each(callable $func, bool $discard = true): void
     {
-        if ($this->empty()) {
-            return;
-        }
-
         try {
-            foreach ($this->pipeline as $key => $value) {
-                $func($value, $key);
-            }
+            $this->eachInternal($func);
         } finally {
             if ($discard) {
                 $this->discard();
             }
         }
+    }
+
+    /**
+     * @param callable(TValue, TKey=): void $func
+     */
+    private function eachInternal(callable $func): void
+    {
+        if ($this->empty()) {
+            return;
+        }
+
+        foreach ($this->pipeline as $key => $value) {
+            try {
+                $func($value, $key);
+            } catch (ArgumentCountError) {
+                // Optimization to reduce the number of argument count errors when calling internal callables.
+                // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
+                // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
+                // are too little arguments passed, it will blow up just a line later.
+                $func = self::wrapInternalCallable($func);
+                $func($value, $key);
+            }
+        }
+    }
+
+    private static function wrapInternalCallable(callable $func): callable
+    {
+        return static fn($value) => $func($value);
     }
 }

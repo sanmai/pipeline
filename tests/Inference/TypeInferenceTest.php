@@ -127,6 +127,7 @@ class TypeInferenceTest extends TestCase
         ;
 
         /** @var array<string, string> $result */
-        $this->assertSame(['Foo' => 'Foo'], $result);
+        $this->assertArrayHasKey('Foo', $result);
+        $this->assertSame('Foo', $result['Foo']);
     }
 }

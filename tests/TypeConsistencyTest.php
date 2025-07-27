@@ -36,7 +36,7 @@ use function str_contains;
  *
  * @internal
  */
-class TypeAnnotationConsistencyTest extends TestCase
+class TypeConsistencyTest extends TestCase
 {
     /**
      * @dataProvider providePublicMethods

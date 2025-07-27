@@ -20,10 +20,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArgumentCountError;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ArrayIterator;
+use SplQueue;
+use Tests\Pipeline\Fixtures\CallableThrower;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -157,5 +160,59 @@ final class EachTest extends TestCase
         $pipeline->each(intval(...));
 
         $this->addToAssertionCount(1);
+    }
+
+    public function testStrictArity(): void
+    {
+        $queue = new SplQueue();
+        $pipeline = fromArray([1, 2, 3]);
+        $pipeline->each($queue->enqueue(...));
+
+        $this->assertSame([1, 2, 3], take($queue)->toList());
+    }
+
+    public function testVariadicInternal(): void
+    {
+        $this->expectOutputString("123");
+
+        $pipeline = fromArray(['1', '2', '3']);
+        $pipeline->each(printf(...));
+    }
+
+    public function testVariadicInternalOnIterator(): void
+    {
+        $this->expectOutputString("123");
+
+        $pipeline = take(new ArrayIterator(['1', '2', '3']));
+        $pipeline->each(printf(...));
+    }
+
+    public function testArgumentCountError(): void
+    {
+        $pipeline = fromArray(['1', '2', '3']);
+
+        $this->expectException(ArgumentCountError::class);
+        $this->expectExceptionMessage('Too few arguments');
+        $pipeline->each(static function ($a, $b, $c): void {});
+    }
+
+    /**
+     * Test that the reassignment of the callable inside the loop will affect all iterations.
+     */
+    public function testCallableReassigned(): void
+    {
+        $callback = new CallableThrower();
+
+        $pipeline = fromArray(['1', '2', '3']);
+        $pipeline->each($callback);
+
+        $this->assertSame(4, $callback->callCount, 'Expected 1 initial call that throws + 3 successful calls after wrapping');
+
+        $this->assertSame([
+            ['1', 0],
+            ['1'],
+            ['2'],
+            ['3'],
+        ], $callback->args);
     }
 }
