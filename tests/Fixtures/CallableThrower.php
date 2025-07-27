@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
  *
@@ -24,11 +25,12 @@ class CallableThrower
     public array $args = [];
     public int $callCount = 0;
 
-    public function __invoke(...$args)
+    public function __invoke(...$args): void
     {
         $this->args[] = $args;
         $this->callCount++;
 
+        // @phpstan-ignore-next-line
         if (1 === $this->callCount) {
             throw new ArgumentCountError();
         }
