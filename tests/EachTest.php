@@ -173,7 +173,15 @@ final class EachTest extends TestCase
     {
         $this->expectOutputString("123");
 
-        $pipeline = fromArray([1, 2, 3]);
+        $pipeline = fromArray(['1', '2', '3']);
+        $pipeline->each(printf(...));
+    }
+
+    public function testVariadicInternalOnIterator(): void
+    {
+        $this->expectOutputString("123");
+
+        $pipeline = take(new \ArrayIterator(['1', '2', '3']));
         $pipeline->each(printf(...));
     }
 }
