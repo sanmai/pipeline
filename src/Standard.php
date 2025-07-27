@@ -22,11 +22,13 @@ namespace Pipeline;
 
 use ArrayIterator;
 use CallbackFilterIterator;
+use Closure;
 use Countable;
 use EmptyIterator;
 use Generator;
 use Iterator;
 use IteratorAggregate;
+use ReflectionFunction;
 use Traversable;
 use Override;
 
@@ -1390,6 +1392,8 @@ class Standard implements IteratorAggregate, Countable
             return;
         }
 
+        $func = self::wrapInternalCallable($func);
+
         try {
             foreach ($this->pipeline as $key => $value) {
                 $func($value, $key);
@@ -1399,5 +1403,28 @@ class Standard implements IteratorAggregate, Countable
                 $this->discard();
             }
         }
+    }
+
+    /**
+     * Wraps internal functions with strict arity with a callable to prevent ArgumentCountError.
+     */
+    private static function wrapInternalCallable(callable $func): callable
+    {
+        $ref = new ReflectionFunction($func(...));
+
+        if ($ref->isUserDefined()) {
+            return $func;
+        }
+
+        if ($ref->isVariadic()) {
+            return $func;
+        }
+
+        if (1 !== $ref->getNumberOfParameters()) {
+            return $func;
+        }
+
+        // User-defined functions silently ignore extra args
+        return fn($a) => $func($a);
     }
 }
