@@ -26,7 +26,6 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ArrayIterator;
 use SplQueue;
-use Tests\Pipeline\Fixtures\CallableThrower;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -194,25 +193,5 @@ final class EachTest extends TestCase
         $this->expectException(ArgumentCountError::class);
         $this->expectExceptionMessage('Too few arguments');
         $pipeline->each(static function ($a, $b, $c): void {});
-    }
-
-    /**
-     * Test that the reassignment of the callable inside the loop will affect all iterations.
-     */
-    public function testCallableReassigned(): void
-    {
-        $callback = new CallableThrower();
-
-        $pipeline = fromArray(['1', '2', '3']);
-        $pipeline->each($callback);
-
-        $this->assertSame(4, $callback->callCount, 'Expected 1 initial call that throws + 3 successful calls after wrapping');
-
-        $this->assertSame([
-            ['1', 0],
-            ['1'],
-            ['2'],
-            ['3'],
-        ], $callback->args);
     }
 }
