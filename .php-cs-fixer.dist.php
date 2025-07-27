@@ -37,6 +37,7 @@ $header = <<<'EOF'
 $config = new PhpCsFixer\Config();
 $config
     ->setRiskyAllowed(true)
+    ->setUnsupportedPhpVersionAllowed(true)
     ->setRules([
         'header_comment' => ['comment_type' => 'PHPDoc', 'header' => $header, 'separate' => 'bottom', 'location' => 'after_open'],
         '@PER-CS' => true,
