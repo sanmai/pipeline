@@ -196,6 +196,9 @@ final class EachTest extends TestCase
         $pipeline->each(static function ($a, $b, $c): void {});
     }
 
+    /**
+     * Test that the reassignment of the callable inside the loop will affect all iterations.
+     */
     public function testCallableReassigned(): void
     {
         $callback = new CallableThrower();
@@ -203,7 +206,7 @@ final class EachTest extends TestCase
         $pipeline = fromArray(['1', '2', '3']);
         $pipeline->each($callback);
 
-        $this->assertSame(4, $callback->callCount);
+        $this->assertSame(4, $callback->callCount, 'Expected 1 initial call that throws + 3 successful calls after wrapping');
 
         $this->assertSame([
             ['1', 0],
