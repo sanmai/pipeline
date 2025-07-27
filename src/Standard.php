@@ -28,6 +28,7 @@ use EmptyIterator;
 use Generator;
 use Iterator;
 use IteratorAggregate;
+use ReflectionFunction;
 use Traversable;
 use Override;
 
@@ -49,6 +50,7 @@ use function min;
 use function mt_getrandmax;
 use function mt_rand;
 use function array_keys;
+use function array_walk;
 
 /**
  * Concrete pipeline with sensible default callbacks.
@@ -1395,31 +1397,45 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    /**
-     * @param callable(TValue, TKey=): void $func
-     */
     private function eachInternal(callable $func): void
     {
         if ($this->empty()) {
             return;
         }
 
+        $func = self::wrapInternalCallable($func);
+
+        if (is_array($this->pipeline)) {
+            // 5% faster
+            array_walk($this->pipeline, $func);
+            return;
+        }
+
         foreach ($this->pipeline as $key => $value) {
-            try {
-                $func($value, $key);
-            } catch (ArgumentCountError) {
-                // Optimization to reduce the number of argument count errors when calling internal callables.
-                // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
-                // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
-                // are too little arguments passed, it will blow up just a line later.
-                $func = self::wrapInternalCallable($func);
-                $func($value, $key);
-            }
+            $func($value, $key);
         }
     }
 
+    /**
+     * Wraps internal functions with strict arity with a callable to prevent ArgumentCountError.
+     */
     private static function wrapInternalCallable(callable $func): callable
     {
-        return static fn($value) => $func($value);
+        $ref = new ReflectionFunction($func(...));
+
+        if ($ref->isUserDefined()) {
+            return $func;
+        }
+
+        if ($ref->isVariadic()) {
+            return $func;
+        }
+
+        if (1 !== $ref->getNumberOfParameters()) {
+            return $func;
+        }
+
+        // User-defined functions silently ignore extra args
+        return fn($a) => $func($a);
     }
 }
