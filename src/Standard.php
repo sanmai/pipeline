@@ -1383,7 +1383,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
-     * @param callable $func A callback such as fn($value, $key); return value is ignored.
+     * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
      * @param bool $discard Whether to discard the pipeline's iterator.
      */
     public function each(callable $func, bool $discard = true): void

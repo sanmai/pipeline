@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArgumentCountError;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
