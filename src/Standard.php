@@ -20,9 +20,9 @@ declare(strict_types=1);
 
 namespace Pipeline;
 
+use ArgumentCountError;
 use ArrayIterator;
 use CallbackFilterIterator;
-use Closure;
 use Countable;
 use EmptyIterator;
 use Generator;
@@ -43,7 +43,6 @@ use function array_slice;
 use function array_values;
 use function count;
 use function is_array;
-use function is_string;
 use function iterator_count;
 use function iterator_to_array;
 use function max;
@@ -51,6 +50,7 @@ use function min;
 use function mt_getrandmax;
 use function mt_rand;
 use function array_keys;
+use function array_walk;
 
 /**
  * Concrete pipeline with sensible default callbacks.
@@ -1388,20 +1388,31 @@ class Standard implements IteratorAggregate, Countable
      */
     public function each(callable $func, bool $discard = true): void
     {
+        try {
+            $this->eachInternal($func);
+        } finally {
+            if ($discard) {
+                $this->discard();
+            }
+        }
+    }
+
+    private function eachInternal(callable $func): void
+    {
         if ($this->empty()) {
             return;
         }
 
         $func = self::wrapInternalCallable($func);
 
-        try {
-            foreach ($this->pipeline as $key => $value) {
-                $func($value, $key);
-            }
-        } finally {
-            if ($discard) {
-                $this->discard();
-            }
+        if (is_array($this->pipeline)) {
+            // 5% faster
+            array_walk($this->pipeline, $func);
+            return;
+        }
+
+        foreach ($this->pipeline as $key => $value) {
+            $func($value, $key);
         }
     }
 

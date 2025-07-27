@@ -24,6 +24,7 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ArrayIterator;
+use SplQueue;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -157,5 +158,22 @@ final class EachTest extends TestCase
         $pipeline->each(intval(...));
 
         $this->addToAssertionCount(1);
+    }
+
+    public function testStrictArity(): void
+    {
+        $queue = new SplQueue();
+        $pipeline = fromArray([1, 2, 3]);
+        $pipeline->each($queue->enqueue(...));
+
+        $this->assertSame([1, 2, 3], take($queue)->toList());
+    }
+
+    public function testVariadicInternal(): void
+    {
+        $this->expectOutputString("123");
+
+        $pipeline = fromArray([1, 2, 3]);
+        $pipeline->each(printf(...));
     }
 }
