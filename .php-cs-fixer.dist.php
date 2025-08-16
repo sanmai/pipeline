@@ -64,6 +64,7 @@ $config
         'yoda_style' => true,
         'array_indentation' => true,
         'no_unused_imports' => true,
+        'operator_linebreak' => ['only_booleans' => true],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
