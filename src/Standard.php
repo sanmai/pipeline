@@ -1405,7 +1405,7 @@ class Standard implements IteratorAggregate, Countable
             } catch (ArgumentCountError) {
                 // Optimization to reduce the number of argument count errors when calling internal callables.
                 $func = self::wrapInternalCallable($func);
-                $func($value, $key);
+                $func($value);
             }
 
             yield $key => $value;
@@ -1447,7 +1447,7 @@ class Standard implements IteratorAggregate, Countable
                 // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
                 // are too little arguments passed, it will blow up just a line later.
                 $func = self::wrapInternalCallable($func);
-                $func($value, $key);
+                $func($value);
             }
         }
     }
