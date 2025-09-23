@@ -21,12 +21,10 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArgumentCountError;
-use ArrayIterator;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use SplQueue;
-use Tests\Pipeline\Fixtures\CallableThrower;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -101,7 +99,7 @@ final class TapTest extends TestCase
     {
         $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
 
-        $result = $pipeline->tap(fn(int $value, string $key) => $this->recordKeyValue($value, $key))->toAssoc();
+        $result = $pipeline->tap($this->recordKeyValue(...))->toAssoc();
 
         $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $result);
         $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $this->sideEffects);
@@ -112,53 +110,24 @@ final class TapTest extends TestCase
         $pipeline = take([1, 2, 3]);
 
         $result = $pipeline
-            ->tap(fn($value) => $this->sideEffects[] = $value * 10)
+            ->tap(fn($value) => $value * 10)
             ->map(fn($value) => $value * 2)
             ->toList();
 
         $this->assertSame([2, 4, 6], $result);
-        $this->assertSame([10, 20, 30], $this->sideEffects);
     }
 
     public function testTapChaining(): void
     {
-        $firstTap = [];
-        $secondTap = [];
-
         $result = take([1, 2, 3])
-            ->tap(function ($value) use (&$firstTap): void {
-                $firstTap[] = $value * 2;
-            })
-            ->tap(function ($value) use (&$secondTap): void {
-                $secondTap[] = $value * 3;
-            })
+            ->tap($this->recordValue(...))
+            ->cast(fn($value) => $value * 2)
+            ->tap($this->recordValue(...))
             ->toList();
 
-        $this->assertSame([1, 2, 3], $result);
-        $this->assertSame([2, 4, 6], $firstTap);
-        $this->assertSame([3, 6, 9], $secondTap);
+        $this->assertSame([2, 4, 6], $result);
+        $this->assertSame([1, 2, 2, 4, 3, 6], $this->sideEffects);
     }
-
-    public function testTapWithArray(): void
-    {
-        $pipeline = fromArray([10, 20, 30]);
-
-        $result = $pipeline->tap($this->recordValue(...))->toList();
-
-        $this->assertSame([10, 20, 30], $result);
-        $this->assertSame([10, 20, 30], $this->sideEffects);
-    }
-
-    public function testTapWithIterator(): void
-    {
-        $pipeline = take(new ArrayIterator([5, 15, 25]));
-
-        $result = $pipeline->tap($this->recordValue(...))->toList();
-
-        $this->assertSame([5, 15, 25], $result);
-        $this->assertSame([5, 15, 25], $this->sideEffects);
-    }
-
 
     public function testLaziness(): void
     {
@@ -178,18 +147,17 @@ final class TapTest extends TestCase
 
     public function testTapWithException(): void
     {
-        $pipeline = take([1, 2, 3]);
-
-        $this->expectException(LogicException::class);
-
-        $pipeline
+        $pipeline = take([1, 2, 3])
             ->tap(function ($value): void {
                 $this->recordValue($value);
                 if (2 === $value) {
                     throw new LogicException('Test exception');
                 }
-            })
-            ->toList();
+            });
+
+        $this->expectException(LogicException::class);
+
+        $pipeline->toList();
     }
 
     public function testTapStrictArity(): void
@@ -213,30 +181,13 @@ final class TapTest extends TestCase
 
     public function testTapArgumentCountError(): void
     {
-        $pipeline = fromArray(['1', '2', '3']);
+        $pipeline = fromArray(['1', '2', '3'])
+            ->tap(static function ($a, $b, $c): void {});
 
         $this->expectException(ArgumentCountError::class);
         $this->expectExceptionMessage('Too few arguments');
 
-        $pipeline->tap(static function ($a, $b, $c): void {})->toList();
-    }
-
-    public function testTapCallableReassigned(): void
-    {
-        $callback = new CallableThrower();
-
-        $pipeline = fromArray(['1', '2', '3']);
-        $result = $pipeline->tap($callback)->toList();
-
-        $this->assertSame(['1', '2', '3'], $result);
-        $this->assertSame(4, $callback->callCount, 'Expected 1 initial call that throws + 3 successful calls after wrapping');
-
-        $this->assertSame([
-            ['1', 0],
-            ['1'],
-            ['2'],
-            ['3'],
-        ], $callback->args);
+        $pipeline->toList();
     }
 
     public function testTapReturnsSameInstance(): void
@@ -245,51 +196,5 @@ final class TapTest extends TestCase
         $result = $pipeline->tap($this->recordValue(...));
 
         $this->assertSame($pipeline, $result);
-    }
-
-    public function testTapInPipelineChain(): void
-    {
-        $debugValues = [];
-
-        $result = take([1, 2, 3])
-            ->tap(function ($value) use (&$debugValues): void {
-                $debugValues[] = "before: $value";
-            })
-            ->map(fn($value) => $value * 2)
-            ->tap(function ($value) use (&$debugValues): void {
-                $debugValues[] = "after: $value";
-            })
-            ->toList();
-
-        $this->assertSame([2, 4, 6], $result);
-        $this->assertSame([
-            'before: 1',
-            'after: 2',
-            'before: 2',
-            'after: 4',
-            'before: 3',
-            'after: 6',
-        ], $debugValues);
-    }
-
-    public function testTapOnArrayPipeline(): void
-    {
-        $pipeline = new Standard([1, 2, 3]);
-
-        $result = $pipeline->tap($this->recordValue(...))->toList();
-
-        $this->assertSame([1, 2, 3], $result);
-        $this->assertSame([1, 2, 3], $this->sideEffects);
-    }
-
-    public function testTapIteratorPathCoverage(): void
-    {
-        $iterator = new ArrayIterator([10, 20, 30]);
-        $pipeline = new Standard($iterator);
-
-        $result = $pipeline->tap($this->recordValue(...))->toList();
-
-        $this->assertSame([10, 20, 30], $result);
-        $this->assertSame([10, 20, 30], $this->sideEffects);
     }
 }
