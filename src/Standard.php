@@ -1453,13 +1453,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Wraps internal callables to prevent argument count errors.
-     *
-     * This wrapper reduces the number of argument count errors when calling internal callables.
-     * The original error is thrown when too many arguments are passed to a built-in function
-     * that is sensitive to extra arguments, so this wrapper prevents such errors by limiting
-     * the callable to accept only one argument. If too few arguments are passed, the wrapped
-     * function will still throw an error.
+     * Wraps internal callables to handle argument count mismatches by limiting to single argument.
      */
     private static function wrapInternalCallable(callable $func): callable
     {
