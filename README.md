@@ -419,6 +419,18 @@ $result = $pipeline->toList();
 
 If in the example about one would use `iterator_to_array($result)` they would get just `[3, 4]`.
 
+## `$pipeline->tap()`
+
+Performs side effects on each element without changing the values in the pipeline. Useful for debugging, logging, or other side effects.
+
+```php
+$pipeline->tap(function ($value, $key) {
+    $this->log("Processing $key: $value");
+})->map(fn($x) => $x * 2);
+```
+
+The `tap()` method executes the callback for each element as it flows through the pipeline, but the original values continue unchanged to the next stage.
+
 ## `$pipeline->each()`
 
 Eagerly iterates over the sequence using the provided callback.
