@@ -138,6 +138,7 @@ All entry points always return an instance of the pipeline.
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
@@ -418,6 +419,18 @@ $result = $pipeline->toList();
 ```
 
 If in the example about one would use `iterator_to_array($result)` they would get just `[3, 4]`.
+
+## `$pipeline->tap()`
+
+Performs side effects on each element without changing the values in the pipeline. Useful for debugging, logging, or other side effects.
+
+```php
+$pipeline->tap(function ($value, $key) {
+    $this->log("Processing $key: $value");
+})->map(fn($x) => $x * 2);
+```
+
+The `tap()` method executes the callback for each element as it flows through the pipeline, but the original values continue unchanged to the next stage.
 
 ## `$pipeline->each()`
 

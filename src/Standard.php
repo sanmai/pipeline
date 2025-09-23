@@ -1379,6 +1379,40 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Performs side effects on each element without changing the values in the pipeline.
+     *
+     * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
+     *
+     * @phpstan-self-out self<TKey, TValue>
+     * @return Standard<TKey, TValue>
+     */
+    public function tap(callable $func): self
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $this->pipeline = self::tapValues($this->pipeline, $func);
+
+        return $this;
+    }
+
+    private static function tapValues(iterable $previous, callable $func): Generator
+    {
+        foreach ($previous as $key => $value) {
+            try {
+                $func($value, $key);
+            } catch (ArgumentCountError) {
+                // Optimization to reduce the number of argument count errors when calling internal callables.
+                $func = self::wrapInternalCallable($func);
+                $func($value);
+            }
+
+            yield $key => $value;
+        }
+    }
+
+    /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
      * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
@@ -1413,11 +1447,14 @@ class Standard implements IteratorAggregate, Countable
                 // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
                 // are too little arguments passed, it will blow up just a line later.
                 $func = self::wrapInternalCallable($func);
-                $func($value, $key);
+                $func($value);
             }
         }
     }
 
+    /**
+     * Wraps internal callables to handle argument count mismatches by limiting to single argument.
+     */
     private static function wrapInternalCallable(callable $func): callable
     {
         return static fn($value) => $func($value);
