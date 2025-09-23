@@ -33,7 +33,7 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::tap
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
