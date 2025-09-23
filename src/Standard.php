@@ -1379,6 +1379,40 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Performs side effects on each element without changing the values in the pipeline.
+     *
+     * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
+     *
+     * @phpstan-self-out self<TKey, TValue>
+     * @return Standard<TKey, TValue>
+     */
+    public function tap(callable $func): self
+    {
+        if ($this->empty()) {
+            return $this;
+        }
+
+        $this->pipeline = self::tapValues($this->pipeline, $func);
+
+        return $this;
+    }
+
+    private static function tapValues(iterable $previous, callable $func): Generator
+    {
+        foreach ($previous as $key => $value) {
+            try {
+                $func($value, $key);
+            } catch (ArgumentCountError) {
+                // Optimization to reduce the number of argument count errors when calling internal callables.
+                $func = self::wrapInternalCallable($func);
+                $func($value, $key);
+            }
+
+            yield $key => $value;
+        }
+    }
+
+    /**
      * Eagerly iterates over the sequence using the provided callback. Discards the sequence after iteration.
      *
      * @param callable(TValue, TKey=): void $func A callback such as fn($value, $key); return value is ignored.
@@ -1418,6 +1452,15 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    /**
+     * Wraps internal callables to prevent argument count errors.
+     *
+     * This wrapper reduces the number of argument count errors when calling internal callables.
+     * The original error is thrown when too many arguments are passed to a built-in function
+     * that is sensitive to extra arguments, so this wrapper prevents such errors by limiting
+     * the callable to accept only one argument. If too few arguments are passed, the wrapped
+     * function will still throw an error.
+     */
     private static function wrapInternalCallable(callable $func): callable
     {
         return static fn($value) => $func($value);
