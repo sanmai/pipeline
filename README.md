@@ -128,9 +128,9 @@ All entry points always return an instance of the pipeline.
 | ----------- | ----------------------------- | ----------------- |
 | `map()`     | Takes an optional callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments. Provided no callback does nothing. Also available as a plain function. |  `SelectMany`                  |
 | `cast()`    | Takes a callback that for each input value expected to return another single value. Unlike `map()`, it assumes no special treatment for generators. Provided no callback does nothing. | `array_map`, `Select`                  |
-| `append()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
+| `append()` | Appends the contents of an iterable to the end of the pipeline. | `array_merge` |
 | `push()` | Appends the arguments to the end of the pipeline. | `array_push` |
-| `prepend()` | Appends the contents of an interable to the end of the pipeline. | `array_merge` |
+| `prepend()` | Appends the contents of an iterable to the end of the pipeline. | `array_merge` |
 | `unshift()` | Prepends the pipeline with a list of values. | `array_unshift` |
 | `zip()`  | Takes a number of iterables, transposing them together with the current sequence, if any.  | `array_map(null, ...$array)`, Python's `zip()`, transposition |
 | `reservoir()` | Reservoir sampling with an optional weighting function. |  |
@@ -140,7 +140,7 @@ All entry points always return an instance of the pipeline.
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
-| `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Suppors negative values for both arguments. |  `array_slice`                |
+| `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Supports negative values for both arguments. |  `array_slice`                |
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
 | `values()`  | Keep values only. | `array_values` |
@@ -232,7 +232,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	// Exception: Cannot traverse an already closed generator
 	```
  
-  Although there are some cases where a pipeline can be rewinded and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.   
+  Although there are some cases where a pipeline can be rewound and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.
  
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
