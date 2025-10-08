@@ -324,7 +324,7 @@ class Standard implements IteratorAggregate, Countable
      * Chunks the pipeline into arrays with variable sizes. Chunking stops when chunk sizes are exhausted.
      *
      * @param (iterable<int<0, max>>)|(callable(): iterable<int<0, max>>) $func An iterable or callable that yields chunk sizes. Size 0 produces empty arrays. If callable, it will be invoked to get an iterable.
-     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
+     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex each chunk numerically.
      *
      * @phpstan-self-out self<array-key, array<TKey, TValue>>
      * @return Standard<array-key, array<TKey, TValue>>
