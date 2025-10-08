@@ -31,10 +31,40 @@ use function Pipeline\take;
  */
 final class ChunkByTest extends TestCase
 {
-    public function testChunkCallback(): void
+    public function testChunkIterable(): void
     {
         $pipeline = take(self::xrange(1, 10));
         $pipeline->chunkBy([2, 5, 5]);
+
+        $this->assertSame([
+            [1, 2],
+            [3, 4, 5, 6, 7],
+            [8, 9, 10],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkIterablePartial(): void
+    {
+        $pipeline = take(self::xrange(1, 10));
+        $pipeline->chunkBy([2, 5]);
+
+        $this->assertSame([
+            [1, 2],
+            [3, 4, 5, 6, 7],
+            [8, 9],
+            [10],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkGenerator(): void
+    {
+        $pipeline = take(self::xrange(1, 10));
+        $pipeline->chunkBy(static function () {
+            yield 2;
+            while (true) {
+                yield 5;
+            }
+        });
 
         $this->assertSame([
             [1, 2],
