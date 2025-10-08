@@ -88,6 +88,29 @@ final class ChunkTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys ?? false));
     }
 
+    /**
+     * @dataProvider provideIterables
+     */
+    public function testChunkBy(?bool $preserve_keys, int $length, iterable $input, array $expected): void
+    {
+        $pipeline = take($input);
+
+        if (null === $preserve_keys) {
+            $pipeline->chunkBy(self::infiniteGenerator($length));
+        } else { // @phpstan-ignore-line
+            $pipeline->chunkBy(self::infiniteGenerator($length), $preserve_keys);
+        }
+
+        $this->assertSame($expected, $pipeline->toArray($preserve_keys ?? false));
+    }
+
+    private static function infiniteGenerator(int $number): iterable
+    {
+        do {
+            yield $number;
+        } while (true);
+    }
+
     public function testChunkNoop(): void
     {
         $pipeline = new Standard();
