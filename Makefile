@@ -78,6 +78,7 @@ ci-cs: prerequisites
 
 .PHONY: test
 test: phpunit analyze infection composer-validate yamllint
+	$(SILENT) $(PHP) $(PHPUNIT) --group=documentation
 
 .PHONY: composer-validate
 composer-validate: test-prerequisites

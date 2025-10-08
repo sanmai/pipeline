@@ -323,7 +323,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Chunks the pipeline into arrays with variable sizes. Chunking stops when chunk sizes are exhausted.
      *
-     * @param (iterable<int<1, max>>)|(callable(): iterable<int<1, max>>) $func An iterable or callable that yields chunk sizes. If callable, it will be invoked to get an iterable.
+     * @param (iterable<int<0, max>>)|(callable(): iterable<int<0, max>>) $func An iterable or callable that yields chunk sizes. Size 0 produces empty arrays. If callable, it will be invoked to get an iterable.
      * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex the chunk numerically.
      *
      * @phpstan-self-out self<array-key, array<TKey, TValue>>
@@ -337,7 +337,7 @@ class Standard implements IteratorAggregate, Countable
         }
 
         // Convert callable to iterable
-        /** @var iterable<int<1, max>> $sizes */
+        /** @var iterable<int<0, max>> $sizes */
         $sizes = is_callable($func) ? $func() : $func;
 
         $this->pipeline = self::toChunksBySize(
@@ -350,13 +350,18 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @param iterable<int<1, max>> $sizes
+     * @param iterable<int<0, max>> $sizes
      */
     private static function toChunksBySize(Generator $input, iterable $sizes, bool $preserve_keys): Generator
     {
         foreach ($sizes as $size) {
             if (!$input->valid()) {
                 return;
+            }
+
+            if ($size < 1) {
+                yield [];
+                continue;
             }
 
             yield iterator_to_array(self::take($input, $size), $preserve_keys);

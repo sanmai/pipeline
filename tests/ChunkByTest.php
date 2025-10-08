@@ -109,6 +109,76 @@ final class ChunkByTest extends TestCase
         $this->assertSame([], $pipeline->toList());
     }
 
+    public function testChunkWithZeroSize(): void
+    {
+        $pipeline = take(self::xrange(1, 5));
+        $pipeline->chunkBy([2, 0, 2]);
+
+        $this->assertSame([
+            [1, 2],
+            [],
+            [3, 4],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkWithNegativeSize(): void
+    {
+        $pipeline = take(self::xrange(1, 5));
+        $pipeline->chunkBy([2, -1, 2]);
+
+        $this->assertSame([
+            [1, 2],
+            [],
+            [3, 4],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkZeroNotEmittedWhenExhausted(): void
+    {
+        $pipeline = take(self::xrange(1, 3));
+        $pipeline->chunkBy([3, 0]);
+
+        $this->assertSame([
+            [1, 2, 3],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkZeroAtStart(): void
+    {
+        $pipeline = take(self::xrange(1, 3));
+        $pipeline->chunkBy([0, 3]);
+
+        $this->assertSame([
+            [],
+            [1, 2, 3],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkMultipleZeros(): void
+    {
+        $pipeline = take(self::xrange(1, 3));
+        $pipeline->chunkBy([0, 0, 2, 0]);
+
+        $this->assertSame([
+            [],
+            [],
+            [1, 2],
+            [],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkSizeOne(): void
+    {
+        $pipeline = take(self::xrange(1, 3));
+        $pipeline->chunkBy([1, 1, 1]);
+
+        $this->assertSame([
+            [1],
+            [2],
+            [3],
+        ], $pipeline->toList());
+    }
+
     private static function xrange(int $start, int $limit, int $step = 1)
     {
         for ($i = $start; $i <= $limit; $i += $step) {
