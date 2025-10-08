@@ -51,8 +51,6 @@ final class ChunkByTest extends TestCase
         $this->assertSame([
             [1, 2],
             [3, 4, 5, 6, 7],
-            [8, 9],
-            [10],
         ], $pipeline->toList());
     }
 
@@ -71,6 +69,44 @@ final class ChunkByTest extends TestCase
             [3, 4, 5, 6, 7],
             [8, 9, 10],
         ], $pipeline->toList());
+    }
+
+    public function testChunkWithPreserveKeys(): void
+    {
+        $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5]);
+        $pipeline->chunkBy([2, 3], true);
+
+        $this->assertSame([
+            ['a' => 1, 'b' => 2],
+            ['c' => 3, 'd' => 4, 'e' => 5],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkDataExhaustedMidChunk(): void
+    {
+        $pipeline = take(self::xrange(1, 5));
+        $pipeline->chunkBy([2, 10]);
+
+        $this->assertSame([
+            [1, 2],
+            [3, 4, 5],
+        ], $pipeline->toList());
+    }
+
+    public function testChunkEmptyPipeline(): void
+    {
+        $pipeline = take([]);
+        $pipeline->chunkBy([2, 5]);
+
+        $this->assertSame([], $pipeline->toList());
+    }
+
+    public function testChunkEmptySizes(): void
+    {
+        $pipeline = take(self::xrange(1, 10));
+        $pipeline->chunkBy([]);
+
+        $this->assertSame([], $pipeline->toList());
     }
 
     private static function xrange(int $start, int $limit, int $step = 1)
