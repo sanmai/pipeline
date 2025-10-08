@@ -79,7 +79,31 @@ final class ChunkByTest extends TestCase
         $this->assertSame([
             ['a' => 1, 'b' => 2],
             ['c' => 3, 'd' => 4, 'e' => 5],
-        ], $pipeline->toList());
+        ], $pipeline->toAssoc());
+    }
+
+    public function testChunkWithoutPreserveKeys(): void
+    {
+        $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5]);
+        $pipeline->chunkBy([2, 3], false);
+
+        $this->assertSame([
+            [1, 2],
+            [3, 4, 5],
+        ], $pipeline->toAssoc());
+    }
+
+    public function testChunkPreserveKeysWithZero(): void
+    {
+        $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
+        $pipeline->chunkBy([0, 2, 0, 2], true);
+
+        $this->assertSame([
+            [],
+            ['a' => 1, 'b' => 2],
+            [],
+            ['c' => 3],
+        ], $pipeline->toAssoc());
     }
 
     public function testChunkDataExhaustedMidChunk(): void
