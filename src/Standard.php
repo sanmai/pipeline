@@ -319,6 +319,11 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    public function chunkBy(iterable|callable $func, bool $preserve_keys = false): self
+    {
+        // TODO
+    }
+
     /**
      * Takes a callback that for each input value may return one or yield many. Also takes an initial generator, where it must not require any arguments.
      *
