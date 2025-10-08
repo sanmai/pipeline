@@ -137,6 +137,7 @@ All entry points always return an instance of the pipeline.
 | `flatten()` |  Flattens inputs: `[[1, 2], [3, 4]]` becomes `[1, 2, 3, 4]`. |  `flat_map`, `flatten`, `collect_concat`      |
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
+| `chunkBy()` | Chunks the pipeline into arrays with variable sizes. Size 0 produces empty arrays. | |
 | `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 

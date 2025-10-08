@@ -49,6 +49,7 @@ use function min;
 use function mt_getrandmax;
 use function mt_rand;
 use function array_keys;
+use function is_callable;
 
 /**
  * Concrete pipeline with sensible default callbacks.
@@ -315,6 +316,55 @@ class Standard implements IteratorAggregate, Countable
     {
         while ($input->valid()) {
             yield iterator_to_array(self::take($input, $length), $preserve_keys);
+            $input->next();
+        }
+    }
+
+    /**
+     * Chunks the pipeline into arrays with variable sizes. Chunking stops when chunk sizes are exhausted.
+     *
+     * @param (iterable<int<0, max>>)|(callable(): iterable<int<0, max>>) $func An iterable or callable that yields chunk sizes. Size 0 produces empty arrays. If callable, it will be invoked to get an iterable.
+     * @param bool $preserve_keys When set to true keys will be preserved. Default is false which will reindex each chunk numerically.
+     *
+     * @phpstan-self-out self<array-key, array<TKey, TValue>>
+     * @return Standard<array-key, array<TKey, TValue>>
+     */
+    public function chunkBy(iterable|callable $func, bool $preserve_keys = false): self
+    {
+        // No-op: an empty array or null.
+        if ($this->empty()) {
+            return $this;
+        }
+
+        // Convert callable to iterable
+        /** @var iterable<int<0, max>> $sizes */
+        $sizes = is_callable($func) ? $func() : $func;
+
+        $this->pipeline = self::toChunksBySize(
+            self::makeNonRewindable($this->pipeline),
+            $sizes,
+            $preserve_keys
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param iterable<int<0, max>> $sizes
+     */
+    private static function toChunksBySize(Generator $input, iterable $sizes, bool $preserve_keys): Generator
+    {
+        foreach ($sizes as $size) {
+            if (!$input->valid()) {
+                return;
+            }
+
+            if ($size < 1) {
+                yield [];
+                continue;
+            }
+
+            yield iterator_to_array(self::take($input, $size), $preserve_keys);
             $input->next();
         }
     }
