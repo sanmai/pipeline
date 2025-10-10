@@ -136,6 +136,7 @@ All entry points always return an instance of the pipeline.
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Supports negative values for both arguments. |  `array_slice`                |
+| `peek()`  | Returns the first N items. Optionally consumes items when `consume: true`. | `array_splice` |
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
 | `reduce()`  | Alias to `fold()` with a reversed order of arguments. | `array_reduce` |
 | `values()`  | Keep values only. | `array_values` |

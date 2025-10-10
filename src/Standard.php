@@ -828,6 +828,58 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
+    /**
+     * Returns the first N items from the pipeline. By default, items remain in the pipeline (non-destructive peek).
+     *
+     * @param int<0, max> $count Number of items to peek at.
+     * @param bool $consume If true, removes peeked items from the pipeline. Default is false.
+     * @param bool $preserve_keys Sets the keys to be preserved.
+     *
+     * @return array<TKey, TValue> Iterable of peeked items with keys preserved.
+     */
+    public function peek(int $count, bool $consume = false, bool $preserve_keys = false): array
+    {
+        // No-op: an empty array or null.
+        if ($this->empty() || $count <= 0) {
+            return [];
+        }
+
+        // Array shortcut
+        if (is_array($this->pipeline)) {
+            $peeked = array_slice($this->pipeline, 0, $count, preserve_keys: $preserve_keys);
+            if ($consume) {
+                // Replace the array with the copy of itself with N items removed (always preserve keys)
+                $this->pipeline = array_slice($this->pipeline, $count, preserve_keys: true);
+            }
+
+            return $peeked;
+        }
+
+        // Convert to non-rewindable iterator
+        $generator = self::makeNonRewindable($this->pipeline);
+
+        // Extract first N items (this advances the iterator as a side effect)
+        $peeked = iterator_to_array(self::take($generator, $count), $preserve_keys);
+
+        // Advance the pointer to counter the quirks of self::take
+        $generator->next();
+
+        // And make sure we can continue iterating over the generator - while preserving the peeked items when requested
+        $this->pipeline = self::resumeGenerator($generator, $consume ? [] : $peeked);
+
+        return $peeked;
+    }
+
+    private static function resumeGenerator(Generator $input, array $peeked = []): Generator
+    {
+        yield from $peeked;
+
+        while ($input->valid()) {
+            yield $input->key() => $input->current();
+            $input->next();
+        }
+    }
+
     private static function sliceToIterator(Iterator $stream, int $offset, ?int $length): Iterator
     {
         if ($offset < 0) {
@@ -876,6 +928,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Note: it does not call next() upon stopping - caller's responsibility to do that if they want to reuse the iterator.
      * @psalm-param positive-int $take
      */
     private static function take(Iterator $input, int $take): Iterator
