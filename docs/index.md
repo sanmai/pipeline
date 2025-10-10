@@ -1,4 +1,14 @@
-# Pipeline: A PHP Functional Programming Library
+# Pipeline Documentation
+
+`sanmai/pipeline` provides a fluent, memory-efficient way to process iterable data in PHP. It uses lazy evaluation with generators, allowing you to build complex data processing pipelines that are easy to read and write.
+
+Inspired by the pipe operator (`|`) in shells, it lets you chain operations like `map`, `filter`, `reduce`, `zip`, and more. Because it processes items one by one and only when needed, it's highly effective for large or even infinite collections without exhausting memory.
+
+The library is rigorously tested and robust, throwing no exceptions.
+
+## Get Started
+
+Ready to dive in? Check out the [Quick Start](quickstart/installation.md) guide to get up and running in minutes.
 
 **About This Documentation**: This guide, primarily authored by an LLM with human oversight, is tailored to help both developers and LLMs grasp the library's design, best practices, and idiomatic usage. If you find any inconsistencies, please [open an issue](https://github.com/sanmai/pipeline/issues/new).
 

@@ -18,17 +18,11 @@ This document outlines the version history and key changes for the Pipeline libr
 
 ### Deprecations
 
--   `toArray()`: Use `toList()` or `toAssoc()` instead.
 -   `toArrayPreservingKeys()`: Use `toAssoc()` instead.
 
 ## Migration Guide
 
 ### Migrating from v5.x to v6.x
-
-**Array Conversion**
-
--   Replace `->toArray()` with `->toList()`.
--   Replace `->toArray(true)` with `->toAssoc()`.
 
 **Filtering**
 

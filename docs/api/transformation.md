@@ -1,24 +1,14 @@
 # Transformation Methods
 
-Transformation methods are used to modify the elements within a pipeline.
+Transformation methods modify the elements within a pipeline.
 
 ## `map()`
 
-Transforms each element using a callback function. This is the most flexible transformation method, as the callback can return a single value or a `Generator` to yield multiple values.
+Transforms each element with a callback. The callback can return a single value or a `Generator` to produce multiple values.
 
 **Signature**: `map(?callable $func = null): self`
 
--   `$func`: The transformation function.
-
-**Callback Signature**: `function(mixed $value): mixed|Generator`
-
-**Behavior**:
-
--   If the callback returns a `Generator`, `map()` will expand it, yielding each of its values into the main pipeline.
-
-> **Performance Note**
->
-> When starting with an array, `map()` processes lazily but other methods in your chain might not. For large datasets, consider using `->stream()` first to ensure all operations process one element at a time, avoiding high memory usage.
+-   If the callback returns a `Generator`, `map()` expands it, yielding each of its values into the main pipeline.
 
 **Examples**:
 
@@ -39,20 +29,11 @@ $result = take(['a', 'b'])
 
 ## `cast()`
 
-Transforms each element using a callback, but with a key difference from `map()`: it does not expand generators. This makes it ideal for simple, 1-to-1 transformations, especially on arrays, where it is highly optimized.
+Performs a simple 1-to-1 transformation on each element. Unlike `map()`, it does not expand generators.
 
 **Signature**: `cast(?callable $func = null): self`
 
--   `$func`: The transformation function.
-
-**Behavior**:
-
--   If the callback returns a `Generator`, `cast()` will treat it as a single value, not expand it.
--   It is faster than `map()` for simple transformations on arrays because it uses `array_map()` internally.
-
-> **Performance Note**
->
-> When working with arrays, `cast()` uses PHP's `array_map()` internally, creating a new array in memory. For large datasets, use `->stream()` first to process elements one at a time.
+-   `cast()` is faster than `map()` for simple transformations on arrays because it uses `array_map()` internally. For large datasets, consider using `->stream()` first to ensure lazy processing.
 
 **Examples**:
 
@@ -62,12 +43,10 @@ $result = take(['1', '2', '3'])
     ->cast(intval(...))
     ->toList(); // [1, 2, 3]
 
-// Creating a pipeline of generators
+// cast() treats a returned Generator as a single value
 $result = take(['a', 'b'])
     ->cast(function ($char) {
-        return (function () use ($char) {
-            yield $char;
-        })();
+        return (function () use ($char) { yield $char; })();
     })
     ->toList(); // [Generator, Generator]
 ```
@@ -78,7 +57,7 @@ Flattens a nested pipeline by one level.
 
 **Signature**: `flatten(): self`
 
-**Examples**:
+**Example**:
 
 ```php
 $result = take([[1, 2], [3, 4]])
@@ -88,17 +67,11 @@ $result = take([[1, 2], [3, 4]])
 
 ## `unpack()`
 
-Unpacks array elements as arguments to a callback function.
+Unpacks array elements from the pipeline as arguments to a callback. If no callback is provided, it behaves like `flatten()`.
 
 **Signature**: `unpack(?callable $func = null): self`
 
--   `$func`: The callback to receive the unpacked arguments.
-
-**Behavior**:
-
--   If no callback is provided, it behaves like `flatten()`.
-
-**Examples**:
+**Example**:
 
 ```php
 $result = take([[1, 2], [3, 4]])
@@ -108,19 +81,30 @@ $result = take([[1, 2], [3, 4]])
 
 ## `chunk()`
 
-Splits the pipeline into chunks of a specified size.
+Splits the pipeline into chunks of a fixed size.
 
 **Signature**: `chunk(int $length, bool $preserve_keys = false): self`
 
--   `$length`: The size of each chunk.
--   `$preserve_keys`: Whether to preserve the original keys.
-
-**Examples**:
+**Example**:
 
 ```php
 $result = take([1, 2, 3, 4, 5])
     ->chunk(2)
     ->toList(); // [[1, 2], [3, 4], [5]]
+```
+
+## `chunkBy()`
+
+Splits the pipeline into chunks of variable sizes.
+
+**Signature**: `chunkBy(iterable|callable $func, bool $preserve_keys = false): self`
+
+**Example**:
+
+```php
+$result = take([1, 2, 3, 4, 5, 6, 7])
+    ->chunkBy([2, 3, 1])
+    ->toList(); // [[1, 2], [3, 4, 5], [6]]
 ```
 
 ## `slice()`
@@ -129,10 +113,7 @@ Extracts a portion of the pipeline.
 
 **Signature**: `slice(int $offset, ?int $length = null): self`
 
--   `$offset`: The starting position.
--   `$length`: The number of elements to extract.
-
-**Examples**:
+**Example**:
 
 ```php
 $result = take([1, 2, 3, 4, 5])

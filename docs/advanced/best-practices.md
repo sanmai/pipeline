@@ -1,48 +1,38 @@
 # Best Practices
 
-To make the most of the Pipeline library, follow these best practices for writing clean, efficient, and maintainable code.
+Follow these best practices for writing clean, efficient, and maintainable pipelines.
 
-## Core Principles
+## 1. Think in Streams
 
-### 1. Think in Streams
-
-The library is designed for streaming data. Always prefer iterators and generators over arrays for large datasets to minimize memory usage.
+Prefer iterators and generators over arrays for large datasets to minimize memory usage.
 
 ```php
 // Good: Streaming from a file
 $result = take(new SplFileObject('data.csv'))
     ->map('str_getcsv')
     ->toList();
-
-// Good: Forcing a stream from a large array
-$result = take($largeArray)
-    ->stream()
-    ->filter(fn($user) => $user['active'])
-    ->toList();
 ```
 
 #### Array Processing Warning
 
-When working with arrays, be aware that certain methods (`filter()`, `cast()`, `slice()`, `chunk()`) use PHP's native array functions for performance. This means they create intermediate arrays:
+When starting a pipeline with a large array, some methods (`filter()`, `cast()`, `slice()`) use PHP's native array functions for performance, which create intermediate arrays in memory. To avoid this, use `stream()` to force lazy, one-by-one processing.
 
 ```php
-// This creates intermediate arrays in memory:
-$result = take($millionRecords)
-    ->filter(fn($r) => $r['active'])     // New array with ~500k elements
-    ->map(fn($r) => transform($r))       // Another array with ~500k elements
-    ->toList();
+// Bad: Creates intermediate arrays, high memory usage
+$result = take($largeArray)
+    ->filter(...)
+    ->map(...);
 
-// Better: Use stream() for large arrays
-$result = take($millionRecords)
-    ->stream()                           // Process one element at a time
-    ->filter(fn($r) => $r['active'])
-    ->map(fn($r) => transform($r))
-    ->toList();
+// Good: Processes one element at a time
+$result = take($largeArray)
+    ->stream()
+    ->filter(...)
+    ->map(...);
 ```
 
-### 2. Chain Operations
+## 2. Keep a Single, Fluent Chain
 
-Keep your operations in a single, fluent chain for readability and efficiency.
+Avoid breaking a pipeline into multiple chains. This creates unnecessary intermediate variables and is less efficient.
 
 ```php
 // Good: A single, readable chain
@@ -51,38 +41,38 @@ $result = take($data)
     ->map($transformer)
     ->toList();
 
-// Bad: Breaking the chain creates unnecessary intermediate variables
+// Bad: Creates an intermediate array
 $filtered = take($data)->filter($predicate)->toList();
 $result = take($filtered)->map($transformer)->toList();
 ```
 
-### 3. Prefer `fold()` for Aggregations
+## 3. Prefer `fold()` for Aggregations
 
-For clarity and type safety, use `fold()` instead of `reduce()` for all aggregation tasks. It requires an explicit initial value, which makes your code more predictable.
+For clarity and type safety, use `fold()` instead of `reduce()`. It requires an explicit initial value, which makes your code more predictable and prevents errors with empty pipelines.
 
 ```php
 // Good: Explicit initial value
 $sum = take($numbers)->fold(0, fn($a, $b) => $a + $b);
 
-// Bad: Implicit initial value
+// Avoid: Implicit initial value can be ambiguous
 $sum = take($numbers)->reduce();
 ```
 
-### 4. Use Strict Filtering
+## 4. Use Strict Filtering for Data Cleaning
 
-When cleaning data, use `filter(strict: true)` to only remove `null` and `false` values. This prevents accidental removal of falsy values like `0` or empty strings.
+Use `filter(strict: true)` to remove only `null` and `false`. This prevents accidentally removing falsy values like `0` or `''`.
 
 ```php
 // Good: Predictable cleaning
 $cleaned = take($data)->filter(strict: true);
 
-// Bad: Aggressive cleaning may remove valid data
+// Avoid: May remove valid data
 $cleaned = take($data)->filter();
 ```
 
-## Error Handling
+## 5. Handle Errors Gracefully
 
-Write defensive code to handle potential errors gracefully.
+Write defensive code inside your pipeline steps to handle potential errors.
 
 ```php
 // Handle missing keys with the null coalescing operator
@@ -95,25 +85,8 @@ $result = take($users)
     ->toList();
 ```
 
-## Code Organization
-
-For complex pipelines, consider creating reusable functions or classes to encapsulate logic.
-
-```php
-// Reusable pipeline function
-function getActiveUsers(iterable $users): Standard
-{
-    return take($users)
-        ->filter(fn($user) => $user['active']);
-}
-
-$activeAdmins = getActiveUsers($allUsers)
-    ->filter(fn($user) => $user['isAdmin'])
-    ->toList();
-```
-
 ## Antipatterns to Avoid
 
--   **Reusing a consumed pipeline**: Generators can only be iterated over once. Create a new pipeline for each use.
--   **Modifying the source data during iteration**: This can lead to unexpected behavior. Create new data structures instead.
--   **Overusing pipelines for simple tasks**: For simple operations like `array_sum`, native PHP functions are often more efficient.
+-   **Reusing a consumed pipeline**: Generators can only be iterated over once. Create a new pipeline if you need to process the same data again.
+-   **Modifying source data during iteration**: This can lead to unpredictable behavior.
+-   **Overusing pipelines**: For simple tasks like `array_sum`, native PHP functions are often clearer and more efficient.

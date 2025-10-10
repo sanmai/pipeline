@@ -1,16 +1,14 @@
 # Type Safety with Generics
 
-Pipeline uses PHP's generic types (`@template` in PHPDocs) to provide robust type safety. This enhances static analysis (PHPStan, Psalm), leading to more reliable code.
+Pipeline uses PHP's generic types (`@template` in PHPDocs) to provide robust type safety for static analysis tools like PHPStan and Psalm.
 
 ## How It Works
 
-The `Pipeline\Standard` class uses generic types to inform static analysis tools about the types of keys (`TKey`) and values (`TValue`) in your pipeline.
-
-## Using Type-Safe Pipelines
+The `Pipeline\Standard` class uses generics to track the types of keys (`TKey`) and values (`TValue`) in your pipeline, allowing static analysis to catch potential bugs before runtime.
 
 ### Type Inference
 
-Pipeline often infers types automatically when creating pipelines using functions like `fromValues()` or `fromArray()`.
+Pipeline automatically infers types when creating pipelines.
 
 ```php
 use function Pipeline\fromArray;
@@ -20,57 +18,39 @@ $strings = fromValues('hello', 'world'); // Inferred: Standard<int, string>
 $numbers = fromArray(['a' => 1, 'b' => 2]); // Inferred: Standard<string, int>
 ```
 
-Explicit PHPDoc type annotations can be added if needed:
-
-```php
-/** @var Standard<int, string> $strings */
-$strings = fromValues('hello', 'world');
-```
-
 ### Type Transformations
 
-*   **`filter()`**: This method preserves the existing types of elements, only reducing their count.
-    ```php
-    $pipeline = fromValues('hello', 'world')->filter(fn($s) => strlen($s) > 4);
-    // Result: list<string>
-    ```
-*   **`map()` / `cast()`**: These methods are used to transform values, potentially changing their types. Static analysis tools accurately track these type changes.
-    ```php
-    $pipeline = fromArray(['a' => 1])->map(fn($n) => "Number: $n");
-    // Result: array<string, string>
-    ```
-*   **`reduce()` / `fold()`**: Aggregation methods like `reduce()` and `fold()` also benefit from type checking, ensuring type safety for accumulators and elements.
+Static analysis tools accurately track type changes through the pipeline.
 
-### Extracting Data
+-   **`filter()`**: Preserves the existing types, only reducing the number of elements.
+-   **`map()` / `cast()`**: Can transform values, changing their types.
+-   **`reduce()` / `fold()`**: Ensure type safety for accumulators and elements.
 
-Terminal operations such as `toList()` and `toAssoc()` extract processed data into standard PHP arrays, with types correctly inferred by static analysis.
+```php
+$pipeline = fromArray(['a' => 1])->map(fn($n) => "Number: $n");
+// Inferred type of values is now string
+```
+
+### Terminal Operations
+
+Terminal operations like `toList()` and `toAssoc()` produce standard PHP arrays with correctly inferred types.
 
 ```php
 use function Pipeline\take;
 
 $data = take($someIterable);
-$list = $data->toList();   // Numerically indexed
-$assoc = $data->toAssoc(); // Associative
+$list = $data->toList();   // Produces a list<TValue>
+$assoc = $data->toAssoc(); // Produces an array<TKey, TValue>
 ```
 
 ## Important Considerations
 
-*   **Mutability**: Pipeline instances are mutable; methods like `map()` modify the *same* instance.
-*   **One-Time Use**: As with PHP generators, pipelines are generally one-time use; after a terminal operation (e.g., `toList()`), the pipeline is exhausted.
-*   **Complex Transformations**: Operations such as `chunk()`, `flip()`, `values()`, and `keys()` inherently alter the key/value relationships within the pipeline. Due to these complex transformations, explicit type hints may occasionally be necessary to assist static analysis tools.
+-   **Mutability**: Pipeline instances are mutable; methods like `map()` modify the *same* instance.
+-   **One-Time Use**: Like PHP generators, pipelines are generally for one-time use. After a terminal operation (e.g., `toList()`), the pipeline is consumed.
+-   **Complex Transformations**: Operations like `chunk()`, `flip()`, `values()`, and `keys()` alter the key/value structure. In these cases, you may need to add explicit type hints to assist static analysis.
     ```php
     use Pipeline\Standard;
     /** @var Standard<int, string> $pipeline */
     $pipeline = fromArray(['a' => 1])->flip();
     ```
-*   **Backward Compatibility**: All type improvements are implemented purely through PHPDoc comments, ensuring no runtime impact and 100% backward compatibility. This design principle is consistent across the library.
-
-## Tool Setup & Tips
-
-*   **PHPStan/Psalm**: Include Pipeline in your project. Configure a high analysis level.
-*   **Tips**:
-    *   Provide type hints when the source isn't obvious.
-    *   Prefer arrow functions for better type inference.
-    *   Integrate static analysis into your CI pipeline.
-
-The Pipeline type system is designed to be a helpful tool, providing robust static analysis.
+-   **Backward Compatibility**: All type information is in PHPDoc comments, ensuring no runtime impact and 100% backward compatibility.

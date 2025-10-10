@@ -1,10 +1,6 @@
 # Walkthrough: Processing CSV Data
 
-This walkthrough demonstrates the core concepts of the library by building a practical data processing pipeline.
-
-## The Goal
-
-Our objective is to process a string of CSV data. We will parse the data, skip the header, transform it into a more usable format, filter it based on a condition, and finally, collect the results.
+This walkthrough demonstrates the core concepts of the library by building a practical data processing pipeline to parse CSV data, skip the header, transform, filter, and collect the results.
 
 ## The Pipeline
 
@@ -14,7 +10,7 @@ Here is the complete pipeline:
 use function Pipeline\take;
 
 // Sample CSV data with a header row
-$csv = <<<CSV
+$csv = <<<
 name,age,city
 Alice,30,New York
 Bob,25,Los Angeles
@@ -41,19 +37,7 @@ $users = take(explode("\n", $csv))
 // ]
 ```
 
-## Step-by-Step Explanation
-
-1.  **`take(explode("\n", $csv))`**: We begin by creating a pipeline from the CSV data. `explode()` splits the string into an array of lines.
-
-2.  **`map(str_getcsv(...))`**: The `map()` method is used to apply `str_getcsv()` to each line, converting each CSV string into an array of values.
-
-3.  **`slice(1)`**: This method skips the first element of the pipeline, which in this case is the header row.
-
-4.  **`map(fn($row) => ...)`**: We use `map()` again to transform the indexed array for each row into a more readable associative array.
-
-5.  **`filter(fn($user) => ...)`**: The `filter()` method is used to apply our business logic, keeping only the users who are 30 years of age or older.
-
-6.  **`toList()`**: This is a terminal operation. It triggers the execution of all the previous (lazy) operations and collects the final results into an array.
+The code comments explain each step of the pipeline.
 
 ## Key Concepts
 
@@ -68,3 +52,4 @@ This example illustrates several core principles of the library:
 
 -   Explore the [Cookbook](../cookbook/index.md) for more practical examples.
 -   Consult the [API Reference](../api/creation.md) for detailed information on each method.
+

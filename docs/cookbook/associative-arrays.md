@@ -1,23 +1,21 @@
 # Associative Array Recipes
 
-Working with associative arrays requires more than just transforming values. This guide shows you how to manipulate both keys and values using the library's functional patterns.
+This guide shows how to manipulate both keys and values of associative arrays.
 
 ## The Key Manipulation Pattern
 
 To modify array keys, use this three-step pattern:
 
-1. **`tuples()`** - Convert to `[key, value]` pairs
-2. **`map()`** - Transform the pairs
-3. **`unpack()`** - Reconstruct the array
+1.  **`tuples()`**: Convert the `[key => value]` entries to `[key, value]` pairs.
+2.  **`map()`**: Transform the pairs.
+3.  **`unpack()`**: Reconstruct the array from the modified pairs.
 
 ### Prefixing Keys
-
-Add a prefix to all keys in an associative array:
 
 ```php
 use function Pipeline\take;
 
-$data = ['id' => 123, 'name' => 'Alice', 'status' => 'active'];
+$data = ['id' => 123, 'name' => 'Alice'];
 
 $result = take($data)
     ->tuples()
@@ -29,13 +27,12 @@ $result = take($data)
 // [
 //     'user_id' => 123,
 //     'user_name' => 'Alice',
-//     'user_status' => 'active'
 // ]
 ```
 
 ### Swapping Keys and Values
 
-Flip keys and values, similar to `array_flip()`:
+For simple cases, `->flip()` is easier. This pattern is useful if values are not scalar.
 
 ```php
 $data = ['a' => 1, 'b' => 2, 'c' => 3];
@@ -51,8 +48,6 @@ $result = take($data)
 
 ### Filtering by Key
 
-Remove entries based on their keys:
-
 ```php
 $data = ['user_id' => 1, 'password' => 'secret', 'email' => 'alice@example.com'];
 
@@ -65,9 +60,7 @@ $safe = take($data)
 // Result: ['user_id' => 1, 'email' => 'alice@example.com']
 ```
 
-### Transforming Keys and Values
-
-Apply different transformations to keys and values:
+### Transforming Keys and Values Simultaneously
 
 ```php
 $data = ['first_name' => 'alice', 'last_name' => 'smith'];
@@ -88,8 +81,6 @@ $result = take($data)
 
 ### Merging with Defaults
 
-Ensure all required keys exist with default values:
-
 ```php
 $defaults = ['name' => 'Unknown', 'age' => 0, 'active' => true];
 $input = ['name' => 'Bob', 'age' => 25];
@@ -107,8 +98,6 @@ $result = take($defaults)
 ```
 
 ### Grouping by Key Pattern
-
-Group data by a key pattern:
 
 ```php
 $data = [
@@ -136,7 +125,7 @@ $grouped = take($data)
 
 ## Performance Considerations
 
-The `tuples -> map -> unpack` pattern creates intermediate arrays. For large associative arrays, consider using `stream()` first to process entries one at a time:
+The `tuples -> map -> unpack` pattern can be memory-intensive for very large arrays. For better performance, use `stream()` to process entries one at a time.
 
 ```php
 $result = take($largeArray)
@@ -146,8 +135,3 @@ $result = take($largeArray)
     ->unpack(fn($key, $value) => yield $key => $value)
     ->toAssoc();
 ```
-
-## See Also
-
-- [Utility Methods](../api/utility.md) - Documentation for `tuples()`, `flip()`, and `keys()`
-- [Transformation Methods](../api/transformation.md) - Documentation for `map()` and `unpack()`

@@ -2,18 +2,17 @@
 
 This guide provides techniques for optimizing your pipelines for speed and memory efficiency.
 
-## The Power of Streaming
+## Streaming for Memory Efficiency
 
-The library's core strength is its ability to process large datasets with minimal memory usage through streaming. This is achieved by using iterators and generators, which process data one element at a time.
+The library's core strength is processing large datasets with minimal memory usage through streaming. This is achieved by using iterators and generators, which process data one element at a time.
 
 **Example: Finding Errors in a Large Log File**
 
-Consider the task of finding the first five "ERROR" lines in a 10 GB log file.
+To find the first five "ERROR" lines in a 10 GB log file:
 
-**The Inefficient Way (Loading into Memory)**
-
+**Inefficient (High Memory Usage):**
 ```php
-// Warning: This will likely exhaust your server's memory.
+// Warning: This will likely exhaust memory.
 $lines = file('huge-10GB.log'); // Loads the entire 10GB file into memory
 $errors = take($lines)
     ->filter(fn($line) => str_contains($line, 'ERROR'))
@@ -21,74 +20,45 @@ $errors = take($lines)
     ->toList();
 ```
 
-**The Efficient Way (Streaming)**
-
+**Efficient (Streaming):**
 ```php
-// This is memory-safe and fast.
+// Memory-safe and fast.
 $errors = take(new SplFileObject('huge-10GB.log'))
     ->filter(fn($line) => str_contains($line, 'ERROR'))
     ->slice(0, 5)
     ->toList();
 ```
+The streaming approach is far more efficient because it reads the file line by line and stops as soon as the five errors are found.
 
-The streaming approach is significantly faster and more memory-efficient because it reads the file line by line and stops as soon as the required number of errors has been found.
+## Forcing Lazy Processing with `stream()`
 
-## The `stream()` Method
+The `stream()` method converts an array-based pipeline into a generator-based one. This forces all subsequent operations to be lazy and process elements one by one.
 
-The `stream()` method is a powerful tool for controlling how your pipeline processes data. It converts the pipeline to use generators, forcing element-by-element processing instead of batch operations.
-
-### Understanding Array vs Stream Processing
-
-By default, when working with arrays, the library optimizes certain operations:
+By default, some operations on arrays are optimized for speed and create intermediate arrays in memory. `stream()` prevents this.
 
 ```php
-// Without stream(): Creates intermediate arrays
+// Without stream(): Creates intermediate arrays, high memory usage
 $result = take($largeArray)
-    ->filter($predicate)  // Creates a new filtered array in memory
-    ->map($transformer)   // Creates another transformed array
+    ->filter($predicate)
+    ->map($transformer)
     ->toList();
-```
 
-With `stream()`, each element flows through the entire pipeline before the next one starts:
-
-```php
-// With stream(): Processes one element at a time
+// With stream(): Processes one element at a time, low memory usage
 $result = take($largeArray)
-    ->stream()           // Convert to generator
-    ->filter($predicate) // Element passes through filter...
-    ->map($transformer)  // ...then immediately through map
+    ->stream()
+    ->filter($predicate)
+    ->map($transformer)
     ->toList();
 ```
 
 ### When to Use `stream()`
 
-Use `stream()` when:
-- Working with large arrays that would create memory pressure
-- Your transformations are expensive and you might not process all elements
-- You want predictable memory usage regardless of input size
+-   When working with large arrays that would cause high memory usage.
+-   When your transformations are expensive and you might not need to process all elements.
+-   When you need predictable, low memory usage regardless of input size.
 
-### Performance Trade-offs
+## Other Considerations
 
-- **Memory**: `stream()` significantly reduces peak memory usage
-- **Speed**: Array operations are typically faster for small-to-medium datasets
-- **Best Practice**: Use `stream()` for large arrays or when memory is constrained
-
-## Array Optimizations
-
-For convenience, some methods are optimized for speed when working with small arrays:
-
--   `filter()`
--   `cast()`
--   `slice()`
--   `chunk()`
-
-These methods use native PHP array functions internally, which can be faster for small datasets. However, they create intermediate arrays in memory, so they should be used with caution.
-
-## Memory Management
-
--   **Process in chunks**: Use the `chunk()` method to process large datasets in smaller, more manageable batches.
--   **Release resources**: When using generators to interact with resources like files or database connections, be sure to release them in a `finally` block.
-
-## Profiling
-
-Before optimizing, always profile your code to identify the actual bottlenecks. Use tools like Xdebug or Blackfire to get a clear picture of your pipeline's performance.
+-   **`chunk()`**: Use `chunk()` to process large datasets in smaller, manageable batches, which can be useful for operations like database inserts.
+-   **Resource Management**: When using generators that interact with resources like files or database connections, be sure to release them (e.g., in a `finally` block).
+-   **Profiling**: Before optimizing, always profile your code with tools like Xdebug or Blackfire to identify the actual bottlenecks. For simple operations, native PHP functions may be faster.

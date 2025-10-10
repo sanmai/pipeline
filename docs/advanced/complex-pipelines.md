@@ -1,14 +1,10 @@
 # Complex Pipeline Patterns
 
-This section explores advanced techniques for building sophisticated, maintainable, and scalable data processing pipelines.
+This section explores advanced techniques for building sophisticated and maintainable data processing pipelines.
 
-## Pipeline Composition
+## Pipeline Composition with Reusable Components
 
-One of the most powerful features of the library is the ability to compose complex pipelines from smaller, reusable components. This is achieved by encapsulating business logic into separate classes or functions, which can then be chained together.
-
-### Reusable Components
-
-By creating dedicated classes for pipeline operations, you can build a library of reusable, testable components.
+For complex workflows, encapsulate business logic into separate classes or functions. This allows you to build clean, readable pipelines from reusable, testable components.
 
 **Example: A `UserProcessor` Class**
 
@@ -33,7 +29,7 @@ class UserProcessor
 }
 ```
 
-These components can then be used to build a clean and readable pipeline:
+These components can then be used to build a clean pipeline:
 
 ```php
 use App\Pipeline\Components\UserProcessor;
@@ -45,15 +41,11 @@ $processedUsers = take($rawUsers)
     ->toList();
 ```
 
-This approach offers several advantages:
-
--   **Readability**: The pipeline clearly expresses the business logic.
--   **Testability**: Each component can be unit-tested in isolation.
--   **Reusability**: Components can be shared across multiple pipelines.
+This approach improves readability, testability, and reusability.
 
 ## Stateful Transformations
 
-For operations that require state to be maintained between elements, you can use a class to encapsulate the state.
+For operations that require state to be maintained between elements, use a class to encapsulate the state.
 
 **Example: A `ChangeDetector`**
 
@@ -83,49 +75,13 @@ $changes = take($prices)
     ->toList();
 ```
 
-## Error Handling
+## Graceful Error Handling
 
-For pipelines that may encounter errors, you can create a wrapper to handle exceptions gracefully.
+For pipelines that may encounter errors, you can handle exceptions within a `map` step or use a dedicated error-handling object.
 
-**Example: A `SafeProcessor`**
+**Example: Processing API Responses**
 
-```php
-class SafeProcessor
-{
-    private array $errors = [];
-
-    public function transform(callable $transformer): callable
-    {
-        return function ($item) use ($transformer) {
-            try {
-                return ['success' => true, 'data' => $transformer($item)];
-            } catch (\Exception $e) {
-                $this->errors[] = ['item' => $item, 'error' => $e->getMessage()];
-                return ['success' => false, 'data' => null];
-            }
-        };
-    }
-
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-}
-
-$processor = new SafeProcessor();
-
-$results = take($inputs)
-    ->map($processor->transform(fn($item) => process($item)))
-    ->filter(fn($result) => $result['success'])
-    ->map(fn($result) => $result['data'])
-    ->toList();
-
-$errors = $processor->getErrors();
-```
-
-### Practical Example: Processing API Responses
-
-Here's a real-world example of handling errors when processing API responses:
+Here's a practical example of handling errors when processing API responses, collecting both valid results and errors.
 
 ```php
 use function Pipeline\take;
@@ -138,7 +94,6 @@ $apiResponses = [
     ['url' => '/users/4', 'data' => null], // Failed request
 ];
 
-// Process with error collection
 $validUsers = [];
 $errors = [];
 
@@ -157,25 +112,16 @@ take($apiResponses)
 
         return $decoded;
     })
-    ->filter() // Remove nulls
+    ->filter() // Remove nulls from failed steps
     ->each(function($user) use (&$validUsers) {
         $validUsers[] = $user;
     });
 
-// $validUsers:
-// [
-//     ['id' => 1, 'name' => 'Alice'],
-//     ['id' => 3, 'name' => 'Charlie'],
-// ]
-//
-// $errors:
-// [
-//     ['url' => '/users/2', 'error' => 'Invalid JSON'],
-//     ['url' => '/users/4', 'error' => 'Request failed'],
-// ]
+// $validUsers will contain the valid user data.
+// $errors will contain information about the failed responses.
 ```
 
-## Hierarchical Data
+## Processing Hierarchical Data
 
 For nested data structures, you can use recursion to process the entire tree.
 

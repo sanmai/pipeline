@@ -4,11 +4,9 @@ This cookbook provides practical, ready-to-use solutions for common data process
 
 ## Data Cleaning
 
-### Safe and Predictable Data Cleaning
-
 **Problem**: You need to remove `null` or `false` values from a dataset without accidentally removing valid data like `0` or empty strings.
 
-**Solution**: Use `filter(strict: true)` to ensure only `null` and `false` are removed.
+**Solution**: Use `filter(strict: true)`.
 
 ```php
 $cleanedData = take($rawData)
@@ -17,8 +15,6 @@ $cleanedData = take($rawData)
 ```
 
 ## Batch Processing
-
-### Batching for Databases and APIs
 
 **Problem**: You need to process a large number of records and send them to a database or API in manageable batches.
 
@@ -35,9 +31,7 @@ take(new SplFileObject('large-dataset.csv'))
     });
 ```
 
-## Real-Time Analysis
-
-### Anomaly Detection
+## Real-Time Anomaly Detection
 
 **Problem**: You have a live stream of data and need to identify outliers in real-time.
 
@@ -59,9 +53,7 @@ take($liveStream)
     });
 ```
 
-## Distributed Data
-
-### Parallel Statistics Aggregation
+## Parallel Statistics Aggregation
 
 **Problem**: Your data is distributed across multiple sources, and you need to calculate overall statistics without centralizing the data.
 
@@ -76,9 +68,7 @@ $stats2 = take($source2)->finalVariance();
 $overallStats = new RunningVariance($stats1, $stats2);
 ```
 
-## File Processing
-
-### CSV and JSON Processing
+## CSV and JSON Processing
 
 **Problem**: You need to process large CSV or JSON files efficiently.
 
@@ -92,11 +82,9 @@ $data = take(new SplFileObject('data.csv'))
     ->toList();
 ```
 
-## Error Handling
+## Safe Error Handling
 
-### Safe Processing
-
-**Problem**: You need to process data where some items may cause errors, but you want to continue processing the rest.
+**Problem**: Some items in your data may cause errors, but you want to continue processing the rest.
 
 **Solution**: Wrap the risky operation in a `try-catch` block within a `map()` transformation.
 
@@ -112,19 +100,17 @@ $results = take($inputs)
     ->toList();
 ```
 
-## Deduplication
-
-### Memory-Efficient Deduplication
+## Memory-Efficient Deduplication
 
 **Problem**: You need to remove duplicate values from a large dataset without loading it all into memory.
 
-**Solution**: For simple values, use the `flip()` method twice. For complex data, use a "seen" set to track unique items.
+**Solution**: For simple values, use `flip()` twice. For complex data, use a "seen" set to track unique items.
 
 ```php
 // Simple deduplication
 $unique = take($values)->flip()->flip()->values()->toList();
 
-// Complex deduplication
+// Complex deduplication by a key
 $seen = [];
 $unique = take($users)
     ->filter(function ($user) use (&$seen) {
