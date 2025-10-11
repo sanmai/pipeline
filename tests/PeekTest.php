@@ -219,6 +219,16 @@ final class PeekTest extends TestCase
         $this->assertSame([1, 2], iterator_to_array($first, false));
     }
 
+    public function testPeekOneDefersCosts(): void
+    {
+        $pipeline = map(function () {
+            yield 1;
+            $this->fail('Should not be called');
+        });
+
+        $this->assertSame([1], iterator_to_array($pipeline->peek(1)));
+    }
+
     private static function xrange(int $start, int $end): iterable
     {
         for ($i = $start; $i <= $end; $i++) {

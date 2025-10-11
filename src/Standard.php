@@ -809,18 +809,21 @@ class Standard implements IteratorAggregate, Countable
         // And preserve duplicates as tuples
         $peeked = iterator_to_array(self::toTuples(self::take($generator, $count)));
 
-        // Advance the pointer to counter the optimizations of self::take
-        $generator->next();
-
         // Wrap remaining items in a fresh generator to avoid rewind issues
         $this->pipeline = self::resumeGenerator($generator);
+
 
         // Return generator that yields the collected items
         return self::tuplesToGenerator($peeked);
     }
 
+    /**
+     * Advances the pointer to counter the optimizations of self::take(), while also deferring the costs.
+     */
     private static function resumeGenerator(Generator $input): Generator
     {
+        $input->next();
+
         while ($input->valid()) {
             yield $input->key() => $input->current();
             $input->next();
