@@ -807,7 +807,7 @@ class Standard implements IteratorAggregate, Countable
 
         // Collect items eagerly (to update pipeline state before returning)
         // And preserve duplicates as tuples
-        $peeked = take(self::take($generator, $count))->tuples()->toList();
+        $peeked = iterator_to_array(self::toTuples(self::take($generator, $count)));
 
         // Advance the pointer to counter the quirks of self::take
         $generator->next();
