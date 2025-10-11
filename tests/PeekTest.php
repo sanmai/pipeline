@@ -23,7 +23,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
-use Tests\Pipeline\Examples\PeekExample;
+use Tests\Pipeline\Scenarios\PeekScenario;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -38,24 +38,24 @@ use function range;
 final class PeekTest extends TestCase
 {
     /**
-     * @return iterable<PeekExample>
+     * @return iterable<PeekScenario>
      */
     public static function providePeekData(): iterable
     {
-        yield 'empty array' => new PeekExample();
-        yield 'empty array, count 3' => new PeekExample(count: 3, expected_remains: []);
-        yield 'zero count' => new PeekExample(count: 0, input: [1, 2, 3], expected_peeked: [], expected_remains: [1, 2, 3]);
+        yield 'empty array' => new PeekScenario();
+        yield 'empty array, count 3' => new PeekScenario(count: 3, expected_remains: []);
+        yield 'zero count' => new PeekScenario(count: 0, input: [1, 2, 3], expected_peeked: [], expected_remains: [1, 2, 3]);
 
-        yield 'simple peek' => new PeekExample(count: 3, input: [1, 2, 3, 4, 5], expected_peeked: [1, 2, 3], expected_remains: [3 => 4, 5]);
+        yield 'simple peek' => new PeekScenario(count: 3, input: [1, 2, 3, 4, 5], expected_peeked: [1, 2, 3], expected_remains: [3 => 4, 5]);
 
-        yield 'preserve keys' => new PeekExample(count: 2, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2], expected_remains: ['c' => 3]);
+        yield 'preserve keys' => new PeekScenario(count: 2, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2], expected_remains: ['c' => 3]);
 
-        yield 'peek more than available' => new PeekExample(count: 10, input: [1, 2, 3], expected_peeked: [1, 2, 3], expected_remains: []);
-        yield 'consume all' => new PeekExample(count: 3, input: [1, 2, 3], expected_peeked: [1, 2, 3], expected_remains: []);
+        yield 'peek more than available' => new PeekScenario(count: 10, input: [1, 2, 3], expected_peeked: [1, 2, 3], expected_remains: []);
+        yield 'consume all' => new PeekScenario(count: 3, input: [1, 2, 3], expected_peeked: [1, 2, 3], expected_remains: []);
     }
 
     /**
-     * @return iterable<PeekExample>
+     * @return iterable<PeekScenario>
      */
     public static function providePeekIterables(): iterable
     {
@@ -70,7 +70,7 @@ final class PeekTest extends TestCase
     /**
      * @dataProvider providePeekIterables
      */
-    public function testPeekWithProvider(PeekExample $item): void
+    public function testPeekWithProvider(PeekScenario $item): void
     {
         $pipeline = take($item->input);
 

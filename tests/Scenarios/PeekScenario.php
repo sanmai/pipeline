@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-namespace Tests\Pipeline\Examples;
+namespace Tests\Pipeline\Scenarios;
 
-class PeekExample
+class PeekScenario
 {
     public function __construct(
         public readonly int $count = 0,
