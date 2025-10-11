@@ -42,25 +42,21 @@ final class PeekTest extends TestCase
     {
         yield 'empty array' => new PeekExample();
         yield 'empty array, count 3' => new PeekExample(count: 3);
+        yield 'zero count' => new PeekExample(count: 0, input: [1, 2, 3], expected_peeked: []);
 
-        return;
-        // [count, consume, preserve_keys, input, expected_peeked]
+        yield 'simple peek' => new PeekExample(count: 3, input: [1, 2, 3, 4, 5], expected_peeked: [1, 2, 3]);
+        yield 'simple consume' => new PeekExample(count: 3, consume: true, input: [1, 2, 3, 4, 5], expected_peeked: [1, 2, 3]);
 
-        yield 'zero count' => [0, false, false, [1, 2, 3], []];
+        yield 'preserve keys' => new PeekExample(count: 2, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
+        yield 'no preserve keys with string keys' => new PeekExample(count: 2, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
 
-        yield 'simple peek' => [3, false, false, [1, 2, 3, 4, 5], [1, 2, 3]];
-        yield 'simple consume' => [3, true, false, [1, 2, 3, 4, 5], [1, 2, 3]];
+        yield 'consume with preserve keys' => new PeekExample(count: 2, consume: true, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
+        yield 'consume without preserve keys' => new PeekExample(count: 2, consume: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
 
-        yield 'preserve keys' => [2, false, true, ['a' => 1, 'b' => 2, 'c' => 3], ['a' => 1, 'b' => 2]];
-        yield 'no preserve keys with string keys' => [2, false, false, ['a' => 1, 'b' => 2, 'c' => 3], [1, 2]];
+        yield 'no preserve keys with numeric keys' => new PeekExample(count: 2, input: [10, 20, 30, 40], expected_peeked: [10, 20]);
 
-        yield 'consume with preserve keys' => [2, true, true, ['a' => 1, 'b' => 2, 'c' => 3], ['a' => 1, 'b' => 2]];
-        yield 'consume without preserve keys' => [2, true, false, ['a' => 1, 'b' => 2, 'c' => 3], [1, 2]];
-
-        yield 'no preserve keys with numeric keys' => [2, false, false, [10, 20, 30, 40], [10, 20]];
-
-        yield 'peek more than available' => [10, false, false, [1, 2, 3], [1, 2, 3]];
-        yield 'consume all' => [10, true, false, [1, 2, 3], [1, 2, 3]];
+        yield 'peek more than available' => new PeekExample(count: 10, input: [1, 2, 3], expected_peeked: [1, 2, 3]);
+        yield 'consume all' => new PeekExample(count: 10, consume: true, input: [1, 2, 3], expected_peeked: [1, 2, 3]);
     }
 
     /**
