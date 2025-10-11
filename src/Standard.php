@@ -809,7 +809,7 @@ class Standard implements IteratorAggregate, Countable
         // And preserve duplicates as tuples
         $peeked = iterator_to_array(self::toTuples(self::take($generator, $count)));
 
-        // Advance the pointer to counter the quirks of self::take
+        // Advance the pointer to counter the optimizations of self::take
         $generator->next();
 
         // Wrap remaining items in a fresh generator to avoid rewind issues
