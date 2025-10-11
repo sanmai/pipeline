@@ -882,12 +882,12 @@ class Standard implements IteratorAggregate, Countable
         $generator->next();
 
         // Prepend back using dict version (duplicates lost, but that's the best we can do with arrays)
-        $this->pipeline = self::resumeGenerator($generator, $consume ? [] : $peeked_dict);
+        $this->pipeline = self::resumeGenerator($consume ? [] : $peeked_dict, $generator);
 
         return $peeked;
     }
 
-    private static function resumeGenerator(Generator $input, array $peeked = []): Generator
+    private static function resumeGenerator(array $peeked, Generator $input): Generator
     {
         yield from $peeked;
 
