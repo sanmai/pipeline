@@ -28,6 +28,7 @@ use Tests\Pipeline\Examples\PeekExample;
 use function Pipeline\map;
 use function Pipeline\take;
 use function iterator_to_array;
+use function range;
 
 /**
  * @covers \Pipeline\Standard
@@ -184,9 +185,10 @@ final class PeekTest extends TestCase
         $this->assertSame([1, 2, 3, 4, 5], $pipeline->toList());
     }
 
-    public function testMultipleSequentialPeeks(): void
+    /** @dataProvider provideOneToFive */
+    public function testMultipleSequentialPeeks(iterable $input): void
     {
-        $pipeline = take([1, 2, 3, 4, 5]);
+        $pipeline = take($input);
 
         $first = iterator_to_array($pipeline->peek(2), false);
         $this->assertSame([1, 2], $first);
@@ -197,9 +199,16 @@ final class PeekTest extends TestCase
         $this->assertSame([5], $pipeline->toList());
     }
 
-    public function testMultipleSequentialPeeksOutOfOrder(): void
+    public static function provideOneToFive(): iterable
     {
-        $pipeline = take([1, 2, 3, 4, 5]);
+        yield [range(1, 5)];
+        yield [self::xrange(1, 5)];
+    }
+
+    /** @dataProvider provideOneToFive */
+    public function testMultipleSequentialPeeksOutOfOrder(iterable $input): void
+    {
+        $pipeline = take($input);
 
         $first = $pipeline->peek(2);
 
