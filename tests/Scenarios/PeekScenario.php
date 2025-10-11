@@ -29,6 +29,6 @@ class PeekScenario
 
     public function withInput(iterable $input): self
     {
-        return new self($this->count, $input, $this->expected_peeked);
+        return new self($this->count, $input, $this->expected_peeked, $this->expected_remains);
     }
 }
