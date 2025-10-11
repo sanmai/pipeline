@@ -22,14 +22,13 @@ class PeekExample
 {
     public function __construct(
         public readonly int $count = 0,
-        public readonly bool $consume = false,
-        public readonly bool $preserve_keys = false,
         public readonly iterable $input = [],
-        public readonly array $expected_peeked = [],
+        public readonly iterable $expected_peeked = [],
+        public readonly ?iterable $expected_remains = null
     ) {}
 
     public function withInput(iterable $input): self
     {
-        return new self($this->count, $this->consume, $this->preserve_keys, $input, $this->expected_peeked);
+        return new self($this->count, $input, $this->expected_peeked);
     }
 }

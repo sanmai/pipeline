@@ -788,6 +788,55 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Returns the first N items from the pipeline as an iterable, removing them from the pipeline (destructive).
+     * Users can call prepend() to restore items if non-destructive behavior is needed.
+     *
+     * @param int<0, max> $count Number of items to peek at.
+     *
+     * @return iterable<TKey, TValue> Iterator of peeked items with keys preserved (including duplicates).
+     */
+    public function peek(int $count): iterable
+    {
+        // No-op: empty pipeline or zero count
+        if ($this->empty() || $count <= 0) {
+            return [];
+        }
+
+        // Convert to non-rewindable iterator
+        $generator = self::makeNonRewindable($this->pipeline);
+
+        // Collect items eagerly (to update pipeline state before returning)
+        $peeked = [];
+        foreach (self::take($generator, $count) as $key => $value) {
+            $peeked[] = [$key, $value];  // Preserve duplicates as tuples
+        }
+
+        // Advance the pointer to counter the quirks of self::take
+        $generator->next();
+
+        // Wrap remaining items in a fresh generator to avoid rewind issues
+        $this->pipeline = self::resumeGenerator($generator);
+
+        // Return generator that yields the collected items
+        return self::tuplesToGenerator($peeked);
+    }
+
+    private static function resumeGenerator(Generator $input): Generator
+    {
+        while ($input->valid()) {
+            yield $input->key() => $input->current();
+            $input->next();
+        }
+    }
+
+    private static function tuplesToGenerator(iterable $input): Generator
+    {
+        foreach ($input as [$key, $value]) {
+            yield $key => $value;
+        }
+    }
+
+    /**
      * Extracts a slice from the inputs. Keys are not discarded intentionally.
      *
      * @see \array_slice()
@@ -826,75 +875,6 @@ class Standard implements IteratorAggregate, Countable
         );
 
         return $this;
-    }
-
-    /**
-     * Returns the first N items from the pipeline. By default, items remain in the pipeline (non-destructive peek).
-     *
-     * @param int<0, max> $count Number of items to peek at.
-     * @param bool $consume If true, removes peeked items from the pipeline. Default is false.
-     * @param bool $preserve_keys Sets the keys to be preserved.
-     *
-     * @return array<TKey, TValue> Iterable of peeked items with keys preserved.
-     */
-    public function peek(int $count, bool $consume = false, bool $preserve_keys = false): array
-    {
-        // No-op: an empty array or null.
-        if ($this->empty() || $count <= 0) {
-            return [];
-        }
-
-        // Array shortcut
-        if (is_array($this->pipeline)) {
-            $peeked = array_slice($this->pipeline, 0, $count, preserve_keys: $preserve_keys);
-
-            if ($consume) {
-                // Replace the array with the copy of itself with N items removed.
-                // We always preserve keys as it costs us nothing and avoids unpleasant surprises later.
-                // (User will be able to call values() if they do not need the keys.)
-                $this->pipeline = array_slice($this->pipeline, $count, preserve_keys: true);
-            }
-
-            if (!$preserve_keys) {
-                $peeked = array_values($peeked);
-            }
-
-            return $peeked;
-        }
-
-        // Convert to non-rewindable iterator
-        $generator = self::makeNonRewindable($this->pipeline);
-
-        // Collect items manually to handle duplicate keys correctly
-        // We need both: a list (for preserve_keys=false) and a dict (for prepending back)
-        $peeked_list = [];
-        $peeked_dict = [];
-        foreach (self::take($generator, $count) as $key => $value) {
-            $peeked_list[] = $value;        // All values, re-indexed (handles duplicates)
-            /** @phpstan-ignore offsetAccess.invalidOffset */
-            $peeked_dict[$key] = $value;    // Keyed (duplicates collapsed, unavoidable with arrays)
-        }
-
-        // Return based on preserve_keys parameter
-        $peeked = $preserve_keys ? $peeked_dict : $peeked_list;
-
-        // Advance the pointer to counter the quirks of self::take
-        $generator->next();
-
-        // Prepend back using dict version (duplicates lost, but that's the best we can do with arrays)
-        $this->pipeline = self::resumeGenerator($consume ? [] : $peeked_dict, $generator);
-
-        return $peeked;
-    }
-
-    private static function resumeGenerator(array $peeked, Generator $input): Generator
-    {
-        yield from $peeked;
-
-        while ($input->valid()) {
-            yield $input->key() => $input->current();
-            $input->next();
-        }
     }
 
     private static function sliceToIterator(Iterator $stream, int $offset, ?int $length): Iterator
