@@ -20,8 +20,12 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
+use IteratorIterator;
 use PHPUnit\Framework\TestCase;
+use Tests\Pipeline\Examples\PeekExample;
 
+use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
@@ -31,6 +35,66 @@ use function Pipeline\take;
  */
 final class PeekTest extends TestCase
 {
+    /**
+     * @return iterable<PeekExample>
+     */
+    public static function providePeekData(): iterable
+    {
+        yield 'empty array' => new PeekExample();
+        yield 'empty array, count 3' => new PeekExample(count: 3);
+
+        return;
+        // [count, consume, preserve_keys, input, expected_peeked]
+
+        yield 'zero count' => [0, false, false, [1, 2, 3], []];
+
+        yield 'simple peek' => [3, false, false, [1, 2, 3, 4, 5], [1, 2, 3]];
+        yield 'simple consume' => [3, true, false, [1, 2, 3, 4, 5], [1, 2, 3]];
+
+        yield 'preserve keys' => [2, false, true, ['a' => 1, 'b' => 2, 'c' => 3], ['a' => 1, 'b' => 2]];
+        yield 'no preserve keys with string keys' => [2, false, false, ['a' => 1, 'b' => 2, 'c' => 3], [1, 2]];
+
+        yield 'consume with preserve keys' => [2, true, true, ['a' => 1, 'b' => 2, 'c' => 3], ['a' => 1, 'b' => 2]];
+        yield 'consume without preserve keys' => [2, true, false, ['a' => 1, 'b' => 2, 'c' => 3], [1, 2]];
+
+        yield 'no preserve keys with numeric keys' => [2, false, false, [10, 20, 30, 40], [10, 20]];
+
+        yield 'peek more than available' => [10, false, false, [1, 2, 3], [1, 2, 3]];
+        yield 'consume all' => [10, true, false, [1, 2, 3], [1, 2, 3]];
+    }
+
+    /**
+     * @return iterable<PeekExample>
+     */
+    public static function providePeekIterables(): iterable
+    {
+        foreach (self::providePeekData() as $name => $item) {
+            // Original array
+            yield $name . ' (array)' => [$item];
+
+            // ArrayIterator
+            yield $name . ' (ArrayIterator)' => [$item->withInput(new ArrayIterator($item->input))];
+
+            // IteratorIterator
+            yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
+
+            // Pipeline fromArray->stream
+            yield $name . ' (stream)' => [$item->withInput(fromArray($item->input)->stream())];
+        }
+    }
+
+    /**
+     * @dataProvider providePeekIterables
+     */
+    public function testPeekWithProvider(PeekExample $item): void
+    {
+        $pipeline = take($item->input);
+
+        $peeked = $pipeline->peek($item->count, $item->consume, $item->preserve_keys);
+
+        $this->assertSame($item->expected_peeked, $peeked);
+    }
+
     public function testPeekNonDestructiveFromArray(): void
     {
         $pipeline = take([1, 2, 3, 4, 5]);
@@ -106,7 +170,7 @@ final class PeekTest extends TestCase
     public function testPeekPreservesKeys(): void
     {
         $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]);
-        $peeked = $pipeline->peek(2);
+        $peeked = $pipeline->peek(2, preserve_keys: true);
 
         $this->assertSame(['a' => 1, 'b' => 2], $peeked);
         $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4], $pipeline->toAssoc());
@@ -115,10 +179,19 @@ final class PeekTest extends TestCase
     public function testPeekPreservesKeysWhenConsuming(): void
     {
         $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]);
-        $peeked = $pipeline->peek(2, consume: true);
+        $peeked = $pipeline->peek(2, consume: true, preserve_keys: true);
 
         $this->assertSame(['a' => 1, 'b' => 2], $peeked);
         $this->assertSame(['c' => 3, 'd' => 4], $pipeline->toAssoc());
+    }
+
+    public function testPeekWithoutPreserveKeys(): void
+    {
+        $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]);
+        $peeked = $pipeline->peek(2);
+
+        $this->assertSame([1, 2], $peeked);
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4], $pipeline->toAssoc());
     }
 
     public function testMultipleSequentialPeeksNonDestructive(): void
@@ -163,10 +236,19 @@ final class PeekTest extends TestCase
     public function testPeekDestructivePreservesKeysInRemainingPipeline(): void
     {
         $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]);
-        $peeked = $pipeline->peek(2, consume: true);
+        $peeked = $pipeline->peek(2, consume: true, preserve_keys: true);
 
         $this->assertSame(['a' => 1, 'b' => 2], $peeked);
         $this->assertSame(['c' => 3, 'd' => 4], $pipeline->toAssoc());
+    }
+
+    public function testPeekConsumeMoreThanAvailableFromGenerator(): void
+    {
+        $pipeline = take(self::xrange(1, 3));
+        $peeked = $pipeline->peek(10, consume: true);
+
+        $this->assertSame([1, 2, 3], $peeked);
+        $this->assertSame([], $pipeline->toList());
     }
 
     private static function xrange(int $start, int $end): iterable

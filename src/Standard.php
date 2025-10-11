@@ -847,11 +847,16 @@ class Standard implements IteratorAggregate, Countable
         // Array shortcut
         if (is_array($this->pipeline)) {
             $peeked = array_slice($this->pipeline, 0, $count, preserve_keys: $preserve_keys);
+
             if ($consume) {
                 // Replace the array with the copy of itself with N items removed.
                 // We always preserve keys as it costs us nothing and avoids unpleasant surprises later.
                 // (User will be able to call values() if they do not need the keys.)
                 $this->pipeline = array_slice($this->pipeline, $count, preserve_keys: true);
+            }
+
+            if (!$preserve_keys) {
+                $peeked = array_values($peeked);
             }
 
             return $peeked;
