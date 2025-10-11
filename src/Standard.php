@@ -802,6 +802,14 @@ class Standard implements IteratorAggregate, Countable
             return [];
         }
 
+        // Fast-path for arrays
+        if (is_array($this->pipeline)) {
+            $peeked = array_slice($this->pipeline, 0, $count, true);
+            $this->pipeline = array_slice($this->pipeline, $count, null, true);
+
+            return $peeked;
+        }
+
         // Convert to non-rewindable iterator
         $generator = self::makeNonRewindable($this->pipeline);
 
