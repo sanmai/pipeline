@@ -26,6 +26,7 @@ use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Examples\PeekExample;
 
+use function is_array;
 use function Pipeline\fromArray;
 use function Pipeline\take;
 
@@ -70,14 +71,18 @@ final class PeekTest extends TestCase
             // Original array
             yield $name . ' (array)' => [$item];
 
+            // Pipeline fromArray->stream
+            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
+
+            if (!is_array($item->input)) {
+                continue;
+            }
+
             // ArrayIterator
             yield $name . ' (ArrayIterator)' => [$item->withInput(new ArrayIterator($item->input))];
 
             // IteratorIterator
             yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
-
-            // Pipeline fromArray->stream
-            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
         }
     }
 
