@@ -211,13 +211,11 @@ final class PeekTest extends TestCase
         $pipeline = take($input);
 
         $first = $pipeline->peek(2);
-
         $second = $pipeline->peek(2);
 
         $this->assertSame([5], $pipeline->toList());
 
         $this->assertSame([3, 4], iterator_to_array($second, false));
-
         $this->assertSame([1, 2], iterator_to_array($first, false));
     }
 
