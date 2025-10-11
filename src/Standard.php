@@ -865,14 +865,24 @@ class Standard implements IteratorAggregate, Countable
         // Convert to non-rewindable iterator
         $generator = self::makeNonRewindable($this->pipeline);
 
-        // Extract first N items (this advances the iterator as a side effect)
-        $peeked = iterator_to_array(self::take($generator, $count), $preserve_keys);
+        // Collect items manually to handle duplicate keys correctly
+        // We need both: a list (for preserve_keys=false) and a dict (for prepending back)
+        $peeked_list = [];
+        $peeked_dict = [];
+        foreach (self::take($generator, $count) as $key => $value) {
+            $peeked_list[] = $value;        // All values, re-indexed (handles duplicates)
+            /** @phpstan-ignore offsetAccess.invalidOffset */
+            $peeked_dict[$key] = $value;    // Keyed (duplicates collapsed, unavoidable with arrays)
+        }
+
+        // Return based on preserve_keys parameter
+        $peeked = $preserve_keys ? $peeked_dict : $peeked_list;
 
         // Advance the pointer to counter the quirks of self::take
         $generator->next();
 
-        // And make sure we can continue iterating over the generator - while preserving the peeked items when requested
-        $this->pipeline = self::resumeGenerator($generator, $consume ? [] : $peeked);
+        // Prepend back using dict version (duplicates lost, but that's the best we can do with arrays)
+        $this->pipeline = self::resumeGenerator($generator, $consume ? [] : $peeked_dict);
 
         return $peeked;
     }

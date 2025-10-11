@@ -26,8 +26,6 @@ use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Examples\PeekExample;
 
-use function is_array;
-use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
@@ -52,6 +50,7 @@ final class PeekTest extends TestCase
         yield 'preserve keys' => new PeekExample(count: 2, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
         yield 'no preserve keys with string keys' => new PeekExample(count: 2, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
         yield 'no preserve keys with duplicate string keys' => new PeekExample(count: 2, input: self::joinArrays(['a' => 1], ['a' => 2], ['a' => 3]), expected_peeked: [1, 2]);
+        yield 'preserve keys with duplicate string keys' => new PeekExample(count: 2, preserve_keys: true, input: self::joinArrays(['a' => 1], ['a' => 2], ['a' => 3]), expected_peeked: ['a' => 2]);
 
         yield 'consume with preserve keys' => new PeekExample(count: 2, consume: true, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
         yield 'consume without preserve keys' => new PeekExample(count: 2, consume: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
@@ -68,21 +67,18 @@ final class PeekTest extends TestCase
     public static function providePeekIterables(): iterable
     {
         foreach (self::providePeekData() as $name => $item) {
-            // Original array
-            yield $name . ' (array)' => [$item];
+            // For generators, only test as-is (can't wrap or it gets consumed)
+            if ($item->input instanceof Generator) {
+                yield $name => [$item];
 
-            // Pipeline fromArray->stream
-            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
-
-            if (!is_array($item->input)) {
                 continue;
             }
 
-            // ArrayIterator
+            // For arrays, yield all variants
+            yield $name . ' (array)' => [$item];
             yield $name . ' (ArrayIterator)' => [$item->withInput(new ArrayIterator($item->input))];
-
-            // IteratorIterator
             yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
+            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
         }
     }
 
@@ -252,6 +248,32 @@ final class PeekTest extends TestCase
 
         $this->assertSame([1, 2, 3], $peeked);
         $this->assertSame([], $pipeline->toList());
+    }
+
+    public function testPeekWithoutPreserveKeysDoesNotCorruptPipelineKeys(): void
+    {
+        // Non-destructive peek with preserve_keys=false should return re-indexed array
+        // but NOT corrupt the original keys in the pipeline
+        $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4]);
+        $peeked = $pipeline->peek(2, consume: false, preserve_keys: false);
+
+        $this->assertSame([1, 2], $peeked, 'Peeked array should be re-indexed');
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4], $pipeline->toAssoc(), 'Pipeline should maintain original keys');
+    }
+
+    public function testPeekWithoutPreserveKeysFromGenerator(): void
+    {
+        $generator = static function () {
+            yield 'x' => 10;
+            yield 'y' => 20;
+            yield 'z' => 30;
+        };
+
+        $pipeline = take($generator());
+        $peeked = $pipeline->peek(2, consume: false, preserve_keys: false);
+
+        $this->assertSame([10, 20], $peeked, 'Peeked array should be re-indexed');
+        $this->assertSame(['x' => 10, 'y' => 20, 'z' => 30], $pipeline->toAssoc(), 'Pipeline should maintain original keys');
     }
 
     private static function xrange(int $start, int $end): iterable

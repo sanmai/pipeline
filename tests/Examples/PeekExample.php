@@ -28,8 +28,8 @@ class PeekExample
         public readonly array $expected_peeked = [],
     ) {}
 
-    public function withInput(iterable $input): static
+    public function withInput(iterable $input): self
     {
-        return new static($this->count, $this->consume, $this->preserve_keys, $input, $this->expected_peeked);
+        return new self($this->count, $this->consume, $this->preserve_keys, $input, $this->expected_peeked);
     }
 }
