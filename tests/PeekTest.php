@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
+use Generator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Examples\PeekExample;
@@ -49,6 +50,7 @@ final class PeekTest extends TestCase
 
         yield 'preserve keys' => new PeekExample(count: 2, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
         yield 'no preserve keys with string keys' => new PeekExample(count: 2, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
+        yield 'no preserve keys with duplicate string keys' => new PeekExample(count: 2, input: self::joinArrays(['a' => 1], ['a' => 2], ['a' => 3]), expected_peeked: [1, 2]);
 
         yield 'consume with preserve keys' => new PeekExample(count: 2, consume: true, preserve_keys: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: ['a' => 1, 'b' => 2]);
         yield 'consume without preserve keys' => new PeekExample(count: 2, consume: true, input: ['a' => 1, 'b' => 2, 'c' => 3], expected_peeked: [1, 2]);
@@ -75,7 +77,7 @@ final class PeekTest extends TestCase
             yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
 
             // Pipeline fromArray->stream
-            yield $name . ' (stream)' => [$item->withInput(fromArray($item->input)->stream())];
+            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
         }
     }
 
@@ -251,6 +253,13 @@ final class PeekTest extends TestCase
     {
         for ($i = $start; $i <= $end; $i++) {
             yield $i;
+        }
+    }
+
+    private static function joinArrays(...$args): Generator
+    {
+        foreach ($args as $arg) {
+            yield from $arg;
         }
     }
 }
