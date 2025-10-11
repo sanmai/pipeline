@@ -793,7 +793,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param int<0, max> $count Number of items to peek at.
      *
-     * @return iterable<TKey, TValue> Iterator of peeked items with keys preserved (including duplicates).
+     * @return iterable<TKey, TValue> Iterator of peeked items with keys preserved (including duplicate keys).
      */
     public function peek(int $count): iterable
     {
