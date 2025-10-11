@@ -806,10 +806,8 @@ class Standard implements IteratorAggregate, Countable
         $generator = self::makeNonRewindable($this->pipeline);
 
         // Collect items eagerly (to update pipeline state before returning)
-        $peeked = [];
-        foreach (self::take($generator, $count) as $key => $value) {
-            $peeked[] = [$key, $value];  // Preserve duplicates as tuples
-        }
+        // And preserve duplicates as tuples
+        $peeked = take(self::take($generator, $count))->tuples()->toList();
 
         // Advance the pointer to counter the quirks of self::take
         $generator->next();

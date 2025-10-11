@@ -26,6 +26,7 @@ use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Examples\PeekExample;
 
+use function Pipeline\map;
 use function Pipeline\take;
 use function iterator_to_array;
 
@@ -59,14 +60,6 @@ final class PeekTest extends TestCase
     public static function providePeekIterables(): iterable
     {
         foreach (self::providePeekData() as $name => $item) {
-            // For generators, only test as-is (can't wrap or it gets consumed)
-            if ($item->input instanceof Generator) {
-                yield $name => [$item];
-
-                continue;
-            }
-
-            // For arrays, yield all variants
             yield $name . ' (array)' => [$item];
             yield $name . ' (ArrayIterator)' => [$item->withInput(new ArrayIterator($item->input))];
             yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
@@ -118,18 +111,20 @@ final class PeekTest extends TestCase
 
     public function testPeekWithDuplicateKeys(): void
     {
-        $generator = static function () {
+        $generator = map(static function () {
             yield 'a' => 1;
             yield 'a' => 2;
             yield 'b' => 3;
-        };
+        });
 
-        $pipeline = take($generator());
+        $pipeline = take($generator);
+        $peeked = $pipeline->peek(2);
 
-        // Don't preserve keys to capture duplicates
-        $peeked = iterator_to_array($pipeline->peek(2), false);
+        $this->assertSame(
+            [['a', 1], ['a', 2]],
+            take($peeked)->tuples()->toList(),
+        );
 
-        $this->assertSame([1, 2], $peeked);
         $this->assertSame(['b' => 3], $pipeline->toAssoc());
     }
 

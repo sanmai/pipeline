@@ -24,7 +24,7 @@ class PeekExample
         public readonly int $count = 0,
         public readonly iterable $input = [],
         public readonly iterable $expected_peeked = [],
-        public readonly ?iterable $expected_remains = null
+        public readonly ?iterable $expected_remains = null,
     ) {}
 
     public function withInput(iterable $input): self
