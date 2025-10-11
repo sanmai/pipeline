@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use Generator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Examples\PeekExample;
@@ -196,6 +195,21 @@ final class PeekTest extends TestCase
         $this->assertSame([3, 4], $second);
 
         $this->assertSame([5], $pipeline->toList());
+    }
+
+    public function testMultipleSequentialPeeksOutOfOrder(): void
+    {
+        $pipeline = take([1, 2, 3, 4, 5]);
+
+        $first = $pipeline->peek(2);
+
+        $second = $pipeline->peek(2);
+
+        $this->assertSame([5], $pipeline->toList());
+
+        $this->assertSame([3, 4], iterator_to_array($second, false));
+
+        $this->assertSame([1, 2], iterator_to_array($first, false));
     }
 
     private static function xrange(int $start, int $end): iterable
