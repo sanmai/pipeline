@@ -1,20 +1,15 @@
 # Utility Methods
 
-Utility methods provide specialized functionality for tasks like sampling, combining data, and monitoring pipelines.
+Utility methods provide specialized functionality for tasks like sampling and monitoring pipelines.
 
 ## `reservoir()`
 
-Performs reservoir sampling to select a random subset of elements from a pipeline. This is highly memory-efficient, as it does not require loading the entire dataset into memory.
+Performs reservoir sampling to select a random subset of elements from a pipeline. This is a terminal operation and is highly memory-efficient, as it does not require loading the entire dataset into memory.
 
 **Signature**: `reservoir(int $size, ?callable $weightFunc = null): array`
 
 -   `$size`: The number of elements to sample.
 -   `$weightFunc`: An optional function to calculate the weight of each element for weighted sampling.
-
-**Behavior**:
-
--   This is a terminal operation.
--   It uses Algorithm R for uniform sampling and Algorithm A-Chao for weighted sampling.
 
 **Examples**:
 
@@ -23,47 +18,20 @@ Performs reservoir sampling to select a random subset of elements from a pipelin
 $sample = take(new SplFileObject('large.log'))
     ->reservoir(10);
 
-// Weighted sampling
+// Weighted sampling based on priority
 $sample = take($items)
     ->reservoir(5, fn($item) => $item['priority']);
 ```
 
-## `zip()`
-
-Combines multiple iterables into a single pipeline of tuples.
-
-**Signature**: `zip(iterable ...$inputs): self`
-
--   `...$inputs`: The iterables to combine.
-
-**Behavior**:
-
--   Creates a new pipeline where each element is an array of corresponding elements from the input iterables.
--   Shorter iterables are padded with `null`.
-
-**Examples**:
-
-```php
-$result = take(['a', 'b'])
-    ->zip([1, 2], [true, false])
-    ->toList();
-// [['a', 1, true], ['b', 2, false]]
-```
-
 ## `runningCount()`
 
-Counts elements as they pass through the pipeline without consuming it.
+Counts elements as they pass through the pipeline without consuming it. This is a non-terminal operation, useful for monitoring.
 
 **Signature**: `runningCount(?int &$count): self`
 
--   `&$count`: A reference to a counter variable, which will be updated.
+-   `&$count`: A reference to a counter variable that will be updated as elements pass through.
 
-**Behavior**:
-
--   This is a non-terminal operation.
--   It is useful for monitoring the number of elements that have been processed at a certain point in the pipeline.
-
-**Examples**:
+**Example**:
 
 ```php
 $count = 0;
@@ -77,16 +45,11 @@ echo "Count: $count"; // 50
 
 ## `stream()`
 
-Converts an array-based pipeline into a generator-based one, forcing all subsequent operations to be lazy and process elements one by one.
+Converts an array-based pipeline into a generator-based one. This forces all subsequent operations to be lazy and process elements one by one, which is crucial for memory efficiency with large arrays. This is a non-terminal operation.
 
 **Signature**: `stream(): self`
 
-**Behavior**:
-
--   This is a non-terminal operation.
--   It is crucial for memory efficiency when working with large arrays.
-
-**Examples**:
+**Example**:
 
 ```php
 // Process a large array with low memory usage
