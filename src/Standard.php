@@ -788,6 +788,64 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Returns the first N items from the pipeline as an iterable, removing them from the pipeline (destructive).
+     * Users can call prepend() to restore items if non-destructive behavior is needed.
+     *
+     * @param int<0, max> $count Number of items to peek at.
+     *
+     * @return iterable<TKey, TValue> Iterator of peeked items with keys preserved (including duplicate keys).
+     */
+    public function peek(int $count): iterable
+    {
+        // No-op: empty pipeline or zero count
+        if ($this->empty() || $count <= 0) {
+            return [];
+        }
+
+        // Fast-path for arrays
+        if (is_array($this->pipeline)) {
+            $peeked = array_slice($this->pipeline, 0, $count, true);
+            $this->pipeline = array_slice($this->pipeline, $count, null, true);
+
+            return $peeked;
+        }
+
+        // Convert to non-rewindable iterator
+        $generator = self::makeNonRewindable($this->pipeline);
+
+        // Collect items eagerly (to update pipeline state before returning)
+        // And preserve duplicates as tuples
+        $peeked = iterator_to_array(self::toTuples(self::take($generator, $count)));
+
+        // Wrap remaining items in a fresh generator to avoid rewind issues
+        $this->pipeline = self::resumeGenerator($generator);
+
+
+        // Return generator that yields the collected items
+        return self::tuplesToGenerator($peeked);
+    }
+
+    /**
+     * Advances the pointer to counter the optimizations of self::take(), while also deferring the costs.
+     */
+    private static function resumeGenerator(Generator $input): Generator
+    {
+        $input->next();
+
+        while ($input->valid()) {
+            yield $input->key() => $input->current();
+            $input->next();
+        }
+    }
+
+    private static function tuplesToGenerator(iterable $input): Generator
+    {
+        foreach ($input as [$key, $value]) {
+            yield $key => $value;
+        }
+    }
+
+    /**
      * Extracts a slice from the inputs. Keys are not discarded intentionally.
      *
      * @see \array_slice()
@@ -876,6 +934,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Note: it does not call next() upon stopping - caller's responsibility to do that if they want to reuse the iterator.
      * @psalm-param positive-int $take
      */
     private static function take(Iterator $input, int $take): Iterator
