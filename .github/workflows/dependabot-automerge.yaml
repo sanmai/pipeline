@@ -1,0 +1,25 @@
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+name: Dependabot Auto-merge
+
+on:
+  pull_request:
+
+jobs:
+  dependabot_automerge:
+    name: Dependabot Auto-merge
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+
+    steps:
+      - name: Approve PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} --approve --repo ${{ github.repository }}
+
+      - name: Comment to trigger squash and merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "@dependabot squash and merge" --repo ${{ github.repository }}
