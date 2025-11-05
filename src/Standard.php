@@ -788,14 +788,19 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Returns the first N items from the pipeline as an iterable, removing them from the pipeline (destructive).
+     * Returns the first N items from the pipeline as a new pipeline, removing them from the current pipeline (destructive).
      * Users can call prepend() to restore items if non-destructive behavior is needed.
      *
      * @param int<0, max> $count Number of items to peek at.
      *
-     * @return iterable<TKey, TValue> Iterator of peeked items with keys preserved (including duplicate keys).
+     * @return self<TKey, TValue> Pipeline (new instance) of peeked items with keys preserved (including duplicate keys).
      */
-    public function peek(int $count): iterable
+    public function peek(int $count): self
+    {
+        return take($this->peekAsIterable($count));
+    }
+
+    private function peekAsIterable(int $count): iterable
     {
         // No-op: empty pipeline or zero count
         if ($this->empty() || $count <= 0) {
