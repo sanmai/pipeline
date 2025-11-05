@@ -229,6 +229,21 @@ final class PeekTest extends TestCase
         $this->assertSame([1], iterator_to_array($pipeline->peek(1)));
     }
 
+    /**
+     * Test chaining map() on peek result
+     */
+    public function testPeekReturnsFluentPipeline(): void
+    {
+        $pipeline = take([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        $peeked = $pipeline->peek(5)
+            ->cast(fn($x) => $x * 2)
+            ->toList();
+
+        $this->assertSame([2, 4, 6, 8, 10], $peeked);
+        $this->assertSame([6, 7, 8, 9, 10], $pipeline->toList());
+    }
+
     private static function xrange(int $start, int $end): iterable
     {
         for ($i = $start; $i <= $end; $i++) {
