@@ -793,11 +793,11 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param int<0, max> $count Number of items to peek at.
      *
-     * @return self<TKey, TValue> Pipeline of peeked items with keys preserved (including duplicate keys).
+     * @return self<TKey, TValue> Pipeline (new instance) of peeked items with keys preserved (including duplicate keys).
      */
     public function peek(int $count): self
     {
-        return new self($this->peekAsIterable($count));
+        return take($this->peekAsIterable($count));
     }
 
     private function peekAsIterable(int $count): iterable
