@@ -230,7 +230,7 @@ final class PeekTest extends TestCase
     }
 
     /**
-     * Test chaining map() on peek result
+     * Test chaining cast() on peek result
      */
     public function testPeekReturnsFluentPipeline(): void
     {
