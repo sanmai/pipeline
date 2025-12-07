@@ -1,0 +1,219 @@
+# sanmai/pipeline - LLM Quick Reference
+
+## What It Is
+A PHP library for functional-style, lazy data processing using generators. Think of it as a pipe operator (`|>`) for PHP that processes data one item at a time without loading everything into memory.
+
+## Core Principles
+1. **Lazy evaluation by default** - Operations only execute when results are consumed
+2. **Memory-efficient streaming** - Processes items one at a time using generators
+3. **Fluent chainable interface** - Methods return `$this` for chaining
+4. **Mutable pipeline** - Each method modifies the same instance
+5. **No exceptions thrown** - Returns sensible defaults for edge cases
+6. **One-time use** - Like generators, pipelines can't be reused after consumption
+
+## Essential Patterns
+
+### Basic Pipeline Creation
+```php
+use function Pipeline\take;
+use function Pipeline\map;
+use function Pipeline\fromArray;
+
+// From any iterable
+$pipeline = take($data);
+
+// From a generator
+$pipeline = map(function() {
+    yield 1;
+    yield 2;
+});
+
+// From an array
+$pipeline = fromArray([1, 2, 3]);
+```
+
+### Common Transformations
+```php
+take($data)
+    ->filter(fn($x) => $x > 0)        // Keep positive values
+    ->map(fn($x) => $x * 2)            // Transform each element
+    ->slice(0, 10)                     // Take first 10 items
+    ->toList();                        // Terminal: get results as array
+```
+
+### Memory-Safe Processing
+```php
+// ALWAYS use stream() to force lazy evaluation with large arrays
+take($largeArray)
+    ->stream()           // Convert to generator - crucial for memory safety!
+    ->filter($predicate)
+    ->map($transformer)
+    ->toList();
+
+// Process files line-by-line
+take(new SplFileObject('huge.log'))
+    ->filter(fn($line) => str_contains($line, 'ERROR'))
+    ->each(fn($line) => error_log($line));
+```
+
+## Key Methods
+
+### Creation
+- `take($input)` - Start a pipeline from any iterable
+- `map($callback)` - Start with a generator callback
+- `fromArray($array)` - Explicitly from array
+- `fromValues(...$values)` - From individual values
+
+### Transformation (Non-Terminal)
+- `map($callback)` - Transform elements (can yield multiple values)
+- `cast($callback)` - Simple 1-to-1 transformation (no generator expansion)
+- `filter($predicate, $strict)` - Remove elements (null = remove falsy)
+- `chunk($size)` - Group into fixed-size arrays
+- `flatten()` - Flatten one level of nesting
+- `unpack($callback)` - Apply callback to array elements as arguments
+
+### Data Flow
+- `append($iterable)` - Add to end
+- `prepend($iterable)` - Add to beginning
+- `slice($offset, $length)` - Extract portion
+- `stream()` - Force lazy evaluation (critical for arrays!)
+- `zip(...$iterables)` - Combine multiple iterables
+
+### Terminal Operations (Consume Pipeline)
+- `toList()` - Get all values as indexed array (recommended)
+- `toAssoc()` - Get with keys preserved
+- `reduce($func, $initial)` - Reduce to single value
+- `fold($initial, $func)` - Reduce with required initial (preferred)
+- `count()` - Count elements
+- `each($callback)` - Iterate side effects
+- `first()` / `last()` - Get single element
+- `min()` / `max()` - Find extremes
+
+### Special Methods
+- `peek($count)` - Extract and remove first N items (destructive)
+- `tuples()` - Convert [key => value] to [[key, value]]
+- `flip()` - Swap keys and values
+- `values()` / `keys()` - Extract only values or keys
+- `runningCount(&$count)` - Count without consuming
+- `runningVariance(&$variance)` - Collect statistics online
+
+## Critical Performance Tips
+
+### 1. Always Use stream() with Large Arrays
+```php
+// BAD: Creates intermediate arrays in memory
+take($bigArray)->filter()->map()->toList();
+
+// GOOD: Processes one item at a time
+take($bigArray)->stream()->filter()->map()->toList();
+```
+
+### 2. Use fold() Instead of reduce()
+```php
+// GOOD: Explicit initial value, type-safe
+$sum = take($numbers)->fold(0, fn($a, $b) => $a + $b);
+
+// AVOID: Implicit initial, less predictable
+$sum = take($numbers)->reduce();
+```
+
+### 3. Use toList() Instead of iterator_to_array()
+```php
+// GOOD: Handles all edge cases correctly
+$results = $pipeline->toList();
+
+// BAD: Can lose data with duplicate keys
+$results = iterator_to_array($pipeline);
+```
+
+## Advanced Patterns
+
+### Associative Array Manipulation
+```php
+// Pattern: tuples -> transform -> unpack
+take(['a' => 1, 'b' => 2])
+    ->tuples()                                    // [[a, 1], [b, 2]]
+    ->map(fn($t) => ['prefix_'.$t[0], $t[1]])   // Transform pairs
+    ->unpack(fn($k, $v) => yield $k => $v)      // Rebuild array
+    ->toAssoc();                                 // ['prefix_a' => 1, 'prefix_b' => 2]
+```
+
+### Pipeline-Helper Pattern for Testing
+```php
+class ImportHelper {
+    public function isValid($row): bool { /* ... */ }
+    public function normalize($row): array { /* ... */ }
+}
+
+class Importer {
+    public function __construct(private ImportHelper $helper) {}
+
+    public function import($rows) {
+        return take($rows)
+            ->filter($this->helper->isValid(...))
+            ->map($this->helper->normalize(...));
+    }
+}
+```
+
+### Error Collection Pattern
+```php
+$errors = [];
+$results = take($items)
+    ->map(function($item) use (&$errors) {
+        try {
+            return process($item);
+        } catch (Exception $e) {
+            $errors[] = ['item' => $item, 'error' => $e->getMessage()];
+            return null;
+        }
+    })
+    ->filter()  // Remove nulls from errors
+    ->toList();
+```
+
+## Common Pitfalls to Avoid
+
+1. **Reusing consumed pipelines** - Once consumed, create a new pipeline
+2. **Not using stream() with large arrays** - Will cause memory issues
+3. **Using filter() without arguments carelessly** - Removes all falsy values including 0 and ''
+4. **Forgetting pipelines are mutable** - Methods modify the same instance
+5. **Not consuming results** - Nothing happens until you iterate or reduce
+6. **Using negative slice offsets on streams** - Requires buffering, high memory use
+
+## Array-Optimized Methods
+These methods use PHP's native array functions when the pipeline contains an array:
+- `filter()` - Uses array_filter()
+- `cast()` - Uses array_map()
+- `chunk()` - Uses array_chunk()
+- `slice()` - Uses array_slice()
+
+Use `stream()` first to force lazy evaluation if memory is a concern.
+
+## Method Defaults
+- `filter()` with no args removes falsy values
+- `reduce()` with no args sums values
+- `filter(strict: true)` only removes null and false
+- `chunk()` discards keys by default
+
+## Type Safety with Generics
+The library uses PHPDoc generics for static analysis:
+```php
+/** @var Standard<string, int> */
+$pipeline = fromArray(['a' => 1, 'b' => 2]);
+```
+
+## Testing Commands
+```bash
+make test           # Run full test suite
+make cs             # Fix code style
+make analyze        # Run static analysis
+make infection      # Run mutation testing
+```
+
+## Remember
+- **Think in streams, not arrays** - Mental model should be "one item flows through"
+- **Lazy is the default** - Nothing executes until consumed
+- **Memory safety requires stream()** - Critical for large arrays
+- **Use specialized helpers** - `toList()`, `fold()`, not generic PHP functions
+- **Pipelines are mutable and single-use** - Like generators they wrap
