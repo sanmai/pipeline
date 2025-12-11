@@ -17,9 +17,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh pr review ${{ github.event.pull_request.number }} --approve --repo ${{ github.repository }}
-
-      - name: Comment to trigger squash and merge
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "@dependabot squash and merge" --repo ${{ github.repository }}
