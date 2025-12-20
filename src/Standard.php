@@ -673,10 +673,6 @@ class Standard implements IteratorAggregate, Countable
 
         $iterator = $this->getIterator();
 
-        while ($iterator instanceof IteratorAggregate) {
-            $iterator = $iterator->getIterator();
-        }
-
         // Avoid double wrapping
         if ($iterator instanceof NoRewindIterator) {
             return $iterator;
