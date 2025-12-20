@@ -49,7 +49,7 @@ class CursorIterator extends NoRewindIterator
     {
         parent::__construct($iterator);
 
-        // Get the inner iterator ready: else valid()/current() won't work
+        // Get the inner iterator ready; otherwise valid()/current() won't work
         $iterator->rewind();
     }
 
