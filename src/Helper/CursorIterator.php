@@ -22,6 +22,7 @@ namespace Pipeline\Helper;
 
 use Iterator;
 use NoRewindIterator;
+use Override;
 
 /**
  * A forward-only iterator that auto-advances when iteration resumes.
@@ -47,9 +48,10 @@ class CursorIterator extends NoRewindIterator
     public function __construct(Iterator $iterator)
     {
         parent::__construct($iterator);
-        $this->getInnerIterator()->rewind();
+        $iterator->rewind();
     }
 
+    #[Override]
     public function rewind(): void
     {
         if (!$this->started) {
