@@ -47,9 +47,7 @@ final class CursorTest extends TestCase
 
         yield 'IteratorAggregate' => [take(new Standard(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5]))))];
 
-        yield 'generator' => [map(function () {
-            yield from [1, 2, 3, 4, 5];
-        })];
+        yield 'generator' => [map(fn() => yield from [1, 2, 3, 4, 5])];
 
         yield 'stream' => [fromArray([1, 2, 3, 4, 5])->stream()];
     }
