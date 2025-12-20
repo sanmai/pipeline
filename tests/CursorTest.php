@@ -55,7 +55,7 @@ final class CursorTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
-    public function testCursorContinuesAfterBreak(\Pipeline\Standard $pipeline): void
+    public function testCursorContinuesAfterBreak(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
 
@@ -81,7 +81,7 @@ final class CursorTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
-    public function testCursorWithTakeCount(\Pipeline\Standard $pipeline): void
+    public function testCursorWithTakeCount(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
 
@@ -98,7 +98,7 @@ final class CursorTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
-    public function testCursorWithTakeReduce(\Pipeline\Standard $pipeline): void
+    public function testCursorWithTakeReduce(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
 
@@ -115,7 +115,7 @@ final class CursorTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
-    public function testExhaustedCursorReturnsEmpty(\Pipeline\Standard $pipeline): void
+    public function testExhaustedCursorReturnsEmpty(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
 
