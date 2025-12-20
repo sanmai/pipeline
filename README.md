@@ -228,7 +228,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	// Exception: Cannot traverse an already closed generator
 	```
  
-  Although there are some cases where a pipeline can be rewound and reused just like a regular array, a user should make no assumptions about this behavior as it is not a part of the API compatibility guarantees.
+  Although there are some cases where a pipeline can be rewound and reused just like a regular array, if you need to pause iteration and continue later, or if you need to iterate strictly once without accidental resets or exceptions, use [`$pipeline->cursor()`](#pipeline-cursor).
  
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
