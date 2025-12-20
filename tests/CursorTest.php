@@ -20,80 +20,191 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use NoRewindIterator;
+use ArrayIterator;
+use IteratorIterator;
 use PHPUnit\Framework\TestCase;
+use Iterator;
+use Pipeline\Standard;
 
 use function Pipeline\fromArray;
+use function Pipeline\map;
+use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
+ * @covers \Pipeline\Standard::cursor
  *
  * @internal
  */
 final class CursorTest extends TestCase
 {
-    public function testIterateTwiceFails()
+    public static function provideIterables(): iterable
     {
-        $pipeline = fromArray([1, 2, 3, 4, 5])->stream();
+        yield 'array' => [fromArray([1, 2, 3, 4, 5])];
 
-        foreach ($pipeline as $i) {
+        yield 'ArrayIterator' => [take(new ArrayIterator([1, 2, 3, 4, 5]))];
+
+        yield 'IteratorIterator' => [take(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5])))];
+
+        yield 'IteratorAggregate' => [take(new Standard(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5]))))];
+
+        yield 'generator' => [map(function () {
+            yield from [1, 2, 3, 4, 5];
+        })];
+
+        yield 'stream' => [fromArray([1, 2, 3, 4, 5])->stream()];
+    }
+
+    /**
+     * @dataProvider provideIterables
+     */
+    public function testCursorContinuesAfterBreak(\Pipeline\Standard $pipeline): void
+    {
+        $cursor = $pipeline->cursor();
+
+        $collected = [];
+        foreach ($cursor as $i) {
+            $collected[] = $i;
             if (2 === $i) {
                 break;
             }
         }
 
-        $this->expectExceptionMessage("Cannot rewind a generator");
-        foreach ($pipeline as $i) {
-            echo "$i\n";
+        $this->assertSame([1, 2], $collected);
+
+        $remaining = [];
+        foreach ($cursor as $i) {
+            $remaining[] = $i;
         }
 
-        $this->assertSame($i, 5);
+        // NoRewindIterator resumes at current position, so element 2 appears again
+        $this->assertSame([2, 3, 4, 5], $remaining);
     }
 
-    public function testIterateTwiceSucceeds()
+    /**
+     * @dataProvider provideIterables
+     */
+    public function testCursorWithTakeCount(\Pipeline\Standard $pipeline): void
     {
-        $pipeline = fromArray([1, 2, 3, 4, 5])->stream();
+        $cursor = $pipeline->cursor();
 
-        $pipeline = new NoRewindIterator($pipeline->getIterator());
-
-        foreach ($pipeline as $i) {
-            echo "testIterateTwiceSucceeds-1: $i\n";
-
+        foreach ($cursor as $i) {
             if (2 === $i) {
                 break;
             }
         }
 
-        foreach ($pipeline as $i) {
-            echo "testIterateTwiceSucceeds-2: $i\n";
-        }
-
-        $this->assertSame($i, 5);
+        // Resumes at current position (2), so 4 elements remain: 2, 3, 4, 5
+        $this->assertSame(4, take($cursor)->count());
     }
 
-    public function testIterateTwiceSucceeds2()
+    /**
+     * @dataProvider provideIterables
+     */
+    public function testCursorWithTakeReduce(\Pipeline\Standard $pipeline): void
     {
-        $pipeline = fromArray([1, 2, 3, 4, 5])->stream();
+        $cursor = $pipeline->cursor();
 
-        $pipeline->toList()
-
-        $pipeline = new NoRewindIterator($pipeline->getIterator());
-
-        foreach ($pipeline as $i) {
-            echo "testIterateTwiceSucceeds-1: $i\n";
-
+        foreach ($cursor as $i) {
             if (2 === $i) {
                 break;
             }
         }
 
-        foreach ($pipeline as $i) {
-            echo "testIterateTwiceSucceeds-2: $i\n";
-        }
-
-
-
-        $this->assertSame($i, 5);
+        // Remaining: 2 + 3 + 4 + 5 = 14
+        $this->assertSame(14, take($cursor)->reduce());
     }
 
+    /**
+     * @dataProvider provideIterables
+     */
+    public function testExhaustedCursorReturnsEmpty(\Pipeline\Standard $pipeline): void
+    {
+        $cursor = $pipeline->cursor();
+
+        // Consume all elements
+        foreach ($cursor as $i) {
+            // drain
+        }
+
+        $remaining = [];
+        foreach ($cursor as $i) {
+            $remaining[] = $i;
+        }
+
+        $this->assertSame([], $remaining);
+    }
+
+    public function testCursorReturnsIterator(): void
+    {
+        $pipeline = fromArray([1, 2, 3]);
+        $cursor = $pipeline->cursor();
+
+        $this->assertInstanceOf(Iterator::class, $cursor);
+    }
+
+    public function testCursorAvoidDoubleWrapping(): void
+    {
+        $pipeline = fromArray([1, 2, 3]);
+
+        $cursor1 = $pipeline->cursor();
+        $cursor2 = take($cursor1)->cursor();
+
+        // Should be the same instance (no double wrapping)
+        $this->assertSame($cursor1, $cursor2);
+    }
+
+    public function testCursorWithEmptyPipeline(): void
+    {
+        $pipeline = fromArray([]);
+        $cursor = $pipeline->cursor();
+
+        $collected = [];
+        foreach ($cursor as $i) {
+            $collected[] = $i;
+        }
+
+        $this->assertSame([], $collected);
+    }
+
+    public function testCursorPreservesKeys(): void
+    {
+        $pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+        $cursor = $pipeline->cursor();
+
+        $collected = [];
+        foreach ($cursor as $key => $value) {
+            $collected[$key] = $value;
+            if ('a' === $key) {
+                break;
+            }
+        }
+
+        $this->assertSame(['a' => 1], $collected);
+
+        $remaining = [];
+        foreach ($cursor as $key => $value) {
+            $remaining[$key] = $value;
+        }
+
+        // Resumes at current position, so 'a' appears again
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $remaining);
+    }
+
+    public function testCursorManualIteration(): void
+    {
+        $pipeline = fromArray([1, 2, 3]);
+        $cursor = $pipeline->cursor();
+
+        $this->assertTrue($cursor->valid());
+        $this->assertSame(1, $cursor->current());
+
+        $cursor->next();
+        $this->assertSame(2, $cursor->current());
+
+        $cursor->next();
+        $this->assertSame(3, $cursor->current());
+
+        $cursor->next();
+        $this->assertFalse($cursor->valid());
+    }
 }
