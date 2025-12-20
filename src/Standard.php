@@ -30,7 +30,7 @@ use Iterator;
 use IteratorAggregate;
 use Traversable;
 use Override;
-use NoRewindIterator;
+use Pipeline\Helper\CursorIterator;
 
 use function array_chunk;
 use function array_filter;
@@ -674,16 +674,12 @@ class Standard implements IteratorAggregate, Countable
         $iterator = $this->getIterator();
 
         // Avoid double wrapping
-        if ($iterator instanceof NoRewindIterator) {
+        if ($iterator instanceof CursorIterator) {
             return $iterator;
         }
 
-        // NoRewindIterator's rewind() is a no-op, but some iterators
-        // need rewind() to initialize before they can be used
         /** @var Iterator $iterator */
-        $iterator->rewind();
-
-        return new NoRewindIterator($iterator);
+        return new CursorIterator($iterator);
     }
 
     /**

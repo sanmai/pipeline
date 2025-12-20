@@ -470,7 +470,7 @@ foreach ($cursor as $value) {
 
 // Continue with remaining elements
 foreach ($cursor as $value) {
-    echo $value; // 2, 3, 4, 5
+    echo $value; // 3, 4, 5
 }
 
 // Or use take() to re-enter Pipeline world

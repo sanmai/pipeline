@@ -24,6 +24,7 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Iterator;
+use Pipeline\Helper\CursorIterator;
 use Pipeline\Standard;
 
 use function Pipeline\fromArray;
@@ -32,6 +33,7 @@ use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard::cursor
+ * @covers \Pipeline\Helper\CursorIterator
  *
  * @internal
  */
@@ -74,8 +76,8 @@ final class CursorTest extends TestCase
             $remaining[] = $i;
         }
 
-        // NoRewindIterator resumes at current position, so element 2 appears again
-        $this->assertSame([2, 3, 4, 5], $remaining);
+        // CursorIterator auto-advances past the break point
+        $this->assertSame([3, 4, 5], $remaining);
     }
 
     /**
@@ -91,8 +93,8 @@ final class CursorTest extends TestCase
             }
         }
 
-        // Resumes at current position (2), so 4 elements remain: 2, 3, 4, 5
-        $this->assertSame(4, take($cursor)->count());
+        // 3 elements remain: 3, 4, 5
+        $this->assertSame(3, take($cursor)->count());
     }
 
     /**
@@ -108,8 +110,8 @@ final class CursorTest extends TestCase
             }
         }
 
-        // Remaining: 2 + 3 + 4 + 5 = 14
-        $this->assertSame(14, take($cursor)->reduce());
+        // Remaining: 3 + 4 + 5 = 12
+        $this->assertSame(12, take($cursor)->reduce());
     }
 
     /**
@@ -184,8 +186,8 @@ final class CursorTest extends TestCase
             $remaining[$key] = $value;
         }
 
-        // Resumes at current position, so 'a' appears again
-        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $remaining);
+        // CursorIterator auto-advances past 'a'
+        $this->assertSame(['b' => 2, 'c' => 3], $remaining);
     }
 
     public function testCursorManualIteration(): void
