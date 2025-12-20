@@ -27,6 +27,7 @@ use Iterator;
 use Pipeline\Helper\CursorIterator;
 use Pipeline\Standard;
 
+use function iterator_count;
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use function Pipeline\take;
@@ -100,6 +101,19 @@ final class CursorTest extends TestCase
     /**
      * @dataProvider provideIterables
      */
+    public function testCursorWithSlice(Standard $pipeline): void
+    {
+        $cursor = $pipeline->cursor();
+
+        $this->assertSame([1, 2], take($cursor)->slice(0, 2)->toList());
+
+        // 3 elements remain: 3, 4, 5
+        $this->assertSame(3, take($cursor)->count());
+    }
+
+    /**
+     * @dataProvider provideIterables
+     */
     public function testCursorWithTakeReduce(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -122,9 +136,7 @@ final class CursorTest extends TestCase
         $cursor = $pipeline->cursor();
 
         // Consume all elements
-        foreach ($cursor as $i) {
-            // drain
-        }
+        $this->assertSame(5, iterator_count($cursor));
 
         $remaining = [];
         foreach ($cursor as $i) {
@@ -158,12 +170,7 @@ final class CursorTest extends TestCase
         $pipeline = fromArray([]);
         $cursor = $pipeline->cursor();
 
-        $collected = [];
-        foreach ($cursor as $i) {
-            $collected[] = $i;
-        }
-
-        $this->assertSame([], $collected);
+        $this->assertSame([], take($cursor)->toList());
     }
 
     public function testCursorPreservesKeys(): void
