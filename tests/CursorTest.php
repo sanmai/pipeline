@@ -30,7 +30,7 @@ use function Pipeline\fromArray;
  *
  * @internal
  */
-final class NoRewindTest extends TestCase
+final class CursorTest extends TestCase
 {
     public function testIterateTwiceFails()
     {
@@ -70,4 +70,30 @@ final class NoRewindTest extends TestCase
 
         $this->assertSame($i, 5);
     }
+
+    public function testIterateTwiceSucceeds2()
+    {
+        $pipeline = fromArray([1, 2, 3, 4, 5])->stream();
+
+        $pipeline->toList()
+
+        $pipeline = new NoRewindIterator($pipeline->getIterator());
+
+        foreach ($pipeline as $i) {
+            echo "testIterateTwiceSucceeds-1: $i\n";
+
+            if (2 === $i) {
+                break;
+            }
+        }
+
+        foreach ($pipeline as $i) {
+            echo "testIterateTwiceSucceeds-2: $i\n";
+        }
+
+
+
+        $this->assertSame($i, 5);
+    }
+
 }
