@@ -28,7 +28,7 @@ use Override;
  * A forward-only iterator that auto-advances when iteration resumes.
  *
  * Unlike NoRewindIterator which repeats the current element on resume,
- * CursorIterator advances past it - matching database cursor semantics.
+ * CursorIterator advances past it as a database cursor would.
  *
  * @template TKey
  * @template TValue
