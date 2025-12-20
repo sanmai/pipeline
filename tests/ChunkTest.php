@@ -69,6 +69,11 @@ final class ChunkTest extends TestCase
             $iteratorItem[2] = fromArray($iteratorItem[2]);
 
             yield $iteratorItem;
+
+            $iteratorItem = $item;
+            $iteratorItem[2] = take($iteratorItem[2]);
+
+            yield $iteratorItem;
         }
     }
 

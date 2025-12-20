@@ -237,7 +237,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
     /** @var $iterator \Iterator */
     ```
 
-- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this.
+- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this. If you need to break out of iteration and continue later, see [`cursor()`](#pipeline-cursor).
 
 # Classes and interfaces: overview
 
@@ -452,6 +452,30 @@ foreach ($pipeline as $value) {
 ```
 
 This allows to skip type checks for return values if one has no results to return: instead of `false` or `null` it is safe to return an unprimed pipeline.
+
+## `$pipeline->cursor()`
+
+Returns a forward-only iterator that maintains position across iterations. A cursor allows breaking out of a loop and continuing later:
+
+```php
+$pipeline = \Pipeline\fromArray([1, 2, 3, 4, 5]);
+$cursor = $pipeline->cursor();
+
+foreach ($cursor as $value) {
+    echo $value; // 1, 2
+    if ($value === 2) {
+        break;
+    }
+}
+
+// Continue with remaining elements
+foreach ($cursor as $value) {
+    echo $value; // 3, 4, 5
+}
+
+// Or use take() to re-enter Pipeline world
+$remaining = \Pipeline\take($cursor)->count();
+```
 
 ## `$pipeline->runningVariance()`
 

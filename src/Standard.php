@@ -30,6 +30,7 @@ use Iterator;
 use IteratorAggregate;
 use Traversable;
 use Override;
+use Pipeline\Helper\CursorIterator;
 
 use function array_chunk;
 use function array_filter;
@@ -658,6 +659,27 @@ class Standard implements IteratorAggregate, Countable
         }
 
         return new ArrayIterator($this->pipeline);
+    }
+
+    /**
+     * Returns a forward-only iterator that maintains position across iterations.
+     * @return Iterator<TKey, TValue>
+     */
+    public function cursor(): Iterator
+    {
+        if ($this->empty()) {
+            return new EmptyIterator();
+        }
+
+        $iterator = $this->getIterator();
+
+        // Avoid double wrapping
+        if ($iterator instanceof CursorIterator) {
+            return $iterator;
+        }
+
+        /** @var Iterator $iterator */
+        return new CursorIterator($iterator);
     }
 
     /**
