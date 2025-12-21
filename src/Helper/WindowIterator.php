@@ -48,6 +48,8 @@ class WindowIterator implements Iterator
 
     private bool $innerExhausted = false;
 
+    private bool $initialized = false;
+
     /** @var Iterator<TKey, TValue> */
     private Iterator $inner;
 
@@ -60,21 +62,30 @@ class WindowIterator implements Iterator
         $this->inner = $iterator;
         $this->maxSize = $size;
         $this->buffer = new SplDoublyLinkedList();
+    }
 
-        // Eager initialization
-        $iterator->rewind();
-        if (!$iterator->valid()) {
+    private function initialize(): void
+    {
+        if ($this->initialized) {
+            return;
+        }
+        $this->initialized = true;
+
+        $this->inner->rewind();
+        if (!$this->inner->valid()) {
             $this->innerExhausted = true;
 
             return;
         }
 
-        $this->buffer->push([$iterator->key(), $iterator->current()]);
+        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
     }
 
     #[Override]
     public function current(): mixed
     {
+        $this->initialize();
+
         if (!$this->valid()) {
             return null;
         }
@@ -85,6 +96,8 @@ class WindowIterator implements Iterator
     #[Override]
     public function key(): mixed
     {
+        $this->initialize();
+
         if (!$this->valid()) {
             return null;
         }
@@ -126,12 +139,15 @@ class WindowIterator implements Iterator
     #[Override]
     public function rewind(): void
     {
+        $this->initialize();
         $this->position = 0;
     }
 
     #[Override]
     public function valid(): bool
     {
+        $this->initialize();
+
         return $this->position >= 0 && $this->position < $this->buffer->count();
     }
 }
