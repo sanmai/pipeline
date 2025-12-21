@@ -647,6 +647,14 @@ class Standard implements IteratorAggregate, Countable
         return $carry;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * We stripped IteratorAggregate in the constructor/replace(),
+     * so this is guaranteed to be an Iterator.
+     *
+     * @return Iterator<TKey, TValue>
+     */
     #[Override]
     public function getIterator(): Traversable
     {
