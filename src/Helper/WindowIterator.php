@@ -96,20 +96,13 @@ class WindowIterator implements Iterator
         }
 
         // Fetch from inner
-        $this->inner->next();
-        if (!$this->inner->valid()) {
-            $this->innerExhausted = true;
+        $this->fetch();
 
-            return;
-        }
-
-        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
-
-        // Trim if over limit
         if (null === $this->maxSize) {
             return;
         }
 
+        // Trim if over limit
         while ($this->buffer->count() > $this->maxSize) {
             $this->buffer->shift();
             --$this->position;
@@ -137,7 +130,15 @@ class WindowIterator implements Iterator
         }
         $this->initialized = true;
 
-        $this->inner->rewind();
+        $this->fetch(rewind: true);
+    }
+
+    private function fetch(bool $rewind = false): void
+    {
+        match ($rewind) {
+            false => $this->inner->next(),
+            true => $this->inner->rewind(),
+        };
 
         if (!$this->inner->valid()) {
             $this->innerExhausted = true;
