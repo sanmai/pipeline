@@ -48,7 +48,6 @@ final class EagerWithArraysTest extends TestCase
     {
         $reflectionClass = new ReflectionClass(Standard::class);
         $reflectionProperty = $reflectionClass->getProperty('pipeline');
-        $reflectionProperty->setAccessible(true);
 
         $pipeline->filter();
         // At this point $pipeline should contain exactly [1, 2, 3]
