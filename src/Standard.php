@@ -691,7 +691,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * With a size limit, oldest elements are dropped (sliding window).
      *
-     * @param int|null $size Maximum buffer size (null = unlimited)
+     * @param int<1, max>|null $size Maximum buffer size (null = unlimited)
      * @return Iterator<TKey, TValue>
      */
     public function window(?int $size = null): Iterator

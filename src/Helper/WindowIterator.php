@@ -50,7 +50,7 @@ class WindowIterator implements Iterator
 
     /**
      * @param Iterator<TKey, TValue> $inner
-     * @param int|null $maxSize Maximum buffer size (null = unlimited)
+     * @param int<1, max>|null $maxSize Maximum buffer size (null = unlimited)
      */
     public function __construct(
         private readonly Iterator $inner,
@@ -123,6 +123,13 @@ class WindowIterator implements Iterator
         }
         $this->initialized = true;
 
+        // If inner is already pointing at data (e.g. a started generator), capture it
+        if ($this->inner->valid()) {
+            $this->pushFromInner();
+
+            return;
+        }
+
         $this->fetch(rewind: true);
     }
 
@@ -139,6 +146,11 @@ class WindowIterator implements Iterator
             return;
         }
 
+        $this->pushFromInner();
+    }
+
+    private function pushFromInner(): void
+    {
         $this->buffer->push([$this->inner->key(), $this->inner->current()]);
     }
 }

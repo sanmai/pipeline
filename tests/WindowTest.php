@@ -408,4 +408,32 @@ final class WindowTest extends TestCase
         $window->next();
         $this->assertSame(0, $nextCalls);
     }
+
+    public function testWindowWithStartedGenerator(): void
+    {
+        $generator = (function () {
+            yield 1;
+            yield 2;
+            yield 3;
+        })();
+
+        // Advance the generator - it's now "dirty"
+        $generator->next();
+        $this->assertSame(2, $generator->current());
+
+        // Wrapping in WindowIterator should not throw "Cannot rewind a generator"
+        $window = new WindowIterator($generator);
+
+        // Should capture current element (2) and continue
+        $collected = [];
+        foreach ($window as $value) {
+            $collected[] = $value;
+        }
+
+        $this->assertSame([2, 3], $collected);
+
+        // Can rewind and replay
+        $window->rewind();
+        $this->assertSame([2, 3], take($window)->toList());
+    }
 }
