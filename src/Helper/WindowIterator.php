@@ -64,22 +64,6 @@ class WindowIterator implements Iterator
         $this->buffer = new SplDoublyLinkedList();
     }
 
-    private function initialize(): void
-    {
-        if ($this->initialized) {
-            return;
-        }
-        $this->initialized = true;
-
-        $this->inner->rewind();
-        if (!$this->inner->valid()) {
-            $this->innerExhausted = true;
-
-            return;
-        }
-
-        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
-    }
 
     #[Override]
     public function current(): mixed
@@ -144,5 +128,23 @@ class WindowIterator implements Iterator
         $this->initialize();
 
         return $this->position >= 0 && $this->position < $this->buffer->count();
+    }
+
+    private function initialize(): void
+    {
+        if ($this->initialized) {
+            return;
+        }
+        $this->initialized = true;
+
+        $this->inner->rewind();
+
+        if (!$this->inner->valid()) {
+            $this->innerExhausted = true;
+
+            return;
+        }
+
+        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
     }
 }
