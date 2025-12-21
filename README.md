@@ -228,7 +228,7 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 	// Exception: Cannot traverse an already closed generator
 	```
  
-  Although there are some cases where a pipeline can be rewound and reused just like a regular array, if you need to pause iteration and continue later, or if you need to iterate strictly once without accidental resets or exceptions, use [`$pipeline->cursor()`](#pipeline-cursor).
+  Although there are some cases where a pipeline can be rewound and reused just like a regular array, if you need to pause iteration and continue later, or if you need to iterate strictly once without accidental resets or exceptions, use [`$pipeline->cursor()`](#pipeline-cursor). If you need to rewind and replay seen elements, use [`$pipeline->window()`](#pipeline-window).
  
 - Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
 
@@ -475,6 +475,46 @@ foreach ($cursor as $value) {
 
 // Or use take() to re-enter Pipeline world
 $remaining = \Pipeline\take($cursor)->count();
+```
+
+## `$pipeline->window()`
+
+Returns a rewindable iterator that caches elements for replay. Unlike `cursor()` which is forward-only, `window()` buffers seen elements allowing rewind within the buffer bounds:
+
+```php
+$pipeline = \Pipeline\fromArray([1, 2, 3, 4, 5]);
+$window = $pipeline->window();
+
+foreach ($window as $value) {
+    echo $value; // 1, 2, 3
+    if ($value === 3) {
+        break;
+    }
+}
+
+// Rewind and replay from beginning
+$window->rewind();
+foreach ($window as $value) {
+    echo $value; // 1, 2, 3, 4, 5 (full replay)
+}
+```
+
+With a size limit, oldest elements are dropped (sliding window):
+
+```php
+$window = $pipeline->window(3);  // Keep last 3 elements
+
+foreach ($window as $value) {
+    if ($value === 4) {
+        break;  // Saw: 1, 2, 3, 4
+    }
+}
+
+// Rewind - oldest element (1) was dropped
+$window->rewind();
+foreach ($window as $value) {
+    echo $value; // 2, 3, 4, 5 (buffer had [2,3,4], then continues)
+}
 ```
 
 ## `$pipeline->runningVariance()`

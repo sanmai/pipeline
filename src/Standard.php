@@ -31,6 +31,7 @@ use IteratorAggregate;
 use Traversable;
 use Override;
 use Pipeline\Helper\CursorIterator;
+use Pipeline\Helper\WindowIterator;
 
 use function array_chunk;
 use function array_filter;
@@ -680,6 +681,34 @@ class Standard implements IteratorAggregate, Countable
 
         /** @var Iterator $iterator */
         return new CursorIterator($iterator);
+    }
+
+    /**
+     * Returns a rewindable iterator that caches elements for replay.
+     *
+     * Unlike cursor() which is forward-only, window() buffers seen elements
+     * allowing rewind within the buffer bounds.
+     *
+     * With a size limit, oldest elements are dropped (sliding window).
+     *
+     * @param int|null $size Maximum buffer size (null = unlimited)
+     * @return Iterator<TKey, TValue>
+     */
+    public function window(?int $size = null): Iterator
+    {
+        if ($this->empty()) {
+            return new EmptyIterator();
+        }
+
+        $iterator = $this->getIterator();
+
+        // Avoid double wrapping
+        if ($iterator instanceof WindowIterator) {
+            return $iterator;
+        }
+
+        /** @var Iterator $iterator */
+        return new WindowIterator($iterator, $size);
     }
 
     /**
