@@ -40,30 +40,24 @@ use SplDoublyLinkedList;
 class WindowIterator implements Iterator
 {
     /** @var SplDoublyLinkedList<array{TKey, TValue}> */
-    private SplDoublyLinkedList $buffer;
+    private readonly SplDoublyLinkedList $buffer;
 
     private int $position = 0;
-
-    private ?int $maxSize;
 
     private bool $innerExhausted = false;
 
     private bool $initialized = false;
 
-    /** @var Iterator<TKey, TValue> */
-    private Iterator $inner;
-
     /**
-     * @param Iterator<TKey, TValue> $iterator
-     * @param int|null $size Maximum buffer size (null = unlimited)
+     * @param Iterator<TKey, TValue> $inner
+     * @param int|null $maxSize Maximum buffer size (null = unlimited)
      */
-    public function __construct(Iterator $iterator, ?int $size = null)
-    {
-        $this->inner = $iterator;
-        $this->maxSize = $size;
+    public function __construct(
+        private readonly Iterator $inner,
+        private readonly ?int $maxSize = null
+    ) {
         $this->buffer = new SplDoublyLinkedList();
     }
-
 
     #[Override]
     public function current(): mixed
