@@ -84,8 +84,6 @@ class WindowIterator implements Iterator
     #[Override]
     public function current(): mixed
     {
-        $this->initialize();
-
         if (!$this->valid()) {
             return null;
         }
@@ -96,8 +94,6 @@ class WindowIterator implements Iterator
     #[Override]
     public function key(): mixed
     {
-        $this->initialize();
-
         if (!$this->valid()) {
             return null;
         }
@@ -139,7 +135,6 @@ class WindowIterator implements Iterator
     #[Override]
     public function rewind(): void
     {
-        $this->initialize();
         $this->position = 0;
     }
 
