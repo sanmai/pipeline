@@ -49,7 +49,7 @@ all: test
 
 ci-test: SILENT=
 ci-test: prerequisites
-	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP)
+	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_COVERAGE_CLOVER) --group=$(PHPUNIT_GROUP) --display-deprecations
 	$(SILENT) $(PHP) vendor/bin/coverage-check build/logs/clover.xml 100
 
 ci-analyze: SILENT=
