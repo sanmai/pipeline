@@ -22,7 +22,6 @@ namespace Pipeline\Helper;
 
 use Iterator;
 use Override;
-use SplDoublyLinkedList;
 
 /**
  * A rewindable iterator that caches elements for replay.
@@ -39,8 +38,8 @@ use SplDoublyLinkedList;
  */
 class WindowIterator implements Iterator
 {
-    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
-    private readonly SplDoublyLinkedList $buffer;
+    /** @var FixedLengthList<array{TKey, TValue}> */
+    private readonly FixedLengthList $buffer;
 
     private int $position = 0;
 
@@ -54,9 +53,9 @@ class WindowIterator implements Iterator
      */
     public function __construct(
         private readonly Iterator $inner,
-        private readonly ?int $maxSize = null
+        ?int $maxSize = null
     ) {
-        $this->buffer = new SplDoublyLinkedList();
+        $this->buffer = new FixedLengthList($maxSize);
     }
 
     #[Override]
@@ -66,7 +65,10 @@ class WindowIterator implements Iterator
             return null;
         }
 
-        return $this->buffer[$this->position][1];
+        /** @var array{TKey, TValue} $item */
+        $item = $this->buffer[$this->position];
+
+        return $item[1];
     }
 
     #[Override]
@@ -76,7 +78,10 @@ class WindowIterator implements Iterator
             return null;
         }
 
-        return $this->buffer[$this->position][0];
+        /** @var array{TKey, TValue} $item */
+        $item = $this->buffer[$this->position];
+
+        return $item[0];
     }
 
     #[Override]
@@ -85,21 +90,11 @@ class WindowIterator implements Iterator
         ++$this->position;
 
         // If still within buffer or inner exhausted, nothing to fetch
-        if ($this->position < $this->buffer->count() || $this->innerExhausted) {
+        if ($this->innerExhausted || $this->position < $this->buffer->count()) {
             return;
         }
 
         $this->fetch();
-
-        if (null === $this->maxSize) {
-            return;
-        }
-
-        // Trim if over limit
-        while ($this->buffer->count() > $this->maxSize) {
-            $this->buffer->shift();
-            --$this->position;
-        }
     }
 
     #[Override]
@@ -151,6 +146,10 @@ class WindowIterator implements Iterator
 
     private function pushFromInner(): void
     {
-        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
+        if (!$this->buffer->push([$this->inner->key(), $this->inner->current()])) {
+            return;
+        }
+
+        --$this->position;
     }
 }
