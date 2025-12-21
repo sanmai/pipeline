@@ -22,7 +22,6 @@ namespace Pipeline\Helper;
 
 use Iterator;
 use Override;
-use SplDoublyLinkedList;
 
 /**
  * A rewindable iterator that caches elements for replay.
@@ -39,8 +38,12 @@ use SplDoublyLinkedList;
  */
 class WindowIterator implements Iterator
 {
-    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
-    private readonly SplDoublyLinkedList $buffer;
+    /** @var array<int, array{TKey, TValue}> */
+    private array $buffer = [];
+
+    private int $headKey = 0;
+
+    private int $tailKey = 0;
 
     private int $position = 0;
 
@@ -55,9 +58,7 @@ class WindowIterator implements Iterator
     public function __construct(
         private readonly Iterator $inner,
         private readonly ?int $maxSize = null
-    ) {
-        $this->buffer = new SplDoublyLinkedList();
-    }
+    ) {}
 
     #[Override]
     public function current(): mixed
@@ -66,7 +67,7 @@ class WindowIterator implements Iterator
             return null;
         }
 
-        return $this->buffer[$this->position][1];
+        return $this->buffer[$this->headKey + $this->position][1];
     }
 
     #[Override]
@@ -76,7 +77,7 @@ class WindowIterator implements Iterator
             return null;
         }
 
-        return $this->buffer[$this->position][0];
+        return $this->buffer[$this->headKey + $this->position][0];
     }
 
     #[Override]
@@ -85,7 +86,9 @@ class WindowIterator implements Iterator
         ++$this->position;
 
         // If still within buffer or inner exhausted, nothing to fetch
-        if ($this->position < $this->buffer->count() || $this->innerExhausted) {
+        $bufferCount = $this->tailKey - $this->headKey;
+
+        if ($this->position < $bufferCount || $this->innerExhausted) {
             return;
         }
 
@@ -95,9 +98,9 @@ class WindowIterator implements Iterator
             return;
         }
 
-        // Trim if over limit
-        while ($this->buffer->count() > $this->maxSize) {
-            $this->buffer->shift();
+        while ($this->tailKey - $this->headKey > $this->maxSize) {
+            unset($this->buffer[$this->headKey]);
+            ++$this->headKey;
             --$this->position;
         }
     }
@@ -113,7 +116,7 @@ class WindowIterator implements Iterator
     {
         $this->initialize();
 
-        return $this->position < $this->buffer->count();
+        return $this->position < $this->tailKey - $this->headKey;
     }
 
     private function initialize(): void
@@ -151,6 +154,6 @@ class WindowIterator implements Iterator
 
     private function pushFromInner(): void
     {
-        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
+        $this->buffer[$this->tailKey++] = [$this->inner->key(), $this->inner->current()];
     }
 }
