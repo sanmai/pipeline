@@ -89,7 +89,6 @@ class WindowIterator implements Iterator
             return;
         }
 
-        // Fetch from inner
         $this->fetch();
 
         if (null === $this->maxSize) {
@@ -114,7 +113,7 @@ class WindowIterator implements Iterator
     {
         $this->initialize();
 
-        return $this->position >= 0 && $this->position < $this->buffer->count();
+        return $this->position < $this->buffer->count();
     }
 
     private function initialize(): void
