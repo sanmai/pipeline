@@ -81,7 +81,6 @@ final class ArraysTest extends TestCase
 
         $reflectionClass = new ReflectionObject($pipeline);
         $reflectionProperty = $reflectionClass->getProperty('pipeline');
-        $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($pipeline, [
             1 => 1,
             2 => 2,
