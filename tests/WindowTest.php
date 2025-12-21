@@ -73,8 +73,7 @@ final class WindowTest extends TestCase
 
         $this->assertSame([1, 2, 3], $collected);
 
-        // Rewind and replay from beginning
-        $window->rewind();
+        // Replay from beginning
         $replayed = [];
         foreach ($window as $i) {
             $replayed[] = $i;
@@ -102,7 +101,6 @@ final class WindowTest extends TestCase
         $this->assertSame([1, 2, 3, 4], $collected);
 
         // Rewind - oldest element (1) was dropped
-        $window->rewind();
         $replayed = [];
         foreach ($window as $i) {
             $replayed[] = $i;
@@ -159,7 +157,6 @@ final class WindowTest extends TestCase
         $this->assertSame(5, iterator_count($window));
 
         // Rewind and replay
-        $window->rewind();
         $replayed = [];
         foreach ($window as $i) {
             $replayed[] = $i;
@@ -211,7 +208,6 @@ final class WindowTest extends TestCase
         $this->assertSame(['a' => 1], $collected);
 
         // Rewind and get all
-        $window->rewind();
         $all = [];
         foreach ($window as $key => $value) {
             $all[$key] = $value;
@@ -256,7 +252,6 @@ final class WindowTest extends TestCase
         $this->assertSame([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], $all);
 
         // Rewind - only last 5 elements in buffer
-        $window->rewind();
         $buffered = [];
         foreach ($window as $i) {
             $buffered[] = $i;
@@ -288,7 +283,7 @@ final class WindowTest extends TestCase
         $window = $pipeline->window();
 
         // Exhaust the window
-        iterator_count($window);
+        $this->assertSame(3, iterator_count($window));
 
         // Now invalid - should return null
         $this->assertFalse($window->valid());
