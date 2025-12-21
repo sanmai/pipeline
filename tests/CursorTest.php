@@ -50,7 +50,15 @@ final class CursorTest extends TestCase
 
         yield 'IteratorAggregate' => [take(new Standard(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5]))))];
 
-        yield 'generator' => [map(fn() => yield from [1, 2, 3, 4, 5])];
+        yield 'Generator' => [map(fn() => yield from [1, 2, 3, 4, 5])];
+
+        yield 'SameKeyGenerator' => [map(static function () {
+            yield 1 => 1;
+            yield 1 => 2;
+            yield 1 => 3;
+            yield 1 => 4;
+            yield 1 => 5;
+        })];
 
         yield 'stream' => [fromArray([1, 2, 3, 4, 5])->stream()];
     }
