@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
+use Countable;
 use Iterator;
 use Override;
 
@@ -36,7 +37,7 @@ use Override;
  *
  * @final
  */
-class WindowIterator implements Iterator
+class WindowIterator implements Iterator, Countable
 {
     /** @var array<int, array{TKey, TValue}> */
     private array $buffer = [];
@@ -86,9 +87,7 @@ class WindowIterator implements Iterator
         ++$this->position;
 
         // If still within buffer or inner exhausted, nothing to fetch
-        $bufferCount = $this->tailKey - $this->headKey;
-
-        if ($this->position < $bufferCount || $this->innerExhausted) {
+        if ($this->position < $this->count() || $this->innerExhausted) {
             return;
         }
 
@@ -98,7 +97,7 @@ class WindowIterator implements Iterator
             return;
         }
 
-        while ($this->tailKey - $this->headKey > $this->maxSize) {
+        while ($this->count() > $this->maxSize) {
             unset($this->buffer[$this->headKey]);
             ++$this->headKey;
             --$this->position;
@@ -116,7 +115,7 @@ class WindowIterator implements Iterator
     {
         $this->initialize();
 
-        return $this->position < $this->tailKey - $this->headKey;
+        return $this->position < $this->count();
     }
 
     private function initialize(): void
@@ -155,5 +154,10 @@ class WindowIterator implements Iterator
     private function pushFromInner(): void
     {
         $this->buffer[$this->tailKey++] = [$this->inner->key(), $this->inner->current()];
+    }
+
+    public function count(): int
+    {
+        return $this->tailKey - $this->headKey;
     }
 }
