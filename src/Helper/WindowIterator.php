@@ -24,6 +24,8 @@ use Countable;
 use Iterator;
 use Override;
 
+use function count;
+
 /**
  * A rewindable iterator that caches elements for replay.
  *
@@ -43,8 +45,6 @@ class WindowIterator implements Iterator, Countable
     private array $buffer = [];
 
     private int $headKey = 0;
-
-    private int $tailKey = 0;
 
     private int $position = 0;
 
@@ -153,11 +153,12 @@ class WindowIterator implements Iterator, Countable
 
     private function pushFromInner(): void
     {
-        $this->buffer[$this->tailKey++] = [$this->inner->key(), $this->inner->current()];
+        $this->buffer[] = [$this->inner->key(), $this->inner->current()];
     }
 
+    #[Override]
     public function count(): int
     {
-        return $this->tailKey - $this->headKey;
+        return count($this->buffer);
     }
 }
