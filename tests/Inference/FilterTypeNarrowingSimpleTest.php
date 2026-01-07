@@ -27,6 +27,8 @@ use function count;
 use function Pipeline\take;
 use function strlen;
 use function strtoupper;
+use function round;
+use function PHPStan\Testing\assertType;
 
 /**
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
@@ -48,8 +50,12 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take(['hello', ['array'], false, 'world']);
 
         // After filter(is_string(...)), PHPStan should know this contains only strings
-        $result = $pipeline
-            ->filter(is_string(...))
+        $filtered = $pipeline->filter(is_string(...));
+
+        // PHPStan should understand $filtered contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
+        $result = $filtered
             ->cast(fn(string $s) => strtoupper($s))
             ->toList();
 
@@ -65,8 +71,12 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take([1, 'hello', null, 'world', 42]);
 
         // After filter('is_string'), PHPStan should know this contains only strings
-        $result = $pipeline
-            ->filter('is_string')
+        $filtered = $pipeline->filter('is_string');
+
+        // PHPStan should understand $filtered contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
+        $result = $filtered
             ->cast(fn(string $s) => strlen($s))
             ->toList();
 
@@ -82,8 +92,12 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take(['hello', null, false, 'world', '']);
 
         // After filter(strict: true), PHPStan should know null and false are removed
-        $result = $pipeline
-            ->filter(strict: true)
+        $filtered = $pipeline->filter(strict: true);
+
+        // PHPStan should understand null and false are removed
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
+        $result = $filtered
             ->map(fn(string $s) => yield strlen($s))
             ->toList();
 
@@ -114,8 +128,11 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take([1, 'hello', 3.14, 42, 'world', 2.71]);
 
         // After filter(is_int(...)), PHPStan should know this contains only ints
-        $result = $pipeline
-            ->filter(is_int(...))
+        $intFiltered = $pipeline->filter(is_int(...));
+        // PHPStan should understand $intFiltered contains only ints
+        assertType('Pipeline\\Standard<int, int>', $intFiltered);
+
+        $result = $intFiltered
             ->map(fn(int $n) => yield $n * $n)
             ->toList();
 
@@ -131,8 +148,11 @@ class FilterTypeNarrowingSimpleTest extends TestCase
         $pipeline = take([[1, 2], 'hello', null, [3, 4, 5]]);
 
         // After filter('is_array'), PHPStan should know this contains only arrays
-        $result = $pipeline
-            ->filter('is_array')
+        $arrayFiltered = $pipeline->filter('is_array');
+        // PHPStan should understand $arrayFiltered contains only arrays
+        assertType('Pipeline\\Standard<int, array<mixed>>', $arrayFiltered);
+
+        $result = $arrayFiltered
             ->cast(fn(array $arr) => count($arr))
             ->toList();
 
@@ -172,5 +192,180 @@ class FilterTypeNarrowingSimpleTest extends TestCase
             ->toList();
 
         $this->assertSame(['hello', 'world'], $result);
+    }
+
+    /**
+     * Tests callback filtering on already narrow (non-union) types.
+     * This tests our assumption about whether non-union types need narrowing.
+     */
+    public function testFilterNonUnionTypeWithMatchingCallback(): void
+    {
+        /** @var Standard<int, string> $pipeline */
+        $pipeline = take(['hello', 'world', 'test']);
+
+        // Filter strings with is_string - should preserve all values
+        $filtered = $pipeline->filter('is_string');
+
+        // PHPStan should understand $filtered still contains only strings
+        assertType('Pipeline\\Standard<int, string>', $filtered);
+
+        $result = $filtered
+            ->cast(fn(string $s) => strtoupper($s))
+            ->toList();
+
+        $this->assertSame(['HELLO', 'WORLD', 'TEST'], $result);
+    }
+
+    /**
+     * Tests callback filtering on narrow types with non-matching callback.
+     * This should result in an empty result set.
+     */
+    public function testFilterNonUnionTypeWithNonMatchingCallback(): void
+    {
+        /** @var Standard<int, string> $pipeline */
+        $pipeline = take(['hello', 'world']);
+
+        // Filter strings with is_int - should result in empty
+        $filtered = $pipeline->filter('is_int');
+
+        $result = $filtered->toList();
+        $this->assertSame([], $result);
+    }
+
+    /**
+     * Tests that first-class callables work with non-union types.
+     */
+    public function testFilterNonUnionTypeWithFirstClassCallable(): void
+    {
+        /** @var Standard<int, float> $pipeline */
+        $pipeline = take([1.5, 2.7, 3.14]);
+
+        $filtered = $pipeline->filter(is_float(...));
+
+        $result = $filtered
+            ->map(fn(float $f) => yield round($f))
+            ->toList();
+
+        $this->assertSame([2.0, 3.0, 3.0], $result);
+    }
+
+    /**
+     * Tests edge case: filtering with a callback that could match some values.
+     * This tests the boundary between our assumptions.
+     */
+    public function testFilterMixedTypesWithSpecificCallback(): void
+    {
+        /** @var Standard<int, int|float|string> $pipeline */
+        $pipeline = take([1, 2.5, 'hello', 42, 3.14, 'world']);
+
+        // Filter for only numeric types (int|float)
+        $numericOnly = $pipeline->filter('is_numeric');
+        // Should narrow to approximately int|float, though PHPStan might not be that precise
+
+        $result = $numericOnly->toList();
+        $this->assertSame([1, 2.5, 42, 3.14], $result);
+
+        // Then filter the numeric for just ints
+        $intOnly = $pipeline->filter(is_int(...));
+
+        $intResult = $intOnly->toList();
+        $this->assertSame([1, 42], $intResult);
+    }
+
+    /**
+     * Tests strict mode behavior with already narrow types.
+     */
+    public function testStrictModeWithNonUnionTypes(): void
+    {
+        /** @var Standard<int, string|null> $pipeline */
+        $pipeline = take(['hello', null, 'world']);
+
+        $strict = $pipeline->filter(strict: true);
+
+        $result = $strict->toList();
+        $this->assertSame(['hello', 'world'], $result);
+    }
+
+    /**
+     * Tests that our extension handles callback precedence over strict mode.
+     */
+    public function testCallbackPrecedenceOverStrictMode(): void
+    {
+        /** @var Standard<int, string|null|false> $pipeline */
+        $pipeline = take(['hello', null, false, 'world', '']);
+
+        // Even though strict: true would remove null and false,
+        // the callback should take precedence and keep empty string
+        $result = $pipeline
+            ->filter('is_string', strict: true)
+            ->toList();
+
+        // Should keep all strings including empty string
+        $this->assertSame(['hello', 'world', ''], $result);
+    }
+
+    /**
+     * Tests the assumption that default filter behavior works correctly.
+     */
+    public function testDefaultFilterWithVariousFalsyValues(): void
+    {
+        /** @var Standard<int, mixed> $pipeline */
+        $pipeline = take([
+            0,          // falsy int
+            0.0,        // falsy float
+            '',         // falsy string
+            '0',        // falsy string
+            [],         // falsy array
+            false,      // falsy boolean
+            null,       // falsy null
+            'hello',    // truthy string
+            1,          // truthy int
+            [1],        // truthy array
+            true,        // truthy boolean
+        ]);
+
+        // Default filter should remove all falsy values
+        $result = $pipeline->filter()->toList();
+
+        $this->assertSame(['hello', 1, [1], true], $result);
+    }
+
+    /**
+     * Tests assumption about key preservation during filtering.
+     */
+    public function testKeyPreservationDuringFiltering(): void
+    {
+        /** @var Standard<string, int|null> $pipeline */
+        $pipeline = take(['a' => 1, 'b' => null, 'c' => 2, 'd' => null, 'e' => 3]);
+
+        $result = $pipeline
+            ->filter(strict: true)
+            ->toAssoc();
+
+        $this->assertSame(['a' => 1, 'c' => 2, 'e' => 3], $result);
+    }
+
+    /**
+     * Tests our assumption about nested generics and complex types.
+     */
+    public function testComplexGenericTypeNarrowing(): void
+    {
+        /** @var Standard<int, array<string>|null> $pipeline */
+        $pipeline = take([
+            ['hello', 'world'],
+            null,
+            ['foo', 'bar'],
+            null,
+            ['test'],
+        ]);
+
+        $filtered = $pipeline->filter('is_array');
+        // Should narrow to Standard<int, array<string>>
+
+        $result = $filtered
+            ->map(fn(array $arr) => yield count($arr))
+            ->toList();
+
+        $this->assertSame([2, 2, 1], $result);
     }
 }
