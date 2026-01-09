@@ -1,0 +1,39 @@
+# yamllint disable rule:line-length
+
+name: JIT NAN Bug Reproducer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/is_nan_jit
+
+jobs:
+  reproduce-jit-nan-bug:
+    name: Reproduce JIT NAN Bug (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          ini-values: opcache.enable_cli=1, opcache.jit=tracing, opcache.jit_buffer_size=64M
+
+      - name: Show PHP and JIT configuration
+        run: |
+          php -v
+          php -i | grep -E "opcache\.(enable_cli|jit)" || true
+
+      - name: Install dependencies
+        run: composer install --no-progress
+
+      - name: Run reproducer (up to 100 attempts)
+        run: ./jit-nan-bug-reproducer.sh
