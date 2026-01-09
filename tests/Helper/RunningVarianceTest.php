@@ -147,6 +147,26 @@ final class RunningVarianceTest extends TestCase
         // Per IEEE 754, NAN > M_PI should be FALSE, so max stays M_PI
         $this->assertSame(M_PI, $variance->getMin(), 'NAN corrupted min value');
         $this->assertSame(M_PI, $variance->getMax(), 'NAN corrupted max value');
+
+        // Test NAN as first observation (min/max are NAN initially)
+        $variance2 = new RunningVariance();
+        $variance2->observe(NAN);
+        $this->assertNan($variance2->getMin(), 'First NAN observation should set min to NAN');
+        $this->assertNan($variance2->getMax(), 'First NAN observation should set max to NAN');
+
+        // Once min/max are NAN, they stay NAN (all comparisons with NAN are FALSE per IEEE 754)
+        $variance2->observe(M_PI);
+        $this->assertNan($variance2->getMin(), 'Min stays NAN because M_PI < NAN is FALSE');
+        $this->assertNan($variance2->getMax(), 'Max stays NAN because M_PI > NAN is FALSE');
+
+        // Test multiple NANs don't corrupt valid min/max
+        $variance3 = new RunningVariance();
+        $variance3->observe(2.0);
+        $variance3->observe(NAN);
+        $variance3->observe(NAN);
+        $variance3->observe(4.0);
+        $this->assertSame(2.0, $variance3->getMin(), 'Multiple NANs should not corrupt min');
+        $this->assertSame(4.0, $variance3->getMax(), 'Valid value after NANs should update max');
     }
 
     public function testFive(): void
