@@ -34,7 +34,7 @@ JIT_CONFIG="-d opcache.enable_cli=1 -d opcache.jit=tracing -d opcache.jit_buffer
 echo "PHP JIT NAN Comparison Bug Reproducer"
 echo "======================================"
 echo ""
-$PHP_BIN -v | head -1
+$PHP_BIN -v
 echo ""
 echo "JIT Configuration:"
 $PHP_BIN $JIT_CONFIG -r 'echo "  opcache.jit = " . ini_get("opcache.jit") . "\n";'
