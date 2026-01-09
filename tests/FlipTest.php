@@ -20,14 +20,10 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 use function array_flip;
 use function array_reverse;
-use function call_user_func;
 use function chr;
 use function count;
 use function Pipeline\map;
@@ -118,21 +114,9 @@ final class FlipTest extends TestCase
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = array_flip($input);
 
-            yield [$expected, $input];
-
-            yield [$expected, new ArrayIterator($input)];
-
-            yield [$expected, new IteratorIterator(new ArrayIterator($input))];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                yield from $input;
-            })];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                foreach ($input as $key => $value) {
-                    yield $key => $value;
-                }
-            })];
+            foreach (self::wrapArray($input) as $iterable) {
+                yield [$expected, $iterable];
+            }
         }
     }
 

@@ -14,3 +14,6 @@ parameters:
         -
              identifier: argument.type
              path: tests/Inference/
+        -
+             identifier: sanmai.noNestedLoops
+             path: tests/

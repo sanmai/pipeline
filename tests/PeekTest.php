@@ -20,9 +20,6 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use Tests\Pipeline\Scenarios\PeekScenario;
 
 use function Pipeline\map;
@@ -60,10 +57,9 @@ final class PeekTest extends TestCase
     public static function providePeekIterables(): iterable
     {
         foreach (self::providePeekData() as $name => $item) {
-            yield $name . ' (array)' => [$item];
-            yield $name . ' (ArrayIterator)' => [$item->withInput(new ArrayIterator($item->input))];
-            yield $name . ' (IteratorIterator)' => [$item->withInput(new IteratorIterator(new ArrayIterator($item->input)))];
-            yield $name . ' (stream)' => [$item->withInput(take($item->input)->stream())];
+            foreach (self::wrapArray($item->input) as $label => $iterator) {
+                yield "{$label}({$name})" => [$item->withInput($iterator)];
+            }
         }
     }
 
