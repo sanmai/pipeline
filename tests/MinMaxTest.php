@@ -20,14 +20,10 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 use function array_merge;
 use function array_reverse;
-use function call_user_func;
 use function count;
 use function max;
 use function min;
@@ -104,21 +100,10 @@ final class MinMaxTest extends TestCase
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : min($input);
 
-            yield [$expected, $input];
+            foreach (self::wrapArray($input, withSameKeyGenerators: true) as $iterable) {
+                yield [$expected, $iterable];
 
-            yield [$expected, new ArrayIterator($input)];
-
-            yield [$expected, new IteratorIterator(new ArrayIterator($input))];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                yield from $input;
-            })];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                foreach ($input as $value) {
-                    yield 0 => $value;
-                }
-            })];
+            }
         }
     }
 
@@ -137,21 +122,9 @@ final class MinMaxTest extends TestCase
         foreach (self::provideRandomizedInputs() as $input) {
             $expected = [] === $input ? null : max($input);
 
-            yield [$expected, $input];
-
-            yield [$expected, new ArrayIterator($input)];
-
-            yield [$expected, new IteratorIterator(new ArrayIterator($input))];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                yield from $input;
-            })];
-
-            yield [$expected, call_user_func(function () use ($input) {
-                foreach ($input as $value) {
-                    yield 0 => $value;
-                }
-            })];
+            foreach (self::wrapArray($input, withSameKeyGenerators: true) as $iterable) {
+                yield [$expected, $iterable];
+            }
         }
     }
 
