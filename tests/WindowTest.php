@@ -20,17 +20,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
 use EmptyIterator;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use Iterator;
 use Pipeline\Helper\WindowIterator;
 use Pipeline\Standard;
 
 use function iterator_count;
 use function Pipeline\fromArray;
-use function Pipeline\map;
 use function Pipeline\take;
 
 /**
@@ -43,25 +39,7 @@ final class WindowTest extends TestCase
 {
     public static function provideIterables(): iterable
     {
-        yield 'array' => [fromArray([1, 2, 3, 4, 5])];
-
-        yield 'ArrayIterator' => [take(new ArrayIterator([1, 2, 3, 4, 5]))];
-
-        yield 'IteratorIterator' => [take(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5])))];
-
-        yield 'IteratorAggregate' => [take(new Standard(new IteratorIterator(new ArrayIterator([1, 2, 3, 4, 5]))))];
-
-        yield 'Generator' => [map(fn() => yield from [1, 2, 3, 4, 5])];
-
-        yield 'SameKeyGenerator' => [map(static function () {
-            yield 1 => 1;
-            yield 1 => 2;
-            yield 1 => 3;
-            yield 1 => 4;
-            yield 1 => 5;
-        })];
-
-        yield 'stream' => [fromArray([1, 2, 3, 4, 5])->stream()];
+        yield from self::pipelinesForInput([1, 2, 3, 4, 5]);
     }
 
     /**
