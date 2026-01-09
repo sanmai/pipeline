@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
+use function is_nan;
 use function sqrt;
 
 use const NAN;
@@ -74,12 +75,15 @@ class RunningVariance
             return $value;
         }
 
-        if ($value < $this->min) {
-            $this->min = $value;
-        }
+        // Workaround for https://github.com/php/php-src/issues/20880
+        if (!is_nan($value)) {
+            if ($value < $this->min) {
+                $this->min = $value;
+            }
 
-        if ($value > $this->max) {
-            $this->max = $value;
+            if ($value > $this->max) {
+                $this->max = $value;
+            }
         }
 
         return $value;
