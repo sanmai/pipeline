@@ -8,7 +8,7 @@ This document outlines the version history and key changes for the Pipeline libr
 
 -   **PHP 8.2+ Requirement**: The minimum required PHP version has been updated to 8.2.
 -   **Strict Filtering**: The `filter()` method now includes a `strict` mode for more precise control over data cleaning.
--   **Improved Type Safety**: Enhanced type annotations and static analysis support for PHPStan, Psalm, and Phan.
+-   **Improved Type Safety**: Enhanced type annotations and static analysis support for PHPStan and Psalm.
 -   **Performance Optimizations**: Array operations are now faster, and the `cast()` method is optimized for arrays.
 
 ### Breaking Changes

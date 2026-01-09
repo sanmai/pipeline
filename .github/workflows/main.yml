@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --no-update --dev \
-              phan/phan phpstan/phpstan vimeo/psalm \
+              phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
           composer update --prefer-dist --no-interaction --no-progress
 
@@ -89,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --no-update --dev \
-              phan/phan phpstan/phpstan vimeo/psalm \
+              phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer
           composer update --prefer-dist --no-interaction --no-progress
 
@@ -147,7 +147,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --no-update --dev \
-              phan/phan phpstan/phpstan vimeo/psalm \
+              phpstan/phpstan vimeo/psalm \
               friendsofphp/php-cs-fixer
           composer update --prefer-dist --no-interaction --no-progress
 
@@ -180,7 +180,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: ast
           coverage: none
           ini-values: memory_limit=512M, opcache.enable_cli=1, opcache.jit=tracing, opcache.jit_buffer_size=64M
           tools: composer:v2
