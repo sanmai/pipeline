@@ -20,12 +20,8 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use IteratorIterator;
-use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
-use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
@@ -52,28 +48,10 @@ final class ChunkTest extends TestCase
 
     public static function provideIterables(): iterable
     {
-        foreach (self::provideArrays() as $item) {
-            yield $item;
-
-            $iteratorItem = $item;
-            $iteratorItem[2] = new ArrayIterator($iteratorItem[2]);
-
-            yield $iteratorItem;
-
-            $iteratorItem = $item;
-            $iteratorItem[2] = new IteratorIterator(new ArrayIterator($iteratorItem[2]));
-
-            yield $iteratorItem;
-
-            $iteratorItem = $item;
-            $iteratorItem[2] = fromArray($iteratorItem[2]);
-
-            yield $iteratorItem;
-
-            $iteratorItem = $item;
-            $iteratorItem[2] = take($iteratorItem[2]);
-
-            yield $iteratorItem;
+        foreach (self::provideArrays() as [$preserve_keys, $length, $input, $expected]) {
+            foreach (self::wrapArray($input) as $label => $iterator) {
+                yield [$preserve_keys, $length, $iterator, $expected];
+            }
         }
     }
 

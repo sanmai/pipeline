@@ -54,7 +54,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $array
      * @return iterable<string, iterable>
      */
-    protected static function wrapArray(array $array, bool $withSameKeyGenerators = true): iterable
+    protected static function wrapArray(array $array, bool $withSameKeyGenerators = false): iterable
     {
         yield 'array' => $array;
 

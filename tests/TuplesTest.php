@@ -53,7 +53,7 @@ final class TuplesTest extends TestCase
     public static function provideIterables(): iterable
     {
         foreach (self::provideArrays() as $name => [$input, $expected]) {
-            foreach (self::wrapArray($input, withSameKeyGenerators: false) as $label => $iterator) {
+            foreach (self::wrapArray($input) as $label => $iterator) {
                 yield "{$label}({$name})" => [$iterator, $expected];
             }
         }
