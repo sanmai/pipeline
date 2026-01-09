@@ -154,10 +154,10 @@ final class RunningVarianceTest extends TestCase
         $this->assertNan($variance2->getMin(), 'First NAN observation should set min to NAN');
         $this->assertNan($variance2->getMax(), 'First NAN observation should set max to NAN');
 
-        // Once min/max are NAN, they stay NAN (all comparisons with NAN are FALSE per IEEE 754)
+        // With workaround: valid values update NAN min/max
         $variance2->observe(M_PI);
-        $this->assertNan($variance2->getMin(), 'Min stays NAN because M_PI < NAN is FALSE');
-        $this->assertNan($variance2->getMax(), 'Max stays NAN because M_PI > NAN is FALSE');
+        $this->assertSame(M_PI, $variance2->getMin(), 'Valid value updates NAN min');
+        $this->assertSame(M_PI, $variance2->getMax(), 'Valid value updates NAN max');
 
         // Test multiple NANs don't corrupt valid min/max
         $variance3 = new RunningVariance();
