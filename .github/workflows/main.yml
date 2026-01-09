@@ -59,7 +59,7 @@ jobs:
           php vendor/bin/phpunit --group=default --display-deprecations
 
   coverage:
-    name: Coverage for Mutation Testing
+    name: Coverage Collection
     runs-on: ubuntu-latest
 
     env:
