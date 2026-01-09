@@ -34,7 +34,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: pcov
+          coverage: none
+          ini-values: opcache.enable_cli=1, opcache.jit=tracing, opcache.jit_buffer_size=64M
           tools: composer:v2
 
       - name: Cache dependencies
@@ -50,19 +51,12 @@ jobs:
         run: |
           composer remove --no-update --dev \
               phan/phan phpstan/phpstan vimeo/psalm \
-              infection/infection friendsofphp/php-cs-fixer
+              infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Execute tests
         run: |
-          make ci-test
-
-      - name: Upload coverage report
-        continue-on-error: true
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          php vendor/bin/php-coveralls -v
+          php vendor/bin/phpunit --group=default --display-deprecations
 
   coverage:
     name: Coverage for Mutation Testing
@@ -101,7 +95,14 @@ jobs:
 
       - name: Generate coverage
         run: |
-          php vendor/bin/phpunit --coverage-xml=build/logs/coverage-xml --log-junit=build/logs/junit.xml
+          php vendor/bin/phpunit --coverage-xml=build/logs/coverage-xml --coverage-clover=build/logs/clover.xml --log-junit=build/logs/junit.xml
+
+      - name: Upload coverage to Coveralls
+        continue-on-error: true
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          php vendor/bin/php-coveralls -v
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
