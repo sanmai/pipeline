@@ -165,7 +165,7 @@ jobs:
           make ci-infection
 
   static-analysis:
-    name: Static Analysis
+    name: Static Analysis and Validation
     runs-on: ubuntu-latest
 
     env:
