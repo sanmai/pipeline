@@ -167,6 +167,23 @@ final class RunningVarianceTest extends TestCase
         $variance3->observe(4.0);
         $this->assertSame(2.0, $variance3->getMin(), 'Multiple NANs should not corrupt min');
         $this->assertSame(4.0, $variance3->getMax(), 'Valid value after NANs should update max');
+
+        // Test merge() with NAN values
+        $withNan = new RunningVariance();
+        $withNan->observe(NAN);
+
+        $withValid = new RunningVariance();
+        $withValid->observe(5.0);
+
+        // Merging NAN into valid should not corrupt
+        $merged1 = new RunningVariance($withValid, $withNan);
+        $this->assertSame(5.0, $merged1->getMin(), 'Merge: NAN should not corrupt valid min');
+        $this->assertSame(5.0, $merged1->getMax(), 'Merge: NAN should not corrupt valid max');
+
+        // Merging valid into NAN should update
+        $merged2 = new RunningVariance($withNan, $withValid);
+        $this->assertSame(5.0, $merged2->getMin(), 'Merge: valid should update NAN min');
+        $this->assertSame(5.0, $merged2->getMax(), 'Merge: valid should update NAN max');
     }
 
     public function testFive(): void
