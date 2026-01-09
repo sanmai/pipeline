@@ -76,14 +76,16 @@ class RunningVariance
         }
 
         // Workaround for https://github.com/php/php-src/issues/20880
-        if (!is_nan($value)) {
-            if ($value < $this->min) {
-                $this->min = $value;
-            }
+        if (is_nan($value)) {
+            return $value;
+        }
 
-            if ($value > $this->max) {
-                $this->max = $value;
-            }
+        if ($value < $this->min) {
+            $this->min = $value;
+        }
+
+        if ($value > $this->max) {
+            $this->max = $value;
         }
 
         return $value;
