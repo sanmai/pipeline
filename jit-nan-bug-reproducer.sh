@@ -25,7 +25,7 @@
 
 set -e
 
-MAX_ATTEMPTS="${1:-100}"
+MAX_ATTEMPTS="${1:-20}"
 PHP_BIN="${PHP_BIN:-php}"
 
 # Ensure JIT is enabled

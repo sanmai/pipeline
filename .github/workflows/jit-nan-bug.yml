@@ -48,5 +48,5 @@ jobs:
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
           composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Run reproducer (up to 100 attempts)
+      - name: Run reproducer (up to N attempts)
         run: ./jit-nan-bug-reproducer.sh
