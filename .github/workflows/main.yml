@@ -123,12 +123,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Create opcache directory
+        run: mkdir -p build/cache/opcache
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: none
-          ini-values: opcache.enable_cli=1, opcache.file_cache=/tmp/opcache, opcache.file_cache_only=1
+          ini-values: opcache.enable_cli=1, opcache.file_cache=build/cache/opcache, opcache.file_cache_only=1
           tools: composer:v2
 
       - name: Cache dependencies
