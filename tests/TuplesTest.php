@@ -20,12 +20,8 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use IteratorIterator;
 
-use function Pipeline\fromArray;
 use function Pipeline\take;
 use function Pipeline\map;
 
@@ -56,23 +52,10 @@ final class TuplesTest extends TestCase
 
     public static function provideIterables(): iterable
     {
-        foreach (self::provideArrays() as $name => $item) {
-            yield $item;
-
-            $iteratorItem = $item;
-            $iteratorItem[0] = new ArrayIterator($iteratorItem[0]);
-
-            yield "$name(ArrayIterator)" => $iteratorItem;
-
-            $iteratorItem = $item;
-            $iteratorItem[0] = new IteratorIterator(new ArrayIterator($iteratorItem[0]));
-
-            yield "$name(IteratorIterator)" => $iteratorItem;
-
-            $iteratorItem = $item;
-            $iteratorItem[0] = fromArray($iteratorItem[0]);
-
-            yield "$name(Pipeline)" => $iteratorItem;
+        foreach (self::provideArrays() as $name => [$input, $expected]) {
+            foreach (self::wrapArray($input, withSameKeyGenerators: false) as $label => $iterator) {
+                yield "{$label}({$name})" => [$iterator, $expected];
+            }
         }
 
         yield 'generator' => [map(function () {
