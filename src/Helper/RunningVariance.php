@@ -182,11 +182,12 @@ class RunningVariance
         $this->m2 = $this->m2 + $other->m2 + ($delta ** 2 * $this->count * $other->count / $count);
         $this->count = $count;
 
-        if ($other->min < $this->min) {
+        // Workaround for https://github.com/php/php-src/issues/20880
+        if (!is_nan($other->min) && (is_nan($this->min) || $other->min < $this->min)) {
             $this->min = $other->min;
         }
 
-        if ($other->max > $this->max) {
+        if (!is_nan($other->max) && (is_nan($this->max) || $other->max > $this->max)) {
             $this->max = $other->max;
         }
     }
