@@ -123,6 +123,32 @@ final class RunningVarianceTest extends TestCase
         $this->assertNan($variance->getStandardDeviation());
     }
 
+    /**
+     * Regression test for https://github.com/php/php-src/issues/20880
+     *
+     * PHP JIT (tracing) incorrectly evaluates NAN > $float as TRUE.
+     * This test warms up JIT and verifies NAN doesn't corrupt min/max.
+     */
+    public function testNANWithJITWarmup(): void
+    {
+        // Warm up JIT with normal float operations
+        for ($i = 0; $i < 10000; $i++) {
+            $v = new RunningVariance();
+            $v->observe(1.0);
+            $v->observe(2.0);
+            $v->observe(3.0);
+        }
+
+        // Now test NAN handling - should not corrupt min/max
+        $variance = new RunningVariance();
+        $variance->observe(M_PI);
+        $variance->observe(NAN);
+
+        // Per IEEE 754, NAN > M_PI should be FALSE, so max stays M_PI
+        $this->assertSame(M_PI, $variance->getMin(), 'NAN corrupted min value');
+        $this->assertSame(M_PI, $variance->getMax(), 'NAN corrupted max value');
+    }
+
     public function testFive(): void
     {
         $variance = new RunningVariance();
