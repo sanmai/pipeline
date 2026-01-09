@@ -58,7 +58,13 @@ ci-analyze: prerequisites ci-phpunit ci-infection ci-phpstan ci-psalm
 ci-phpunit: ci-cs
 	$(SILENT) $(PHP) $(PHPUNIT) $(PHPUNIT_ARGS)
 
-ci-infection: ci-phpunit
+# Coverage files for infection - can be pre-generated or downloaded as artifact
+PHP_SRC := $(wildcard src/*.php src/*/*.php tests/*.php tests/*/*.php)
+
+build/logs/junit.xml: $(PHP_SRC)
+	$(MAKE) ci-phpunit
+
+ci-infection: build/logs/junit.xml
 	$(SILENT) $(PHP) $(INFECTION) $(INFECTION_ARGS)
 
 ci-phpstan: ci-cs .phpstan.neon .phpstan.src.neon

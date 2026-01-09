@@ -64,8 +64,104 @@ jobs:
         run: |
           php vendor/bin/php-coveralls -v
 
-  analyze:
-    name: Static Analysis and Validation
+  coverage:
+    name: Coverage for Mutation Testing
+    runs-on: ubuntu-latest
+
+    env:
+      PHP_VERSION: '8.3'
+      COMPOSER_ROOT_VERSION: '6.99'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
+          restore-keys: |
+            composer-${{ env.PHP_VERSION }}-
+            composer-
+
+      - name: Install dependencies
+        run: |
+          composer remove --no-update --dev \
+              phan/phan phpstan/phpstan vimeo/psalm \
+              infection/infection friendsofphp/php-cs-fixer
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Generate coverage
+        run: |
+          php vendor/bin/phpunit --coverage-xml=build/logs/coverage-xml --log-junit=build/logs/junit.xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: build/logs/
+          retention-days: 1
+
+  mutation:
+    name: Mutation Testing
+    needs: coverage
+    runs-on: ubuntu-latest
+
+    env:
+      PHP_VERSION: '8.3'
+      COMPOSER_ROOT_VERSION: '6.99'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+          ini-values: opcache.enable_cli=1, opcache.file_cache=/tmp/opcache, opcache.file_cache_only=1
+          tools: composer:v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
+          restore-keys: |
+            composer-${{ env.PHP_VERSION }}-
+            composer-
+
+      - name: Install dependencies
+        run: |
+          composer remove --no-update --dev \
+              phan/phan phpstan/phpstan vimeo/psalm \
+              friendsofphp/php-cs-fixer
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          path: build/logs/
+
+      - name: Mark coverage as fresh
+        run: touch build/logs/junit.xml
+
+      - name: Run mutation testing
+        run: |
+          make ci-infection
+
+  static-analysis:
+    name: Static Analysis
     runs-on: ubuntu-latest
 
     env:
@@ -105,6 +201,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          composer remove --no-update --dev infection/infection
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Validate composer.json
@@ -115,10 +212,14 @@ jobs:
         run: |
           make yamllint
 
+      - name: Check code style
+        run: |
+          make ci-cs
+
       - name: Non-code tests
         run: |
           php vendor/bin/phpunit --group=documentation
 
       - name: Static Analysis
         run: |
-          make ci-analyze --keep-going -j8 --output-sync
+          make ci-phpstan ci-psalm --keep-going -j8 --output-sync
