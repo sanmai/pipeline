@@ -50,7 +50,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "v6.x-dev"
+            "dev-main": "7.x-dev"
         }
     }
 }
