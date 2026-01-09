@@ -33,19 +33,11 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected static function pipelinesForInput(array $array): iterable
     {
-        yield 'array' => [fromArray($array)];
+        yield 'fromArray' => [fromArray($array)];
 
-        yield 'ArrayIterator' => [take(new ArrayIterator($array))];
-
-        yield 'IteratorIterator' => [take(new IteratorIterator(new ArrayIterator($array)))];
-
-        yield 'IteratorAggregate' => [take(new Standard(new IteratorIterator(new ArrayIterator($array))))];
-
-        yield 'Generator' => [take(self::generatorFrom($array))];
-
-        yield 'SameKeyGenerator(int)' => [take(self::generatorWithKey(1, $array))];
-
-        yield 'SameKeyGenerator(string)' => [take(self::generatorWithKey('a', $array))];
+        foreach (self::wrapArray($array, withSameKeyGenerators: true) as $label => $iterable) {
+            yield $label => [take($iterable)];
+        }
 
         yield 'stream' => [fromArray($array)->stream()];
     }
