@@ -46,7 +46,7 @@ jobs:
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
-          composer update --prefer-dist --no-interaction --no-progress
+          composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run reproducer (up to 100 attempts)
         run: ./jit-nan-bug-reproducer.sh
