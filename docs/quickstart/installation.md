@@ -113,10 +113,10 @@ If you plan to contribute to the library or run its test suite, follow these ste
 
 ## Static Analysis
 
-To run static analysis tools like PHPStan, Psalm, and Phan, first ensure they are installed, then run the analysis command:
+To run static analysis tools like PHPStan and Psalm, first ensure they are installed, then run the analysis command:
 
 ```bash
-composer require --dev phpstan/phpstan psalm/phar phan/phan
+composer require --dev phpstan/phpstan vimeo/psalm
 make analyze
 ```
 

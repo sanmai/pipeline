@@ -1,0 +1,23 @@
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
+name: Dependabot Approve
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  dependabot_autoapprove:
+    name: Dependabot Approve
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+
+    steps:
+      - name: Approve PR and enable auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} --approve --repo ${{ github.repository }}
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash --repo ${{ github.repository }} || true
