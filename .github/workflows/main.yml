@@ -58,19 +58,19 @@ jobs:
         run: |
           php vendor/bin/phpunit --group=default --display-deprecations
 
-  coverage:
-    name: Coverage Collection
+  mutation:
+    name: Mutation Testing
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: '8.3'
+      PHP_VERSION: '8.4'
       COMPOSER_ROOT_VERSION: '6.99'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup PHP
+      - name: Setup PHP with coverage
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
@@ -90,7 +90,7 @@ jobs:
         run: |
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
-              infection/infection friendsofphp/php-cs-fixer
+              friendsofphp/php-cs-fixer
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Generate coverage
@@ -104,61 +104,16 @@ jobs:
         run: |
           php vendor/bin/php-coveralls -v
 
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: build/logs/
-          retention-days: 1
-
-  mutation:
-    name: Mutation Testing
-    needs: coverage
-    runs-on: ubuntu-latest
-
-    env:
-      PHP_VERSION: '8.3'
-      COMPOSER_ROOT_VERSION: '6.99'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
       - name: Create opcache directory
         run: mkdir -p /tmp/opcache
 
-      - name: Setup PHP
+      - name: Setup PHP for mutation testing
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: none
           ini-values: opcache.enable_cli=1, opcache.file_cache=/tmp/opcache, opcache.file_cache_only=1
           tools: composer:v2
-
-      - name: Cache dependencies
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/composer
-          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
-          restore-keys: |
-            composer-${{ env.PHP_VERSION }}-
-            composer-
-
-      - name: Install dependencies
-        run: |
-          composer remove --no-update --dev \
-              phpstan/phpstan vimeo/psalm \
-              friendsofphp/php-cs-fixer
-          composer update --prefer-dist --no-interaction --no-progress
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage
-          path: build/logs/
-
-      - name: Mark coverage as fresh
-        run: touch build/logs/junit.xml
 
       - name: Run mutation testing
         run: |
@@ -169,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PHP_VERSION: '8.3'
+      PHP_VERSION: '8.4'
       COMPOSER_ROOT_VERSION: '6.99'
 
     steps:
