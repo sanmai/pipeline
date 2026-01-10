@@ -58,7 +58,7 @@ jobs:
         run: |
           php vendor/bin/phpunit --group=default --display-deprecations
 
-  mutation:
+  mt:
     name: Mutation Testing
     runs-on: ubuntu-latest
 
