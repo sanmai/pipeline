@@ -64,7 +64,7 @@ jobs:
 
     env:
       PHP_VERSION: '8.4'
-      COMPOSER_ROOT_VERSION: '6.99'
+      COMPOSER_ROOT_VERSION: '7.99'
 
     steps:
       - name: Checkout code
@@ -125,7 +125,7 @@ jobs:
 
     env:
       PHP_VERSION: '8.4'
-      COMPOSER_ROOT_VERSION: '6.99'
+      COMPOSER_ROOT_VERSION: '7.99'
 
     steps:
       - name: Checkout code
