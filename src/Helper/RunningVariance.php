@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Pipeline\Helper;
 
 use function sqrt;
+use function is_nan;
 
 use const NAN;
 
@@ -74,11 +75,17 @@ class RunningVariance
             return $value;
         }
 
-        if ($value < $this->min) {
+        // Workaround for https://github.com/php/php-src/issues/20880
+        // JIT may incorrectly evaluate NAN comparisons as TRUE
+        if (is_nan($value)) {
+            return $value;
+        }
+
+        if (is_nan($this->min) || $value < $this->min) {
             $this->min = $value;
         }
 
-        if ($value > $this->max) {
+        if (is_nan($this->max) || $value > $this->max) {
             $this->max = $value;
         }
 
@@ -175,11 +182,12 @@ class RunningVariance
         $this->m2 = $this->m2 + $other->m2 + ($delta ** 2 * $this->count * $other->count / $count);
         $this->count = $count;
 
-        if ($other->min < $this->min) {
+        // Workaround for https://github.com/php/php-src/issues/20880
+        if (!is_nan($other->min) && (is_nan($this->min) || $other->min < $this->min)) {
             $this->min = $other->min;
         }
 
-        if ($other->max > $this->max) {
+        if (!is_nan($other->max) && (is_nan($this->max) || $other->max > $this->max)) {
             $this->max = $other->max;
         }
     }
