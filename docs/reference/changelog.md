@@ -48,7 +48,7 @@ This document outlines the version history and key changes for the Pipeline libr
 
 **Array Conversion (Breaking Change)**
 
-The `toArray()` method now requires a callback parameter. Replace all previous usages as follows:
+The `toArray()` method now requires a boolean parameter. Replace all previous usages as follows:
 
 ```php
 // Before: toArray() or toArray(false) - get indexed array
