@@ -131,6 +131,6 @@ The library follows semantic versioning. Future development will focus on:
 
 -   Performance and memory optimizations
 -   Enhanced type safety
--   Additional utility methods
+-   Additional statistical methods
 
 For the latest updates, please refer to the [GitHub repository](https://github.com/sanmai/pipeline).
