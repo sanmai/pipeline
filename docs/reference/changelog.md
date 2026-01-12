@@ -30,6 +30,7 @@ This document outlines the version history and key changes for the Pipeline libr
 -   **Strict Filtering**: The `filter()` method now includes a `strict` mode for more precise control over data cleaning.
 -   **New Convenience Methods**: Added `first()`, `last()`, `toList()`, and `toAssoc()`.
 -   **Improved Type Safety**: Enhanced type annotations and static analysis support for PHPStan and Psalm.
+-   **Performance Optimizations**: The `cast()` method uses `array_map()` for arrays, improving performance.
 
 ### Breaking Changes from 5.x
 
