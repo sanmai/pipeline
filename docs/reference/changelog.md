@@ -21,7 +21,6 @@ This document outlines the version history and key changes for the Pipeline libr
 
 -   **`toArray()` now requires a parameter**: Use `toList()` for a simple array or `toAssoc()` for an associative array.
 -   **`toArrayPreservingKeys()` removed**: Use `toAssoc()` instead.
--   **`peek()` return type changed**: Now returns `Pipeline` instead of `iterable` for fluent API support.
 
 ## Version 6.x
 
@@ -74,23 +73,6 @@ $result = take($data)->toArrayPreservingKeys();
 
 // After (v7.x)
 $result = take($data)->toAssoc();
-```
-
-**peek() Return Type Changed**
-
-If your code relied on `peek()` returning a plain iterable, note that it now returns a Pipeline instance:
-
-```php
-// Before (v6.x) - peek() returned iterable
-$peeked = $pipeline->peek(5);
-foreach ($peeked as $item) { ... }
-
-// After (v7.x) - peek() returns Pipeline, enabling chaining
-$result = $pipeline->peek(5)->map(fn($x) => $x * 2)->toList();
-
-// If you need plain iterable behavior, the Pipeline is still iterable
-$peeked = $pipeline->peek(5);
-foreach ($peeked as $item) { ... } // Still works
 ```
 
 **New Features to Consider**
