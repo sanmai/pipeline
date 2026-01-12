@@ -22,17 +22,7 @@ It is recommended to use a version constraint to ensure your project remains com
 ```json
 {
     "require": {
-        "sanmai/pipeline": "^6.0"
-    }
-}
-```
-
-**Specific Version**
-
-```json
-{
-    "require": {
-        "sanmai/pipeline": "6.11.0"
+        "sanmai/pipeline": "^7.0"
     }
 }
 ```
