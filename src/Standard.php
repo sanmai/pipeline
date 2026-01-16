@@ -496,7 +496,7 @@ class Standard implements IteratorAggregate, Countable
      * @phpstan-self-out self<TKey, TValue>
      * @return Standard<TKey, TValue>
      */
-    public function select(?callable $func = null, bool $strict = false): self
+    public function select(?callable $func = null, bool $strict = true): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
