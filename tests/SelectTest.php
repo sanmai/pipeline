@@ -23,6 +23,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function iterator_to_array;
 use function Pipeline\fromValues;
@@ -33,7 +34,7 @@ use function Pipeline\map;
  *
  * @internal
  */
-final class FilterTest extends TestCase
+final class SelectTest extends TestCase
 {
     private const NON_STRICT_FALSE_VALUES = [
         0,
@@ -46,7 +47,7 @@ final class FilterTest extends TestCase
     public function testStandardStringFunctions(): void
     {
         $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
-        $pipeline->filter('is_int');
+        $pipeline->select('is_int');
 
         $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
@@ -54,12 +55,12 @@ final class FilterTest extends TestCase
     public function testStandardFunctions(): void
     {
         $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
-        $pipeline->filter(is_int(...));
+        $pipeline->select(is_int(...));
 
         $this->assertSame([1, 2], iterator_to_array($pipeline));
     }
 
-    public function testFilterAnyFalseValueDefaultCallback(): void
+    public function testSelectAnyFalseValueDefaultCallback(): void
     {
         $pipeline = map(function () {
             yield false;
@@ -71,12 +72,12 @@ final class FilterTest extends TestCase
             yield null;
         });
 
-        $pipeline->filter();
+        $pipeline->select(strict: false);
 
         $this->assertCount(0, $pipeline->toList());
     }
 
-    public function testFilterAnyFalseValueDefaultCallbackStrict(): void
+    public function testSelectAnyFalseValueDefaultCallbackStrict(): void
     {
         $pipeline = map(function () {
             yield false;
@@ -88,12 +89,12 @@ final class FilterTest extends TestCase
             yield null;
         });
 
-        $pipeline->filter(strict: true);
+        $pipeline->select();
 
         $this->assertCount(5, $pipeline->toList());
     }
 
-    public function testFilterAnyFalseValueCustomCallback(): void
+    public function testSelectAnyFalseValueCustomCallback(): void
     {
         $pipeline = map(function () {
             yield false;
@@ -106,12 +107,12 @@ final class FilterTest extends TestCase
             yield 1;
         });
 
-        $pipeline->filter('intval', strict: false);
+        $pipeline->select('intval', strict: false);
 
         $this->assertSame([1], $pipeline->toList());
     }
 
-    public function testFilterStrictMode(): void
+    public function testSelectStrictMode(): void
     {
         $pipeline = map(function () {
             yield false;
@@ -120,12 +121,12 @@ final class FilterTest extends TestCase
             yield from self::NON_STRICT_FALSE_VALUES;
         });
 
-        $pipeline->filter(strict: true);
+        $pipeline->select(strict: true);
 
         $this->assertSame(self::NON_STRICT_FALSE_VALUES, $pipeline->toList());
     }
 
-    public function testFilterStrictModeWithPredicate(): void
+    public function testSelectStrictModeWithPredicate(): void
     {
         $pipeline = map(function () {
             yield false;
@@ -134,23 +135,62 @@ final class FilterTest extends TestCase
             yield from self::NON_STRICT_FALSE_VALUES;
         });
 
-        $pipeline->filter(fn($value) => $value, strict: true);
+        $pipeline->select(fn($value) => $value, strict: true);
 
         $this->assertSame(self::NON_STRICT_FALSE_VALUES, $pipeline->toList());
     }
 
-    public function testFilterNonStrictMode(): void
+    public function testSelectNonStrictMode(): void
     {
         $pipeline = fromValues(false, null, '');
-        $pipeline->filter(strict: false);
+        $pipeline->select(strict: false);
         $this->assertCount(0, $pipeline);
     }
 
-    public function testFilterUnprimed(): void
+    public function testSelectUnprimed(): void
     {
         $pipeline = new Standard();
-        $pipeline->filter()->unpack();
+        $pipeline->select()->unpack();
 
         $this->assertSame([], $pipeline->toList());
+    }
+
+    public function testFilterIsNotStrictByDefault(): void
+    {
+        $pipeline = $this->getMockBuilder(Standard::class)
+            ->setConstructorArgs([[1]])
+            ->onlyMethods(['select'])
+            ->getMock();
+
+        $pipeline->expects($this->once())
+            ->method('select')
+            ->with(null, false)
+            ->willReturn($pipeline);
+
+        $pipeline->filter();
+    }
+
+    public static function provideFilterIsEquivalentToSelect(): iterable
+    {
+        yield [null, false];
+        yield [null, true];
+        yield [fn($value) => true, false];
+        yield [fn($value) => true, true];
+    }
+
+    #[DataProvider('provideFilterIsEquivalentToSelect')]
+    public function testFilterIsEquivalentToSelect(?callable $func, bool $strict): void
+    {
+        $pipeline = $this->getMockBuilder(Standard::class)
+            ->setConstructorArgs([[1]])
+            ->onlyMethods(['select'])
+            ->getMock();
+
+        $pipeline->expects($this->once())
+            ->method('select')
+            ->with($func, $strict)
+            ->willReturn($pipeline);
+
+        $pipeline->filter($func, $strict);
     }
 }

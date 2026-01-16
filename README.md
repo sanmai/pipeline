@@ -132,7 +132,8 @@ All entry points always return an instance of the pipeline.
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `chunkBy()` | Chunks the pipeline into arrays with variable sizes. Size 0 produces empty arrays. | |
-| `filter()`  | Removes elements unless a callback returns true. Removes falsey values if no callback provided.  |  `array_filter`, `Where`                |
+| `select()`  | Selects elements for which the callback returns true. By default only removes `null` and `false`.  |  `array_filter`, `filter`, `Where`                |
+| `filter()`  | Alias for `select()` with `strict: false` default. Removes all falsy values like `array_filter`. |  `array_filter`                |
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Supports negative values for both arguments. |  `array_slice`                |
@@ -351,21 +352,23 @@ $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
 
 With iterators with unequal number of elements, missing elements are left as nulls.
 
-## `$pipeline->filter()`
+## `$pipeline->select()`
 
-Takes a filter callback not unlike that of `array_filter`.
+Selects elements for which the callback returns true. `filter()` is an alias with `strict: false` default.
 
 ```php
-$pipeline->filter(function ($item) {
+$pipeline->select(function ($item) {
     return $item->isGood() && $item->amount > 0;
 });
 ```
 
-The pipeline has a default callback with the same effect as in `array_filter`: it'll remove all falsy values.
+By default, `select()` only removes `null` and `false` values.
 
-With the optional `strict` parameter, it only removes strictly `null` or `false`:
+With the optional `strict: false` parameter, it removes all falsy values like `array_filter`:
 ```php
-$pipeline->filter(strict: true);
+$pipeline->select(strict: false);
+// Or use filter() which defaults to non-strict:
+$pipeline->filter();
 ```
 
 ## `$pipeline->slice()`

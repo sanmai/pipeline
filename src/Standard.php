@@ -487,7 +487,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Removes elements unless a callback returns true.
+     * Selects elements for which the callback returns true.
      *
      * With no callback drops all null and false values (not unlike array_filter does by default).
      *
@@ -497,7 +497,7 @@ class Standard implements IteratorAggregate, Countable
      * @phpstan-self-out self<TKey, TValue>
      * @return Standard<TKey, TValue>
      */
-    public function filter(?callable $func = null, bool $strict = false): self
+    public function select(?callable $func = null, bool $strict = true): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -516,6 +516,24 @@ class Standard implements IteratorAggregate, Countable
         $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
+    }
+
+    /**
+     * Removes elements unless a callback returns true. Alias for select().
+     *
+     * With no callback drops all null and false values (not unlike array_filter does by default).
+     *
+     * @see select()
+     *
+     * @param null|callable(TValue): bool $func A callback that accepts a single value and returns a boolean value.
+     * @param bool $strict When true, only `null` and `false` are filtered out.
+     *
+     * @phpstan-self-out self<TKey, TValue>
+     * @return Standard<TKey, TValue>
+     */
+    public function filter(?callable $func = null, bool $strict = false): self
+    {
+        return $this->select($func, $strict);
     }
 
     /**
@@ -898,6 +916,7 @@ class Standard implements IteratorAggregate, Countable
 
         while ($input->valid()) {
             yield $input->key() => $input->current();
+            // @infection-ignore-all causes infinite loops
             $input->next();
         }
     }
