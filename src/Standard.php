@@ -1600,6 +1600,9 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    /**
+     * Reference parameter allows wrapped callable to persist across iterations.
+     */
     private static function callWithValueKey(callable &$func, mixed $value, mixed $key): void
     {
         try {

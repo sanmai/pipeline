@@ -25,12 +25,10 @@ use function count;
 class CallableThrower
 {
     public array $args = [];
-    public int $callCount = 0;
 
     public function __invoke(...$args): void
     {
         $this->args[] = $args;
-        $this->callCount++;
 
         if (count($args) > 1) {
             throw new ArgumentCountError();

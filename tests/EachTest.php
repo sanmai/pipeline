@@ -200,8 +200,6 @@ final class EachTest extends TestCase
         $pipeline = fromArray(['1', '2', '3']);
         $pipeline->each($callback);
 
-        $this->assertSame(4, $callback->callCount, 'Expected 1 initial call that throws + 3 successful calls after wrapping');
-
         $this->assertSame([
             ['1', 0],
             ['1'],
