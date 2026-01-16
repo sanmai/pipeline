@@ -20,6 +20,8 @@ namespace Tests\Pipeline\Fixtures;
 
 use ArgumentCountError;
 
+use function count;
+
 class CallableThrower
 {
     public array $args = [];
@@ -30,7 +32,7 @@ class CallableThrower
         $this->args[] = $args;
         $this->callCount++;
 
-        if (1 === $this->callCount) {
+        if (count($args) > 1) {
             throw new ArgumentCountError();
         }
     }

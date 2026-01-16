@@ -61,7 +61,7 @@ final class EachTest extends TestCase
     {
         $pipeline = new Standard();
 
-        $pipeline->each(fn($value) => $this->observeValue($value));
+        $pipeline->each($this->observeValue(...));
 
         $this->assertSame([], $this->output);
     }
@@ -70,7 +70,7 @@ final class EachTest extends TestCase
     {
         $pipeline = take([]);
 
-        $pipeline->each(fn($value) => $this->observeValue($value));
+        $pipeline->each($this->observeValue(...));
 
         $this->assertSame([], $this->output);
     }
@@ -79,7 +79,7 @@ final class EachTest extends TestCase
     {
         $pipeline = map(static fn() => yield from []);
 
-        $pipeline->each(fn($value) => $this->observeValue($value));
+        $pipeline->each($this->observeValue(...));
 
         $this->assertSame([], $this->output);
     }
@@ -88,7 +88,7 @@ final class EachTest extends TestCase
     {
         $pipeline = take([1, 2, 3, 4]);
 
-        $pipeline->each(fn(int $value) => $this->observeValue($value));
+        $pipeline->each($this->observeValue(...));
 
         $this->assertSame([1, 2, 3, 4], $this->output);
     }
@@ -123,9 +123,7 @@ final class EachTest extends TestCase
         });
 
         try {
-            $pipeline->each(function (int $value): void {
-                $this->observeValue($value);
-            });
+            $pipeline->each($this->observeValue(...));
         } catch (LogicException $_) {
             $this->assertSame([1, 2], $this->output);
         }
@@ -142,13 +140,9 @@ final class EachTest extends TestCase
     {
         $pipeline = fromArray([1, 2, 3]);
 
-        $pipeline->each(function (int $value): void {
-            $this->observeValue($value);
-        }, false);
+        $pipeline->each($this->observeValue(...), false);
 
-        $pipeline->each(function (int $value): void {
-            $this->observeValue($value);
-        });
+        $pipeline->each($this->observeValue(...));
 
         $this->assertSame([1, 2, 3, 1, 2, 3], $this->output);
         $this->assertSame([], $pipeline->toList());
