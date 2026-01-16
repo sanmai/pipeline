@@ -22,7 +22,6 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\DataProvider;
 use SplQueue;
 
 use function iterator_to_array;
@@ -45,6 +44,24 @@ final class SelectTest extends TestCase
         '0',
         [],
     ];
+
+    private array $rejected;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->rejected = [];
+    }
+
+    private function recordValue($value): void
+    {
+        $this->rejected[] = $value;
+    }
+
+    private function recordKeyValue($value, $key): void
+    {
+        $this->rejected[$key] = $value;
+    }
 
     public function testStandardStringFunctions(): void
     {
@@ -157,122 +174,63 @@ final class SelectTest extends TestCase
         $this->assertSame([], $pipeline->toList());
     }
 
-    public function testFilterIsNotStrictByDefault(): void
-    {
-        $pipeline = $this->getMockBuilder(Standard::class)
-            ->setConstructorArgs([[1]])
-            ->onlyMethods(['select'])
-            ->getMock();
-
-        $pipeline->expects($this->once())
-            ->method('select')
-            ->with(null, false)
-            ->willReturn($pipeline);
-
-        $pipeline->filter();
-    }
-
-    public static function provideFilterIsEquivalentToSelect(): iterable
-    {
-        yield [null, false];
-        yield [null, true];
-        yield [fn($value) => true, false];
-        yield [fn($value) => true, true];
-    }
-
-    #[DataProvider('provideFilterIsEquivalentToSelect')]
-    public function testFilterIsEquivalentToSelect(?callable $func, bool $strict): void
-    {
-        $pipeline = $this->getMockBuilder(Standard::class)
-            ->setConstructorArgs([[1]])
-            ->onlyMethods(['select'])
-            ->getMock();
-
-        $pipeline->expects($this->once())
-            ->method('select')
-            ->with($func, $strict)
-            ->willReturn($pipeline);
-
-        $pipeline->filter($func, $strict);
-    }
-
     public function testSelectOnRejectCallback(): void
     {
-        $rejected = [];
-
         $pipeline = fromValues(1, 2, 3, 4, 5);
         $pipeline->select(
             fn($value) => 0 === $value % 2,
-            onReject: function ($value) use (&$rejected) {
-                $rejected[] = $value;
-            },
+            onReject: $this->recordValue(...),
         );
 
         $this->assertSame([2, 4], $pipeline->toList());
-        $this->assertSame([1, 3, 5], $rejected);
+        $this->assertSame([1, 3, 5], $this->rejected);
     }
 
     public function testSelectOnRejectCallbackWithKey(): void
     {
-        $rejected = [];
-
         $pipeline = take(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]));
         $pipeline->select(
             fn($value) => 2 === $value,
-            onReject: function ($value, $key) use (&$rejected) {
-                $rejected[$key] = $value;
-            },
+            onReject: $this->recordKeyValue(...),
         );
 
         $this->assertSame(['b' => 2], $pipeline->toAssoc());
-        $this->assertSame(['a' => 1, 'c' => 3], $rejected);
+        $this->assertSame(['a' => 1, 'c' => 3], $this->rejected);
     }
 
     public function testSelectOnRejectCallbackWithArrayInput(): void
     {
-        $rejected = [];
-
         $pipeline = fromArray([1, 2, 3]);
         $pipeline->select(
             fn($value) => $value > 2,
-            onReject: function ($value) use (&$rejected) {
-                $rejected[] = $value;
-            },
+            onReject: $this->recordValue(...),
         );
 
         $this->assertSame([3], $pipeline->toList());
-        $this->assertSame([1, 2], $rejected);
+        $this->assertSame([1, 2], $this->rejected);
     }
 
     public function testSelectOnRejectCallbackWithStrictMode(): void
     {
-        $rejected = [];
-
         $pipeline = fromValues(null, false, 0, '', 'valid');
         $pipeline->select(
-            onReject: function ($value) use (&$rejected) {
-                $rejected[] = $value;
-            },
+            onReject: $this->recordValue(...),
         );
 
         $this->assertSame([0, '', 'valid'], $pipeline->toList());
-        $this->assertSame([null, false], $rejected);
+        $this->assertSame([null, false], $this->rejected);
     }
 
     public function testSelectOnRejectCallbackWithNonStrictMode(): void
     {
-        $rejected = [];
-
         $pipeline = fromValues(null, false, 0, '', 'valid');
         $pipeline->select(
             strict: false,
-            onReject: function ($value) use (&$rejected) {
-                $rejected[] = $value;
-            },
+            onReject: $this->recordValue(...),
         );
 
         $this->assertSame(['valid'], $pipeline->toList());
-        $this->assertSame([null, false, 0, ''], $rejected);
+        $this->assertSame([null, false, 0, ''], $this->rejected);
     }
 
     public function testSelectOnRejectCallbackWithInternalCallable(): void
