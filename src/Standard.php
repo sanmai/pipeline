@@ -493,11 +493,12 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|callable(TValue): bool $func A callback that accepts a single value and returns a boolean value.
      * @param bool $strict When true, only `null` and `false` are filtered out.
+     * @param null|callable(TValue, TKey=): void $onReject Optional callback for rejected items (side effects like logging).
      *
      * @phpstan-self-out self<TKey, TValue>
      * @return Standard<TKey, TValue>
      */
-    public function select(?callable $func = null, bool $strict = true): self
+    public function select(?callable $func = null, bool $strict = true, ?callable $onReject = null): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
@@ -505,6 +506,13 @@ class Standard implements IteratorAggregate, Countable
         }
 
         $func = self::resolvePredicate($func, $strict);
+
+        // When onReject callback is provided, use generator path for side effects.
+        if (null !== $onReject) {
+            $this->pipeline = self::selectWithRejectCallback($this->pipeline, $func, $onReject);
+
+            return $this;
+        }
 
         // We got an array, that's what we need. Moving along.
         if (is_array($this->pipeline)) {
@@ -516,6 +524,19 @@ class Standard implements IteratorAggregate, Countable
         $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
+    }
+
+    private static function selectWithRejectCallback(iterable $previous, callable $predicate, callable $onReject): Generator
+    {
+        foreach ($previous as $key => $value) {
+            if ($predicate($value)) {
+                yield $key => $value;
+
+                continue;
+            }
+
+            self::callWithValueKey($onReject, $value, $key);
+        }
     }
 
     /**
@@ -1592,13 +1613,7 @@ class Standard implements IteratorAggregate, Countable
     private static function tapValues(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
-            try {
-                $func($value, $key);
-            } catch (ArgumentCountError) {
-                // Optimization to reduce the number of argument count errors when calling internal callables.
-                $func = self::wrapInternalCallable($func);
-                $func($value);
-            }
+            self::callWithValueKey($func, $value, $key);
 
             yield $key => $value;
         }
@@ -1631,16 +1646,24 @@ class Standard implements IteratorAggregate, Countable
         }
 
         foreach ($this->pipeline as $key => $value) {
-            try {
-                $func($value, $key);
-            } catch (ArgumentCountError) {
-                // Optimization to reduce the number of argument count errors when calling internal callables.
-                // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
-                // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
-                // are too little arguments passed, it will blow up just a line later.
-                $func = self::wrapInternalCallable($func);
-                $func($value);
-            }
+            self::callWithValueKey($func, $value, $key);
+        }
+    }
+
+    /**
+     * Reference parameter allows wrapped callable to persist across iterations.
+     */
+    private static function callWithValueKey(callable &$func, mixed $value, mixed $key): void
+    {
+        try {
+            $func($value, $key);
+        } catch (ArgumentCountError) {
+            // Optimization to reduce the number of argument count errors when calling internal callables.
+            // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
+            // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
+            // are too little arguments passed, it will blow up just a line later.
+            $func = self::wrapInternalCallable($func);
+            $func($value);
         }
     }
 
