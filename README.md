@@ -375,7 +375,7 @@ The optional `onReject` callback allows side effects (like logging) for rejected
 ```php
 $pipeline->select(
     fn($row) => $row->isPaid(),
-    onReject: fn($row) => $log('SKIP', "reason=unpaid"),
+    onReject: fn($row) => $unpaid->enqueue(...),
 );
 ```
 
