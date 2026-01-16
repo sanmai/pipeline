@@ -52,7 +52,7 @@ jobs:
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
-          composer update --prefer-dist --no-interaction --no-progress
+          composer install --prefer-dist --no-interaction --no-progress
 
       - name: Execute tests
         run: |
@@ -91,7 +91,7 @@ jobs:
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
               friendsofphp/php-cs-fixer
-          composer update --prefer-dist --no-interaction --no-progress
+          composer install --prefer-dist --no-interaction --no-progress
 
       - name: Generate coverage
         run: |
@@ -160,7 +160,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --no-update --dev infection/infection
-          composer update --prefer-dist --no-interaction --no-progress
+          composer install --prefer-dist --no-interaction --no-progress
 
       - name: Validate composer.json
         run: |
