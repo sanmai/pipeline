@@ -371,11 +371,11 @@ $pipeline->select(strict: false);
 $pipeline->filter();
 ```
 
-The optional `onReject` callback allows side effects (like logging) for rejected items:
+The optional `onReject` callback allows side effects (like logging) for rejected items. It receives `($value, $key)` like `tap()`:
 ```php
 $pipeline->select(
-    fn($row) => $row->isPaid(),
-    onReject: fn($row) => $unpaid->enqueue(...),
+    fn(MyItem $item) => $item->isGood(),
+    onReject: fn($item, $key) => $this->logBad($key, $item),
 );
 ```
 
