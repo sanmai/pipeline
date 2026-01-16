@@ -518,11 +518,14 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * Alias for select().
+     * Removes elements unless a callback returns true. Alias for select().
      *
-     * @param null|callable(TValue): bool $func
+     * With no callback drops all null and false values (not unlike array_filter does by default).
      *
      * @see select()
+     *
+     * @param null|callable(TValue): bool $func A callback that accepts a single value and returns a boolean value.
+     * @param bool $strict When true, only `null` and `false` are filtered out.
      *
      * @phpstan-self-out self<TKey, TValue>
      * @return Standard<TKey, TValue>
