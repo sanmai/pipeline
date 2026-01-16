@@ -534,12 +534,7 @@ class Standard implements IteratorAggregate, Countable
                 continue;
             }
 
-            try {
-                $onReject($value, $key);
-            } catch (ArgumentCountError) {
-                $onReject = self::wrapInternalCallable($onReject);
-                $onReject($value);
-            }
+            self::kv($onReject, $value, $key);
         }
     }
 
@@ -1589,13 +1584,7 @@ class Standard implements IteratorAggregate, Countable
     private static function tapValues(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
-            try {
-                $func($value, $key);
-            } catch (ArgumentCountError) {
-                // Optimization to reduce the number of argument count errors when calling internal callables.
-                $func = self::wrapInternalCallable($func);
-                $func($value);
-            }
+            self::kv($func, $value, $key);
 
             yield $key => $value;
         }
@@ -1628,17 +1617,23 @@ class Standard implements IteratorAggregate, Countable
         }
 
         foreach ($this->pipeline as $key => $value) {
-            try {
-                $func($value, $key);
-            } catch (ArgumentCountError) {
-                // Optimization to reduce the number of argument count errors when calling internal callables.
-                // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
-                // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
-                // are too little arguments passed, it will blow up just a line later.
-                $func = self::wrapInternalCallable($func);
-                $func($value);
-            }
+            self::kv($func, $value, $key);
         }
+    }
+
+    private static function kv(callable &$func, $value, $key): void
+    {
+        try {
+            $func($value, $key);
+        } catch (ArgumentCountError) {
+            // Optimization to reduce the number of argument count errors when calling internal callables.
+            // This error is thrown when too many arguments are passed to a built-in function (that are sensitive
+            // to extra arguments), so we can wrap it to prevent the errors later. On the other hand, if there
+            // are too little arguments passed, it will blow up just a line later.
+            $func = self::wrapInternalCallable($func);
+            $func($value);
+        }
+
     }
 
     /**

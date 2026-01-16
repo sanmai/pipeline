@@ -21,14 +21,15 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use PHPUnit\Framework\Attributes\DataProvider;
 use SplQueue;
 
 use function iterator_to_array;
+use function Pipeline\fromArray;
 use function Pipeline\fromValues;
 use function Pipeline\map;
+use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard
@@ -215,7 +216,7 @@ final class SelectTest extends TestCase
     {
         $rejected = [];
 
-        $pipeline = new Standard(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]));
+        $pipeline = take(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]));
         $pipeline->select(
             fn($value) => 2 === $value,
             onReject: function ($value, $key) use (&$rejected) {
@@ -231,7 +232,7 @@ final class SelectTest extends TestCase
     {
         $rejected = [];
 
-        $pipeline = new Standard([1, 2, 3]);
+        $pipeline = fromArray([1, 2, 3]);
         $pipeline->select(
             fn($value) => $value > 2,
             onReject: function ($value) use (&$rejected) {
