@@ -47,12 +47,20 @@ jobs:
             composer-${{ matrix.php-version }}-
             composer-
 
-      - name: Install dependencies
+      - name: Remove non-test dependencies
         run: |
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
-          composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 30
+          max_attempts: 3
+          retry_on: error
+          command: |
+            composer update --prefer-dist --no-interaction --no-progress
 
       - name: Execute tests
         run: |
@@ -91,7 +99,7 @@ jobs:
           composer remove --no-update --dev \
               phpstan/phpstan vimeo/psalm \
               friendsofphp/php-cs-fixer
-          composer install --prefer-dist --no-interaction --no-progress
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Generate coverage
         run: |
@@ -160,7 +168,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer remove --no-update --dev infection/infection
-          composer install --prefer-dist --no-interaction --no-progress
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Validate composer.json
         run: |
