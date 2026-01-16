@@ -729,9 +729,6 @@ class Standard implements IteratorAggregate, Countable
         return iterator_to_array($this, preserve_keys: false);
     }
 
-    /**
-     * @deprecated Use toList() or toAssoc() instead.
-     */
     public function toArray(bool $preserve_keys): array
     {
         if ($preserve_keys) {
