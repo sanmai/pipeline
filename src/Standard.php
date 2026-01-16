@@ -884,6 +884,7 @@ class Standard implements IteratorAggregate, Countable
 
         while ($input->valid()) {
             yield $input->key() => $input->current();
+            // @infection-ignore-all causes infinite loops
             $input->next();
         }
     }
