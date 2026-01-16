@@ -132,7 +132,7 @@ All entry points always return an instance of the pipeline.
 | `unpack()`  | Unpacks arrays into arguments for a callback. Flattens inputs if no callback provided. |             |
 | `chunk()` | Chunks the pipeline into arrays of specified length. | `array_chunk` |
 | `chunkBy()` | Chunks the pipeline into arrays with variable sizes. Size 0 produces empty arrays. | |
-| `select()`  | Selects elements for which the callback returns true. By default only removes `null` and `false`.  |  `array_filter`, `filter`, `Where`                |
+| `select()`  | Selects elements for which the callback returns true. By default only removes `null` and `false`. Optional `onReject` for side effects.  |  `array_filter`, `filter`, `Where`                |
 | `filter()`  | Alias for `select()` with `strict: false` default. Removes all falsy values like `array_filter`. |  `array_filter`                |
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
 | `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
@@ -369,6 +369,14 @@ With the optional `strict: false` parameter, it removes all falsy values like `a
 $pipeline->select(strict: false);
 // Or use filter() which defaults to non-strict:
 $pipeline->filter();
+```
+
+The optional `onReject` callback allows side effects (like logging) for rejected items. It receives `($value, $key)` like `tap()`:
+```php
+$pipeline->select(
+    fn(MyItem $item) => $item->isGood(),
+    onReject: fn($item, $key) => $this->logBad($key, $item),
+);
 ```
 
 ## `$pipeline->slice()`
