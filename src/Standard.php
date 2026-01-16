@@ -492,29 +492,65 @@ class Standard implements IteratorAggregate, Countable
      *
      * @param null|callable(TValue): bool $func A callback that accepts a single value and returns a boolean value.
      * @param bool $strict When true, only `null` and `false` are filtered out.
+     * @param null|callable(TValue, TKey=): void $onReject Optional callback for rejected items (side effects like logging).
      *
      * @phpstan-self-out self<TKey, TValue>
      * @return Standard<TKey, TValue>
      */
-    public function select(?callable $func = null, bool $strict = true): self
+    public function select(?callable $func = null, bool $strict = true, ?callable $onReject = null): self
     {
         // No-op: an empty array or null.
         if ($this->empty()) {
             return $this;
         }
 
-        $func = self::resolvePredicate($func, $strict);
+        $predicate = self::resolvePredicate($func, $strict);
 
-        // We got an array, that's what we need. Moving along.
-        if (is_array($this->pipeline)) {
-            $this->pipeline = array_filter($this->pipeline, $func);
+        // When onReject callback is provided, use generator path for side effects.
+        if (null !== $onReject) {
+            $this->pipeline = self::selectWithRejectCallback($this->pipeline, $predicate, $onReject);
 
             return $this;
         }
 
-        $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
+        // We got an array, that's what we need. Moving along.
+        if (is_array($this->pipeline)) {
+            $this->pipeline = array_filter($this->pipeline, $predicate);
+
+            return $this;
+        }
+
+        $this->pipeline = new CallbackFilterIterator($this->pipeline, $predicate);
 
         return $this;
+    }
+
+    /**
+     * @template TSelectKey
+     * @template TSelectValue
+     *
+     * @param iterable<TSelectKey, TSelectValue> $previous
+     * @param callable(TSelectValue): bool $predicate
+     * @param callable(TSelectValue, TSelectKey=): void $onReject
+     *
+     * @return Generator<TSelectKey, TSelectValue>
+     */
+    private static function selectWithRejectCallback(iterable $previous, callable $predicate, callable $onReject): Generator
+    {
+        foreach ($previous as $key => $value) {
+            if ($predicate($value)) {
+                yield $key => $value;
+
+                continue;
+            }
+
+            try {
+                $onReject($value, $key);
+            } catch (ArgumentCountError) {
+                $onReject = self::wrapInternalCallable($onReject);
+                $onReject($value);
+            }
+        }
     }
 
     /**
