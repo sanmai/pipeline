@@ -504,23 +504,23 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $predicate = self::resolvePredicate($func, $strict);
+        $func = self::resolvePredicate($func, $strict);
 
         // When onReject callback is provided, use generator path for side effects.
         if (null !== $onReject) {
-            $this->pipeline = self::selectWithRejectCallback($this->pipeline, $predicate, $onReject);
+            $this->pipeline = self::selectWithRejectCallback($this->pipeline, $func, $onReject);
 
             return $this;
         }
 
         // We got an array, that's what we need. Moving along.
         if (is_array($this->pipeline)) {
-            $this->pipeline = array_filter($this->pipeline, $predicate);
+            $this->pipeline = array_filter($this->pipeline, $func);
 
             return $this;
         }
 
-        $this->pipeline = new CallbackFilterIterator($this->pipeline, $predicate);
+        $this->pipeline = new CallbackFilterIterator($this->pipeline, $func);
 
         return $this;
     }
