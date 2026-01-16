@@ -534,7 +534,7 @@ class Standard implements IteratorAggregate, Countable
                 continue;
             }
 
-            self::kv($onReject, $value, $key);
+            self::callWithValueKey($onReject, $value, $key);
         }
     }
 
@@ -1584,7 +1584,7 @@ class Standard implements IteratorAggregate, Countable
     private static function tapValues(iterable $previous, callable $func): Generator
     {
         foreach ($previous as $key => $value) {
-            self::kv($func, $value, $key);
+            self::callWithValueKey($func, $value, $key);
 
             yield $key => $value;
         }
@@ -1617,11 +1617,11 @@ class Standard implements IteratorAggregate, Countable
         }
 
         foreach ($this->pipeline as $key => $value) {
-            self::kv($func, $value, $key);
+            self::callWithValueKey($func, $value, $key);
         }
     }
 
-    private static function kv(callable &$func, $value, $key): void
+    private static function callWithValueKey(callable &$func, $value, $key): void
     {
         try {
             $func($value, $key);
@@ -1633,7 +1633,6 @@ class Standard implements IteratorAggregate, Countable
             $func = self::wrapInternalCallable($func);
             $func($value);
         }
-
     }
 
     /**
