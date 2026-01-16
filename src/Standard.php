@@ -525,16 +525,6 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
-    /**
-     * @template TSelectKey
-     * @template TSelectValue
-     *
-     * @param iterable<TSelectKey, TSelectValue> $previous
-     * @param callable(TSelectValue): bool $predicate
-     * @param callable(TSelectValue, TSelectKey=): void $onReject
-     *
-     * @return Generator<TSelectKey, TSelectValue>
-     */
     private static function selectWithRejectCallback(iterable $previous, callable $predicate, callable $onReject): Generator
     {
         foreach ($previous as $key => $value) {

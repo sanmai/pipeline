@@ -223,7 +223,7 @@ final class SelectTest extends TestCase
             },
         );
 
-        $this->assertSame([2], $pipeline->toList());
+        $this->assertSame(['b' => 2], $pipeline->toAssoc());
         $this->assertSame(['a' => 1, 'c' => 3], $rejected);
     }
 
