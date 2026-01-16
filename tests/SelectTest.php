@@ -155,7 +155,7 @@ final class SelectTest extends TestCase
         $this->assertSame([], $pipeline->toList());
     }
 
-    public function testFilterIsEquivalentToSelectWithDefaultValues(): void
+    public function testFilterIsNotStrictByDefault(): void
     {
         $pipeline = $this->getMockBuilder(Standard::class)
             ->setConstructorArgs([[1]])
