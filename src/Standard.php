@@ -1621,7 +1621,7 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
-    private static function callWithValueKey(callable &$func, $value, $key): void
+    private static function callWithValueKey(callable &$func, mixed $value, mixed $key): void
     {
         try {
             $func($value, $key);
