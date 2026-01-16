@@ -153,4 +153,28 @@ final class FilterTest extends TestCase
 
         $this->assertSame([], $pipeline->toList());
     }
+
+    public function testSelectIsEquivalentToFilter(): void
+    {
+        $pipeline = new Standard(new ArrayIterator([1, 2, 'foo', 'bar']));
+        $pipeline->select('is_int');
+
+        $this->assertSame([1, 2], iterator_to_array($pipeline));
+    }
+
+    public function testSelectStrictMode(): void
+    {
+        $pipeline = fromValues(false, null, 0, '', []);
+        $pipeline->select(strict: true);
+
+        $this->assertSame([0, '', []], $pipeline->toList());
+    }
+
+    public function testSelectDefaultsToNonStrict(): void
+    {
+        $pipeline = fromValues(false, null, 0, '', []);
+        $pipeline->select();
+
+        $this->assertSame([], $pipeline->toList());
+    }
 }
