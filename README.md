@@ -113,6 +113,7 @@ All entry points always return an instance of the pipeline.
 | `map()`     | Takes an optional initial callback, where it must not require any arguments. Other than that, works just like an instance method below. | `use function Pipeline\map;` |
 | `take()`  | Takes any iterables, including arrays, joining them together in succession.  | `use function Pipeline\take;` |
 | `fromArray()`  | Takes an array, initializes a pipeline with it.  | `use function Pipeline\fromArray;` |
+| `fromValues()`  | Takes variadic arguments, initializes a pipeline with them.  | `use function Pipeline\fromValues;` |
 | `zip()`  | Takes an iterable, and several more, transposing them together.  | `use function Pipeline\zip;` |
 
 
@@ -154,11 +155,12 @@ All entry points always return an instance of the pipeline.
 | `runningCount()` | Counts seen values using a reference argument. | |
 | `toList()` | Returns an array with all values. Eagerly executed. |  |
 | `toAssoc()` | Returns a final array with values and keys. Eagerly executed. | `dict`, `ToDictionary` |
+| `cursor()` | Returns a forward-only iterator that maintains position across iterations. | |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
 
-Pipeline is an iterator and can be used as any other iterable. 
+Pipeline implements `IteratorAggregate` and can be used as any other iterable.
 
 Pipeline can be used as an argument to `count()`. Implements `Countable`. Be warned that operation of counting values is [a terminal operation](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps).
 
