@@ -24,8 +24,6 @@ use Countable;
 use Iterator;
 use Override;
 
-use function count;
-
 /**
  * A rewindable iterator that caches elements for replay.
  *
@@ -41,10 +39,8 @@ use function count;
  */
 class WindowIterator implements Iterator, Countable
 {
-    /** @var array<int, array{TKey, TValue}> */
-    private array $buffer = [];
-
-    private int $headKey = 0;
+    /** @var WindowBuffer<TKey, TValue> */
+    private WindowBuffer $buffer;
 
     private int $position = 0;
 
@@ -59,7 +55,9 @@ class WindowIterator implements Iterator, Countable
     public function __construct(
         private readonly Iterator $inner,
         private readonly ?int $maxSize = null
-    ) {}
+    ) {
+        $this->buffer = new WindowBuffer();
+    }
 
     #[Override]
     public function current(): mixed
@@ -68,7 +66,7 @@ class WindowIterator implements Iterator, Countable
             return null;
         }
 
-        return $this->buffer[$this->headKey + $this->position][1];
+        return $this->buffer->valueAt($this->position);
     }
 
     #[Override]
@@ -78,7 +76,7 @@ class WindowIterator implements Iterator, Countable
             return null;
         }
 
-        return $this->buffer[$this->headKey + $this->position][0];
+        return $this->buffer->keyAt($this->position);
     }
 
     #[Override]
@@ -97,11 +95,7 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
-        while ($this->count() > $this->maxSize) {
-            unset($this->buffer[$this->headKey]);
-            ++$this->headKey;
-            --$this->position;
-        }
+        $this->buffer->trimToMax($this->maxSize, $this->position);
     }
 
     #[Override]
@@ -153,12 +147,12 @@ class WindowIterator implements Iterator, Countable
 
     private function pushFromInner(): void
     {
-        $this->buffer[] = [$this->inner->key(), $this->inner->current()];
+        $this->buffer->append($this->inner->key(), $this->inner->current());
     }
 
     #[Override]
     public function count(): int
     {
-        return count($this->buffer);
+        return $this->buffer->count();
     }
 }

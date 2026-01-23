@@ -22,6 +22,7 @@ namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Helper\WindowBuffer;
 use Pipeline\Helper\WindowIterator;
 use ReflectionProperty;
 use RuntimeException;
@@ -51,8 +52,9 @@ final class WindowIteratorTest extends TestCase
                 }
 
                 $buffer = (new ReflectionProperty(WindowIterator::class, 'buffer'))->getValue($mock);
+                $innerBuffer = (new ReflectionProperty(WindowBuffer::class, 'buffer'))->getValue($buffer);
 
-                return count($buffer);
+                return count($innerBuffer);
             });
 
         // Consume all elements - triggers trim operations
