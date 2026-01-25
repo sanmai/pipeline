@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
+use Pipeline\Standard;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -39,7 +40,7 @@ final class VarianceTest extends TestCase
 {
     public function testVarianceUnitinialized(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $this->assertSame(0, $pipeline->finalVariance()->getCount());
     }

@@ -22,6 +22,8 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
+use League\Pipeline\Pipeline;
+use Pipeline\Standard;
 
 use function iterator_to_array;
 
@@ -34,7 +36,7 @@ final class LeaguePipelineTest extends TestCase
 {
     public function testWithLeaguePipeline(): void
     {
-        $leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
+        $leaguePipeline = (new Pipeline())->pipe(function ($payload) {
             return $payload + 1;
         })->pipe(function ($payload) {
             return $payload * 2;
@@ -42,7 +44,7 @@ final class LeaguePipelineTest extends TestCase
 
         $this->assertSame(22, $leaguePipeline(10));
 
-        $pipeline = new \Pipeline\Standard(new ArrayIterator([10, 20, 30]));
+        $pipeline = new Standard(new ArrayIterator([10, 20, 30]));
         $pipeline->map($leaguePipeline);
 
         $this->assertSame([22, 42, 62], iterator_to_array($pipeline));
