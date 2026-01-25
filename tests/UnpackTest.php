@@ -33,6 +33,7 @@ use function sqrt;
  * @internal
  */
 #[CoversMethod(Standard::class, 'unpack')]
+#[CoversMethod(Standard::class, 'flatten')]
 final class UnpackTest extends TestCase
 {
     public function testMapVector(): void
