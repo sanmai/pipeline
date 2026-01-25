@@ -24,6 +24,7 @@ use Generator;
 
 use const M_PI;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\map;
@@ -33,10 +34,9 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class CastTest extends TestCase
 {
     public function testCastGenerator(): void

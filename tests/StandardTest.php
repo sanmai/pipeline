@@ -28,6 +28,7 @@ use function iterator_count;
 use function iterator_to_array;
 use function max;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -40,10 +41,9 @@ use function range;
 use ReflectionClass;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class StandardTest extends TestCase
 {
     public function testEmpty(): void

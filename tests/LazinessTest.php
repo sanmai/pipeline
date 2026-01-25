@@ -22,15 +22,15 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use Traversable;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class LazinessTest extends TestCase
 {
     private function yieldFail(): bool

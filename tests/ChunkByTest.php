@@ -20,15 +20,16 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class ChunkByTest extends TestCase
 {
     public function testChunkIterable(): void

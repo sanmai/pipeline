@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 
 use ArgumentCountError;
 use LogicException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -34,10 +35,9 @@ use function Pipeline\take;
 use SplQueue;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class TapTest extends TestCase
 {
     private array $sideEffects;

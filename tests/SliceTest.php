@@ -31,6 +31,8 @@ use InvalidArgumentException;
 
 use const PHP_INT_MAX;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -44,10 +46,9 @@ use function range;
 use RuntimeException;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class SliceTest extends TestCase
 {
     public static function provideCallback(): iterable
@@ -76,10 +77,9 @@ final class SliceTest extends TestCase
     }
 
     /**
-     * @dataProvider provideCallback
-     *
      * @param Closure():Standard $example
      */
+    #[DataProvider('provideCallback')]
     public function testSliceExample(Closure $example): void
     {
         $this->assertSame(
@@ -288,11 +288,7 @@ final class SliceTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider specimens
-     *
-     * @covers \Pipeline\Standard::slice()
-     */
+    #[DataProvider('specimens')]
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = fromArray($input);
@@ -303,11 +299,7 @@ final class SliceTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider specimens
-     *
-     * @covers \Pipeline\Standard::slice()
-     */
+    #[DataProvider('specimens')]
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = map(static function () use ($input) {

@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -31,10 +32,9 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class CountTest extends TestCase
 {
     public function testCountZeroForUninitialized(): void

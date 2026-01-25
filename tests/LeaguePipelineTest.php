@@ -25,14 +25,14 @@ use ArrayIterator;
 use function iterator_to_array;
 
 use League\Pipeline\Pipeline;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 final class LeaguePipelineTest extends TestCase
 {
     public function testWithLeaguePipeline(): void

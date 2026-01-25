@@ -21,7 +21,7 @@
         "php-coveralls/php-coveralls": "^2.4.1",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2",
-        "phpunit/phpunit": ">=9.4 <12",
+        "phpunit/phpunit": "^11 || ^12",
         "sanmai/phpstan-rules": "^0.3.11",
         "sanmai/phpunit-double-colon-syntax": "^0.1.1",
         "vimeo/psalm": ">=2"

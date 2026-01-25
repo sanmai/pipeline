@@ -23,13 +23,13 @@ namespace Tests\Pipeline;
 use function ob_end_clean;
 use function ob_start;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 final class ExampleTest extends TestCase
 {
     public function testExample(): void

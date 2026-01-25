@@ -23,6 +23,8 @@ namespace Tests\Pipeline;
 use ArgumentCountError;
 use ArrayIterator;
 use LogicException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -36,10 +38,9 @@ use SplQueue;
 use Tests\Pipeline\Fixtures\CallableThrower;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class EachTest extends TestCase
 {
     private array $output;
@@ -112,9 +113,7 @@ final class EachTest extends TestCase
         yield [take(new ArrayIterator([1, 2, 3, 4]))];
     }
 
-    /**
-     * @dataProvider provideInterrupt
-     */
+    #[DataProvider('provideInterrupt')]
     public function testInterrupt(Standard $pipeline): void
     {
         $pipeline->cast(function (int $value) {

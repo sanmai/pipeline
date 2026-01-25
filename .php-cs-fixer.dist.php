@@ -70,6 +70,7 @@ $config
         'array_indentation' => true,
         'no_unused_imports' => true,
         'operator_linebreak' => ['only_booleans' => true],
+        'php_unit_attributes' => true,
         'no_empty_comment' => true,
         'fully_qualified_strict_types' => [
             'import_symbols' => true,

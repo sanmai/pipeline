@@ -23,6 +23,8 @@ namespace Tests\Pipeline\Inference;
 use function dirname;
 
 use Iterator;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
@@ -39,11 +41,11 @@ use function str_contains;
 use Tests\Pipeline\Fixtures\Foo;
 
 /**
- * @coversNothing
- * @group integration
  *
  * @internal
  */
+#[CoversNothing]
+#[Group('integration')]
 class TypeInferenceTest extends TestCase
 {
     public function testExample(): void

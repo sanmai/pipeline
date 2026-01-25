@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromValues;
@@ -30,10 +31,9 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class SkipWhileTest extends TestCase
 {
     public function testSkipEmpty(): void

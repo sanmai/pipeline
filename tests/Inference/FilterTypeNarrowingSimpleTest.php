@@ -22,6 +22,8 @@ namespace Tests\Pipeline\Inference;
 
 use function count;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
@@ -33,11 +35,11 @@ use function strtoupper;
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
  * These tests verify that PHPStan correctly understands type narrowing after filter operations.
  *
- * @coversNothing
- * @group integration
  *
  * @internal
  */
+#[CoversNothing]
+#[Group('integration')]
 class FilterTypeNarrowingSimpleTest extends TestCase
 {
     /**

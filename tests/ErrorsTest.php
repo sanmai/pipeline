@@ -21,15 +21,15 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArgumentCountError;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use TypeError;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments(): void
@@ -44,9 +44,6 @@ final class ErrorsTest extends TestCase
         });
     }
 
-    /**
-     * @covers \Pipeline\Standard::unpack()
-     */
     public function testUnpackNonIterable(): void
     {
         $pipeline = new Standard();

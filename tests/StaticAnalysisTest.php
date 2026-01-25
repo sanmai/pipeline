@@ -21,6 +21,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
@@ -28,10 +30,9 @@ use ReflectionMethod;
 use Traversable;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 final class StaticAnalysisTest extends TestCase
 {
     public function testIsNotFinal(): void
@@ -50,17 +51,13 @@ final class StaticAnalysisTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[DataProvider('provideMethods')]
     public function testPublicMethodsAreNotFinal(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isFinal());
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[DataProvider('provideMethods')]
     public function testAllMethodsArePublicOrPrivate(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isProtected());

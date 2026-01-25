@@ -26,6 +26,7 @@ use ArrayIterator;
 
 use function iterator_to_array;
 
+use PHPUnit\Framework\Attributes\CoversFunction;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
@@ -39,18 +40,15 @@ use function Pipeline\zip;
 use function range;
 
 /**
- * @covers \Pipeline\fromArray
- * @covers \Pipeline\map
- * @covers \Pipeline\take
- * @covers \Pipeline\zip
- *
  * @internal
  */
+#[CoversFunction('Pipeline\fromArray')]
+#[CoversFunction('Pipeline\map')]
+#[CoversFunction('Pipeline\take')]
+#[CoversFunction('Pipeline\zip')]
+#[CoversFunction('Pipeline\fromValues')]
 final class FunctionsTest extends TestCase
 {
-    /**
-     * @covers \Pipeline\map
-     */
     public function testMapFunction(): void
     {
         $pipeline = map();
@@ -67,9 +65,6 @@ final class FunctionsTest extends TestCase
         $this->assertSame(3, $pipeline->reduce());
     }
 
-    /**
-     * @covers \Pipeline\take
-     */
     public function testTakeFunction(): void
     {
         $pipeline = take();
@@ -81,17 +76,11 @@ final class FunctionsTest extends TestCase
         $this->assertSame(6, $pipeline->reduce());
     }
 
-    /**
-     * @covers \Pipeline\take
-     */
     public function testTakeArray(): void
     {
         $this->assertSame([1, 2, 3, 4, 5], take([1, 2, 3, 4, 5])->toList());
     }
 
-    /**
-     * @covers \Pipeline\take
-     */
     public function testTakeMany(): void
     {
         $this->assertSame([1, 2, 3, 4, 5], take([1, 2], [3, 4], [5])->toList());
@@ -99,18 +88,12 @@ final class FunctionsTest extends TestCase
         $this->assertSame([1, 2, 3, 4, 5], take(take([1, 2]), take([3, 4]), fromValues(5))->toList());
     }
 
-    /**
-     * @covers \Pipeline\fromValues
-     */
     public function testFromValues(): void
     {
         $this->assertSame([1, 2, 3, 4, 5], fromValues(1, 2, 3, 4, 5)->toList());
         $this->assertSame([1, 2, 3], fromValues(...[1, 2, 3])->toList());
     }
 
-    /**
-     * @covers \Pipeline\fromArray
-     */
     public function testFromArray(): void
     {
         $pipeline = fromArray(range(0, 100));
@@ -118,9 +101,6 @@ final class FunctionsTest extends TestCase
         $this->assertSame(range(0, 100), $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\zip
-     */
     public function testZip(): void
     {
         $pipeline = zip([1, 2], [3, 4]);
