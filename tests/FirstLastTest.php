@@ -28,11 +28,10 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::first
- * @covers \Pipeline\Standard::last
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'first')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'last')]
 final class FirstLastTest extends TestCase
 {
     public function testFirstWithArray(): void

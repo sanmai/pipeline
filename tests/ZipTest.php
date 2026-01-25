@@ -35,12 +35,9 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'zip')]
 final class ZipTest extends TestCase
 {
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipArray(): void
     {
         $pipeline = new Standard();
@@ -57,9 +54,6 @@ final class ZipTest extends TestCase
         $this->assertSame(array_map(null, ...$array), $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipSelf(): void
     {
         $pipeline = fromArray([1, 2]);
@@ -69,9 +63,6 @@ final class ZipTest extends TestCase
         $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipGenerator(): void
     {
         $pipeline = map(function () {
@@ -87,9 +78,6 @@ final class ZipTest extends TestCase
         $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testNoop(): void
     {
         $pipeline = new Standard();

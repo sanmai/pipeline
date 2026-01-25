@@ -29,12 +29,11 @@ use function Pipeline\map;
 use const NAN;
 
 /**
- * @covers \Pipeline\Standard::feedRunningVariance()
- * @covers \Pipeline\Standard::finalVariance()
- * @covers \Pipeline\Standard::runningVariance()
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'feedRunningVariance')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'finalVariance')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'runningVariance')]
 final class VarianceTest extends TestCase
 {
     public function testVarianceUnitinialized(): void

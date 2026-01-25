@@ -28,11 +28,10 @@ use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::cursor
- *
  * @internal
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Helper\CursorIterator::class)]
+#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'cursor')]
 final class CursorTest extends TestCase
 {
     public static function provideIterables(): iterable

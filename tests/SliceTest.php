@@ -281,9 +281,6 @@ final class SliceTest extends TestCase
         }
     }
 
-    /**
-     * @covers \Pipeline\Standard::slice()
-     */
     #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
@@ -295,9 +292,6 @@ final class SliceTest extends TestCase
         );
     }
 
-    /**
-     * @covers \Pipeline\Standard::slice()
-     */
     #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
