@@ -32,7 +32,7 @@ use const M_PI;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class CastTest extends TestCase
 {
     public function testCastGenerator(): void

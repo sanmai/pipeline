@@ -28,7 +28,7 @@ use TypeError;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments(): void
@@ -45,7 +45,7 @@ final class ErrorsTest extends TestCase
 
     public function testUnpackNonIterable(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield 1;

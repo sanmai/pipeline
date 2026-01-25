@@ -28,7 +28,7 @@ use function Pipeline\map;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class TuplesTest extends TestCase
 {
     public static function provideArrays(): iterable

@@ -34,7 +34,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class EdgeCasesTest extends TestCase
 {
     public function testNonUniqueKeys(): void

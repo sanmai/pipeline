@@ -67,6 +67,7 @@ $config
         'operator_linebreak' => ['only_booleans' => true],
         'php_unit_attributes' => true,
         'no_empty_comment' => true,
+        'fully_qualified_strict_types' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

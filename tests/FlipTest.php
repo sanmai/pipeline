@@ -33,7 +33,7 @@ use function shuffle;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class FlipTest extends TestCase
 {
     public function testFlipDiscardKeys(): void

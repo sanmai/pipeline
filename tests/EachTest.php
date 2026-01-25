@@ -35,7 +35,7 @@ use function Pipeline\fromArray;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class EachTest extends TestCase
 {
     private array $output;

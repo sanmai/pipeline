@@ -31,7 +31,7 @@ use function Pipeline\take;
  * @internal
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Helper\CursorIterator::class)]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'cursor')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'cursor')]
 final class CursorTest extends TestCase
 {
     public static function provideIterables(): iterable

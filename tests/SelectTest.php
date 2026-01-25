@@ -33,7 +33,7 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class SelectTest extends TestCase
 {
     private const NON_STRICT_FALSE_VALUES = [

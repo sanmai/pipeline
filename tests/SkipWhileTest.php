@@ -30,7 +30,7 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class SkipWhileTest extends TestCase
 {
     public function testSkipEmpty(): void

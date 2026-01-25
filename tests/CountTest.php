@@ -31,7 +31,7 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class CountTest extends TestCase
 {
     public function testCountZeroForUninitialized(): void

@@ -30,8 +30,8 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'first')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'last')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'first')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'last')]
 final class FirstLastTest extends TestCase
 {
     public function testFirstWithArray(): void

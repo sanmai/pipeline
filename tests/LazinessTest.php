@@ -29,7 +29,7 @@ use Traversable;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class LazinessTest extends TestCase
 {
     private function yieldFail(): bool

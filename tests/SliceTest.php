@@ -41,7 +41,7 @@ use const PHP_INT_MAX;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class SliceTest extends TestCase
 {
     public static function provideCallback(): iterable

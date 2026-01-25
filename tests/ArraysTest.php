@@ -31,7 +31,7 @@ use const PHP_INT_MAX;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class ArraysTest extends TestCase
 {
     public function testInitialCallbackNotGenerator(): void

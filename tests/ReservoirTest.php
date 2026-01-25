@@ -37,7 +37,7 @@ use function sin;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class ReservoirTest extends TestCase
 {
     protected function setUp(): void

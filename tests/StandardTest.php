@@ -37,7 +37,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class StandardTest extends TestCase
 {
     public function testEmpty(): void
@@ -300,7 +300,7 @@ final class StandardTest extends TestCase
         // initial generator
         $sourceData = new ArrayIterator(range(1, 5));
 
-        $pipeline = new \Pipeline\Standard($sourceData);
+        $pipeline = new Standard($sourceData);
         $pipeline->map($this->double);
         $pipeline->map($this->double);
         $pipeline->map($this->plusone);

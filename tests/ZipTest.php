@@ -35,7 +35,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'zip')]
+#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'zip')]
 final class ZipTest extends TestCase
 {
     public function testZipArray(): void

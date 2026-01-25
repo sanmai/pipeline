@@ -36,7 +36,7 @@ use const M_E;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class MinMaxTest extends TestCase
 {
     private static function provideInputs(): iterable

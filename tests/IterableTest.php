@@ -28,7 +28,7 @@ use function iterator_to_array;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
 final class IterableTest extends TestCase
 {
     public function testArrayToArray(): void

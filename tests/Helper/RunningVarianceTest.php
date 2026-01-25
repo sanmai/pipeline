@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Helper;
 
+use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
 use Throwable;
@@ -42,7 +43,7 @@ use const PHP_FLOAT_EPSILON;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Helper\RunningVariance::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(RunningVariance::class)]
 final class RunningVarianceTest extends TestCase
 {
     public function testEmpty(): void
@@ -295,6 +296,7 @@ final class RunningVarianceTest extends TestCase
         yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
     }
 
+    #[IgnorePhpunitWarnings]
     #[\PHPUnit\Framework\Attributes\CoversNothing]
     #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
@@ -323,6 +325,7 @@ final class RunningVarianceTest extends TestCase
         );
     }
 
+    #[IgnorePhpunitWarnings]
     #[\PHPUnit\Framework\Attributes\CoversNothing]
     #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
