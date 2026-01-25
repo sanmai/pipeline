@@ -21,18 +21,20 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
+
+use function count;
+
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowIterator;
 use ReflectionProperty;
 use RuntimeException;
 
-use function count;
-
 /**
- * @covers \Pipeline\Helper\WindowIterator
  *
  * @internal
  */
+#[CoversClass(WindowIterator::class)]
 final class WindowIteratorTest extends TestCase
 {
     public function testTrimLoopTerminatesCorrectly(): void

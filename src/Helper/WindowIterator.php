@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
+use function count;
+
 use Countable;
 use Iterator;
 use Override;
-
-use function count;
 
 /**
  * A rewindable iterator that caches elements for replay.

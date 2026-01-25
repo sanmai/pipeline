@@ -22,19 +22,25 @@ namespace Tests\Pipeline;
 
 use EmptyIterator;
 use Iterator;
+
+use function iterator_count;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+use function Pipeline\fromArray;
+
 use Pipeline\Helper\WindowIterator;
 use Pipeline\Standard;
 
-use function iterator_count;
-use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard::window
- * @covers \Pipeline\Helper\WindowIterator
  *
  * @internal
  */
+#[CoversClass(WindowIterator::class)]
 final class WindowTest extends TestCase
 {
     public static function provideIterables(): iterable
@@ -43,8 +49,8 @@ final class WindowTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testWindowRewindsAndReplays(Standard $pipeline): void
     {
         $window = $pipeline->window();
@@ -70,8 +76,8 @@ final class WindowTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testWindowWithSizeLimit(Standard $pipeline): void
     {
         $window = $pipeline->window(3);
@@ -97,8 +103,8 @@ final class WindowTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testWindowWithTakeCount(Standard $pipeline): void
     {
         $window = $pipeline->window();
@@ -115,8 +121,8 @@ final class WindowTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testWindowWithTakeReduce(Standard $pipeline): void
     {
         $window = $pipeline->window();
@@ -133,8 +139,8 @@ final class WindowTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testExhaustedWindowCanRewind(Standard $pipeline): void
     {
         $window = $pipeline->window();
