@@ -21,11 +21,13 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use PHPUnit\Framework\TestCase;
 
 use function count;
 use function is_numeric;
 use function key;
+
+use PHPUnit\Framework\TestCase;
+
 use function Pipeline\take;
 
 /**

@@ -22,9 +22,11 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function round;
 use function sqrt;
 

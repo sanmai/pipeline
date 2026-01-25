@@ -20,13 +20,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use ReflectionObject;
-
 use function iterator_to_array;
 
 use const PHP_INT_MAX;
+
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
+use ReflectionObject;
 
 /**
  * @covers \Pipeline\Standard

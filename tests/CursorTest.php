@@ -21,10 +21,12 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Iterator;
-use Pipeline\Standard;
 
 use function iterator_count;
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 /**

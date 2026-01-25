@@ -20,18 +20,20 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
-
 use function array_merge;
 use function array_reverse;
 use function count;
+
+use const M_E;
+
 use function max;
 use function min;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function range;
 use function shuffle;
-
-use const M_E;
 
 /**
  * @covers \Pipeline\Standard

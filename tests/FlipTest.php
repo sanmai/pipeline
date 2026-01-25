@@ -20,13 +20,14 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
-
 use function array_flip;
 use function array_reverse;
 use function chr;
 use function count;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function shuffle;
 

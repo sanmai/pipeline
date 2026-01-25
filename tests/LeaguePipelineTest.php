@@ -21,11 +21,12 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use PHPUnit\Framework\TestCase;
-use League\Pipeline\Pipeline;
-use Pipeline\Standard;
 
 use function iterator_to_array;
+
+use League\Pipeline\Pipeline;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 
 /**
  * @coversNothing
