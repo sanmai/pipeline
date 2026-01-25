@@ -23,7 +23,6 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 use function array_map;
 use function max;
@@ -34,10 +33,10 @@ use function Pipeline\zip;
 use function range;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class ZipTest extends TestCase
 {
     /**

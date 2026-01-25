@@ -17,8 +17,6 @@
  */
 
 declare(strict_types=1);
-use League\Pipeline\Pipeline;
-use Pipeline\Standard;
 
 include 'vendor/autoload.php';
 
@@ -105,13 +103,13 @@ var_dump($sum);
 // int(6)
 
 // now with League\Pipeline
-$leaguePipeline = (new Pipeline())->pipe(function ($payload) {
+$leaguePipeline = (new \League\Pipeline\Pipeline())->pipe(function ($payload) {
     return $payload + 1;
 })->pipe(function ($payload) {
     return $payload * 2;
 });
 
-$pipeline = new Standard(new ArrayIterator([10, 20, 30]));
+$pipeline = new \Pipeline\Standard(new \ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
 $result = iterator_to_array($pipeline);

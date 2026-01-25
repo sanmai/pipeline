@@ -22,9 +22,6 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Pipeline\Standard;
 
 use function count;
 use function is_numeric;
@@ -32,10 +29,10 @@ use function key;
 use function Pipeline\take;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class AppendPrependTest extends TestCase
 {
     private static function generateIterableCombinations(array $arrays): iterable
@@ -76,8 +73,8 @@ final class AppendPrependTest extends TestCase
     }
 
     /**
+     * @dataProvider provideAppendArrays
      */
-    #[DataProvider('provideAppendArrays')]
     public function testPush(array $expected, ?array $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -97,8 +94,8 @@ final class AppendPrependTest extends TestCase
     }
 
     /**
+     * @dataProvider provideAppend
      */
-    #[DataProvider('provideAppend')]
     public function testAppend(array $expected, ?iterable $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -131,8 +128,8 @@ final class AppendPrependTest extends TestCase
     }
 
     /**
+     * @dataProvider providePrependArrays
      */
-    #[DataProvider('providePrependArrays')]
     public function testUnshift(array $expected, ?array $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -152,8 +149,8 @@ final class AppendPrependTest extends TestCase
     }
 
     /**
+     * @dataProvider providePrepend
      */
-    #[DataProvider('providePrepend')]
     public function testPrepend(array $expected, ?iterable $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);

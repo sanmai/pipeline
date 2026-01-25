@@ -23,17 +23,16 @@ namespace Tests\Pipeline;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionObject;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 use function iterator_to_array;
 
 use const PHP_INT_MAX;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class ArraysTest extends TestCase
 {
     public function testInitialCallbackNotGenerator(): void

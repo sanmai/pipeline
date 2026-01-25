@@ -23,9 +23,6 @@ namespace Tests\Pipeline\Helper;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
 use Throwable;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversNothing;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 use function abs;
 use function array_sum;
@@ -45,8 +42,8 @@ use const PHP_FLOAT_EPSILON;
 /**
  * @internal
  *
+ * @covers \Pipeline\Helper\RunningVariance
  */
-#[CoversClass(RunningVariance::class)]
 final class RunningVarianceTest extends TestCase
 {
     public function testEmpty(): void
@@ -300,10 +297,10 @@ final class RunningVarianceTest extends TestCase
     }
 
     /**
+     * @coversNothing
      *
+     * @dataProvider provideRandomNumberCounts
      */
-    #[CoversNothing]
-    #[DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
@@ -331,10 +328,10 @@ final class RunningVarianceTest extends TestCase
     }
 
     /**
+     * @coversNothing
      *
+     * @dataProvider provideRandomNumberCounts
      */
-    #[CoversNothing]
-    #[DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))

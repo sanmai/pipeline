@@ -21,8 +21,6 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 use function array_merge;
 use function array_reverse;
@@ -36,10 +34,10 @@ use function shuffle;
 use const M_E;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class MinMaxTest extends TestCase
 {
     private static function provideInputs(): iterable
@@ -110,10 +108,10 @@ final class MinMaxTest extends TestCase
     }
 
     /**
+     * @dataProvider provideMinInputs
      *
      * @param mixed $expected
      */
-    #[DataProvider('provideMinInputs')]
     public function testMin($expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->min());
@@ -131,10 +129,10 @@ final class MinMaxTest extends TestCase
     }
 
     /**
+     * @dataProvider provideMaxInputs
      *
      * @param mixed $expected
      */
-    #[DataProvider('provideMaxInputs')]
     public function testMax($expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->max());

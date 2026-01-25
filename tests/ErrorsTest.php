@@ -24,13 +24,12 @@ use ArgumentCountError;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use TypeError;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments(): void
@@ -50,7 +49,7 @@ final class ErrorsTest extends TestCase
      */
     public function testUnpackNonIterable(): void
     {
-        $pipeline = new Standard();
+        $pipeline = new \Pipeline\Standard();
 
         $pipeline->map(function () {
             yield 1;

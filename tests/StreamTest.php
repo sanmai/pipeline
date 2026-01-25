@@ -23,18 +23,16 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
 use function Pipeline\take;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class StreamTest extends TestCase
 {
     /** @var array<mixed> */
@@ -131,8 +129,8 @@ final class StreamTest extends TestCase
     }
 
     /**
+     * @dataProvider provideStreamLazy
      */
-    #[DataProvider('provideStreamLazy')]
     public function testStreamLazy(Standard $input): void
     {
         $count = $input

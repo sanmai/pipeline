@@ -21,9 +21,6 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Benchmarks;
 
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Pipeline\Standard;
 
 use function array_map;
 use function array_sum;
@@ -31,19 +28,19 @@ use function Pipeline\fromArray;
 use function random_int;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  *
  * @long
  */
-#[CoversClass(Standard::class)]
 final class BenchTest extends TestCase
 {
     public const ITER_MAX = 100;
 
     /**
+     * @dataProvider provideCases
      */
-    #[DataProvider('provideCases')]
     public function testBenchmarks(callable $nativePhpFunc, callable $pipelineFunc): void
     {
         $this->assertSame($nativePhpFunc(), $pipelineFunc());

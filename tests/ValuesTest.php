@@ -22,16 +22,15 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
 
 /**
+ * @covers \Pipeline\Standard
  *
  * @internal
  */
-#[CoversClass(Standard::class)]
 final class ValuesTest extends TestCase
 {
     public function testValuesArray(): void
