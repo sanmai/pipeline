@@ -20,14 +20,14 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 
 /**
- * @covers \Pipeline\Standard::filter
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class FilterTest extends TestCase
 {
     public function testFilterIsNotStrictByDefault(): void

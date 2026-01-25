@@ -39,10 +39,9 @@ use function range;
 use const PHP_INT_MAX;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class SliceTest extends TestCase
 {
     public static function provideCallback(): iterable
@@ -71,10 +70,9 @@ final class SliceTest extends TestCase
     }
 
     /**
-     * @dataProvider provideCallback
-     *
      * @param Closure():Standard $example
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideCallback')]
     public function testSliceExample(Closure $example): void
     {
         $this->assertSame(
@@ -283,11 +281,7 @@ final class SliceTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider specimens
-     *
-     * @covers \Pipeline\Standard::slice()
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = fromArray($input);
@@ -298,11 +292,7 @@ final class SliceTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider specimens
-     *
-     * @covers \Pipeline\Standard::slice()
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = map(static function () use ($input) {

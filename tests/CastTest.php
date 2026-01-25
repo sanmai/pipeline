@@ -30,10 +30,9 @@ use function Pipeline\take;
 use const M_PI;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class CastTest extends TestCase
 {
     public function testCastGenerator(): void

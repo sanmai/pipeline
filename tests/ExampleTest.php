@@ -26,10 +26,9 @@ use function ob_end_clean;
 use function ob_start;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 final class ExampleTest extends TestCase
 {
     public function testExample(): void

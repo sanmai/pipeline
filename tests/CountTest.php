@@ -29,10 +29,9 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class CountTest extends TestCase
 {
     public function testCountZeroForUninitialized(): void

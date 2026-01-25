@@ -31,10 +31,9 @@ use function Pipeline\take;
 use function shuffle;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class FlipTest extends TestCase
 {
     public function testFlipDiscardKeys(): void
@@ -120,9 +119,7 @@ final class FlipTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideFlipInputs
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideFlipInputs')]
     public function testFlip(array $expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->flip()->toAssoc());

@@ -29,15 +29,11 @@ use function round;
 use function sqrt;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class UnpackTest extends TestCase
 {
-    /**
-     * @covers \Pipeline\Standard::unpack()
-     */
     public function testMapVector(): void
     {
         $pipeline = new \Pipeline\Standard();
@@ -56,9 +52,6 @@ final class UnpackTest extends TestCase
         $this->assertSame(37.0, round($pipeline->reduce()));
     }
 
-    /**
-     * @covers \Pipeline\Standard::unpack()
-     */
     public function testFlatMap(): void
     {
         $pipeline = new \Pipeline\Standard();
@@ -73,9 +66,6 @@ final class UnpackTest extends TestCase
         $this->assertSame((10 * 11) / 2, $pipeline->reduce());
     }
 
-    /**
-     * @covers \Pipeline\Standard::unpack()
-     */
     public function testWithIterator(): void
     {
         $this->assertSame([1, 2, 3], fromArray([
@@ -85,9 +75,6 @@ final class UnpackTest extends TestCase
         ])->unpack()->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::flatten()
-     */
     public function testFlatten(): void
     {
         $this->assertSame([1, 2, 3], fromArray([

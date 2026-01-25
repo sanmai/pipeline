@@ -28,10 +28,9 @@ use ReflectionMethod;
 use Traversable;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 final class StaticAnalysisTest extends TestCase
 {
     public function testIsNotFinal(): void
@@ -50,17 +49,13 @@ final class StaticAnalysisTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
     public function testPublicMethodsAreNotFinal(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isFinal());
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
     public function testAllMethodsArePublicOrPrivate(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isProtected());

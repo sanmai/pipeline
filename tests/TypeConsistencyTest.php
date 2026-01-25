@@ -32,15 +32,12 @@ use function trim;
 use function str_contains;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 class TypeConsistencyTest extends TestCase
 {
-    /**
-     * @dataProvider providePublicMethods
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providePublicMethods')]
     public function testGenericReturnHasMatchingSelfOut(ReflectionMethod $method): void
     {
         $methodName = $method->getName();

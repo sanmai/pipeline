@@ -35,10 +35,9 @@ use function Pipeline\map;
 use function range;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class StandardTest extends TestCase
 {
     public function testEmpty(): void

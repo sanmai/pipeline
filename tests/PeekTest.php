@@ -28,10 +28,9 @@ use function iterator_to_array;
 use function range;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class PeekTest extends TestCase
 {
     /**
@@ -63,9 +62,7 @@ final class PeekTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider providePeekIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providePeekIterables')]
     public function testPeekWithProvider(PeekScenario $item): void
     {
         $pipeline = take($item->input);
@@ -181,7 +178,7 @@ final class PeekTest extends TestCase
         $this->assertSame([1, 2, 3, 4, 5], $pipeline->toList());
     }
 
-    /** @dataProvider provideOneToFive */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideOneToFive')]
     public function testMultipleSequentialPeeks(iterable $input): void
     {
         $pipeline = take($input);
@@ -201,7 +198,7 @@ final class PeekTest extends TestCase
         yield [self::xrange(1, 5)];
     }
 
-    /** @dataProvider provideOneToFive */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideOneToFive')]
     public function testMultipleSequentialPeeksOutOfOrder(iterable $input): void
     {
         $pipeline = take($input);

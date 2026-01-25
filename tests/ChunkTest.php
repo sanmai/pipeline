@@ -25,10 +25,9 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class ChunkTest extends TestCase
 {
     public static function provideArrays(): iterable
@@ -55,9 +54,7 @@ final class ChunkTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testChunk(?bool $preserve_keys, int $length, iterable $input, array $expected): void
     {
         $pipeline = take($input);
@@ -71,9 +68,7 @@ final class ChunkTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys ?? false));
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testChunkBy(?bool $preserve_keys, int $length, iterable $input, array $expected): void
     {
         $pipeline = take($input);

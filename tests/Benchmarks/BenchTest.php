@@ -28,19 +28,16 @@ use function Pipeline\fromArray;
 use function random_int;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
- *
  * @long
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class BenchTest extends TestCase
 {
     public const ITER_MAX = 100;
 
-    /**
-     * @dataProvider provideCases
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideCases')]
     public function testBenchmarks(callable $nativePhpFunc, callable $pipelineFunc): void
     {
         $this->assertSame($nativePhpFunc(), $pipelineFunc());

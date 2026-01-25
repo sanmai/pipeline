@@ -32,11 +32,11 @@ use function strtoupper;
  * Tests for PHPStan FilterReturnTypeExtension type narrowing functionality.
  * These tests verify that PHPStan correctly understands type narrowing after filter operations.
  *
- * @coversNothing
- * @group integration
  *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\Group('integration')]
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 class FilterTypeNarrowingSimpleTest extends TestCase
 {
     /**

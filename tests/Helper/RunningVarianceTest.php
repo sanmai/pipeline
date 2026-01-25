@@ -41,9 +41,8 @@ use const PHP_FLOAT_EPSILON;
 
 /**
  * @internal
- *
- * @covers \Pipeline\Helper\RunningVariance
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Helper\RunningVariance::class)]
 final class RunningVarianceTest extends TestCase
 {
     public function testEmpty(): void
@@ -296,11 +295,7 @@ final class RunningVarianceTest extends TestCase
         yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
     }
 
-    /**
-     * @coversNothing
-     *
-     * @dataProvider provideRandomNumberCounts
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
@@ -327,11 +322,7 @@ final class RunningVarianceTest extends TestCase
         );
     }
 
-    /**
-     * @coversNothing
-     *
-     * @dataProvider provideRandomNumberCounts
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))

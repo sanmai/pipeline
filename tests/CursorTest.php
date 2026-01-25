@@ -28,11 +28,10 @@ use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::cursor
- * @covers \Pipeline\Helper\CursorIterator
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Helper\CursorIterator::class)]
 final class CursorTest extends TestCase
 {
     public static function provideIterables(): iterable
@@ -40,9 +39,7 @@ final class CursorTest extends TestCase
         yield from self::pipelinesForInput([1, 2, 3, 4, 5]);
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testCursorContinuesAfterBreak(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -66,9 +63,7 @@ final class CursorTest extends TestCase
         $this->assertSame([3, 4, 5], $remaining);
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testCursorWithTakeCount(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -83,9 +78,7 @@ final class CursorTest extends TestCase
         $this->assertSame(3, take($cursor)->count());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testCursorWithSlice(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -96,9 +89,7 @@ final class CursorTest extends TestCase
         $this->assertSame(3, take($cursor)->count());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testCursorWithTakeReduce(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -113,9 +104,7 @@ final class CursorTest extends TestCase
         $this->assertSame(12, take($cursor)->reduce());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testExhaustedCursorReturnsEmpty(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();

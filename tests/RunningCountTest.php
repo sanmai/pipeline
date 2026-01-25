@@ -27,10 +27,9 @@ use function Pipeline\take;
 use function range;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class RunningCountTest extends TestCase
 {
     public function testRunningCount(): void

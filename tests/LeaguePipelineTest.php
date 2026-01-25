@@ -26,10 +26,9 @@ use PHPUnit\Framework\TestCase;
 use function iterator_to_array;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 final class LeaguePipelineTest extends TestCase
 {
     public function testWithLeaguePipeline(): void

@@ -26,10 +26,9 @@ use Pipeline\Standard;
 use TypeError;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments(): void
@@ -44,9 +43,6 @@ final class ErrorsTest extends TestCase
         });
     }
 
-    /**
-     * @covers \Pipeline\Standard::unpack()
-     */
     public function testUnpackNonIterable(): void
     {
         $pipeline = new \Pipeline\Standard();

@@ -38,12 +38,12 @@ use function substr;
 /**
  * Test documentation has sections for all public methods.
  *
- * @group documentation
  *
- * @coversNothing
  *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\Group('documentation')]
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 final class DocumentationTest extends TestCase
 {
     private static string $readme;
@@ -89,9 +89,7 @@ final class DocumentationTest extends TestCase
         $this->assertGreaterThan(0, $methods, 'No public methods found.');
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
     public function testMethodHasMention(string $methodName): void
     {
         try {
@@ -106,9 +104,7 @@ final class DocumentationTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
     public function testMethodHasHeader(string $methodName): void
     {
         try {

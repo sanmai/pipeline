@@ -27,10 +27,9 @@ use function Pipeline\fromArray;
 use function Pipeline\map;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class KeysTest extends TestCase
 {
     public function testKeysArray(): void

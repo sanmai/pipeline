@@ -25,10 +25,9 @@ use PHPUnit\Framework\TestCase;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class ChunkByTest extends TestCase
 {
     public function testChunkIterable(): void

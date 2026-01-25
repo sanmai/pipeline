@@ -34,10 +34,9 @@ use function shuffle;
 use const M_E;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class MinMaxTest extends TestCase
 {
     private static function provideInputs(): iterable
@@ -108,10 +107,9 @@ final class MinMaxTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMinInputs
-     *
      * @param mixed $expected
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMinInputs')]
     public function testMin($expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->min());
@@ -129,10 +127,9 @@ final class MinMaxTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMaxInputs
-     *
      * @param mixed $expected
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideMaxInputs')]
     public function testMax($expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->max());

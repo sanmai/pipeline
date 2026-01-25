@@ -26,10 +26,9 @@ use function Pipeline\take;
 use function Pipeline\map;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class TuplesTest extends TestCase
 {
     public static function provideArrays(): iterable
@@ -64,9 +63,7 @@ final class TuplesTest extends TestCase
         }), [['1', 2], ['2', 3]]];
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
     public function testTuples(iterable $input, array $expected, bool $preserve_keys = false): void
     {
         $pipeline = take($input);

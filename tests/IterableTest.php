@@ -26,10 +26,9 @@ use Pipeline\Standard;
 use function iterator_to_array;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class IterableTest extends TestCase
 {
     public function testArrayToArray(): void

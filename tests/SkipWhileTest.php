@@ -28,10 +28,9 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class SkipWhileTest extends TestCase
 {
     public function testSkipEmpty(): void

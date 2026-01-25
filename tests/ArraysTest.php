@@ -29,10 +29,9 @@ use function iterator_to_array;
 use const PHP_INT_MAX;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class ArraysTest extends TestCase
 {
     public function testInitialCallbackNotGenerator(): void

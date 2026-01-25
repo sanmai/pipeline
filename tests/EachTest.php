@@ -33,10 +33,9 @@ use function Pipeline\take;
 use function Pipeline\fromArray;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class EachTest extends TestCase
 {
     private array $output;
@@ -109,9 +108,7 @@ final class EachTest extends TestCase
         yield [take(new ArrayIterator([1, 2, 3, 4]))];
     }
 
-    /**
-     * @dataProvider provideInterrupt
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideInterrupt')]
     public function testInterrupt(Standard $pipeline): void
     {
         $pipeline->cast(function (int $value) {

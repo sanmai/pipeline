@@ -31,10 +31,9 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class SelectTest extends TestCase
 {
     private const NON_STRICT_FALSE_VALUES = [

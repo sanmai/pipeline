@@ -29,10 +29,9 @@ use function Pipeline\map;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class StreamTest extends TestCase
 {
     /** @var array<mixed> */
@@ -128,9 +127,7 @@ final class StreamTest extends TestCase
         yield [new Standard()];
     }
 
-    /**
-     * @dataProvider provideStreamLazy
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideStreamLazy')]
     public function testStreamLazy(Standard $input): void
     {
         $count = $input

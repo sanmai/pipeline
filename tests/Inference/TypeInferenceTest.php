@@ -35,11 +35,11 @@ use function str_contains;
 use function dirname;
 
 /**
- * @coversNothing
- * @group integration
  *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\Group('integration')]
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 class TypeInferenceTest extends TestCase
 {
     public function testExample(): void

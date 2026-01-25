@@ -25,10 +25,9 @@ use PHPUnit\Framework\TestCase;
 use function Pipeline\map;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
 final class MapTest extends TestCase
 {
     public function testMapPreservesKeys(): void
