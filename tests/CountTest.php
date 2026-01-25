@@ -22,10 +22,12 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 /**

@@ -22,11 +22,14 @@ namespace Tests\Pipeline;
 
 use Generator;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use ReflectionClass;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
+
+use ReflectionClass;
 
 /**
  * @covers \Pipeline\Standard

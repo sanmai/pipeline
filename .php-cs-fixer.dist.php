@@ -62,11 +62,15 @@ $config
             'import_functions' => true,
         ],
 
+        'ordered_imports' => true,
+        'no_unused_imports' => true,
+
         'strict_comparison' => true,
         'yoda_style' => true,
         'array_indentation' => true,
         'no_unused_imports' => true,
         'operator_linebreak' => ['only_booleans' => true],
+        'no_empty_comment' => true,
         'fully_qualified_strict_types' => [
             'import_symbols' => true,
         ],

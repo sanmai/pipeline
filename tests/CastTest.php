@@ -21,13 +21,16 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Generator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-
-use function Pipeline\map;
-use function Pipeline\take;
 
 use const M_PI;
+
+use PHPUnit\Framework\TestCase;
+
+use function Pipeline\map;
+
+use Pipeline\Standard;
+
+use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard

@@ -20,12 +20,12 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Tests\Pipeline\Scenarios\PeekScenario;
-
+use function iterator_to_array;
 use function Pipeline\map;
 use function Pipeline\take;
-use function iterator_to_array;
 use function range;
+
+use Tests\Pipeline\Scenarios\PeekScenario;
 
 /**
  * @covers \Pipeline\Standard

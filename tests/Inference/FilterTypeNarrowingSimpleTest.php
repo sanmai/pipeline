@@ -20,10 +20,11 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Inference;
 
+use function count;
+
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 
-use function count;
 use function Pipeline\take;
 use function strlen;
 use function strtoupper;

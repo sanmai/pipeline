@@ -20,8 +20,8 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Pipeline\Standard;
 
 /**
  * @covers \Pipeline\Standard::filter

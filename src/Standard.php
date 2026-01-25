@@ -21,36 +21,45 @@ declare(strict_types=1);
 namespace Pipeline;
 
 use ArgumentCountError;
-use ArrayIterator;
-use CallbackFilterIterator;
-use Countable;
-use EmptyIterator;
-use Generator;
-use Iterator;
-use IteratorAggregate;
-use Traversable;
-use Override;
-use Pipeline\Helper\CursorIterator;
 
 use function array_chunk;
 use function array_filter;
 use function array_flip;
+use function array_keys;
 use function array_map;
 use function array_merge;
 use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
+
+use ArrayIterator;
+use CallbackFilterIterator;
+
 use function count;
+
+use Countable;
+use EmptyIterator;
+use Generator;
+
 use function is_array;
+use function is_callable;
+
+use Iterator;
+
 use function iterator_count;
 use function iterator_to_array;
+
+use IteratorAggregate;
+
 use function max;
 use function min;
 use function mt_getrandmax;
 use function mt_rand;
-use function array_keys;
-use function is_callable;
+
+use Override;
+use Pipeline\Helper\CursorIterator;
+use Traversable;
 
 /**
  * Concrete pipeline with sensible default callbacks.

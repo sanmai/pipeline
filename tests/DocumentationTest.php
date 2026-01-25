@@ -20,16 +20,19 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function file_get_contents;
+use function implode;
+
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
+use function Pipeline\take;
+use function preg_match_all;
+
 use ReflectionClass;
 use ReflectionMethod;
 
-use function file_get_contents;
-use function implode;
-use function Pipeline\take;
-use function preg_match_all;
 use function sprintf;
 use function str_contains;
 use function strpos;

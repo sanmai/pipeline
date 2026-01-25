@@ -20,19 +20,23 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Inference;
 
+use function dirname;
+
 use Iterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
+use function Pipeline\take;
+use function preg_match;
+
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
 use SplFileInfo;
-use Tests\Pipeline\Fixtures\Foo;
 
-use function Pipeline\take;
-use function preg_match;
 use function str_contains;
-use function dirname;
+
+use Tests\Pipeline\Fixtures\Foo;
 
 /**
  * @coversNothing
