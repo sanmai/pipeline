@@ -29,7 +29,7 @@ use Closure;
 use Generator;
 use InvalidArgumentException;
 
-use const PHP_INT_MAX;
+use RuntimeException;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
