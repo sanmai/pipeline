@@ -20,25 +20,30 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function array_merge;
+use function array_slice;
+use function array_values;
+
 use ArrayIterator;
 use Closure;
 use Generator;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use RuntimeException;
+
+use const PHP_INT_MAX;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
-use function array_merge;
-use function array_slice;
-use function array_values;
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function range;
 
-use const PHP_INT_MAX;
+use RuntimeException;
 
 /**
  * @internal

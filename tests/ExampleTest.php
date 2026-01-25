@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\CoversNothing;
-
 use function ob_end_clean;
 use function ob_start;
+
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal

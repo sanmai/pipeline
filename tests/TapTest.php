@@ -22,14 +22,17 @@ namespace Tests\Pipeline;
 
 use ArgumentCountError;
 use LogicException;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use SplQueue;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
+
+use SplQueue;
 
 /**
  * @internal

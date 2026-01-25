@@ -20,15 +20,18 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
-
 use function array_flip;
 use function array_reverse;
 use function chr;
 use function count;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function shuffle;
 

@@ -20,15 +20,20 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function array_map;
+
 use ArrayIterator;
+
+use function max;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 
-use function array_map;
-use function max;
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function Pipeline\zip;
 use function range;

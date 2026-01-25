@@ -20,15 +20,18 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\TestCase;
-use Pipeline\Helper\RunningVariance;
+use const NAN;
+
 use PHPUnit\Framework\Attributes\CoversMethod;
-use Pipeline\Standard;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Helper\RunningVariance;
+
 use function Pipeline\map;
 
-use const NAN;
+use Pipeline\Standard;
 
 /**
  * @internal

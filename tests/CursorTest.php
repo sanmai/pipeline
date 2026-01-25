@@ -21,14 +21,18 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Iterator;
-use Pipeline\Standard;
+
+use function iterator_count;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Pipeline\Helper\CursorIterator;
 
-use function iterator_count;
 use function Pipeline\fromArray;
+
+use Pipeline\Helper\CursorIterator;
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 /**

@@ -20,29 +20,33 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Helper;
 
-use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Helper\RunningVariance;
-use Throwable;
-use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversNothing;
-use PHPUnit\Framework\Attributes\DataProvider;
-
 use function abs;
 use function array_sum;
 use function cos;
 use function count;
 use function log;
+
+use const M_PI;
+
 use function mt_getrandmax;
 use function mt_rand;
+
+use const NAN;
+use const PHP_FLOAT_EPSILON;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Helper\RunningVariance;
+
 use function Pipeline\take;
 use function sin;
 use function sqrt;
 
-use const NAN;
-use const M_PI;
-use const PHP_FLOAT_EPSILON;
+use Throwable;
 
 /**
  * @internal

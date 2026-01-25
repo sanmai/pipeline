@@ -62,6 +62,9 @@ $config
             'import_functions' => true,
         ],
 
+        'ordered_imports' => true,
+        'no_unused_imports' => true,
+
         'strict_comparison' => true,
         'yoda_style' => true,
         'array_indentation' => true,

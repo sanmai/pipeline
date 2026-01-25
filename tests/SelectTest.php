@@ -21,15 +21,20 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use Pipeline\Standard;
-use SplQueue;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 use function iterator_to_array;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+
 use function Pipeline\fromArray;
 use function Pipeline\fromValues;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
+
+use SplQueue;
 
 /**
  * @internal

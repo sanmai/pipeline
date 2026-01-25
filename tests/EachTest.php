@@ -21,18 +21,21 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArgumentCountError;
-use LogicException;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 use ArrayIterator;
-use SplQueue;
-use Tests\Pipeline\Fixtures\CallableThrower;
+use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
-use function Pipeline\map;
-use function Pipeline\take;
 use function Pipeline\fromArray;
+use function Pipeline\map;
+
+use Pipeline\Standard;
+
+use function Pipeline\take;
+
+use SplQueue;
+use Tests\Pipeline\Fixtures\CallableThrower;
 
 /**
  * @internal

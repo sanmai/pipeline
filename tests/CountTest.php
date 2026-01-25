@@ -21,12 +21,14 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 /**

@@ -21,11 +21,13 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use ArrayIterator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function round;
 use function sqrt;
 

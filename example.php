@@ -17,8 +17,8 @@
  */
 
 declare(strict_types=1);
-use Pipeline\Standard;
 use League\Pipeline\Pipeline;
+use Pipeline\Standard;
 
 include 'vendor/autoload.php';
 

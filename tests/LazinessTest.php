@@ -22,10 +22,10 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use Traversable;
-use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal

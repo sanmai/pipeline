@@ -20,11 +20,13 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Pipeline\Standard;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function range;
 

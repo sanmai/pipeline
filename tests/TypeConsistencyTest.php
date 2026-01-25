@@ -20,18 +20,20 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use ReflectionClass;
-use ReflectionMethod;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Standard;
 
 use function Pipeline\take;
 use function preg_match;
+
+use ReflectionClass;
+use ReflectionMethod;
+
+use function str_contains;
 use function str_replace;
 use function trim;
-use function str_contains;
 
 /**
  * @internal

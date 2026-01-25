@@ -21,14 +21,17 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Generator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use ReflectionClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
+
+use ReflectionClass;
 
 /**
  * @internal
