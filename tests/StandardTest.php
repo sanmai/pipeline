@@ -301,7 +301,7 @@ final class StandardTest extends TestCase
         // initial generator
         $sourceData = new ArrayIterator(range(1, 5));
 
-        $pipeline = new \Pipeline\Standard($sourceData);
+        $pipeline = new Standard($sourceData);
         $pipeline->map($this->double);
         $pipeline->map($this->double);
         $pipeline->map($this->plusone);

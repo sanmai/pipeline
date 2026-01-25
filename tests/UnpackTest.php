@@ -40,7 +40,7 @@ final class UnpackTest extends TestCase
      */
     public function testMapVector(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield [5, 7];
@@ -61,7 +61,7 @@ final class UnpackTest extends TestCase
      */
     public function testFlatMap(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield [1];

@@ -49,7 +49,7 @@ final class ErrorsTest extends TestCase
      */
     public function testUnpackNonIterable(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield 1;
