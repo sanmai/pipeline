@@ -22,14 +22,15 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function iterator_to_array;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class IterableTest extends TestCase
 {
     public function testArrayToArray(): void

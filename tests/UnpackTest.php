@@ -23,16 +23,17 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function Pipeline\fromArray;
 use function round;
 use function sqrt;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class UnpackTest extends TestCase
 {
     /**
@@ -40,7 +41,7 @@ final class UnpackTest extends TestCase
      */
     public function testMapVector(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield [5, 7];
@@ -61,7 +62,7 @@ final class UnpackTest extends TestCase
      */
     public function testFlatMap(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $pipeline->map(function () {
             yield [1];

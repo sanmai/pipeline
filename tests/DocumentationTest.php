@@ -25,6 +25,9 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 use function file_get_contents;
 use function implode;
@@ -38,12 +41,12 @@ use function substr;
 /**
  * Test documentation has sections for all public methods.
  *
- * @group documentation
  *
- * @coversNothing
  *
  * @internal
  */
+#[Group('documentation')]
+#[CoversNothing]
 final class DocumentationTest extends TestCase
 {
     private static string $readme;
@@ -90,8 +93,8 @@ final class DocumentationTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMethods
      */
+    #[DataProvider('provideMethods')]
     public function testMethodHasMention(string $methodName): void
     {
         try {
@@ -107,8 +110,8 @@ final class DocumentationTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMethods
      */
+    #[DataProvider('provideMethods')]
     public function testMethodHasHeader(string $methodName): void
     {
         try {

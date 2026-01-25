@@ -25,12 +25,13 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use Traversable;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class LazinessTest extends TestCase
 {
     private function yieldFail(): bool

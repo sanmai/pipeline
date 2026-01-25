@@ -24,15 +24,17 @@ use Generator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\fromArray;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class EagerWithArraysTest extends TestCase
 {
     public static function specimens(): Generator
@@ -42,8 +44,8 @@ final class EagerWithArraysTest extends TestCase
     }
 
     /**
-     * @dataProvider specimens
      */
+    #[DataProvider('specimens')]
     public function testEagerArrayFilter(Standard $pipeline): void
     {
         $reflectionClass = new ReflectionClass(Standard::class);
@@ -61,8 +63,8 @@ final class EagerWithArraysTest extends TestCase
     }
 
     /**
-     * @dataProvider specimens
      */
+    #[DataProvider('specimens')]
     public function testEagerArrayReduce(Standard $pipeline): void
     {
         $this->assertSame(6, $pipeline->reduce());
@@ -73,8 +75,8 @@ final class EagerWithArraysTest extends TestCase
     }
 
     /**
-     * @dataProvider specimens
      */
+    #[DataProvider('specimens')]
     public function testEagerArrayFilterAndReduce(Standard $pipeline): void
     {
         $this->assertSame(6, $pipeline->filter()->reduce());
@@ -83,8 +85,8 @@ final class EagerWithArraysTest extends TestCase
     }
 
     /**
-     * @dataProvider specimens
      */
+    #[DataProvider('specimens')]
     public function testNonEagerArrayMap(Standard $pipeline): void
     {
         $this->assertSame([1, 1, 1, 1, 1], $pipeline->map(function ($value) {

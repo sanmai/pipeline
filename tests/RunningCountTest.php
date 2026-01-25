@@ -21,16 +21,18 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Pipeline\Standard;
 
 use function Pipeline\map;
 use function Pipeline\take;
 use function range;
 
 /**
- * @covers \Pipeline\Standard
  *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class RunningCountTest extends TestCase
 {
     public function testRunningCount(): void

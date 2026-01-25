@@ -22,6 +22,9 @@ namespace Tests\Pipeline;
 
 use Iterator;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Pipeline\Helper\CursorIterator;
 
 use function iterator_count;
 use function Pipeline\fromArray;
@@ -29,10 +32,10 @@ use function Pipeline\take;
 
 /**
  * @covers \Pipeline\Standard::cursor
- * @covers \Pipeline\Helper\CursorIterator
  *
  * @internal
  */
+#[CoversClass(CursorIterator::class)]
 final class CursorTest extends TestCase
 {
     public static function provideIterables(): iterable
@@ -41,8 +44,8 @@ final class CursorTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testCursorContinuesAfterBreak(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -67,8 +70,8 @@ final class CursorTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testCursorWithTakeCount(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -84,8 +87,8 @@ final class CursorTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testCursorWithSlice(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -97,8 +100,8 @@ final class CursorTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testCursorWithTakeReduce(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -114,8 +117,8 @@ final class CursorTest extends TestCase
     }
 
     /**
-     * @dataProvider provideIterables
      */
+    #[DataProvider('provideIterables')]
     public function testExhaustedCursorReturnsEmpty(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();

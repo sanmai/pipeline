@@ -812,7 +812,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * This is a terminal operation.
      *
-     * @see \Countable::count()
+     * @see Countable::count()
      */
     #[Override]
     public function count(): int

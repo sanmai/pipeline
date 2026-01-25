@@ -26,12 +26,14 @@ use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
 use Traversable;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * @coversNothing
  *
  * @internal
  */
+#[CoversNothing]
 final class StaticAnalysisTest extends TestCase
 {
     public function testIsNotFinal(): void
@@ -51,16 +53,16 @@ final class StaticAnalysisTest extends TestCase
     }
 
     /**
-     * @dataProvider provideMethods
      */
+    #[DataProvider('provideMethods')]
     public function testPublicMethodsAreNotFinal(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isFinal());
     }
 
     /**
-     * @dataProvider provideMethods
      */
+    #[DataProvider('provideMethods')]
     public function testAllMethodsArePublicOrPrivate(ReflectionMethod $method): void
     {
         $this->assertFalse($method->isProtected());
