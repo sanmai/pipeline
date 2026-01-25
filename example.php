@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 use Pipeline\Standard;
+use League\Pipeline\Pipeline;
 
 include 'vendor/autoload.php';
 
@@ -104,7 +105,7 @@ var_dump($sum);
 // int(6)
 
 // now with League\Pipeline
-$leaguePipeline = (new League\Pipeline\Pipeline())->pipe(function ($payload) {
+$leaguePipeline = (new Pipeline())->pipe(function ($payload) {
     return $payload + 1;
 })->pipe(function ($payload) {
     return $payload * 2;
