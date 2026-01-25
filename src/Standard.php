@@ -34,29 +34,22 @@ use function array_slice;
 use function array_values;
 
 use ArrayIterator;
-use ArrayIterator;
-use CallbackFilterIterator;
 use CallbackFilterIterator;
 
 use function count;
 
 use Countable;
-use Countable;
 use EmptyIterator;
-use EmptyIterator;
-use Generator;
 use Generator;
 
 use function is_array;
 use function is_callable;
 
 use Iterator;
-use Iterator;
 
 use function iterator_count;
 use function iterator_to_array;
 
-use IteratorAggregate;
 use IteratorAggregate;
 
 use function max;
@@ -65,11 +58,8 @@ use function mt_getrandmax;
 use function mt_rand;
 
 use Override;
-use Override;
-use Pipeline\Helper\CursorIterator;
 use Pipeline\Helper\CursorIterator;
 use Pipeline\Helper\WindowIterator;
-use Traversable;
 use Traversable;
 
 /**
