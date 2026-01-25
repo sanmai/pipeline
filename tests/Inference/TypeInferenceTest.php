@@ -28,6 +28,8 @@ use RecursiveIteratorIterator;
 use ReflectionClass;
 use SplFileInfo;
 use Tests\Pipeline\Fixtures\Foo;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 
 use function Pipeline\take;
 use function preg_match;
@@ -38,8 +40,8 @@ use function dirname;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversNothing]
-#[\PHPUnit\Framework\Attributes\Group('integration')]
+#[CoversNothing]
+#[Group('integration')]
 class TypeInferenceTest extends TestCase
 {
     public function testExample(): void

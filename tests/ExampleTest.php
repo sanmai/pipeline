@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 
 use function ob_end_clean;
 use function ob_start;
@@ -28,7 +29,7 @@ use function ob_start;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversNothing]
+#[CoversNothing]
 final class ExampleTest extends TestCase
 {
     public function testExample(): void

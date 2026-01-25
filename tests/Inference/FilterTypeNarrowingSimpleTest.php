@@ -22,6 +22,8 @@ namespace Tests\Pipeline\Inference;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 
 use function count;
 use function Pipeline\take;
@@ -35,8 +37,8 @@ use function strtoupper;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversNothing]
-#[\PHPUnit\Framework\Attributes\Group('integration')]
+#[CoversNothing]
+#[Group('integration')]
 class FilterTypeNarrowingSimpleTest extends TestCase
 {
     /**

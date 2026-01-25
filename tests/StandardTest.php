@@ -25,6 +25,7 @@ use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function call_user_func;
 use function iterator_count;
@@ -37,7 +38,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class StandardTest extends TestCase
 {
     public function testEmpty(): void

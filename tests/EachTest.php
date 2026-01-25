@@ -27,6 +27,8 @@ use Pipeline\Standard;
 use ArrayIterator;
 use SplQueue;
 use Tests\Pipeline\Fixtures\CallableThrower;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -35,7 +37,7 @@ use function Pipeline\fromArray;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class EachTest extends TestCase
 {
     private array $output;
@@ -108,7 +110,7 @@ final class EachTest extends TestCase
         yield [take(new ArrayIterator([1, 2, 3, 4]))];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideInterrupt')]
+    #[DataProvider('provideInterrupt')]
     public function testInterrupt(Standard $pipeline): void
     {
         $pipeline->cast(function (int $value) {

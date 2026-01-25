@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -29,7 +30,7 @@ use function Pipeline\map;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class KeysTest extends TestCase
 {
     public function testKeysArray(): void

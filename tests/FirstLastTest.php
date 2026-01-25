@@ -22,6 +22,7 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversMethod;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -30,8 +31,8 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'first')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(Standard::class, 'last')]
+#[CoversMethod(Standard::class, 'first')]
+#[CoversMethod(Standard::class, 'last')]
 final class FirstLastTest extends TestCase
 {
     public function testFirstWithArray(): void

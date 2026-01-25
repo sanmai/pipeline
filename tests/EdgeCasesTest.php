@@ -26,6 +26,7 @@ use IteratorIterator;
 use NoRewindIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function iterator_to_array;
 use function Pipeline\map;
@@ -34,7 +35,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class EdgeCasesTest extends TestCase
 {
     public function testNonUniqueKeys(): void

@@ -20,10 +20,14 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Helper;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
 use Throwable;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function abs;
 use function array_sum;
@@ -43,7 +47,7 @@ use const PHP_FLOAT_EPSILON;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(RunningVariance::class)]
+#[CoversClass(RunningVariance::class)]
 final class RunningVarianceTest extends TestCase
 {
     public function testEmpty(): void
@@ -297,8 +301,8 @@ final class RunningVarianceTest extends TestCase
     }
 
     #[IgnorePhpunitWarnings]
-    #[\PHPUnit\Framework\Attributes\CoversNothing]
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
+    #[CoversNothing]
+    #[DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
@@ -326,8 +330,9 @@ final class RunningVarianceTest extends TestCase
     }
 
     #[IgnorePhpunitWarnings]
-    #[\PHPUnit\Framework\Attributes\CoversNothing]
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
+    #[CoversNothing]
+    #[Group('integration')]
+    #[DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))

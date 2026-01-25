@@ -21,13 +21,15 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\take;
 
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class ChunkTest extends TestCase
 {
     public static function provideArrays(): iterable
@@ -54,7 +56,7 @@ final class ChunkTest extends TestCase
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
+    #[DataProvider('provideIterables')]
     public function testChunk(?bool $preserve_keys, int $length, iterable $input, array $expected): void
     {
         $pipeline = take($input);
@@ -68,7 +70,7 @@ final class ChunkTest extends TestCase
         $this->assertSame($expected, $pipeline->toArray($preserve_keys ?? false));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
+    #[DataProvider('provideIterables')]
     public function testChunkBy(?bool $preserve_keys, int $length, iterable $input, array $expected): void
     {
         $pipeline = take($input);

@@ -23,6 +23,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use Pipeline\Standard;
 use SplQueue;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function iterator_to_array;
 use function Pipeline\fromArray;
@@ -33,7 +34,7 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class SelectTest extends TestCase
 {
     private const NON_STRICT_FALSE_VALUES = [

@@ -21,13 +21,15 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Pipeline\Standard;
 
 use function Pipeline\map;
 
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[CoversClass(Standard::class)]
 final class MapTest extends TestCase
 {
     public function testMapPreservesKeys(): void

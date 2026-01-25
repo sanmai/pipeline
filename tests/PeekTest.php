@@ -21,6 +21,9 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Tests\Pipeline\Scenarios\PeekScenario;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Pipeline\Standard;
 
 use function Pipeline\map;
 use function Pipeline\take;
@@ -30,7 +33,7 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[CoversClass(Standard::class)]
 final class PeekTest extends TestCase
 {
     /**
@@ -62,7 +65,7 @@ final class PeekTest extends TestCase
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('providePeekIterables')]
+    #[DataProvider('providePeekIterables')]
     public function testPeekWithProvider(PeekScenario $item): void
     {
         $pipeline = take($item->input);
@@ -178,7 +181,7 @@ final class PeekTest extends TestCase
         $this->assertSame([1, 2, 3, 4, 5], $pipeline->toList());
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideOneToFive')]
+    #[DataProvider('provideOneToFive')]
     public function testMultipleSequentialPeeks(iterable $input): void
     {
         $pipeline = take($input);
@@ -198,7 +201,7 @@ final class PeekTest extends TestCase
         yield [self::xrange(1, 5)];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideOneToFive')]
+    #[DataProvider('provideOneToFive')]
     public function testMultipleSequentialPeeksOutOfOrder(iterable $input): void
     {
         $pipeline = take($input);

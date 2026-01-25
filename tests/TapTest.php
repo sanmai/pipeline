@@ -25,6 +25,7 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use SplQueue;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -33,7 +34,7 @@ use function Pipeline\take;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class TapTest extends TestCase
 {
     private array $sideEffects;

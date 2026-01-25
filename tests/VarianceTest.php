@@ -22,6 +22,8 @@ namespace Tests\Pipeline;
 
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use Pipeline\Standard;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
@@ -31,14 +33,14 @@ use const NAN;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'feedRunningVariance')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'finalVariance')]
-#[\PHPUnit\Framework\Attributes\CoversMethod(\Pipeline\Standard::class, 'runningVariance')]
+#[CoversMethod(Standard::class, 'feedRunningVariance')]
+#[CoversMethod(Standard::class, 'finalVariance')]
+#[CoversMethod(Standard::class, 'runningVariance')]
 final class VarianceTest extends TestCase
 {
     public function testVarianceUnitinialized(): void
     {
-        $pipeline = new \Pipeline\Standard();
+        $pipeline = new Standard();
 
         $this->assertSame(0, $pipeline->finalVariance()->getCount());
     }

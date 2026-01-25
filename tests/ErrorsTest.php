@@ -24,11 +24,12 @@ use ArgumentCountError;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use TypeError;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class ErrorsTest extends TestCase
 {
     public function testInvalidInitialGeneratorWithArguments(): void

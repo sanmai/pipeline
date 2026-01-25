@@ -21,6 +21,8 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\take;
 use function Pipeline\map;
@@ -28,7 +30,7 @@ use function Pipeline\map;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class TuplesTest extends TestCase
 {
     public static function provideArrays(): iterable
@@ -63,7 +65,7 @@ final class TuplesTest extends TestCase
         }), [['1', 2], ['2', 3]]];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideIterables')]
+    #[DataProvider('provideIterables')]
     public function testTuples(iterable $input, array $expected, bool $preserve_keys = false): void
     {
         $pipeline = take($input);

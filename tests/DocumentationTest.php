@@ -25,6 +25,9 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 use function file_get_contents;
 use function implode;
@@ -42,8 +45,8 @@ use function substr;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\Group('documentation')]
-#[\PHPUnit\Framework\Attributes\CoversNothing]
+#[Group('documentation')]
+#[CoversNothing]
 final class DocumentationTest extends TestCase
 {
     private static string $readme;
@@ -89,7 +92,7 @@ final class DocumentationTest extends TestCase
         $this->assertGreaterThan(0, $methods, 'No public methods found.');
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
+    #[DataProvider('provideMethods')]
     public function testMethodHasMention(string $methodName): void
     {
         try {
@@ -104,7 +107,7 @@ final class DocumentationTest extends TestCase
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideMethods')]
+    #[DataProvider('provideMethods')]
     public function testMethodHasHeader(string $methodName): void
     {
         try {

@@ -24,6 +24,8 @@ use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use ReflectionClass;
 use ReflectionMethod;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Pipeline\take;
 use function preg_match;
@@ -34,10 +36,10 @@ use function str_contains;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversNothing]
+#[CoversNothing]
 class TypeConsistencyTest extends TestCase
 {
-    #[\PHPUnit\Framework\Attributes\DataProvider('providePublicMethods')]
+    #[DataProvider('providePublicMethods')]
     public function testGenericReturnHasMatchingSelfOut(ReflectionMethod $method): void
     {
         $methodName = $method->getName();

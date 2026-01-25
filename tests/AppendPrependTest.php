@@ -22,6 +22,9 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Pipeline\Standard;
 
 use function count;
 use function is_numeric;
@@ -32,7 +35,7 @@ use function Pipeline\take;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
+#[CoversClass(Standard::class)]
 final class AppendPrependTest extends TestCase
 {
     private static function generateIterableCombinations(array $arrays): iterable
@@ -72,7 +75,7 @@ final class AppendPrependTest extends TestCase
         yield [['a' => 'a', 'bb' => 'b'], ['a' => 'a'], ['bb' => 'b']];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideAppendArrays')]
+    #[DataProvider('provideAppendArrays')]
     public function testPush(array $expected, ?array $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -91,7 +94,7 @@ final class AppendPrependTest extends TestCase
             ->map(self::generateIterableCombinations(...));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideAppend')]
+    #[DataProvider('provideAppend')]
     public function testAppend(array $expected, ?iterable $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -123,7 +126,7 @@ final class AppendPrependTest extends TestCase
         yield [['bb' => 'b', 'a' => 'a'], ['a' => 'a'], ['bb' => 'b']];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('providePrependArrays')]
+    #[DataProvider('providePrependArrays')]
     public function testUnshift(array $expected, ?array $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);
@@ -142,7 +145,7 @@ final class AppendPrependTest extends TestCase
             ->map(self::generateIterableCombinations(...));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('providePrepend')]
+    #[DataProvider('providePrepend')]
     public function testPrepend(array $expected, ?iterable $initialValue, ...$iterables): void
     {
         $pipeline = take($initialValue);

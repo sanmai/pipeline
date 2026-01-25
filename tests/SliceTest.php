@@ -27,6 +27,8 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
 use RuntimeException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function array_merge;
 use function array_slice;
@@ -41,7 +43,7 @@ use const PHP_INT_MAX;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class SliceTest extends TestCase
 {
     public static function provideCallback(): iterable
@@ -72,7 +74,7 @@ final class SliceTest extends TestCase
     /**
      * @param Closure():Standard $example
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideCallback')]
+    #[DataProvider('provideCallback')]
     public function testSliceExample(Closure $example): void
     {
         $this->assertSame(
@@ -281,7 +283,7 @@ final class SliceTest extends TestCase
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
+    #[DataProvider('specimens')]
     public function testSliceWithArrays(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = fromArray($input);
@@ -292,7 +294,7 @@ final class SliceTest extends TestCase
         );
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('specimens')]
+    #[DataProvider('specimens')]
     public function testSliceWithIterables(array $expected, array $input, int $offset, ?int $length = null, bool $preserve_keys = false): void
     {
         $pipeline = map(static function () use ($input) {

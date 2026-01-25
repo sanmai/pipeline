@@ -23,6 +23,7 @@ namespace Tests\Pipeline;
 use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function array_map;
 use function iterator_to_array;
@@ -36,11 +37,11 @@ use function range;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversFunction('Pipeline\fromArray')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('Pipeline\map')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('Pipeline\take')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('Pipeline\zip')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('Pipeline\fromValues')]
+#[CoversFunction('Pipeline\fromArray')]
+#[CoversFunction('Pipeline\map')]
+#[CoversFunction('Pipeline\take')]
+#[CoversFunction('Pipeline\zip')]
+#[CoversFunction('Pipeline\fromValues')]
 final class FunctionsTest extends TestCase
 {
     public function testMapFunction(): void

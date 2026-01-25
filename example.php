@@ -17,6 +17,7 @@
  */
 
 declare(strict_types=1);
+use Pipeline\Standard;
 
 include 'vendor/autoload.php';
 
@@ -109,7 +110,7 @@ $leaguePipeline = (new League\Pipeline\Pipeline())->pipe(function ($payload) {
     return $payload * 2;
 });
 
-$pipeline = new Pipeline\Standard(new ArrayIterator([10, 20, 30]));
+$pipeline = new Standard(new ArrayIterator([10, 20, 30]));
 $pipeline->map($leaguePipeline);
 
 $result = iterator_to_array($pipeline);

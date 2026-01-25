@@ -24,6 +24,8 @@ use ArrayIterator;
 use IteratorIterator;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function abs;
 use function mt_rand;
@@ -37,7 +39,7 @@ use function sin;
 /**
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(Standard::class)]
+#[CoversClass(Standard::class)]
 final class ReservoirTest extends TestCase
 {
     protected function setUp(): void
@@ -95,7 +97,7 @@ final class ReservoirTest extends TestCase
         ]];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideInputs')]
+    #[DataProvider('provideInputs')]
     public function testSampleFromGenerator(array $input, int $size, array $expected): void
     {
         $this->assertSame($expected, map(static function () use ($input) {
@@ -103,13 +105,13 @@ final class ReservoirTest extends TestCase
         })->reservoir($size));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideInputs')]
+    #[DataProvider('provideInputs')]
     public function testSampleFromArray(array $input, int $size, array $expected): void
     {
         $this->assertSame($expected, take($input)->reservoir($size));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideInputs')]
+    #[DataProvider('provideInputs')]
     public function testSampleFromIterator(array $input, int $size, array $expected): void
     {
         $input = new IteratorIterator(new ArrayIterator($input));
@@ -148,7 +150,7 @@ final class ReservoirTest extends TestCase
         ]];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideWeightedInputs')]
+    #[DataProvider('provideWeightedInputs')]
     public function testWeightedSampleFromGenerator(array $input, int $size, callable $weightFn, array $expected): void
     {
         $pipeline = map(static function () use ($input) {
@@ -164,13 +166,13 @@ final class ReservoirTest extends TestCase
         $this->assertSame([], $pipeline->toList());
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideWeightedInputs')]
+    #[DataProvider('provideWeightedInputs')]
     public function testWeightedSampleFromArray(array $input, int $size, callable $weightFn, array $expected): void
     {
         $this->assertSame($expected, take($input)->reservoir($size, $weightFn));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('provideWeightedInputs')]
+    #[DataProvider('provideWeightedInputs')]
     public function testWeightedSampleFromIterator(array $input, int $size, callable $weightFn, array $expected): void
     {
         $input = new IteratorIterator(new ArrayIterator($input));
