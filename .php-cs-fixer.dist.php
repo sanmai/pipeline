@@ -72,7 +72,6 @@ $config
         'fully_qualified_strict_types' => [
             'import_symbols' => true,
         ],
-
     ])
     ->setFinder(
         Finder::create()
