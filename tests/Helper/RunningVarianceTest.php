@@ -295,6 +295,7 @@ final class RunningVarianceTest extends TestCase
         yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
     }
 
+    #[\PHPUnit\Framework\Attributes\CoversNothing]
     #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
@@ -322,6 +323,7 @@ final class RunningVarianceTest extends TestCase
         );
     }
 
+    #[\PHPUnit\Framework\Attributes\CoversNothing]
     #[\PHPUnit\Framework\Attributes\DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
     {

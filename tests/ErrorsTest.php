@@ -43,6 +43,9 @@ final class ErrorsTest extends TestCase
         });
     }
 
+    /**
+     * @covers \Pipeline\Standard::unpack()
+     */
     public function testUnpackNonIterable(): void
     {
         $pipeline = new \Pipeline\Standard();

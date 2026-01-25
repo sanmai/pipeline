@@ -38,8 +38,8 @@ use function dirname;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\Group('integration')]
 #[\PHPUnit\Framework\Attributes\CoversNothing]
+#[\PHPUnit\Framework\Attributes\Group('integration')]
 class TypeInferenceTest extends TestCase
 {
     public function testExample(): void

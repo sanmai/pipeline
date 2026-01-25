@@ -35,8 +35,8 @@ use function strtoupper;
  *
  * @internal
  */
-#[\PHPUnit\Framework\Attributes\Group('integration')]
 #[\PHPUnit\Framework\Attributes\CoversNothing]
+#[\PHPUnit\Framework\Attributes\Group('integration')]
 class FilterTypeNarrowingSimpleTest extends TestCase
 {
     /**

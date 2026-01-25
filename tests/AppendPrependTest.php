@@ -29,6 +29,7 @@ use function key;
 use function Pipeline\take;
 
 /**
+ *
  * @internal
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(\Pipeline\Standard::class)]
