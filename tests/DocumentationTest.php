@@ -20,16 +20,22 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use function file_get_contents;
+use function implode;
+
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
+use function Pipeline\take;
+use function preg_match_all;
+
 use ReflectionClass;
 use ReflectionMethod;
 
-use function file_get_contents;
-use function implode;
-use function Pipeline\take;
-use function preg_match_all;
 use function sprintf;
 use function str_contains;
 use function strpos;
@@ -38,12 +44,12 @@ use function substr;
 /**
  * Test documentation has sections for all public methods.
  *
- * @group documentation
  *
- * @coversNothing
  *
  * @internal
  */
+#[Group('documentation')]
+#[CoversNothing]
 final class DocumentationTest extends TestCase
 {
     private static string $readme;
@@ -89,9 +95,7 @@ final class DocumentationTest extends TestCase
         $this->assertGreaterThan(0, $methods, 'No public methods found.');
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[DataProvider('provideMethods')]
     public function testMethodHasMention(string $methodName): void
     {
         try {
@@ -106,9 +110,7 @@ final class DocumentationTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideMethods
-     */
+    #[DataProvider('provideMethods')]
     public function testMethodHasHeader(string $methodName): void
     {
         try {

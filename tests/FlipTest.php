@@ -20,21 +20,25 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use Pipeline\Standard;
-
 use function array_flip;
 use function array_reverse;
 use function chr;
 use function count;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function shuffle;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class FlipTest extends TestCase
 {
     public function testFlipDiscardKeys(): void
@@ -120,9 +124,7 @@ final class FlipTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider provideFlipInputs
-     */
+    #[DataProvider('provideFlipInputs')]
     public function testFlip(array $expected, iterable $input): void
     {
         $this->assertSame($expected, take($input)->flip()->toAssoc());

@@ -20,9 +20,11 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use IteratorIterator;
-use Pipeline\Standard;
 
 use function Pipeline\fromArray;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase

@@ -22,20 +22,24 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use Iterator;
-use IteratorIterator;
-use NoRewindIterator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 
 use function iterator_to_array;
+
+use IteratorIterator;
+use NoRewindIterator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function range;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class EdgeCasesTest extends TestCase
 {
     public function testNonUniqueKeys(): void

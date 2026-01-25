@@ -20,30 +20,38 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Helper;
 
-use PHPUnit\Framework\TestCase;
-use Pipeline\Helper\RunningVariance;
-use Throwable;
-
 use function abs;
 use function array_sum;
 use function cos;
 use function count;
 use function log;
+
+use const M_PI;
+
 use function mt_getrandmax;
 use function mt_rand;
+
+use const NAN;
+use const PHP_FLOAT_EPSILON;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
+use PHPUnit\Framework\TestCase;
+use Pipeline\Helper\RunningVariance;
+
 use function Pipeline\take;
 use function sin;
 use function sqrt;
 
-use const NAN;
-use const M_PI;
-use const PHP_FLOAT_EPSILON;
+use Throwable;
 
 /**
  * @internal
- *
- * @covers \Pipeline\Helper\RunningVariance
  */
+#[CoversClass(RunningVariance::class)]
 final class RunningVarianceTest extends TestCase
 {
     public function testEmpty(): void
@@ -296,11 +304,9 @@ final class RunningVarianceTest extends TestCase
         yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
     }
 
-    /**
-     * @coversNothing
-     *
-     * @dataProvider provideRandomNumberCounts
-     */
+    #[IgnorePhpunitWarnings]
+    #[CoversNothing]
+    #[DataProvider('provideRandomNumberCounts')]
     public function testNumericStability(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))
@@ -327,11 +333,10 @@ final class RunningVarianceTest extends TestCase
         );
     }
 
-    /**
-     * @coversNothing
-     *
-     * @dataProvider provideRandomNumberCounts
-     */
+    #[IgnorePhpunitWarnings]
+    #[CoversNothing]
+    #[Group('integration')]
+    #[DataProvider('provideRandomNumberCounts')]
     public function testMullerTransform(int $count, float $mean, float $sigma): void
     {
         $numbers = take(self::getRandomNumbers($mean, $sigma))

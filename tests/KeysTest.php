@@ -20,17 +20,18 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
 
 use function Pipeline\fromArray;
 use function Pipeline\map;
 
+use Pipeline\Standard;
+
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class KeysTest extends TestCase
 {
     public function testKeysArray(): void

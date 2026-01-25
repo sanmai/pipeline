@@ -20,28 +20,30 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
-use ArrayIterator;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-
 use function array_map;
+
+use ArrayIterator;
+
 use function max;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function Pipeline\take;
 use function Pipeline\zip;
 use function range;
 
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class ZipTest extends TestCase
 {
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipArray(): void
     {
         $pipeline = new Standard();
@@ -58,9 +60,6 @@ final class ZipTest extends TestCase
         $this->assertSame(array_map(null, ...$array), $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipSelf(): void
     {
         $pipeline = fromArray([1, 2]);
@@ -70,9 +69,6 @@ final class ZipTest extends TestCase
         $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testZipGenerator(): void
     {
         $pipeline = map(function () {
@@ -88,9 +84,6 @@ final class ZipTest extends TestCase
         $this->assertSame([[1, 3], [2, 4]], $pipeline->toList());
     }
 
-    /**
-     * @covers \Pipeline\Standard::zip()
-     */
     public function testNoop(): void
     {
         $pipeline = new Standard();

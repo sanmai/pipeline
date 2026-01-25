@@ -21,18 +21,25 @@ declare(strict_types=1);
 namespace Tests\Pipeline;
 
 use Iterator;
-use Pipeline\Standard;
 
 use function iterator_count;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use function Pipeline\fromArray;
+
+use Pipeline\Helper\CursorIterator;
+use Pipeline\Standard;
+
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::cursor
- * @covers \Pipeline\Helper\CursorIterator
- *
  * @internal
  */
+#[CoversClass(CursorIterator::class)]
+#[CoversMethod(Standard::class, 'cursor')]
 final class CursorTest extends TestCase
 {
     public static function provideIterables(): iterable
@@ -40,9 +47,7 @@ final class CursorTest extends TestCase
         yield from self::pipelinesForInput([1, 2, 3, 4, 5]);
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[DataProvider('provideIterables')]
     public function testCursorContinuesAfterBreak(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -66,9 +71,7 @@ final class CursorTest extends TestCase
         $this->assertSame([3, 4, 5], $remaining);
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[DataProvider('provideIterables')]
     public function testCursorWithTakeCount(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -83,9 +86,7 @@ final class CursorTest extends TestCase
         $this->assertSame(3, take($cursor)->count());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[DataProvider('provideIterables')]
     public function testCursorWithSlice(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -96,9 +97,7 @@ final class CursorTest extends TestCase
         $this->assertSame(3, take($cursor)->count());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[DataProvider('provideIterables')]
     public function testCursorWithTakeReduce(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
@@ -113,9 +112,7 @@ final class CursorTest extends TestCase
         $this->assertSame(12, take($cursor)->reduce());
     }
 
-    /**
-     * @dataProvider provideIterables
-     */
+    #[DataProvider('provideIterables')]
     public function testExhaustedCursorReturnsEmpty(Standard $pipeline): void
     {
         $cursor = $pipeline->cursor();
