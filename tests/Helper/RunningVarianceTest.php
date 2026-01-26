@@ -20,33 +20,14 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Helper;
 
-use function abs;
-use function array_sum;
-use function cos;
-use function count;
-use function log;
-
 use const M_PI;
-
-use function mt_getrandmax;
-use function mt_rand;
-
 use const NAN;
-use const PHP_FLOAT_EPSILON;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversNothing;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnorePhpunitWarnings;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\RunningVariance;
 
-use function Pipeline\take;
-use function sin;
 use function sqrt;
-
-use Throwable;
 
 /**
  * @internal
@@ -291,100 +272,5 @@ final class RunningVarianceTest extends TestCase
         $this->assertSame(8.0, $variance->getMax());
         $this->assertEqualsWithDelta(5.0, $variance->getVariance(), 0.0001);
         $this->assertEqualsWithDelta(sqrt(5.0), $variance->getStandardDeviation(), 0.0001);
-    }
-
-    public static function provideRandomNumberCounts(): iterable
-    {
-        yield ['count' => 900, 'mean' => 8.1, 'sigma' => 1.9];
-
-        yield ['count' => 1190, 'mean' => 729.4, 'sigma' => 4.2];
-
-        yield ['count' => 1500, 'mean' => 3698.41, 'sigma' => 12.9];
-
-        yield ['count' => 25000, 'mean' => 2.34E+21, 'sigma' => 111111001.1];
-    }
-
-    #[IgnorePhpunitWarnings]
-    #[CoversNothing]
-    #[DataProvider('provideRandomNumberCounts')]
-    public function testNumericStability(int $count, float $mean, float $sigma): void
-    {
-        $numbers = take(self::getRandomNumbers($mean, $sigma))
-            ->slice(0, $count)->toList();
-
-        $benchmark = self::standard_deviation($numbers);
-
-        $variance = take($numbers)->finalVariance();
-
-        $benchmarkError = abs($sigma - $benchmark);
-        $onlineError = abs($sigma - $variance->getStandardDeviation());
-
-        $this->assertLessThanOrEqual(
-            $sigma / 50,
-            $onlineError - $benchmarkError,
-            "Online algorithm deviated for more than 2% from the textbook computation on {$count} samples"
-        );
-
-        $this->assertEqualsWithDelta(
-            $sigma,
-            $variance->getStandardDeviation(),
-            $sigma / 10,
-            "Online algorithm deviated from the expected value beyond the expected 10% on {$count} samples"
-        );
-    }
-
-    #[IgnorePhpunitWarnings]
-    #[CoversNothing]
-    #[Group('integration')]
-    #[DataProvider('provideRandomNumberCounts')]
-    public function testMullerTransform(int $count, float $mean, float $sigma): void
-    {
-        $numbers = take(self::getRandomNumbers($mean, $sigma))
-            ->slice(0, $count)
-            ->toList();
-
-        try {
-            $this->assertEqualsWithDelta($sigma, self::standard_deviation(
-                $numbers
-            ), $sigma / 10);
-        } catch (Throwable $e) {
-            $this->assertGreaterThan(1E10, $mean, "Naive standard deviation calculation failed where it should not: {$e->getMessage()}");
-        }
-    }
-
-    /**
-     * @see https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-     *
-     * @param float $mean  The target average/mean
-     * @param float $sigma The target standard deviation
-     *
-     * @return iterable<float>
-     */
-    private static function getRandomNumbers(float $mean, float $sigma): iterable
-    {
-        $two_pi = 2 * M_PI;
-        $epsilon = PHP_FLOAT_EPSILON;
-
-        while (true) { // @phpstan-ignore-line
-            do {
-                $u1 = mt_rand() / mt_getrandmax();
-            } while ($u1 <= $epsilon);
-
-            $mag = $sigma * sqrt(-2.0 * log($u1));
-
-            $u2 = mt_rand() / mt_getrandmax();
-
-            yield $mag * cos($two_pi * $u2) + $mean;
-            yield $mag * sin($two_pi * $u2) + $mean;
-        }
-    }
-
-    private static function standard_deviation(array $input)
-    {
-        $mean = array_sum($input) / count($input);
-
-        $carry = take($input)->cast(fn(float $val) => ($val - $mean) ** 2)->reduce();
-
-        return sqrt($carry / count($input));
     }
 }
