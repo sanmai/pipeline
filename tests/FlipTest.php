@@ -75,7 +75,7 @@ final class FlipTest extends TestCase
             'one',
             1 => 'int_key',
             -2 => 'negative_key',
-            8.9 => 'float_key',
+            '8.9' => 'float_key',
             0o12 => 'octal_key',
             0x34 => 'hex_key',
             'key' => 'string_key1',
