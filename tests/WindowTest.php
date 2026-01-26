@@ -36,11 +36,10 @@ use Pipeline\Standard;
 use function Pipeline\take;
 
 /**
- * @covers \Pipeline\Standard::window
- *
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
+#[CoversClass(Standard::class)]
 final class WindowTest extends TestCase
 {
     public static function provideIterables(): iterable
