@@ -31,7 +31,6 @@ use ReflectionProperty;
 use RuntimeException;
 
 /**
- *
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
