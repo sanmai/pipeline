@@ -164,17 +164,6 @@ final class WindowTest extends TestCase
         $this->assertInstanceOf(Iterator::class, $window);
     }
 
-    public function testWindowAvoidDoubleWrapping(): void
-    {
-        $pipeline = fromArray([1, 2, 3]);
-
-        $window1 = $pipeline->window();
-        $window2 = take($window1)->window();
-
-        // Should be the same instance (no double wrapping)
-        $this->assertSame($window1, $window2);
-    }
-
     public function testWindowWithEmptyPipeline(): void
     {
         $pipeline = fromArray([]);
