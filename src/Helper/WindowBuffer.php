@@ -22,34 +22,42 @@ namespace Pipeline\Helper;
 
 use function count;
 
+use Countable;
+use Iterator;
+use Override;
+
 /**
  * @template TKey
  * @template TValue
  *
  * @internal
  */
-class WindowBuffer
+class WindowBuffer implements Countable
 {
     /** @var array<int, array{TKey, TValue}> */
     private array $buffer = [];
 
     private int $headKey = 0;
 
+    /** @return TKey */
     public function keyAt(int $position): mixed
     {
         return $this->buffer[$this->headKey + $position][0];
     }
 
+    /** @return TValue */
     public function valueAt(int $position): mixed
     {
         return $this->buffer[$this->headKey + $position][1];
     }
 
-    public function append(mixed $key, mixed $value): void
+    /** @param Iterator<TKey, TValue> $iterator */
+    public function append(Iterator $iterator): void
     {
-        $this->buffer[] = [$key, $value];
+        $this->buffer[] = [$iterator->key(), $iterator->current()];
     }
 
+    #[Override]
     public function count(): int
     {
         return count($this->buffer);

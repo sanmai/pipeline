@@ -145,7 +145,7 @@ class WindowIterator implements Iterator, Countable
 
     private function pushFromInner(): void
     {
-        $this->buffer->append($this->inner->key(), $this->inner->current());
+        $this->buffer->append($this->inner);
     }
 
     #[Override]
