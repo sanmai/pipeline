@@ -65,7 +65,6 @@ class WindowBuffer implements Countable
 
     public function shift(): void
     {
-        unset($this->buffer[$this->headKey]);
-        ++$this->headKey;
+        unset($this->buffer[$this->headKey++]);
     }
 }
