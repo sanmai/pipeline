@@ -28,7 +28,7 @@ use function count;
  *
  * @internal
  */
-final class WindowBuffer
+class WindowBuffer
 {
     /** @var array<int, array{TKey, TValue}> */
     private array $buffer = [];
