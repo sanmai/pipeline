@@ -91,6 +91,8 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
+        $this->inner->next();
+
         $this->fetch();
 
         while ($this->count() > $this->maxSize) {
@@ -128,16 +130,13 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
-        $this->fetch(rewind: true);
+        $this->inner->rewind();
+
+        $this->fetch();
     }
 
-    private function fetch(bool $rewind = false): void
+    private function fetch(): void
     {
-        match ($rewind) {
-            false => $this->inner->next(),
-            true => $this->inner->rewind(),
-        };
-
         if (!$this->inner->valid()) {
             $this->innerExhausted = true;
 
