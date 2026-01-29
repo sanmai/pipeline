@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
-use Countable;
 use Iterator;
 use Override;
 
@@ -37,11 +36,8 @@ use Override;
  *
  * @final
  */
-class WindowIterator implements Iterator, Countable
+class WindowIterator implements Iterator
 {
-    /** @var WindowBuffer<TKey, TValue> */
-    private readonly WindowBuffer $buffer;
-
     private int $position = 0;
 
     private bool $innerExhausted = false;
@@ -51,13 +47,13 @@ class WindowIterator implements Iterator, Countable
     /**
      * @param Iterator<TKey, TValue> $inner
      * @param int<1, max> $maxSize Maximum buffer size
+     * @param WindowBuffer<TKey, TValue> $buffer
      */
     public function __construct(
         private readonly Iterator $inner,
-        private readonly int $maxSize
-    ) {
-        $this->buffer = new WindowBuffer();
-    }
+        private readonly int $maxSize,
+        private readonly WindowBuffer $buffer = new WindowBuffer()
+    ) {}
 
     #[Override]
     public function current(): mixed
@@ -85,7 +81,7 @@ class WindowIterator implements Iterator, Countable
         ++$this->position;
 
         // If still within buffer or inner exhausted, nothing to fetch
-        if ($this->position < $this->count() || $this->innerExhausted) {
+        if ($this->position < $this->buffer->count() || $this->innerExhausted) {
             return;
         }
 
@@ -93,7 +89,7 @@ class WindowIterator implements Iterator, Countable
 
         $this->fetch();
 
-        while ($this->count() > $this->maxSize) {
+        while ($this->buffer->count() > $this->maxSize) {
             $this->buffer->shift();
             --$this->position;
         }
@@ -110,7 +106,7 @@ class WindowIterator implements Iterator, Countable
     {
         $this->initialize();
 
-        return $this->position < $this->count();
+        return $this->position < $this->buffer->count();
     }
 
     private function initialize(): void
@@ -146,11 +142,5 @@ class WindowIterator implements Iterator, Countable
     private function pushFromInner(): void
     {
         $this->buffer->append($this->inner);
-    }
-
-    #[Override]
-    public function count(): int
-    {
-        return $this->buffer->count();
     }
 }

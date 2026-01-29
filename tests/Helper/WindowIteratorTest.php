@@ -21,45 +21,40 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
-
-use function count;
-
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowBuffer;
 use Pipeline\Helper\WindowIterator;
-use ReflectionProperty;
 use RuntimeException;
 
 /**
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
+#[CoversClass(WindowBuffer::class)]
 final class WindowIteratorTest extends TestCase
 {
     public function testTrimLoopTerminatesCorrectly(): void
     {
         $callCount = 0;
 
-        $mock = $this->getMockBuilder(WindowIterator::class)
-            ->setConstructorArgs([new ArrayIterator([1, 2, 3, 4, 5]), 3])
+        $buffer = $this->getMockBuilder(WindowBuffer::class)
             ->onlyMethods(['count'])
             ->getMock();
 
-        $mock->method('count')
-            ->willReturnCallback(function () use (&$callCount, $mock): int {
+        $buffer->method('count')
+            ->willReturnCallback(function () use (&$callCount, $buffer): int {
                 if (++$callCount > 50) {
                     throw new RuntimeException('count() called >50 times - infinite loop');
                 }
 
-                $buffer = (new ReflectionProperty(WindowIterator::class, 'buffer'))->getValue($mock);
-                $innerBuffer = (new ReflectionProperty(WindowBuffer::class, 'buffer'))->getValue($buffer);
-
-                return count($innerBuffer);
+                return parent::count();
             });
 
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3, 4, 5]), 3, $buffer);
+
         // Consume all elements - triggers trim operations
-        foreach ($mock as $_) {
+        foreach ($window as $_) {
         }
 
         // With 5 elements and maxSize 3, count() calls should be bounded
