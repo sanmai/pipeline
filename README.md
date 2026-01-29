@@ -156,6 +156,7 @@ All entry points always return an instance of the pipeline.
 | `toList()` | Returns an array with all values. Eagerly executed. |  |
 | `toAssoc()` | Returns a final array with values and keys. Eagerly executed. | `dict`, `ToDictionary` |
 | `cursor()` | Returns a forward-only iterator that maintains position across iterations. | |
+| `window()` | Returns a rewindable iterator that caches elements for replay. | |
 | `runningVariance()` | Computes online statistics: sample mean, sample variance, standard deviation. | [Welford's method](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm) |
 | `finalVariance()` | Computes final statistics for the sequence. |   |
 | `__construct()` | Can be provided with an optional initial iterator. Used in the `take()` function from above.  |     |
@@ -496,25 +497,6 @@ Returns a rewindable iterator that caches elements for replay. Unlike `cursor()`
 
 ```php
 $pipeline = \Pipeline\fromArray([1, 2, 3, 4, 5]);
-$window = $pipeline->window();
-
-foreach ($window as $value) {
-    echo $value; // 1, 2, 3
-    if ($value === 3) {
-        break;
-    }
-}
-
-// Rewind and replay from beginning
-$window->rewind();
-foreach ($window as $value) {
-    echo $value; // 1, 2, 3, 4, 5 (full replay)
-}
-```
-
-With a size limit, oldest elements are dropped (sliding window):
-
-```php
 $window = $pipeline->window(3);  // Keep last 3 elements
 
 foreach ($window as $value) {
