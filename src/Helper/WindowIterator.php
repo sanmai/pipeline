@@ -42,7 +42,7 @@ use Override;
 class WindowIterator implements Iterator, Countable
 {
     /** @var WindowBuffer<TKey, TValue> */
-    private WindowBuffer $buffer;
+    private readonly WindowBuffer $buffer;
 
     private int $position = 0;
 
