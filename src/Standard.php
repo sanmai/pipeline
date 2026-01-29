@@ -747,23 +747,18 @@ class Standard implements IteratorAggregate, Countable
      *
      * With a size limit, oldest elements are dropped (sliding window).
      *
-     * @param int<1, max>|null $size Maximum buffer size (null = unlimited)
+     * @param int<1, max> $size Maximum buffer size
      * @return Iterator<TKey, TValue>
      */
-    public function window(?int $size = null): Iterator
+    public function window(int $size): Iterator
     {
         if ($this->empty()) {
             return new EmptyIterator();
         }
 
+        /** @var Iterator $iterator */
         $iterator = $this->getIterator();
 
-        // Avoid double wrapping
-        if ($iterator instanceof WindowIterator) {
-            return $iterator;
-        }
-
-        /** @var Iterator $iterator */
         return new WindowIterator($iterator, $size);
     }
 

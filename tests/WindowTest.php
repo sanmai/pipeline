@@ -52,7 +52,7 @@ final class WindowTest extends TestCase
     #[DataProvider('provideIterables')]
     public function testWindowRewindsAndReplays(Standard $pipeline): void
     {
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         $collected = [];
         foreach ($window as $i) {
@@ -106,7 +106,7 @@ final class WindowTest extends TestCase
     #[DataProvider('provideIterables')]
     public function testWindowWithTakeCount(Standard $pipeline): void
     {
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         foreach ($window as $i) {
             if (2 === $i) {
@@ -124,7 +124,7 @@ final class WindowTest extends TestCase
     #[DataProvider('provideIterables')]
     public function testWindowWithTakeReduce(Standard $pipeline): void
     {
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         foreach ($window as $i) {
             if (2 === $i) {
@@ -142,7 +142,7 @@ final class WindowTest extends TestCase
     #[DataProvider('provideIterables')]
     public function testExhaustedWindowCanRewind(Standard $pipeline): void
     {
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         // Consume all elements
         $this->assertSame(5, iterator_count($window));
@@ -159,7 +159,7 @@ final class WindowTest extends TestCase
     public function testWindowReturnsIterator(): void
     {
         $pipeline = fromArray([1, 2, 3]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         $this->assertInstanceOf(Iterator::class, $window);
     }
@@ -178,7 +178,7 @@ final class WindowTest extends TestCase
     public function testWindowWithEmptyPipeline(): void
     {
         $pipeline = fromArray([]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         $this->assertSame([], take($window)->toList());
     }
@@ -186,7 +186,7 @@ final class WindowTest extends TestCase
     public function testWindowPreservesKeys(): void
     {
         $pipeline = fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         $collected = [];
         foreach ($window as $key => $value) {
@@ -210,7 +210,7 @@ final class WindowTest extends TestCase
     public function testWindowManualIteration(): void
     {
         $pipeline = fromArray([1, 2, 3]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         $this->assertTrue($window->valid());
         $this->assertSame(1, $window->current());
@@ -254,7 +254,7 @@ final class WindowTest extends TestCase
     public function testWindowMultipleRewinds(): void
     {
         $pipeline = fromArray([1, 2, 3]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         // First iteration
         $this->assertSame([1, 2, 3], take($window)->toList());
@@ -271,7 +271,7 @@ final class WindowTest extends TestCase
     public function testWindowCurrentAndKeyWhenInvalid(): void
     {
         $pipeline = fromArray([1, 2, 3]);
-        $window = $pipeline->window();
+        $window = $pipeline->window(10);
 
         // Exhaust the window
         $this->assertSame(3, iterator_count($window));
@@ -284,7 +284,7 @@ final class WindowTest extends TestCase
 
     public function testWindowIteratorWithEmptyIterator(): void
     {
-        $window = new WindowIterator(new EmptyIterator());
+        $window = new WindowIterator(new EmptyIterator(), 10);
 
         $this->assertFalse($window->valid());
         $this->assertNull($window->current());
@@ -334,7 +334,7 @@ final class WindowTest extends TestCase
             }
         };
 
-        $window = new WindowIterator($iterator);
+        $window = new WindowIterator($iterator, 10);
 
         // Consume all - next() called twice (to advance from 1 to 2, then to exhaust)
         iterator_count($window);
@@ -380,7 +380,7 @@ final class WindowTest extends TestCase
             }
         };
 
-        $window = new WindowIterator($iterator);
+        $window = new WindowIterator($iterator, 10);
 
         // Empty iterator - next() should not have been called
         $this->assertFalse($window->valid());
@@ -405,7 +405,7 @@ final class WindowTest extends TestCase
         $this->assertSame(2, $generator->current());
 
         // Wrapping in WindowIterator should not throw "Cannot rewind a generator"
-        $window = new WindowIterator($generator);
+        $window = new WindowIterator($generator, 10);
 
         // Should capture current element (2) and continue
         $collected = [];

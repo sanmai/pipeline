@@ -54,11 +54,11 @@ class WindowIterator implements Iterator, Countable
 
     /**
      * @param Iterator<TKey, TValue> $inner
-     * @param int<1, max>|null $maxSize Maximum buffer size (null = unlimited)
+     * @param int<1, max> $maxSize Maximum buffer size
      */
     public function __construct(
         private readonly Iterator $inner,
-        private readonly ?int $maxSize = null
+        private readonly int $maxSize
     ) {}
 
     #[Override]
@@ -92,10 +92,6 @@ class WindowIterator implements Iterator, Countable
         }
 
         $this->fetch();
-
-        if (null === $this->maxSize) {
-            return;
-        }
 
         while ($this->count() > $this->maxSize) {
             unset($this->buffer[$this->headKey]);
