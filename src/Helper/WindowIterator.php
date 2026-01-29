@@ -20,8 +20,6 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
-use function count;
-
 use Countable;
 use Iterator;
 use Override;
@@ -57,7 +55,9 @@ class WindowIterator implements Iterator, Countable
     public function __construct(
         private readonly Iterator $inner,
         private readonly int $maxSize
-    ) {}
+    ) {
+        $this->buffer = new WindowBuffer();
+    }
 
     #[Override]
     public function current(): mixed
@@ -93,7 +93,10 @@ class WindowIterator implements Iterator, Countable
 
         $this->fetch();
 
-        $this->buffer->trimToMax($this->maxSize, $this->position);
+        while ($this->count() > $this->maxSize) {
+            $this->buffer->dropOldest();
+            --$this->position;
+        }
     }
 
     #[Override]

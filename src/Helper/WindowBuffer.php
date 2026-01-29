@@ -55,12 +55,9 @@ class WindowBuffer
         return count($this->buffer);
     }
 
-    public function trimToMax(int $maxSize, int &$position): void
+    public function dropOldest(): void
     {
-        while ($this->count() > $maxSize) {
-            unset($this->buffer[$this->headKey]);
-            ++$this->headKey;
-            --$position;
-        }
+        unset($this->buffer[$this->headKey]);
+        ++$this->headKey;
     }
 }
