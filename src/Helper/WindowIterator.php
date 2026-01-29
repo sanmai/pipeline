@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
+use function count;
+
 use Countable;
 use Iterator;
 use Override;
@@ -50,14 +52,12 @@ class WindowIterator implements Iterator, Countable
 
     /**
      * @param Iterator<TKey, TValue> $inner
-     * @param int<1, max>|null $maxSize Maximum buffer size (null = unlimited)
+     * @param int<1, max> $maxSize Maximum buffer size
      */
     public function __construct(
         private readonly Iterator $inner,
-        private readonly ?int $maxSize = null
-    ) {
-        $this->buffer = new WindowBuffer();
-    }
+        private readonly int $maxSize
+    ) {}
 
     #[Override]
     public function current(): mixed
@@ -89,11 +89,9 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
-        $this->fetch();
+        $this->inner->next();
 
-        if (null === $this->maxSize) {
-            return;
-        }
+        $this->fetch();
 
         $this->buffer->trimToMax($this->maxSize, $this->position);
     }
@@ -126,16 +124,13 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
-        $this->fetch(rewind: true);
+        $this->inner->rewind();
+
+        $this->fetch();
     }
 
-    private function fetch(bool $rewind = false): void
+    private function fetch(): void
     {
-        match ($rewind) {
-            false => $this->inner->next(),
-            true => $this->inner->rewind(),
-        };
-
         if (!$this->inner->valid()) {
             $this->innerExhausted = true;
 

@@ -21,37 +21,46 @@ declare(strict_types=1);
 namespace Pipeline;
 
 use ArgumentCountError;
-use ArrayIterator;
-use CallbackFilterIterator;
-use Countable;
-use EmptyIterator;
-use Generator;
-use Iterator;
-use IteratorAggregate;
-use Traversable;
-use Override;
-use Pipeline\Helper\CursorIterator;
-use Pipeline\Helper\WindowIterator;
 
 use function array_chunk;
 use function array_filter;
 use function array_flip;
+use function array_keys;
 use function array_map;
 use function array_merge;
 use function array_reduce;
 use function array_shift;
 use function array_slice;
 use function array_values;
+
+use ArrayIterator;
+use CallbackFilterIterator;
+
 use function count;
+
+use Countable;
+use EmptyIterator;
+use Generator;
+
 use function is_array;
+use function is_callable;
+
+use Iterator;
+
 use function iterator_count;
 use function iterator_to_array;
+
+use IteratorAggregate;
+
 use function max;
 use function min;
 use function mt_getrandmax;
 use function mt_rand;
-use function array_keys;
-use function is_callable;
+
+use Override;
+use Pipeline\Helper\CursorIterator;
+use Pipeline\Helper\WindowIterator;
+use Traversable;
 
 /**
  * Concrete pipeline with sensible default callbacks.
@@ -738,23 +747,18 @@ class Standard implements IteratorAggregate, Countable
      *
      * With a size limit, oldest elements are dropped (sliding window).
      *
-     * @param int<1, max>|null $size Maximum buffer size (null = unlimited)
+     * @param int<1, max> $size Maximum buffer size
      * @return Iterator<TKey, TValue>
      */
-    public function window(?int $size = null): Iterator
+    public function window(int $size): Iterator
     {
         if ($this->empty()) {
             return new EmptyIterator();
         }
 
+        /** @var Iterator $iterator */
         $iterator = $this->getIterator();
 
-        // Avoid double wrapping
-        if ($iterator instanceof WindowIterator) {
-            return $iterator;
-        }
-
-        /** @var Iterator $iterator */
         return new WindowIterator($iterator, $size);
     }
 
@@ -841,7 +845,7 @@ class Standard implements IteratorAggregate, Countable
      *
      * This is a terminal operation.
      *
-     * @see \Countable::count()
+     * @see Countable::count()
      */
     #[Override]
     public function count(): int

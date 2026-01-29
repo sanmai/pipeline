@@ -20,26 +20,32 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline\Inference;
 
+use function dirname;
+
 use Iterator;
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Standard;
+
+use function Pipeline\take;
+use function preg_match;
+
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
 use SplFileInfo;
+
+use function str_contains;
+
 use Tests\Pipeline\Fixtures\Foo;
 
-use function Pipeline\take;
-use function preg_match;
-use function str_contains;
-use function dirname;
-
 /**
- * @coversNothing
- * @group integration
  *
  * @internal
  */
+#[CoversNothing]
+#[Group('integration')]
 class TypeInferenceTest extends TestCase
 {
     public function testExample(): void

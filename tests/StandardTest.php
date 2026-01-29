@@ -22,23 +22,28 @@ namespace Tests\Pipeline;
 
 use ArrayIterator;
 use BadMethodCallException;
-use PHPUnit\Framework\TestCase;
-use Pipeline\Standard;
-use ReflectionClass;
 
 use function call_user_func;
 use function iterator_count;
 use function iterator_to_array;
 use function max;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
 use function Pipeline\fromArray;
 use function Pipeline\map;
+
+use Pipeline\Standard;
+
 use function range;
 
+use ReflectionClass;
+
 /**
- * @covers \Pipeline\Standard
- *
  * @internal
  */
+#[CoversClass(Standard::class)]
 final class StandardTest extends TestCase
 {
     public function testEmpty(): void
@@ -301,7 +306,7 @@ final class StandardTest extends TestCase
         // initial generator
         $sourceData = new ArrayIterator(range(1, 5));
 
-        $pipeline = new \Pipeline\Standard($sourceData);
+        $pipeline = new Standard($sourceData);
         $pipeline->map($this->double);
         $pipeline->map($this->double);
         $pipeline->map($this->plusone);

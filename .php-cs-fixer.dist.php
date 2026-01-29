@@ -17,6 +17,8 @@
  */
 
 declare(strict_types=1);
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
 
 $header = <<<'EOF'
     Copyright 2017, 2018 Alexey Kopytko <alexey@kopytko.com>
@@ -34,7 +36,7 @@ $header = <<<'EOF'
     limitations under the License.
     EOF;
 
-$config = new PhpCsFixer\Config();
+$config = new Config();
 $config
     ->setRiskyAllowed(true)
     ->setUnsupportedPhpVersionAllowed(true)
@@ -60,14 +62,22 @@ $config
             'import_functions' => true,
         ],
 
+        'ordered_imports' => true,
+        'no_unused_imports' => true,
+
         'strict_comparison' => true,
         'yoda_style' => true,
         'array_indentation' => true,
         'no_unused_imports' => true,
         'operator_linebreak' => ['only_booleans' => true],
+        'php_unit_attributes' => true,
+        'no_empty_comment' => true,
+        'fully_qualified_strict_types' => [
+            'import_symbols' => true,
+        ],
     ])
     ->setFinder(
-        PhpCsFixer\Finder::create()
+        Finder::create()
             ->in(__DIR__)
             ->append([__FILE__])
     )

@@ -20,10 +20,11 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
-use function sqrt;
 use function is_nan;
 
 use const NAN;
+
+use function sqrt;
 
 /**
  * Computes statistics (such as standard deviation) in real time.
