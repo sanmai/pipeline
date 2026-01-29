@@ -63,7 +63,7 @@ class WindowBuffer implements Countable
         return count($this->buffer);
     }
 
-    public function dropOldest(): void
+    public function shift(): void
     {
         unset($this->buffer[$this->headKey]);
         ++$this->headKey;

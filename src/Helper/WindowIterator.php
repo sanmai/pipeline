@@ -94,7 +94,7 @@ class WindowIterator implements Iterator, Countable
         $this->fetch();
 
         while ($this->count() > $this->maxSize) {
-            $this->buffer->dropOldest();
+            $this->buffer->shift();
             --$this->position;
         }
     }
