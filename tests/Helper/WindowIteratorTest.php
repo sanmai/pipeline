@@ -25,7 +25,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowBuffer;
 use Pipeline\Helper\WindowIterator;
-use RuntimeException;
 
 /**
  * @internal
@@ -34,19 +33,19 @@ use RuntimeException;
 #[CoversClass(WindowBuffer::class)]
 final class WindowIteratorTest extends TestCase
 {
+    private int $callCount = 0;
+
     public function testTrimLoopTerminatesCorrectly(): void
     {
-        $callCount = 0;
+        $this->callCount = 0;
 
         $buffer = $this->getMockBuilder(WindowBuffer::class)
             ->onlyMethods(['count'])
             ->getMock();
 
         $buffer->method('count')
-            ->willReturnCallback(function () use (&$callCount, $buffer): int {
-                if (++$callCount > 50) {
-                    throw new RuntimeException('count() called >50 times - infinite loop');
-                }
+            ->willReturnCallback(function (): int {
+                $this->assertLessThan(50, ++$this->callCount);
 
                 return parent::count();
             });
@@ -58,6 +57,6 @@ final class WindowIteratorTest extends TestCase
         }
 
         // With 5 elements and maxSize 3, count() calls should be bounded
-        $this->assertLessThan(50, $callCount);
+        $this->assertLessThan(50, $this->callCount);
     }
 }
