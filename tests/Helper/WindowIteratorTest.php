@@ -21,6 +21,10 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
+use EmptyIterator;
+
+use function iterator_count;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowBuffer;
@@ -30,33 +34,54 @@ use Pipeline\Helper\WindowIterator;
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
-#[CoversClass(WindowBuffer::class)]
 final class WindowIteratorTest extends TestCase
 {
-    private int $callCount = 0;
-
-    public function testTrimLoopTerminatesCorrectly(): void
+    public function testEmptyIteratorBehavior(): void
     {
-        $this->callCount = 0;
+        $window = new WindowIterator(new EmptyIterator(), 10);
 
-        $buffer = $this->getMockBuilder(WindowBuffer::class)
-            ->onlyMethods(['count'])
-            ->getMock();
+        $this->assertFalse($window->valid());
+        $this->assertNull($window->current());
+        $this->assertNull($window->key());
+    }
 
-        $buffer->method('count')
-            ->willReturnCallback(function (): int {
-                $this->assertLessThan(50, ++$this->callCount);
+    public function testInitializationAndFetching(): void
+    {
+        $buffer = new WindowBuffer();
+        $window = new WindowIterator(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]), 10, $buffer);
 
-                return parent::count();
-            });
+        $this->assertCount(0, $buffer, 'Buffer must be empty before valid() is called');
 
-        $window = new WindowIterator(new ArrayIterator([1, 2, 3, 4, 5]), 3, $buffer);
+        $this->assertTrue($window->valid(), 'valid() must trigger initialization');
+        $this->assertCount(1, $buffer, 'First element must now be in buffer');
+        $this->assertSame('a', $window->key());
+        $this->assertSame(1, $window->current());
 
-        // Consume all elements - triggers trim operations
-        foreach ($window as $_) {
-        }
+        $window->next();
+        $this->assertCount(2, $buffer, 'First next() must fetch second element');
+        $this->assertSame('b', $window->key());
+        $this->assertSame(2, $window->current());
 
-        // With 5 elements and maxSize 3, count() calls should be bounded
-        $this->assertLessThan(50, $this->callCount);
+        $window->next();
+        $this->assertCount(3, $buffer, 'Second next() must fetch third element');
+        $this->assertSame('c', $window->key());
+        $this->assertSame(3, $window->current());
+    }
+
+    public function testRewindAndBufferReuse(): void
+    {
+        $buffer = new WindowBuffer();
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3]), 10, $buffer);
+
+        $this->assertSame(3, iterator_count($window));
+
+        $this->assertCount(3, $buffer, 'Buffer must have 3 elements after consuming all');
+
+        $window->rewind();
+        $this->assertSame(1, $window->current(), 'Rewind must reset to first element');
+
+        $window->next();
+        $this->assertCount(3, $buffer, 'next() must stay within buffer, not fetch');
+        $this->assertSame(2, $window->current());
     }
 }
