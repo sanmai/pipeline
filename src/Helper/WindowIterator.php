@@ -89,6 +89,7 @@ class WindowIterator implements Iterator
 
         $this->fetch();
 
+        // @infection-ignore-all causes infinite loops
         while ($this->buffer->count() > $this->maxSize) {
             $this->buffer->shift();
             --$this->position;
