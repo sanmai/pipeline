@@ -34,37 +34,44 @@ use Override;
  */
 class WindowBuffer implements Countable
 {
-    /** @var array<int, array{TKey, TValue}> */
-    private array $buffer = [];
+    private int $head = 0;
 
-    private int $headKey = 0;
+    /** @var array<int, TKey> */
+    private array $keys = [];
+
+    /** @var array<int, TValue> */
+    private array $values = [];
 
     /** @return TKey */
     public function keyAt(int $position): mixed
     {
-        return $this->buffer[$this->headKey + $position][0];
+        return $this->keys[$this->head + $position];
     }
 
     /** @return TValue */
     public function valueAt(int $position): mixed
     {
-        return $this->buffer[$this->headKey + $position][1];
+        return $this->values[$this->head + $position];
     }
 
     /** @param Iterator<TKey, TValue> $iterator */
     public function append(Iterator $iterator): void
     {
-        $this->buffer[] = [$iterator->key(), $iterator->current()];
+        $this->keys[] = $iterator->key();
+        $this->values[] = $iterator->current();
     }
 
     #[Override]
     public function count(): int
     {
-        return count($this->buffer);
+        return count($this->keys);
     }
 
     public function shift(): void
     {
-        unset($this->buffer[$this->headKey++]);
+        unset($this->keys[$this->head]);
+        unset($this->values[$this->head]);
+
+        $this->head++;
     }
 }
