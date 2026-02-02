@@ -36,6 +36,7 @@ use Override;
  * @template TValue
  *
  * @implements Iterator<TKey, TValue>
+ * @internal
  *
  * @final
  */
