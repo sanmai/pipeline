@@ -21,14 +21,11 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
-
-use function count;
-
+use EmptyIterator;
+use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowIterator;
-use ReflectionProperty;
-use RuntimeException;
 
 /**
  * @internal
@@ -36,31 +33,107 @@ use RuntimeException;
 #[CoversClass(WindowIterator::class)]
 final class WindowIteratorTest extends TestCase
 {
-    public function testTrimLoopTerminatesCorrectly(): void
+    public function testEmptyIterator(): void
     {
-        $callCount = 0;
+        $window = new WindowIterator(new EmptyIterator(), 10);
 
-        $mock = $this->getMockBuilder(WindowIterator::class)
-            ->setConstructorArgs([new ArrayIterator([1, 2, 3, 4, 5]), 3])
-            ->onlyMethods(['count'])
-            ->getMock();
+        $this->assertFalse($window->valid(), 'Empty iterator should not be valid');
+        $this->assertNull($window->current(), 'Empty iterator current should be null');
+        $this->assertNull($window->key(), 'Empty iterator key should be null');
+        $this->assertSame(0, $window->count(), 'Empty iterator count should be 0');
+    }
 
-        $mock->method('count')
-            ->willReturnCallback(function () use (&$callCount, $mock): int {
-                if (++$callCount > 50) {
-                    throw new RuntimeException('count() called >50 times - infinite loop');
-                }
+    public function testForwardIteration(): void
+    {
+        $window = new WindowIterator(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]), 10);
 
-                $buffer = (new ReflectionProperty(WindowIterator::class, 'buffer'))->getValue($mock);
-
-                return count($buffer);
-            });
-
-        // Consume all elements - triggers trim operations
-        foreach ($mock as $_) {
+        $result = [];
+        foreach ($window as $key => $value) {
+            $result[$key] = $value;
         }
 
-        // With 5 elements and maxSize 3, count() calls should be bounded
-        $this->assertLessThan(50, $callCount);
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $result);
+    }
+
+    public function testRewindAndReplay(): void
+    {
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3]), 10);
+
+        // First pass
+        $first = [];
+        foreach ($window as $value) {
+            $first[] = $value;
+        }
+
+        // Rewind and second pass
+        $window->rewind();
+        $second = [];
+        foreach ($window as $value) {
+            $second[] = $value;
+        }
+
+        $this->assertSame([1, 2, 3], $first);
+        $this->assertSame([1, 2, 3], $second);
+    }
+
+    public function testWindowTrimsOldElements(): void
+    {
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3, 4, 5]), 3);
+
+        // Consume all
+        foreach ($window as $_) {
+        }
+
+        // Buffer should only have last 3 elements
+        $this->assertSame(3, $window->count(), 'Buffer should be trimmed to maxSize');
+
+        // Rewind should give us elements 3, 4, 5
+        $window->rewind();
+        $result = [];
+        foreach ($window as $value) {
+            $result[] = $value;
+        }
+
+        $this->assertSame([3, 4, 5], $result, 'After trim, only last 3 elements should remain');
+    }
+
+    public function testStartedGeneratorCapturesCurrent(): void
+    {
+        $generator = (static function (): Generator {
+            yield 'first' => 100;
+            yield 'second' => 200;
+        })();
+
+        // Advance generator to first element
+        $generator->current();
+
+        $window = new WindowIterator($generator, 10);
+
+        $result = [];
+        foreach ($window as $key => $value) {
+            $result[$key] = $value;
+        }
+
+        $this->assertSame(['first' => 100, 'second' => 200], $result);
+    }
+
+    public function testForeachAlwaysRewinds(): void
+    {
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3, 4, 5]), 10);
+
+        // Partial iteration
+        foreach ($window as $value) {
+            if (3 === $value) {
+                break;
+            }
+        }
+
+        // foreach always rewinds - this is expected for window()
+        $result = [];
+        foreach ($window as $value) {
+            $result[] = $value;
+        }
+
+        $this->assertSame([1, 2, 3, 4, 5], $result, 'foreach should rewind and replay all buffered elements');
     }
 }

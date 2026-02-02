@@ -20,11 +20,10 @@ declare(strict_types=1);
 
 namespace Pipeline\Helper;
 
-use function count;
-
 use Countable;
 use Iterator;
 use Override;
+use SplDoublyLinkedList;
 
 /**
  * A rewindable iterator that caches elements for replay.
@@ -42,12 +41,8 @@ use Override;
  */
 class WindowIterator implements Iterator, Countable
 {
-    /** @var array<int, array{TKey, TValue}> */
-    private array $buffer = [];
-
-    private int $headKey = 0;
-
-    private int $position = 0;
+    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
+    private SplDoublyLinkedList $buffer;
 
     private bool $innerExhausted = false;
 
@@ -60,7 +55,9 @@ class WindowIterator implements Iterator, Countable
     public function __construct(
         private readonly Iterator $inner,
         private readonly int $maxSize
-    ) {}
+    ) {
+        $this->buffer = new SplDoublyLinkedList();
+    }
 
     #[Override]
     public function current(): mixed
@@ -69,7 +66,11 @@ class WindowIterator implements Iterator, Countable
             return null;
         }
 
-        return $this->buffer[$this->headKey + $this->position][1];
+        if ($this->buffer->valid()) {
+            return $this->buffer->current()[1];
+        }
+
+        return $this->buffer->top()[1];
     }
 
     #[Override]
@@ -79,34 +80,34 @@ class WindowIterator implements Iterator, Countable
             return null;
         }
 
-        return $this->buffer[$this->headKey + $this->position][0];
+        if ($this->buffer->valid()) {
+            return $this->buffer->current()[0];
+        }
+
+        return $this->buffer->top()[0];
     }
 
     #[Override]
     public function next(): void
     {
-        ++$this->position;
+        $this->buffer->next();
 
-        // If still within buffer or inner exhausted, nothing to fetch
-        if ($this->position < $this->count() || $this->innerExhausted) {
+        if ($this->buffer->valid() || $this->innerExhausted) {
             return;
         }
 
         $this->inner->next();
-
         $this->fetch();
 
-        while ($this->count() > $this->maxSize) {
-            unset($this->buffer[$this->headKey]);
-            ++$this->headKey;
-            --$this->position;
+        while ($this->buffer->count() > $this->maxSize) {
+            $this->buffer->shift();
         }
     }
 
     #[Override]
     public function rewind(): void
     {
-        $this->position = 0;
+        $this->buffer->rewind();
     }
 
     #[Override]
@@ -114,7 +115,8 @@ class WindowIterator implements Iterator, Countable
     {
         $this->initialize();
 
-        return $this->position < $this->count();
+        // After push, buffer iterator is invalid but we have data at top()
+        return $this->buffer->valid() || !$this->innerExhausted;
     }
 
     private function initialize(): void
@@ -124,7 +126,6 @@ class WindowIterator implements Iterator, Countable
         }
         $this->initialized = true;
 
-        // If inner is already pointing at data (e.g. a started generator), capture it
         if ($this->inner->valid()) {
             $this->pushFromInner();
 
@@ -132,7 +133,6 @@ class WindowIterator implements Iterator, Countable
         }
 
         $this->inner->rewind();
-
         $this->fetch();
     }
 
@@ -149,12 +149,12 @@ class WindowIterator implements Iterator, Countable
 
     private function pushFromInner(): void
     {
-        $this->buffer[] = [$this->inner->key(), $this->inner->current()];
+        $this->buffer->push([$this->inner->key(), $this->inner->current()]);
     }
 
     #[Override]
     public function count(): int
     {
-        return count($this->buffer);
+        return $this->buffer->count();
     }
 }
