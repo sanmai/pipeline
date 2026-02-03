@@ -43,27 +43,16 @@ class WindowIterator implements Iterator, Countable
 {
     private bool $innerExhausted = false;
 
-    /** @var Iterator<TKey, TValue> */
-    private readonly Iterator $inner;
-
-    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
-    private readonly SplDoublyLinkedList $buffer;
-
     /**
-     * @param Iterator<TKey, TValue> $innerUnsafe
+     * @param Iterator<TKey, TValue> $inner
      * @param int<1, max> $maxSize Maximum buffer size
-     * @param SplDoublyLinkedList<array{TKey, TValue}>|null $buffer
-     * @param Iterator<TKey, TValue>|null $safeInner Injectable for testing
+     * @param SplDoublyLinkedList<array{TKey, TValue}> $buffer
      */
     public function __construct(
-        Iterator $innerUnsafe,
+        private readonly Iterator $inner,
         private readonly int $maxSize,
-        ?SplDoublyLinkedList $buffer = null,
-        ?Iterator $inner = null
-    ) {
-        $this->buffer = $buffer ?? new SplDoublyLinkedList();
-        $this->inner = $inner ?? new SafeStartIterator($innerUnsafe);
-    }
+        private readonly SplDoublyLinkedList $buffer = new SplDoublyLinkedList(),
+    ) {}
 
     #[Override]
     public function current(): mixed

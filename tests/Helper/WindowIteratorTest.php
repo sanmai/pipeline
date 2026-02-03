@@ -224,7 +224,7 @@ final class WindowIteratorTest extends TestCase
         });
 
         // Pass null for buffer (use default), but inject our own safe inner
-        $window = new WindowIterator(new EmptyIterator(), 10, null, $mockInner);
+        $window = new WindowIterator($mockInner, 10);
 
         $result = [];
         foreach ($window as $key => $value) {

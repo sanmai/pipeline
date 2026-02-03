@@ -59,6 +59,7 @@ use function mt_rand;
 
 use Override;
 use Pipeline\Helper\CursorIterator;
+use Pipeline\Helper\SafeStartIterator;
 use Pipeline\Helper\WindowIterator;
 use Traversable;
 
@@ -759,7 +760,7 @@ class Standard implements IteratorAggregate, Countable
         /** @var Iterator $iterator */
         $iterator = $this->getIterator();
 
-        return new WindowIterator($iterator, $size);
+        return new WindowIterator(new SafeStartIterator($iterator), $size);
     }
 
     /**
