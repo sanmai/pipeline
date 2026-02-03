@@ -43,18 +43,27 @@ class WindowIterator implements Iterator, Countable
 {
     private bool $innerExhausted = false;
 
-    private bool $initialized = false;
+    /** @var Iterator<TKey, TValue> */
+    private readonly Iterator $inner;
+
+    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
+    private readonly SplDoublyLinkedList $buffer;
 
     /**
-     * @param Iterator<TKey, TValue> $inner
+     * @param Iterator<TKey, TValue> $innerUnsafe
      * @param int<1, max> $maxSize Maximum buffer size
-     * @param SplDoublyLinkedList<array{TKey, TValue}> $buffer
+     * @param SplDoublyLinkedList<array{TKey, TValue}>|null $buffer
+     * @param Iterator<TKey, TValue>|null $safeInner Injectable for testing
      */
     public function __construct(
-        private readonly Iterator $inner,
+        Iterator $innerUnsafe,
         private readonly int $maxSize,
-        private readonly SplDoublyLinkedList $buffer = new SplDoublyLinkedList()
-    ) {}
+        ?SplDoublyLinkedList $buffer = null,
+        ?Iterator $inner = null
+    ) {
+        $this->buffer = $buffer ?? new SplDoublyLinkedList();
+        $this->inner = $inner ?? new SafeStartIterator($innerUnsafe);
+    }
 
     #[Override]
     public function current(): mixed
@@ -110,27 +119,12 @@ class WindowIterator implements Iterator, Countable
     #[Override]
     public function valid(): bool
     {
-        $this->initialize();
+        if (0 === $this->buffer->count() && !$this->innerExhausted) {
+            $this->fetch();
+        }
 
         // After push, buffer iterator is invalid but we have data at top()
         return $this->buffer->valid() || !$this->innerExhausted;
-    }
-
-    private function initialize(): void
-    {
-        if ($this->initialized) {
-            return;
-        }
-        $this->initialized = true;
-
-        if ($this->inner->valid()) {
-            $this->pushFromInner();
-
-            return;
-        }
-
-        $this->inner->rewind();
-        $this->fetch();
     }
 
     private function fetch(): void
@@ -141,11 +135,6 @@ class WindowIterator implements Iterator, Countable
             return;
         }
 
-        $this->pushFromInner();
-    }
-
-    private function pushFromInner(): void
-    {
         $this->buffer->push([$this->inner->key(), $this->inner->current()]);
     }
 

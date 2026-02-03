@@ -21,11 +21,16 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Helper;
 
 use ArrayIterator;
+
+use function count;
+
 use EmptyIterator;
 use Generator;
+use Iterator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Helper\SafeStartIterator;
 use Pipeline\Helper\WindowIterator;
 use SplDoublyLinkedList;
 
@@ -33,6 +38,7 @@ use SplDoublyLinkedList;
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
+#[CoversClass(SafeStartIterator::class)]
 final class WindowIteratorTest extends TestCase
 {
     public function testEmptyIterator(): void
@@ -191,5 +197,40 @@ final class WindowIteratorTest extends TestCase
 
         foreach ($window as $_) {
         }
+    }
+
+    public function testInjectableSafeInner(): void
+    {
+        /** @var Iterator<int, string>&MockObject $mockInner */
+        $mockInner = $this->createMock(Iterator::class);
+
+        $values = ['a', 'b', 'c'];
+        $index = 0;
+
+        $mockInner->method('valid')->willReturnCallback(static function () use (&$index, $values): bool {
+            return $index < count($values);
+        });
+
+        $mockInner->method('current')->willReturnCallback(static function () use (&$index, $values): string {
+            return $values[$index];
+        });
+
+        $mockInner->method('key')->willReturnCallback(static function () use (&$index): int {
+            return $index;
+        });
+
+        $mockInner->expects($this->exactly(3))->method('next')->willReturnCallback(static function () use (&$index): void {
+            ++$index;
+        });
+
+        // Pass null for buffer (use default), but inject our own safe inner
+        $window = new WindowIterator(new EmptyIterator(), 10, null, $mockInner);
+
+        $result = [];
+        foreach ($window as $key => $value) {
+            $result[$key] = $value;
+        }
+
+        $this->assertSame([0 => 'a', 1 => 'b', 2 => 'c'], $result, 'Should use injected safeInner instead of wrapping inner');
     }
 }
