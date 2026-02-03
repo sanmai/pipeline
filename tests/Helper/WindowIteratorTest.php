@@ -24,8 +24,10 @@ use ArrayIterator;
 use EmptyIterator;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\WindowIterator;
+use SplDoublyLinkedList;
 
 /**
  * @internal
@@ -135,5 +137,59 @@ final class WindowIteratorTest extends TestCase
         }
 
         $this->assertSame([1, 2, 3, 4, 5], $result, 'foreach should rewind and replay all buffered elements');
+    }
+
+    public function testTrimLoopCallsShiftCorrectTimes(): void
+    {
+        /** @var SplDoublyLinkedList<array{int, int}>&MockObject $buffer */
+        $buffer = $this->createMock(SplDoublyLinkedList::class);
+
+        $count = 0;
+
+        $buffer->method('push')->willReturnCallback(static function () use (&$count): void {
+            ++$count;
+        });
+
+        $buffer->method('count')->willReturnCallback(static function () use (&$count): int {
+            return $count;
+        });
+
+        $buffer->method('valid')->willReturn(false);
+        $buffer->method('top')->willReturn([0, 'value']);
+
+        // With 5 elements and maxSize 3, shift should be called exactly 2 times
+        $buffer->expects($this->exactly(2))->method('shift')->willReturnCallback(static function () use (&$count): void {
+            --$count;
+        });
+
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3, 4, 5]), 3, $buffer);
+
+        foreach ($window as $_) {
+        }
+    }
+
+    public function testNextAdvancesBufferIterator(): void
+    {
+        /** @var SplDoublyLinkedList<array{int, int}>&MockObject $buffer */
+        $buffer = $this->createMock(SplDoublyLinkedList::class);
+
+        $buffer->method('push');
+        $buffer->method('count')->willReturn(3);
+        $buffer->method('top')->willReturn([0, 'value']);
+        $buffer->method('current')->willReturn([0, 'value']);
+
+        $validCalls = 0;
+        $buffer->method('valid')->willReturnCallback(static function () use (&$validCalls): bool {
+            // First few calls return true (mid-buffer), then false (end)
+            return ++$validCalls <= 3;
+        });
+
+        // next() must be called on buffer during iteration
+        $buffer->expects($this->exactly(3))->method('next');
+
+        $window = new WindowIterator(new ArrayIterator([1, 2, 3]), 10, $buffer);
+
+        foreach ($window as $_) {
+        }
     }
 }

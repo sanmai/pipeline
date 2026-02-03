@@ -41,9 +41,6 @@ use SplDoublyLinkedList;
  */
 class WindowIterator implements Iterator, Countable
 {
-    /** @var SplDoublyLinkedList<array{TKey, TValue}> */
-    private SplDoublyLinkedList $buffer;
-
     private bool $innerExhausted = false;
 
     private bool $initialized = false;
@@ -51,13 +48,13 @@ class WindowIterator implements Iterator, Countable
     /**
      * @param Iterator<TKey, TValue> $inner
      * @param int<1, max> $maxSize Maximum buffer size
+     * @param SplDoublyLinkedList<array{TKey, TValue}> $buffer
      */
     public function __construct(
         private readonly Iterator $inner,
-        private readonly int $maxSize
-    ) {
-        $this->buffer = new SplDoublyLinkedList();
-    }
+        private readonly int $maxSize,
+        private readonly SplDoublyLinkedList $buffer = new SplDoublyLinkedList()
+    ) {}
 
     #[Override]
     public function current(): mixed
