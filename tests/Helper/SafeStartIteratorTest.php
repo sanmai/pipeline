@@ -29,12 +29,24 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Pipeline\Helper\SafeStartIterator;
 
+use function Pipeline\take;
+
 /**
  * @internal
  */
 #[CoversClass(SafeStartIterator::class)]
 final class SafeStartIteratorTest extends TestCase
 {
+    private function assertIteratorAssoc(array $expected, Iterator $iterator): void
+    {
+        $this->assertSame($expected, take($iterator)->toAssoc());
+    }
+
+    private function assertIteratorValues(array $expected, Iterator $iterator): void
+    {
+        $this->assertSame($expected, take($iterator)->toList());
+    }
+
     public function testEmptyIterator(): void
     {
         $safe = new SafeStartIterator(new EmptyIterator());
@@ -46,12 +58,7 @@ final class SafeStartIteratorTest extends TestCase
     {
         $safe = new SafeStartIterator(new ArrayIterator(['a' => 1, 'b' => 2, 'c' => 3]));
 
-        $result = [];
-        foreach ($safe as $key => $value) {
-            $result[$key] = $value;
-        }
-
-        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $result);
+        $this->assertIteratorAssoc(['a' => 1, 'b' => 2, 'c' => 3], $safe);
     }
 
     public function testStartedGeneratorCapturesCurrent(): void
@@ -66,12 +73,8 @@ final class SafeStartIteratorTest extends TestCase
 
         $safe = new SafeStartIterator($generator);
 
-        $result = [];
-        foreach ($safe as $key => $value) {
-            $result[$key] = $value;
-        }
+        $this->assertIteratorAssoc(['first' => 100, 'second' => 200], $safe);
 
-        $this->assertSame(['first' => 100, 'second' => 200], $result);
     }
 
     public function testRewindOnlyOnce(): void
@@ -85,28 +88,20 @@ final class SafeStartIteratorTest extends TestCase
 
         $safe = new SafeStartIterator($generator);
 
-        // First access
         $safe->rewind();
         $this->assertSame(1, $rewindCount, 'First rewind should trigger generator');
 
-        // Second rewind should be no-op
         $safe->rewind();
-        $this->assertSame(1, $rewindCount, 'Second rewind should be ignored');
+        $this->assertSame(1, $rewindCount, 'Second rewind should be no-op');
 
-        // Iterate
-        $result = [];
-        foreach ($safe as $value) {
-            $result[] = $value;
-        }
-        $this->assertSame([1, 2], $result);
+        $this->assertIteratorValues([1, 2], $safe);
     }
 
     public function testValidAutoStarts(): void
     {
         $safe = new SafeStartIterator(new ArrayIterator([1, 2, 3]));
 
-        // Calling valid() without rewind() should auto-start
-        $this->assertTrue($safe->valid(), 'valid() should auto-start the iterator');
+        $this->assertTrue($safe->valid(), 'Calling valid() without rewind() should auto-start');
         $this->assertSame(1, $safe->current(), 'current() should return first element');
     }
 
@@ -142,10 +137,10 @@ final class SafeStartIteratorTest extends TestCase
     public function testRewindsUnstartedIteratorOnFirstAccess(): void
     {
         $rewindCalled = false;
-        $generator = (static function () use (&$rewindCalled): Generator {
+        $generator = (function () use (&$rewindCalled): Generator {
             $rewindCalled = true;
             yield 'a';
-            yield 'b';
+            $this->fail('Should not reach this');
         })();
 
         $safe = new SafeStartIterator($generator);
@@ -161,25 +156,20 @@ final class SafeStartIteratorTest extends TestCase
 
     public function testValidAutoStartOnlyCalledOnce(): void
     {
-        $rewindCount = 0;
-        $generator = (static function () use (&$rewindCount): Generator {
-            ++$rewindCount;
-            yield 1;
-        })();
+        $iterator = $this->createMock(Iterator::class);
+        $iterator->method('valid')->willReturn(false);
+        $iterator->expects($this->once())->method('rewind');
 
-        $safe = new SafeStartIterator($generator);
+        $safe = new SafeStartIterator($iterator);
 
         // Call valid() multiple times
         $safe->valid();
         $safe->valid();
         $safe->valid();
-
-        $this->assertSame(1, $rewindCount, 'Rewind should only be called once even with multiple valid() calls');
     }
 
     public function testRewindCallsInnerRewindWhenNotValid(): void
     {
-        /** @var Iterator<int, int>&MockObject $inner */
         $inner = $this->createMock(Iterator::class);
 
         // Inner is not valid (not started)
@@ -209,7 +199,6 @@ final class SafeStartIteratorTest extends TestCase
 
     public function testValidTriggersRewindForUnstartedIterator(): void
     {
-        /** @var Iterator<int, int>&MockObject $inner */
         $inner = $this->createMock(Iterator::class);
 
         $started = false;
