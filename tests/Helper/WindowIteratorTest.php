@@ -30,7 +30,6 @@ use Iterator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Pipeline\Helper\SafeStartIterator;
 use Pipeline\Helper\WindowIterator;
 use SplDoublyLinkedList;
 
@@ -38,7 +37,6 @@ use SplDoublyLinkedList;
  * @internal
  */
 #[CoversClass(WindowIterator::class)]
-#[CoversClass(SafeStartIterator::class)]
 final class WindowIteratorTest extends TestCase
 {
     public function testEmptyIterator(): void
