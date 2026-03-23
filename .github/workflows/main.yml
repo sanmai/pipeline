@@ -54,7 +54,7 @@ jobs:
               infection/infection friendsofphp/php-cs-fixer php-coveralls/php-coveralls
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_seconds: 30
           max_attempts: 3
