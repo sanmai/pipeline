@@ -8,5 +8,5 @@ parameters:
         - "#Binary operation .* between .* and .* results in an error.#"
         - "#array_flip expects array.*, array given#"
         - "#.* should return .* but returns .*#"
-        - "#Parameter .* of method Pipeline.* expects .*#"
+        - "#Parameter .* of (method|class) Pipeline.* expects .*#"
         - "#Unable to resolve the template type .* in call to method .*map\\(\\)#"
