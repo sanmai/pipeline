@@ -923,8 +923,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @param iterable<array{TKey, TValue}> $input
-     * @return Generator<TKey, TValue>
+     * @param iterable<array{mixed, mixed}> $input
      */
     private static function tuplesToGenerator(iterable $input): Generator
     {
@@ -1497,8 +1496,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @param iterable<TKey, TValue> $previous
-     * @return Generator<int, array{TKey, TValue}>
+     * @return Generator<int, array{mixed, mixed}>
      */
     private static function toTuples(iterable $previous): Generator
     {
