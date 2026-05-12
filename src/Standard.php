@@ -922,6 +922,10 @@ class Standard implements IteratorAggregate, Countable
         }
     }
 
+    /**
+     * @param iterable<array{TKey, TValue}> $input
+     * @return Generator<TKey, TValue>
+     */
     private static function tuplesToGenerator(iterable $input): Generator
     {
         foreach ($input as [$key, $value]) {
@@ -1492,6 +1496,10 @@ class Standard implements IteratorAggregate, Countable
         return $this;
     }
 
+    /**
+     * @param iterable<TKey, TValue> $previous
+     * @return Generator<int, array{TKey, TValue}>
+     */
     private static function toTuples(iterable $previous): Generator
     {
         foreach ($previous as $key => $value) {
