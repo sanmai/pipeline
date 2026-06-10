@@ -10,8 +10,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 
 ### Testing
 - `make -j -k` - Run full test suite (all in parallel)
-- `make test` - Run tests without fixing code style first
-- `make phpunit` - Run PHPUnit tests with coverage
+- `make phpunit` - Run PHPUnit tests with line coverage enforcement
 - `php vendor/bin/phpunit tests/SpecificTest.php` - Run a single test file
 - `php vendor/bin/phpunit --filter methodName` - Run specific test method
 
