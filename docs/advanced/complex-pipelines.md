@@ -76,6 +76,7 @@ class ChangeDetector
     }
 }
 
+/** @var iterable<float> $prices A stream of prices, e.g. a generator */
 $detector = new ChangeDetector();
 $changes = take($prices)
     ->cast($detector->detect(...))
