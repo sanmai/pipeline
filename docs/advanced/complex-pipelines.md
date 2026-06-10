@@ -60,9 +60,9 @@ For operations that require state to be maintained between elements, you can use
 ```php
 class ChangeDetector
 {
-    private $previous = null;
+    private ?float $previous = null;
 
-    public function detect($value): ?array
+    public function detect(float $value): ?array
     {
         if ($this->previous === null) {
             $this->previous = $value;
@@ -76,10 +76,11 @@ class ChangeDetector
     }
 }
 
+/** @var iterable<float> $prices A stream of prices, e.g. a generator */
 $detector = new ChangeDetector();
 $changes = take($prices)
-    ->map($detector->detect(...))
-    ->filter() // Remove the first null
+    ->cast($detector->detect(...))
+    ->select() // Remove the null produced for the first element
     ->toList();
 ```
 
@@ -139,11 +140,10 @@ $apiResponses = [
 ];
 
 // Process with error collection
-$validUsers = [];
 $errors = [];
 
-take($apiResponses)
-    ->map(function($response) use (&$errors) {
+$validUsers = take($apiResponses)
+    ->cast(function ($response) use (&$errors) {
         if ($response['data'] === null) {
             $errors[] = ['url' => $response['url'], 'error' => 'Request failed'];
             return null;
@@ -157,10 +157,8 @@ take($apiResponses)
 
         return $decoded;
     })
-    ->filter() // Remove nulls
-    ->each(function($user) use (&$validUsers) {
-        $validUsers[] = $user;
-    });
+    ->select() // Remove nulls
+    ->toList();
 
 // $validUsers:
 // [
@@ -182,6 +180,8 @@ For nested data structures, you can use recursion to process the entire tree.
 **Example: A `TreeProcessor`**
 
 ```php
+use function Pipeline\take;
+
 class TreeProcessor
 {
     public static function traverse(array $node, callable $processor): array

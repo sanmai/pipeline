@@ -1,14 +1,22 @@
 # Associative Array Recipes
 
-Working with associative arrays requires more than just transforming values. This guide shows you how to manipulate both keys and values using the library's functional patterns.
+Working with associative arrays requires more than just transforming values. This guide shows how to manipulate both keys and values using the library's functional patterns.
+
+For simple cases, dedicated methods already exist—reach for them first:
+
+- [`flip()`](../api/utility.md#flip) swaps keys and values.
+- [`keys()`](../api/utility.md#keys) and [`values()`](../api/utility.md#values) extract one side.
+- `map()` with `yield $key => $value` sets keys directly.
 
 ## The Key Manipulation Pattern
 
-To modify array keys, use this three-step pattern:
+For anything beyond that, use this three-step pattern:
 
 1. **`tuples()`** - Convert to `[key, value]` pairs
-2. **`map()`** - Transform the pairs
-3. **`unpack()`** - Reconstruct the array
+2. **`map()`** or **`filter()`** - Transform or drop the pairs
+3. **`unpack()`** - Reconstruct the key-value stream
+
+The reconstruction step is always the same: `unpack(fn($key, $value) => yield $key => $value)` spreads each tuple back into a key and a value.
 
 ### Prefixing Keys
 
@@ -33,22 +41,6 @@ $result = take($data)
 // ]
 ```
 
-### Swapping Keys and Values
-
-Flip keys and values, similar to `array_flip()`:
-
-```php
-$data = ['a' => 1, 'b' => 2, 'c' => 3];
-
-$result = take($data)
-    ->tuples()
-    ->map(fn($tuple) => [$tuple[1], $tuple[0]])
-    ->unpack(fn($key, $value) => yield $key => $value)
-    ->toAssoc();
-
-// Result: [1 => 'a', 2 => 'b', 3 => 'c']
-```
-
 ### Filtering by Key
 
 Remove entries based on their keys:
@@ -65,9 +57,9 @@ $safe = take($data)
 // Result: ['user_id' => 1, 'email' => 'alice@example.com']
 ```
 
-### Transforming Keys and Values
+### Transforming Keys and Values Together
 
-Apply different transformations to keys and values:
+Apply different transformations to keys and values in one pass:
 
 ```php
 $data = ['first_name' => 'alice', 'last_name' => 'smith'];
@@ -76,7 +68,7 @@ $result = take($data)
     ->tuples()
     ->map(fn($tuple) => [
         str_replace('_', '-', $tuple[0]),  // kebab-case keys
-        ucfirst($tuple[1])                 // capitalize values
+        ucfirst($tuple[1]),                // capitalize values
     ])
     ->unpack(fn($key, $value) => yield $key => $value)
     ->toAssoc();
@@ -96,8 +88,9 @@ $input = ['name' => 'Bob', 'age' => 25];
 
 $result = take($defaults)
     ->tuples()
-    ->map(function($tuple) use ($input) {
+    ->map(function ($tuple) use ($input) {
         [$key, $default] = $tuple;
+
         return [$key, $input[$key] ?? $default];
     })
     ->unpack(fn($key, $value) => yield $key => $value)
@@ -108,22 +101,23 @@ $result = take($defaults)
 
 ### Grouping by Key Pattern
 
-Group data by a key pattern:
+Group data by a key prefix:
 
 ```php
 $data = [
     'user_name' => 'Alice',
     'user_email' => 'alice@example.com',
     'order_id' => 123,
-    'order_total' => 99.99
+    'order_total' => 99.99,
 ];
 
 $grouped = take($data)
     ->tuples()
-    ->fold([], function($groups, $tuple) {
+    ->fold([], function ($groups, $tuple) {
         [$key, $value] = $tuple;
         $prefix = explode('_', $key)[0];
         $groups[$prefix][$key] = $value;
+
         return $groups;
     });
 
@@ -136,7 +130,7 @@ $grouped = take($data)
 
 ## Performance Considerations
 
-The `tuples -> map -> unpack` pattern creates intermediate arrays. For large associative arrays, consider using `stream()` first to process entries one at a time:
+On an array-backed pipeline, `tuples()` builds the array of pairs eagerly. For large associative arrays, call `stream()` first to process entries one at a time:
 
 ```php
 $result = take($largeArray)
@@ -149,5 +143,5 @@ $result = take($largeArray)
 
 ## See Also
 
-- [Utility Methods](../api/utility.md) - Documentation for `tuples()`, `flip()`, and `keys()`
+- [Utility Methods](../api/utility.md) - Documentation for `tuples()`, `flip()`, `keys()`, and `values()`
 - [Transformation Methods](../api/transformation.md) - Documentation for `map()` and `unpack()`

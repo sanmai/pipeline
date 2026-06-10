@@ -1,136 +1,74 @@
 # Changelog
 
-This document outlines the version history and key changes for the Pipeline library.
+This documentation always describes the latest version of the library.
 
-## Version 7.x
+For the detailed version history, see the [GitHub releases page](https://github.com/sanmai/pipeline/releases). The library follows semantic versioning.
 
-### Key Features
+## Upgrading from Older Versions
 
--   **New Methods**: Added `tap()`, `chunkBy()`, and `cursor()` for more expressive pipelines.
--   **Enhanced peek()**: Now returns a Pipeline instance for fluent API chaining.
--   **PHP 8.5 Support**: Full compatibility with PHP 8.5.
--   **JIT Compatibility**: Workaround for PHP JIT NAN bug.
+Code written against older versions of the library may use APIs that have since been renamed or removed. The replacements are mechanical:
 
-### New Methods in 7.x
+### Array Conversion
 
--   **`tap(callable $callback)`** (7.2): Execute side effects without modifying values. Useful for logging or debugging.
--   **`chunkBy(callable $callback)`** (7.3): Create chunks with variable sizes based on a callback.
--   **`cursor()`** (7.6): Returns a forward-only iterator that maintains position across loop breaks.
-
-### Breaking Changes
-
--   **`toArray()` now requires a parameter**: Use `toList()` for a simple array or `toAssoc()` for an associative array.
--   **`toArrayPreservingKeys()` removed**: Use `toAssoc()` instead.
-
-## Version 6.x
-
-### Key Features
-
--   **PHP 8.2+ Requirement**: The minimum required PHP version has been updated to 8.2.
--   **Strict Filtering**: The `filter()` method now includes a `strict` mode for more precise control over data cleaning.
--   **New Convenience Methods**: Added `first()`, `last()`, `toList()`, and `toAssoc()`.
--   **Improved Type Safety**: Enhanced type annotations and static analysis support for PHPStan and Psalm.
--   **Performance Optimizations**: The `cast()` method uses `array_map()` for arrays, improving performance.
-
-### Breaking Changes from 5.x
-
--   The minimum required PHP version is now 8.2.
--   Some internal method signatures have been updated to improve type safety.
-
-### Deprecations in 6.x
-
--   `toArray()`: Deprecated, use `toList()` or `toAssoc()` instead.
--   `toArrayPreservingKeys()`: Deprecated, use `toAssoc()` instead.
-
-## Migration Guide
-
-### Migrating from v6.x to v7.x
-
-**Array Conversion (Breaking Change)**
-
-The `toArray()` method now requires a boolean parameter. Replace all previous usages as follows:
+The old `toArray()` method was split into two explicit methods:
 
 ```php
-// Before: toArray() or toArray(false) - get indexed array
-$result = take([1, 2, 3])->toArray();
-$result = take([1, 2, 3])->toArray(false);
+// Before: keys discarded
+$result = take($data)->toArray();
+$result = take($data)->toArray(false);
 
-// After: use toList()
-$result = take([1, 2, 3])->toList();
+// After
+$result = take($data)->toList();
 
-
-// Before: toArray(true) - get associative array with preserved keys
+// Before: keys preserved
 $result = take($data)->toArray(true);
-
-// After: use toAssoc()
-$result = take($data)->toAssoc();
-```
-
-**toArrayPreservingKeys() Removed**
-
-```php
-// Before (v6.x)
 $result = take($data)->toArrayPreservingKeys();
 
-// After (v7.x)
+// After
 $result = take($data)->toAssoc();
 ```
 
-**New Features to Consider**
+### Filtering Semantics
 
-After migrating, consider using these new methods for cleaner code:
+`filter()` always removed every falsy value, like `array_filter()`. The newer `select()` removes only `null` and `false` by default, which is the safer choice when `0` or empty strings are valid data:
 
 ```php
-// tap() for side effects without modifying values
+$result = take([0, '', false, null])->filter()->toList(); // []
+$result = take([0, '', false, null])->select()->toList(); // [0, '']
+```
+
+Existing `filter()` calls keep working unchanged.
+
+## Newer Methods Worth Adopting
+
+If your codebase predates them, these methods can simplify common patterns:
+
+```php
+// tap(): side effects without modifying values
 take($users)
     ->tap(fn($user) => logger()->info("Processing: {$user->name}"))
     ->map(fn($user) => $user->email)
     ->toList();
 
-// chunkBy() for variable-size chunks
+// chunkBy(): variable-size chunks, sizes from any iterable
 take($records)
-    ->chunkBy(fn($record) => $record->category)
-    ->each(fn($chunk) => processCategory($chunk));
+    ->chunkBy([10, 100, 1000])
+    ->each(fn($batch) => Database::bulkInsert($batch));
 
-// cursor() for pauseable iteration
+// cursor(): pause and resume iteration without errors
 $cursor = take($largeDataset)->cursor();
 foreach ($cursor as $item) {
     process($item);
     if (needsPause()) {
-        break; // Can continue later from same position
+        break;
     }
 }
-// Continue iteration later...
-foreach ($cursor as $item) {
+foreach ($cursor as $item) { // Continues where the first loop stopped
     process($item);
 }
+
+// peek(): look at the first N elements, then decide
+$head = $pipeline->peek(5)->toList();
 ```
 
-### Migrating from v5.x to v6.x
-
-**Array Conversion**
-
--   Replace `->toArray()` or `->toArray(false)` with `->toList()`.
--   Replace `->toArray(true)` or `->toArrayPreservingKeys()` with `->toAssoc()`.
-
-**Filtering**
-
-To maintain the old filtering behavior (which removes all falsy values), no changes are needed. To use the new, safer strict filtering, add the `strict: true` parameter:
-
-```php
-// Old behavior (removes all falsy values)
-$result = take([0, '', false, null])->filter()->toList(); // []
-
-// New strict mode (removes only null and false)
-$result = take([0, '', false, null])->filter(strict: true)->toList(); // [0, '']
-```
-
-## Future Development
-
-The library follows semantic versioning. Future development will focus on:
-
--   Performance and memory optimizations
--   Enhanced type safety
--   Additional statistical methods
-
-For the latest updates, please refer to the [GitHub repository](https://github.com/sanmai/pipeline).
+See the [Method Index](method-index.md) for the complete API.
