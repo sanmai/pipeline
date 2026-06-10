@@ -25,6 +25,8 @@ $numbers = fromArray(['a' => 1, 'b' => 2]); // Standard<string, int>
 Callback return types drive the inference, so typed closures give the best results:
 
 ```php
+use function Pipeline\take;
+
 class Foo
 {
     public function __construct(
@@ -49,6 +51,8 @@ foreach ($pipeline as $value) {
 The same inference works without chaining, one statement at a time:
 
 ```php
+use function Pipeline\take;
+
 $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
 $pipeline->map(fn(int $n): int => $n * 2);
 $pipeline->cast(fn(int $n): Foo => new Foo($n));
@@ -72,6 +76,9 @@ $assoc = $pipeline->toAssoc(); // array<string, Foo>
 - **Key-changing operations**: `chunk()`, `flip()`, `keys()`, `values()`, and `tuples()` rewrite the key/value relationship; the annotations model this, but in complex compositions an explicit annotation can help:
 
     ```php
+    use Pipeline\Standard;
+    use function Pipeline\fromArray;
+
     /** @var Standard<int, string> $pipeline */
     $pipeline = fromArray(['a' => 1])->flip();
     ```

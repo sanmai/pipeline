@@ -91,7 +91,7 @@ $count = take(range(1, 100))
 
 Finds the lowest value using standard PHP comparison rules.
 
-**Signature**: `min(): mixed`
+**Signature**: `min(): mixed|null`
 
 **Behavior**:
 
@@ -109,7 +109,7 @@ $min = take(['banana', 'apple', 'cherry'])->min(); // "apple"
 
 Finds the highest value using standard PHP comparison rules.
 
-**Signature**: `max(): mixed`
+**Signature**: `max(): mixed|null`
 
 **Behavior**:
 
@@ -127,7 +127,7 @@ $max = take(['banana', 'apple', 'cherry'])->max(); // "cherry"
 
 Returns the first element of the pipeline.
 
-**Signature**: `first(): mixed`
+**Signature**: `first(): mixed|null`
 
 **Behavior**:
 
@@ -149,7 +149,7 @@ $firstError = take(new SplFileObject('app.log'))
 
 Returns the last element of the pipeline.
 
-**Signature**: `last(): mixed`
+**Signature**: `last(): mixed|null`
 
 **Behavior**:
 

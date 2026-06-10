@@ -134,7 +134,7 @@ Keeps only the values, discarding keys—the streaming counterpart of `array_val
 **Examples**:
 
 ```php
-$result = take(['a' => 1, 'b' => 2])->values()->toAssoc(); // [1, 2]
+$result = take(['a' => 1, 'b' => 2])->values()->toList(); // [1, 2]
 ```
 
 ### `keys()`
