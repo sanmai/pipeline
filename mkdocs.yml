@@ -1,5 +1,5 @@
 # After editing this file please run yamllint on it and fix all violations
-
+---
 site_name: Pipeline - PHP Functional Programming Library
 site_description: |
   Comprehensive documentation for the Pipeline PHP library
@@ -14,7 +14,7 @@ nav:
   - Quick Start:
       - Installation: quickstart/installation.md
       - Basic Usage: quickstart/basic-usage.md
-      - Examples: quickstart/examples.md
+      - Walkthrough: quickstart/walkthrough.md
   - Pipeline Cookbook:
       - Overview: cookbook/index.md
       - Associative Arrays: cookbook/associative-arrays.md
@@ -26,7 +26,6 @@ nav:
       - Aggregation Methods: api/aggregation.md
       - Collection Methods: api/collection.md
       - Utility Methods: api/utility.md
-      - Helper Functions: api/helpers.md
       - Statistics: api/statistics.md
   - Advanced Usage:
       - Complex Pipelines: advanced/complex-pipelines.md

@@ -1,76 +1,85 @@
 # Type Safety with Generics
 
-Pipeline uses PHP's generic types (`@template` in PHPDocs) to provide robust type safety. This enhances static analysis (PHPStan, Psalm), leading to more reliable code.
+Pipeline uses PHP's generic types (`@template` annotations in PHPDocs) to provide robust type safety. Static analyzers such as PHPStan and Psalm can follow the types of keys and values through an entire pipeline, catching mistakes before the code runs.
 
 ## How It Works
 
-The `Pipeline\Standard` class uses generic types to inform static analysis tools about the types of keys (`TKey`) and values (`TValue`) in your pipeline.
+The `Pipeline\Standard` class is annotated as `Standard<TKey, TValue>`. Every method declares how it changes those parameters: `map()` and `cast()` replace `TValue` with the callback's return type, `filter()` and `select()` keep types intact, `keys()` turns `TKey` into the value type, and so on. Notably, the annotations track these changes through both chained calls *and* separate statements, thanks to `@phpstan-self-out`—pipelines are mutable, and the types mutate along.
 
 ## Using Type-Safe Pipelines
 
 ### Type Inference
 
-Pipeline often infers types automatically when creating pipelines using functions like `fromValues()` or `fromArray()`.
+Types are inferred automatically from the input:
 
 ```php
 use function Pipeline\fromArray;
 use function Pipeline\fromValues;
 
-$strings = fromValues('hello', 'world'); // Inferred: Standard<int, string>
-$numbers = fromArray(['a' => 1, 'b' => 2]); // Inferred: Standard<string, int>
-```
-
-Explicit PHPDoc type annotations can be added if needed:
-
-```php
-/** @var Standard<int, string> $strings */
-$strings = fromValues('hello', 'world');
+$strings = fromValues('hello', 'world');    // Standard<int, string>
+$numbers = fromArray(['a' => 1, 'b' => 2]); // Standard<string, int>
 ```
 
 ### Type Transformations
 
-*   **`filter()`**: This method preserves the existing types of elements, only reducing their count.
-    ```php
-    $pipeline = fromValues('hello', 'world')->filter(fn($s) => strlen($s) > 4);
-    // Result: list<string>
-    ```
-*   **`map()` / `cast()`**: These methods are used to transform values, potentially changing their types. Static analysis tools accurately track these type changes.
-    ```php
-    $pipeline = fromArray(['a' => 1])->map(fn($n) => "Number: $n");
-    // Result: array<string, string>
-    ```
-*   **`reduce()` / `fold()`**: Aggregation methods like `reduce()` and `fold()` also benefit from type checking, ensuring type safety for accumulators and elements.
+Callback return types drive the inference, so typed closures give the best results:
+
+```php
+class Foo
+{
+    public function __construct(
+        public int $n,
+    ) {}
+
+    public function bar(): string
+    {
+        return "{$this->n}\n";
+    }
+}
+
+$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3])
+    ->map(fn(int $n): int => $n * 2)
+    ->cast(fn(int $n): Foo => new Foo($n));
+
+foreach ($pipeline as $value) {
+    echo $value->bar(); // Analyzer knows $value is Foo
+}
+```
+
+The same inference works without chaining, one statement at a time:
+
+```php
+$pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
+$pipeline->map(fn(int $n): int => $n * 2);
+$pipeline->cast(fn(int $n): Foo => new Foo($n));
+// $pipeline is now Standard<string, Foo>
+```
+
+If `Foo::bar()` were renamed or its constructor changed to expect a string, PHPStan would flag both the constructor call inside `cast()` and the `$value->bar()` call.
 
 ### Extracting Data
 
-Terminal operations such as `toList()` and `toAssoc()` extract processed data into standard PHP arrays, with types correctly inferred by static analysis.
+Terminal operations carry the types out into plain PHP arrays:
 
 ```php
-use function Pipeline\take;
-
-$data = take($someIterable);
-$list = $data->toList();   // Numerically indexed
-$assoc = $data->toAssoc(); // Associative
+$list = $pipeline->toList();   // list<Foo>
+$assoc = $pipeline->toAssoc(); // array<string, Foo>
 ```
 
 ## Important Considerations
 
-*   **Mutability**: Pipeline instances are mutable; methods like `map()` modify the *same* instance.
-*   **One-Time Use**: As with PHP generators, pipelines are generally one-time use; after a terminal operation (e.g., `toList()`), the pipeline is exhausted.
-*   **Complex Transformations**: Operations such as `chunk()`, `flip()`, `values()`, and `keys()` inherently alter the key/value relationships within the pipeline. Due to these complex transformations, explicit type hints may occasionally be necessary to assist static analysis tools.
+- **Untyped callbacks weaken inference**: `fn($x) => ...` gives the analyzer little to work with. Prefer parameter and return types on closures.
+- **Key-changing operations**: `chunk()`, `flip()`, `keys()`, `values()`, and `tuples()` rewrite the key/value relationship; the annotations model this, but in complex compositions an explicit annotation can help:
+
     ```php
-    use Pipeline\Standard;
     /** @var Standard<int, string> $pipeline */
     $pipeline = fromArray(['a' => 1])->flip();
     ```
-*   **Backward Compatibility**: All type improvements are implemented purely through PHPDoc comments, ensuring no runtime impact and 100% backward compatibility. This design principle is consistent across the library.
+
+- **Zero runtime cost**: All typing lives purely in PHPDoc comments; nothing changes at runtime.
 
 ## Tool Setup & Tips
 
-*   **PHPStan/Psalm**: Include Pipeline in your project. Configure a high analysis level.
-*   **Tips**:
-    *   Provide type hints when the source isn't obvious.
-    *   Prefer arrow functions for better type inference.
-    *   Integrate static analysis into your CI pipeline.
-
-The Pipeline type system is designed to be a helpful tool, providing robust static analysis.
+- Run PHPStan or Psalm at a high analysis level; the library itself is checked at the maximum levels.
+- Provide explicit type hints when the data source isn't statically known (e.g., decoded JSON).
+- Integrate static analysis into your CI pipeline so type regressions surface in review.

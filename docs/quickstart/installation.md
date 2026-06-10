@@ -2,34 +2,18 @@
 
 ## Requirements
 
-- PHP 8.2 or higher
+- A recent version of PHP (see [composer.json](https://github.com/sanmai/pipeline/blob/main/composer.json) for the current minimum)
 - [Composer](https://getcomposer.org/)
 
 ## Composer Installation
 
-To add the library to your project, run the following Composer command:
+To add the library to your project, run:
 
 ```bash
 composer require sanmai/pipeline
 ```
 
-### Version Constraints
-
-It is recommended to use a version constraint to ensure your project remains compatible with future releases.
-
-**Latest Stable Version (Recommended)**
-
-```json
-{
-    "require": {
-        "sanmai/pipeline": "^7.0"
-    }
-}
-```
-
-**Development Version**
-
-To use the latest development version, you can require the `dev-main` branch:
+Composer picks an appropriate version constraint for you. To try the latest development version instead:
 
 ```bash
 composer require sanmai/pipeline:dev-main
@@ -45,7 +29,7 @@ require_once 'vendor/autoload.php';
 
 ## Verifying the Installation
 
-To confirm the library is installed correctly, you can run this simple script:
+To confirm the library is installed correctly, run this simple script:
 
 ```php
 <?php
@@ -83,51 +67,50 @@ $pipeline = new Standard($data);
 
 ## Development Setup
 
-If you plan to contribute to the library or run its test suite, follow these steps:
+If you plan to contribute to the library or run its test suite:
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
+
     ```bash
     git clone https://github.com/sanmai/pipeline.git
     cd pipeline
     ```
 
-2.  **Install dependencies (including dev-dependencies):**
+2. **Install dependencies (including dev-dependencies):**
+
     ```bash
     composer install
     ```
 
-3.  **Run the test suite:**
+3. **Run the test suite:**
+
     ```bash
     make test
     ```
 
-## Static Analysis
-
-To run static analysis tools like PHPStan and Psalm, first ensure they are installed, then run the analysis command:
-
-```bash
-composer require --dev phpstan/phpstan vimeo/psalm
-make analyze
-```
+Static analysis and the rest of the quality checks run with `make analyze`; all checks together run with `make -j -k`.
 
 ## Troubleshooting
 
--   **Memory Limit Issues**: If Composer fails due to memory limits, you can run it with an unlimited memory setting:
+- **Memory Limit Issues**: If Composer fails due to memory limits, run it with an unlimited memory setting:
+
     ```bash
     COMPOSER_MEMORY_LIMIT=-1 composer require sanmai/pipeline
     ```
 
--   **Platform Requirements**: Ensure your environment meets the minimum PHP version requirement:
+- **Platform Requirements**: If Composer reports an unsatisfiable PHP version requirement, check your PHP version:
+
     ```bash
-    php -v // Must be 8.2.0 or higher
+    php -v
     ```
 
--   **Composer Version**: If you encounter issues, ensure Composer is up-to-date:
+- **Composer Version**: If you encounter other issues, ensure Composer is up-to-date:
+
     ```bash
     composer self-update
     ```
 
 ## Next Steps
 
--   [Basic Usage](basic-usage.md)
--   [Examples](examples.md)
+- [Basic Usage](basic-usage.md)
+- [Walkthrough](walkthrough.md)

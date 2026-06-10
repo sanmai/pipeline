@@ -1,61 +1,59 @@
 # Statistical Methods
 
-These methods are used for performing statistical analysis on pipeline data.
+These methods perform statistical analysis on numeric pipeline data. Both build on the `RunningVariance` helper, which computes statistics in a single pass using [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm)—numerically stable and able to handle any number of data points in constant memory.
 
 ## `finalVariance()`
 
-Calculates a comprehensive set of statistics for numeric data in the pipeline.
+Consumes the pipeline and calculates a comprehensive set of statistics.
 
 **Signature**: `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null): RunningVariance`
 
--   `$castFunc`: A function to convert pipeline values to floats. Defaults to `floatval`. Return `null` to skip non-numeric values.
--   `$variance`: An optional, pre-initialized `RunningVariance` object to continue calculations from.
+- `$castFunc`: A callback converting each value to `?float`. Defaults to `floatval`. Return `null` to exclude a value from the statistics.
+- `$variance`: An optional, pre-initialized `RunningVariance` to continue counting into.
 
 **Behavior**:
 
--   This is a terminal operation that returns a `RunningVariance` object.
--   The `RunningVariance` object contains methods to get the mean, variance, standard deviation, min, max, and count.
--   Values that the `$castFunc` returns as `null` are not included in the statistics.
+- This is a terminal operation returning a `RunningVariance` object.
+- Values for which `$castFunc` returns `null` are not counted.
 
 **Examples**:
 
 ```php
-use Pipeline\Helper\RunningVariance;
-
 // Basic statistics
 $stats = take([1, 2, 3, 4, 5])->finalVariance();
-echo $stats->getCount();              // 5
-echo $stats->getMean();               // 3.0
-echo $stats->getVariance();           // 2.5
-echo $stats->getStandardDeviation();  // ~1.58
-echo $stats->getMin();                // 1.0
-echo $stats->getMax();                // 5.0
+$stats->getCount();              // 5
+$stats->getMean();               // 3.0
+$stats->getVariance();           // 2.5
+$stats->getStandardDeviation();  // ~1.58
+$stats->getMin();                // 1.0
+$stats->getMax();                // 5.0
 
 // Statistics for a specific field
 $stats = take($users)->finalVariance(fn($user) => $user['age']);
 
-// Handling mixed data (skip non-numeric values)
+// Mixed data: skip non-numeric values
 $stats = take(['1', 'abc', 2, null, 3.5])
-    ->finalVariance(fn($x) => is_numeric($x) ? (float)$x : null);
-echo $stats->getCount(); // 3 (only numeric values counted)
+    ->finalVariance(fn($x) => is_numeric($x) ? (float) $x : null);
+$stats->getCount(); // 3
 
-// Continuing from existing statistics
+// Continue from existing statistics
 $initialStats = take($firstBatch)->finalVariance();
 $combinedStats = take($secondBatch)->finalVariance(null, $initialStats);
 ```
 
 ## `runningVariance()`
 
-Observes values as they pass through the pipeline, calculating statistics without consuming the pipeline.
+Observes values as they pass through, updating statistics without consuming the pipeline.
 
 **Signature**: `runningVariance(?RunningVariance &$variance, ?callable $castFunc = null): self`
 
--   `&$variance`: A reference to a `RunningVariance` object, which will be updated with the statistics. It will be created if `null`.
--   `$castFunc`: A function to convert pipeline values to floats.
+- `&$variance`: A reference to a `RunningVariance`; created for you when `null`.
+- `$castFunc`: Same as in `finalVariance()`.
 
 **Behavior**:
 
--   This is a non-terminal operation that allows you to inspect statistics at a point in the chain.
+- Non-terminal: statistics accumulate lazily as elements flow through, and can be inspected at any point.
+- Several `runningVariance()` stages can observe different aspects of the same stream, each with its own cast callback; values for which the callback returns `null` are excluded from that particular computation.
 
 **Examples**:
 
@@ -66,30 +64,38 @@ $processedData = take([1, 2, 3, 4, 5])
     ->map(fn($x) => $x * 2)
     ->toList();
 
-echo $stats->getMean(); // 3.0
+$stats->getMean(); // 3.0
+
+// Two independent computations over one stream
+take($orders)
+    ->runningVariance($shipped, fn($order) => $order->isShipped() ? $order->getTotal() : null)
+    ->runningVariance($paid, fn($order) => $order->isPaid() ? $order->getTotal() : null)
+    ->each($processOrder);
 ```
 
-## `RunningVariance` Helper Class
+## The `RunningVariance` Helper Class
 
-The `Pipeline\Helper\RunningVariance` class provides a powerful way to work with statistics. It uses Welford's online algorithm to calculate variance and other metrics in a single pass, which is highly efficient.
+`Pipeline\Helper\RunningVariance` holds the accumulated statistics:
 
-### Key `RunningVariance` Methods
+- `getCount(): int`: The number of observed values.
+- `getMean(): float`: The arithmetic mean.
+- `getVariance(): float`: The sample variance (with [Bessel's correction](https://en.wikipedia.org/wiki/Bessel%27s_correction)).
+- `getStandardDeviation(): float`: The sample standard deviation.
+- `getMin(): float`: The smallest observed value.
+- `getMax(): float`: The largest observed value.
+- `observe(float $value): float`: Feed in a value directly.
 
--   `getCount(): int`: The number of observations.
--   `getMean(): float`: The arithmetic mean.
--   `getVariance(): float`: The sample variance.
--   `getStandardDeviation(): float`: The sample standard deviation.
--   `getMin(): float`: The minimum value.
--   `getMax(): float`: The maximum value.
+With no observed values, `getMean()`, `getVariance()`, `getMin()`, and `getMax()` return `NAN`; with a single value, the variance is `0.0`.
 
 ### Merging Statistics
 
-You can merge `RunningVariance` instances, which is useful for parallel processing or combining historical and current data.
+The constructor merges existing instances, which is useful for parallel processing or combining batches: statistics can be computed independently—even on different machines—and combined afterwards without revisiting the data.
 
 ```php
-// Merge stats from two different sources
+use Pipeline\Helper\RunningVariance;
+
 $stats1 = take($source1)->finalVariance();
 $stats2 = take($source2)->finalVariance();
 
-$combinedStats = new RunningVariance($stats1, $stats2);
+$overall = new RunningVariance($stats1, $stats2);
 ```

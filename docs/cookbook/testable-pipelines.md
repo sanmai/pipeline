@@ -1,6 +1,6 @@
 # Building Testable & Maintainable Pipelines
 
-When building complex data processing workflows, testing can quickly become a nightmare. The **Pipeline-Helper Pattern** solves this by separating your high-level workflow from implementation details, making your code both more maintainable and incredibly easy to test.
+When building complex data processing workflows, testing can quickly become difficult. The **Pipeline-Helper Pattern** solves this by separating the high-level workflow from implementation details, making the code both more maintainable and easy to test.
 
 ## The Pattern
 
@@ -102,7 +102,7 @@ class ProductImporter
 }
 ```
 
-Notice how PHP's first-class callable syntax (`$this->helper->method(...)`, which replaces the more verbose `[$this->helper, 'method']` array syntax) makes this incredibly expressive. The pipeline reads like a specification.
+Notice how PHP's first-class callable syntax (`$this->helper->method(...)`, which replaces the more verbose `[$this->helper, 'method']` array syntax) keeps every stage to a single line. The pipeline reads like a specification.
 
 ## Testing Strategy
 
@@ -140,7 +140,7 @@ class ProductImportHelperTest extends TestCase
 
 ### Testing the Sequence Contract
 
-This is where the pattern truly shines. We can verify the exact order of operations:
+This is the main payoff of the pattern. We can verify the exact order of operations:
 
 ```php
 // tests/ProductImporterTest.php
@@ -275,4 +275,4 @@ $helper->method('isNewProduct')->willReturn(true);
 
 The Pipeline-Helper Pattern transforms complex, monolithic pipelines into clean, testable components. By separating the "what" from the "how", you gain the ability to test each concern independently while maintaining readable, maintainable code.
 
-The pattern is particularly powerful when combined with PHP's first-class callable syntax, creating pipelines that read like specifications while remaining fully testable.
+Combined with PHP's first-class callable syntax, the result is a pipeline that reads like a specification while remaining fully testable.
