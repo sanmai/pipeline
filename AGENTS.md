@@ -79,10 +79,10 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 - PHPUnit with coverage metadata required (`#[CoversClass]`/`#[CoversMethod]` attributes)
 - 100% line coverage enforced in CI (`coverage-check ... 100`)
 - Mutation testing with Infection (100% MSI and covered MSI required)
-- Multiple static analyzers: Phan, Psalm, PHPStan (level 2 over src+tests, plus level max over `tests/Inference/` for generics/type-inference tests)
+- Multiple static analyzers: Psalm and PHPStan (level 2 over src+tests, plus level max over `tests/Inference/` for generics/type-inference tests)
 - CI matrix testing across multiple PHP versions
 - Data providers wrap array inputs in `ArrayIterator` variants to exercise both the eager (array) and lazy (iterator) paths
-- `DocumentationTest` and `DocumentationMethodsTest` enforce that README and `docs/` stay in sync with the actual public API: every public method needs a README mention and header, and documented methods must exist
+- `DocumentationTest` enforces that `README.md` stays in sync with the public API: every public method needs a README mention and a dedicated header section
 
 ### Performance Considerations
 
