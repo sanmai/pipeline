@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -39,7 +39,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.*') }}
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP with coverage
         uses: shivammathur/setup-php@v2
@@ -86,7 +86,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -148,7 +148,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
@@ -157,7 +157,7 @@ jobs:
             composer-
 
       - name: Restore PHP-CS-Fixer cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: build/cache/.php_cs.cache
           key: php-cs-fixer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
