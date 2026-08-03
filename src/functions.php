@@ -78,9 +78,11 @@ function fromValues(...$values): Standard
 }
 
 /**
- * @param iterable<mixed> $base
+ * @template TKey of array-key
+ * @template TValue
+ * @param iterable<TKey, TValue> $base
  * @param iterable<mixed> ...$inputs
- * @return Standard<array-key, array<int, mixed>>
+ * @return Standard<TKey, array{TValue, ...}>
  */
 function zip(iterable $base, iterable ...$inputs): Standard
 {
