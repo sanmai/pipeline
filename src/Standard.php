@@ -1108,7 +1108,7 @@ class Standard implements IteratorAggregate, Countable
     /**
      * Joins every value with the current value of each iterator, exhausted iterators contributing nulls.
      *
-     * @param Iterator[] $iterators
+     * @param list<Iterator> $iterators
      */
     private static function transpose(iterable $input, array $iterators): Generator
     {
@@ -1133,11 +1133,13 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @return Iterator[]
+     * Named arguments become string keys for a variadic parameter: values only, so that tuples stay lists.
+     *
+     * @return list<Iterator>
      */
     private static function toIterators(iterable ...$inputs): array
     {
-        return array_map(static function (iterable $input): Iterator {
+        return array_values(array_map(static function (iterable $input): Iterator {
             while ($input instanceof IteratorAggregate) {
                 $input = $input->getIterator();
             }
@@ -1150,7 +1152,7 @@ class Standard implements IteratorAggregate, Countable
 
             /** @var array $input */
             return new ArrayIterator($input);
-        }, $inputs);
+        }, $inputs));
     }
 
     /**
