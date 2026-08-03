@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -48,13 +49,10 @@ final class EagerWithArraysTest extends TestCase
     #[DataProvider('specimens')]
     public function testEagerArrayFilter(Standard $pipeline): void
     {
-        $reflectionClass = new ReflectionClass(Standard::class);
-        $reflectionProperty = $reflectionClass->getProperty('pipeline');
-
         $pipeline->filter();
         // At this point $pipeline should contain exactly [1, 2, 3]
 
-        $this->assertSame([2 => 1, 2, 3], $reflectionProperty->getValue($pipeline));
+        $this->assertPipelineIs([2 => 1, 2, 3], $pipeline);
 
         $this->assertSame([1, 2, 3], $pipeline->toList());
 
@@ -81,6 +79,25 @@ final class EagerWithArraysTest extends TestCase
     }
 
     #[DataProvider('specimens')]
+    public function testEagerArrayZip(Standard $pipeline): void
+    {
+        $input = new ArrayIterator([1, 2, 3, 4, 5]);
+
+        $pipeline->zip($input);
+        // At this point the input is consumed, and $pipeline holds the tuples
+
+        $this->assertFalse($input->valid(), 'Zip over an array consumes the inputs on the spot');
+
+        $expected = [[0, 1], [0, 2], [1, 3], [2, 4], [3, 5]];
+
+        $this->assertPipelineIs($expected, $pipeline);
+
+        // Reading the tuples more than once is possible with an array
+        $this->assertSame($expected, $pipeline->toList());
+        $this->assertSame($expected, $pipeline->toList());
+    }
+
+    #[DataProvider('specimens')]
     public function testNonEagerArrayMap(Standard $pipeline): void
     {
         $this->assertSame([1, 1, 1, 1, 1], $pipeline->map(function ($value) {
@@ -90,5 +107,12 @@ final class EagerWithArraysTest extends TestCase
         // This should not be possible even with an array, as map() is always lazy
         $this->expectExceptionMessage('Cannot traverse an already closed generator');
         $pipeline->toList();
+    }
+
+    private function assertPipelineIs(array $expected, Standard $pipeline)
+    {
+        $reflectionClass = new ReflectionClass(Standard::class);
+
+        $this->assertSame($expected, $reflectionClass->getProperty('pipeline')->getValue($pipeline));
     }
 }
