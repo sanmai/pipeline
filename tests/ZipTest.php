@@ -97,6 +97,15 @@ final class ZipTest extends TestCase
         $this->assertSame([], take([])->zip([1, 2, 3])->toList());
     }
 
+    public function testZipKeepsKeys(): void
+    {
+        $actual = take(['a' => 1, 'b' => 2])
+            ->zip([3, 4])
+            ->toAssoc();
+
+        $this->assertSame(['a' => [1, 3], 'b' => [2, 4]], $actual, 'Zip must keep the keys of the base sequence');
+    }
+
     public function testZipUnequalLengths(): void
     {
         $actual = take(['a', 'b', 'c'])
@@ -148,6 +157,32 @@ final class ZipTest extends TestCase
         $pipeline = new Standard();
 
         $this->assertSame([], $pipeline->zip()->toList());
+    }
+
+    public function testZipStringKeyedInputs(): void
+    {
+        $inputs = ['second' => [1, 2], 'third' => [3, 4]];
+
+        $actual = take(['a', 'b'])
+            ->zip(...$inputs)
+            ->toList();
+
+        $this->assertSame([
+            ['a', 1, 3],
+            ['b', 2, 4],
+        ], $actual, 'Zip must produce lists no matter how the inputs were keyed');
+    }
+
+    public function testUnpackZipOfStringKeyedInputs(): void
+    {
+        $inputs = ['second' => [1, 2], 'third' => [3, 4]];
+
+        $actual = take(['a', 'b'])
+            ->zip(...$inputs)
+            ->unpack(fn(string $a, int $b, int $c) => "{$a}{$b}{$c}")
+            ->toList();
+
+        $this->assertSame(['a13', 'b24'], $actual, 'Zipped tuples must unpack positionally, not as named arguments');
     }
 
     public function testExample(): void
