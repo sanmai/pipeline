@@ -1099,14 +1099,13 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // Applied directly: map() would narrow the type of $this with every input.
-        $this->pipeline = self::apply($this->pipeline, static function ($item): array {
+        $this->map(static function ($item): array {
             return [$item];
         });
 
         foreach (self::toIterators(...$inputs) as $iterator) {
             // MultipleIterator won't work here because it'll stop at first invalid iterator.
-            $this->pipeline = self::apply($this->pipeline, static function (array $current) use ($iterator) {
+            $this->map(static function (array $current) use ($iterator) {
                 if (!$iterator->valid()) {
                     $current[] = null;
 
