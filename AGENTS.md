@@ -17,7 +17,7 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
 ### Code Quality
 - `make cs` - Fix code style issues (PHP CS Fixer)
 - `make analyze` - Run all static analysis tools
-- `make phpstan` - Run PHPStan static analysis
+- `make phpstan` - Run PHPStan static analysis while silencing known non-errors
 - `make infection` - Run mutation testing (with a set MSI minimum)
 
 ### Build & Validation

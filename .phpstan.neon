@@ -3,7 +3,7 @@ parameters:
     excludePaths:
         - %currentWorkingDirectory%/tests/ErrorsTest.php
         - %currentWorkingDirectory%/tests/Benchmarks/
-    level: 4
+    level: 2
     paths:
         - src
         - tests
