@@ -158,6 +158,21 @@ final class LazinessTest extends TestCase
         })->filter();
     }
 
+    public function testZipLazy(): void
+    {
+        $spy = $this->createMock(ArrayIterator::class);
+        $spy
+            ->expects($this->never())
+            ->method('valid')
+        ;
+
+        $pipeline = new Standard();
+        $pipeline->map(function () {
+            yield 1;
+            yield 2;
+        })->zip($spy)->filter();
+    }
+
     public function testMapLazyOnce(): void
     {
         $pipeline = new Standard();
