@@ -760,7 +760,7 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
-     * @deprecated Use toList() or toAssoc() instead.
+     * @deprecated Replace toArray() with toList(); replace toArray(true) with toAssoc().
      */
     public function toArray(bool $preserve_keys): array
     {
