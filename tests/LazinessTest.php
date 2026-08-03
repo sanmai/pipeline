@@ -170,7 +170,7 @@ final class LazinessTest extends TestCase
         $pipeline->map(function () {
             yield 1;
             yield 2;
-        })->zip($spy);
+        })->zip($spy)->filter();
     }
 
     public function testMapLazyOnce(): void
