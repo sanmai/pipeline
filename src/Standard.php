@@ -1099,47 +1099,36 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        // MultipleIterator won't work here because it'll stop at first invalid iterator.
-        $this->pipeline = self::transpose($this->pipeline, self::toIterators(...$inputs));
+        // Applied directly: map() would narrow the type of $this with every input.
+        $this->pipeline = self::apply($this->pipeline, static function ($item): array {
+            return [$item];
+        });
+
+        foreach (self::toIterators(...$inputs) as $iterator) {
+            // MultipleIterator won't work here because it'll stop at first invalid iterator.
+            $this->pipeline = self::apply($this->pipeline, static function (array $current) use ($iterator) {
+                if (!$iterator->valid()) {
+                    $current[] = null;
+
+                    return $current;
+                }
+
+                $current[] = $iterator->current();
+                $iterator->next();
+
+                return $current;
+            });
+        }
 
         return $this;
     }
 
     /**
-     * Joins every value with the current value of each iterator, exhausted iterators contributing nulls.
-     *
-     * @param list<Iterator> $iterators
-     */
-    private static function transpose(iterable $input, array $iterators): Generator
-    {
-        foreach ($input as $key => $value) {
-            yield $key => [$value, ...array_map(self::advance(...), $iterators)];
-        }
-    }
-
-    /**
-     * Returns the current value of an iterator and moves it forward, or null once it is exhausted.
-     */
-    private static function advance(Iterator $iterator): mixed
-    {
-        if (!$iterator->valid()) {
-            return null;
-        }
-
-        $current = $iterator->current();
-        $iterator->next();
-
-        return $current;
-    }
-
-    /**
-     * Named arguments become string keys for a variadic parameter: values only, so that tuples stay lists.
-     *
-     * @return list<Iterator>
+     * @return Iterator[]
      */
     private static function toIterators(iterable ...$inputs): array
     {
-        return array_values(array_map(static function (iterable $input): Iterator {
+        return array_map(static function (iterable $input): Iterator {
             while ($input instanceof IteratorAggregate) {
                 $input = $input->getIterator();
             }
@@ -1152,7 +1141,7 @@ class Standard implements IteratorAggregate, Countable
 
             /** @var array $input */
             return new ArrayIterator($input);
-        }, $inputs));
+        }, $inputs);
     }
 
     /**
