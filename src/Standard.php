@@ -1099,27 +1099,37 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $this->map(static function ($item): array {
-            return [$item];
-        });
-
-        foreach (self::toIterators(...$inputs) as $iterator) {
-            // MultipleIterator won't work here because it'll stop at first invalid iterator.
-            $this->map(static function (array $current) use ($iterator) {
-                if (!$iterator->valid()) {
-                    $current[] = null;
-
-                    return $current;
-                }
-
-                $current[] = $iterator->current();
-                $iterator->next();
-
-                return $current;
-            });
-        }
+        // MultipleIterator won't work here because it'll stop at first invalid iterator.
+        $this->pipeline = self::transpose($this->pipeline, self::toIterators(...$inputs));
 
         return $this;
+    }
+
+    /**
+     * Joins every value with the current value of each iterator, exhausted iterators contributing nulls.
+     *
+     * @param Iterator[] $iterators
+     */
+    private static function transpose(iterable $input, array $iterators): Generator
+    {
+        foreach ($input as $key => $value) {
+            yield $key => [$value, ...array_map(self::advance(...), $iterators)];
+        }
+    }
+
+    /**
+     * Returns the current value of an iterator and moves it forward, or null once it is exhausted.
+     */
+    private static function advance(Iterator $iterator): mixed
+    {
+        if (!$iterator->valid()) {
+            return null;
+        }
+
+        $current = $iterator->current();
+        $iterator->next();
+
+        return $current;
     }
 
     /**
