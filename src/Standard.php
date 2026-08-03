@@ -1099,13 +1099,13 @@ class Standard implements IteratorAggregate, Countable
             return $this;
         }
 
-        $this->map(static function ($item): array {
+        $this->cast(static function ($item): array {
             return [$item];
         });
 
         foreach (self::toIterators(...$inputs) as $iterator) {
             // MultipleIterator won't work here because it'll stop at first invalid iterator.
-            $this->map(static function (array $current) use ($iterator) {
+            $this->cast(static function (array $current) use ($iterator) {
                 if (!$iterator->valid()) {
                     $current[] = null;
 
