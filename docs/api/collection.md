@@ -64,7 +64,7 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3])
 // ['a' => 2, 'b' => 4, 'c' => 6]
 ```
 
-The deprecated `toArray()` method is an older spelling: prefer `toList()` and `toAssoc()`.
+The deprecated `toArray()` method is an older spelling. Replace `toArray()` and `toArray(false)` with `toList()`; replace `toArray(true)` with `toAssoc()`.
 
 ## Iteration
 
