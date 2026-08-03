@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
 use Generator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -78,6 +79,28 @@ final class EagerWithArraysTest extends TestCase
         $this->assertSame(6, $pipeline->filter()->reduce());
         // This should be possible with an array
         $this->assertSame(6, $pipeline->filter()->reduce());
+    }
+
+    #[DataProvider('specimens')]
+    public function testEagerArrayZip(Standard $pipeline): void
+    {
+        $reflectionClass = new ReflectionClass(Standard::class);
+        $reflectionProperty = $reflectionClass->getProperty('pipeline');
+
+        $input = new ArrayIterator([1, 2, 3, 4, 5]);
+
+        $pipeline->zip($input);
+        // At this point the input is consumed, and $pipeline holds the tuples
+
+        $this->assertFalse($input->valid(), 'Zip over an array consumes the inputs on the spot');
+
+        $expected = [[0, 1], [0, 2], [1, 3], [2, 4], [3, 5]];
+
+        $this->assertSame($expected, $reflectionProperty->getValue($pipeline));
+
+        // Reading the tuples more than once is possible with an array
+        $this->assertSame($expected, $pipeline->toList());
+        $this->assertSame($expected, $pipeline->toList());
     }
 
     #[DataProvider('specimens')]
