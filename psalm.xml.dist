@@ -18,6 +18,9 @@
 
     <extraFiles>
         <directory name="tests" />
+        <ignoreFiles>
+            <directory name="tests/Php86" />
+        </ignoreFiles>
     </extraFiles>
 
     <issueHandlers>

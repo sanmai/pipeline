@@ -9,6 +9,10 @@
     <testsuites>
         <testsuite name="Main">
             <directory>tests/</directory>
+            <exclude>tests/Php86/</exclude>
+        </testsuite>
+        <testsuite name="PHP 8.6">
+            <directory phpVersion="8.6.0-dev" phpVersionOperator=">=">tests/Php86/</directory>
         </testsuite>
     </testsuites>
 
