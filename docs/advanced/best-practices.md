@@ -1,6 +1,6 @@
 # Best Practices
 
-To make the most of the Pipeline library, follow these practices for writing clean, efficient, and maintainable code.
+Follow these practices to keep pipeline code clear and memory-efficient.
 
 ## Core Principles
 
@@ -21,11 +21,11 @@ $result = take($largeArray)
     ->toList();
 ```
 
-When the pipeline holds an array, several methods (`filter()`, `cast()`, `slice()`, `chunk()`, and others) take eager fast paths that create intermediate arrays; `stream()` opts out of them. See [Performance](performance.md) for the details.
+When the pipeline stores an array, several methods (`filter()`, `cast()`, `slice()`, `chunk()`, and others) use eager fast paths that create intermediate arrays. `stream()` disables these paths. See [Performance](performance.md) for the details.
 
 ### 2. Chain Operations
 
-Keep operations in a single, fluent chain; don't round-trip through arrays between stages.
+Keep operations in a single chain. Do not convert the data to arrays between stages.
 
 ```php
 // Good: A single, readable chain
@@ -39,7 +39,7 @@ $filtered = take($data)->filter($predicate)->toList();
 $result = take($filtered)->map($transformer)->toList();
 ```
 
-Because pipelines are mutable and return the same instance, capturing intermediate variables is harmless—but converting to arrays between stages is not.
+Pipelines are mutable and return the same instance, so intermediate variables are harmless. Conversion to arrays between stages is not harmless.
 
 ### 3. Prefer `fold()` for Aggregations
 
@@ -49,7 +49,7 @@ Use `fold()` instead of `reduce()` for aggregation. Its required initial value m
 // Good: Explicit initial value
 $sum = take($numbers)->fold(0);
 
-// Less clear: where does the accumulator start?
+// Less clear: the initial value is implicit
 $sum = take($numbers)->reduce();
 ```
 
@@ -65,15 +65,15 @@ $cleaned = take($data)->select();
 $cleaned = take($data)->filter();
 ```
 
-Reserve plain `filter()` for when you really do want `array_filter()` semantics.
+Use `filter()` only when you require `array_filter()` semantics.
 
 ### 5. Prefer Explicit Operations
 
-A pipeline reads best when each stage does one obvious thing: filter, then transform, then aggregate. Resist the urge to hide several concerns inside one clever callback—the next reader (human or LLM) should be able to follow the data without simulating your code in their head.
+Give each stage a single, obvious operation: filter, then transform, then aggregate. Do not combine several concerns in a single callback. The next reader (human or LLM) must be able to follow the data flow without simulating the code.
 
 ## Error Handling
 
-The library never throws exceptions of its own, so error handling is about your data and your callbacks. Write defensive callbacks for malformed input:
+The library never throws exceptions of its own. Error handling therefore applies only to your data and your callbacks. Write defensive callbacks for malformed input:
 
 ```php
 // Handle missing keys with the null coalescing operator
@@ -86,7 +86,7 @@ $result = take($users)
     ->toList();
 ```
 
-For collecting or logging the rejected items, see [`select()` with `onReject`](../api/filtering.md#select).
+To collect or log rejected items, see [`select()` with `onReject`](../api/filtering.md#select).
 
 ## Code Organization
 
@@ -109,7 +109,7 @@ For testable multi-stage workflows, see the [Pipeline-Helper Pattern](../cookboo
 
 ## Antipatterns to Avoid
 
-- **Reusing a consumed pipeline**: Streaming pipelines, like generators, can only be iterated once; a second pass throws "Cannot traverse an already closed generator". Create a new pipeline for each use, or use [`cursor()`](../api/collection.md#cursor) when you need to pause and resume.
-- **`iterator_to_array()` on a pipeline**: With duplicate keys it silently drops values. Use `toList()` or `toAssoc()`.
-- **Modifying the source data during iteration**: This leads to undefined behavior. Produce new values instead.
-- **Overusing pipelines for trivial tasks**: For a small array that needs one `array_sum()`, the native function is simpler and faster. The pipeline pays off as soon as operations compose or data streams.
+- **Reusing a consumed pipeline**: Streaming pipelines, like generators, allow a single iteration. A second pass throws "Cannot traverse an already closed generator". Create a new pipeline for each use, or use [`cursor()`](../api/collection.md#cursor) to pause and resume iteration.
+- **`iterator_to_array()` on a pipeline**: It silently drops values with duplicate keys. Use `toList()` or `toAssoc()`.
+- **Modifying the source data during iteration**: This causes undefined behavior. Produce new values instead.
+- **Overusing pipelines for trivial tasks**: For a small array that requires a single `array_sum()` call, the native function is simpler and faster. A pipeline becomes useful when several operations compose or when the data streams.

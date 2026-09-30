@@ -1,6 +1,6 @@
 # Method Index
 
-A quick reference to every public method and helper function in the Pipeline library, grouped by purpose. Terminal operations consume the pipeline; all other methods return the same pipeline instance for chaining.
+This page lists every public method and helper function of the Pipeline library by purpose. Terminal operations consume the pipeline. Other methods return the same pipeline instance for chaining, except `getIterator()`, `cursor()`, and `peek()`.
 
 ## Creation
 
@@ -33,9 +33,9 @@ A quick reference to every public method and helper function in the Pipeline lib
 
 | Method | Description | Reference |
 | --- | --- | --- |
-| `select()` | Keeps approved elements; by default drops only `null` and `false`. | [Filtering](../api/filtering.md#select) |
+| `select()` | Keeps elements that the callback accepts; by default drops only `null` and `false`. | [Filtering](../api/filtering.md#select) |
 | `filter()` | Alias of `select()`; by default drops all falsy values. | [Filtering](../api/filtering.md#filter) |
-| `skipWhile()` | Skips leading elements while a predicate holds. | [Filtering](../api/filtering.md#skipwhile) |
+| `skipWhile()` | Skips leading elements while a predicate returns true. | [Filtering](../api/filtering.md#skipwhile) |
 
 ## Aggregation (Terminal)
 
@@ -58,7 +58,7 @@ A quick reference to every public method and helper function in the Pipeline lib
 | `collect()` | Passes all values as a list to a callback and returns its result. Terminal. | [Collection](../api/collection.md#collect) |
 | `getIterator()` | Makes the pipeline `foreach`-able (`IteratorAggregate`). | [Collection](../api/collection.md#getiterator) |
 | `each()` | Eagerly iterates for side effects. Terminal. | [Collection](../api/collection.md#each) |
-| `cursor()` | Returns a forward-only iterator that survives loop breaks. | [Collection](../api/collection.md#cursor) |
+| `cursor()` | Returns a forward-only iterator that keeps its position across loop breaks. | [Collection](../api/collection.md#cursor) |
 | `peek()` | Removes and returns the first N elements as a new pipeline. | [Collection](../api/collection.md#peek) |
 
 ## Utility
@@ -67,7 +67,7 @@ A quick reference to every public method and helper function in the Pipeline lib
 | --- | --- | --- |
 | `tap()` | Performs side effects without changing values. | [Utility](../api/utility.md#tap) |
 | `stream()` | Forces lazy, element-by-element processing. | [Utility](../api/utility.md#stream) |
-| `runningCount()` | Counts elements as they flow through. | [Utility](../api/utility.md#runningcount) |
+| `runningCount()` | Counts elements during iteration. | [Utility](../api/utility.md#runningcount) |
 | `reservoir()` | Samples random elements. Terminal. | [Utility](../api/utility.md#reservoir) |
 | `zip()` | Transposes the pipeline with other iterables. | [Utility](../api/utility.md#zip) |
 | `values()` | Keeps only the values, discarding keys. | [Utility](../api/utility.md#values) |
@@ -79,5 +79,5 @@ A quick reference to every public method and helper function in the Pipeline lib
 
 | Method | Description | Reference |
 | --- | --- | --- |
-| `runningVariance()` | Observes statistics as elements flow through. | [Statistics](../api/statistics.md#runningvariance) |
+| `runningVariance()` | Computes statistics during iteration. | [Statistics](../api/statistics.md#runningvariance) |
 | `finalVariance()` | Computes final statistics. Terminal. | [Statistics](../api/statistics.md#finalvariance) |

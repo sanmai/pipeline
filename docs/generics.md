@@ -1,28 +1,28 @@
 # Type Safety with Generics
 
-Pipeline uses PHP's generic types (`@template` annotations in PHPDocs) to provide robust type safety. Static analyzers such as PHPStan and Psalm can follow the types of keys and values through an entire pipeline, catching mistakes before the code runs.
+Pipeline uses generic types (`@template` annotations in PHPDoc) for type safety. Static analyzers such as PHPStan and Psalm track the types of keys and values through a pipeline and report type errors before the code runs.
 
 ## How It Works
 
-The `Pipeline\Standard` class is annotated as `Standard<TKey, TValue>`. Every method declares how it changes those parameters: `map()` and `cast()` replace `TValue` with the callback's return type, `filter()` and `select()` keep types intact, `keys()` turns `TKey` into the value type, and so on. Notably, the annotations track these changes through both chained calls *and* separate statements, thanks to `@phpstan-self-out`—pipelines are mutable, and the types mutate along.
+The `Pipeline\Standard` class has the annotation `Standard<TKey, TValue>`. Each method defines how it changes these parameters. For example, `map()` and `cast()` replace `TValue` with the callback return type, `filter()` and `select()` keep both types, and `keys()` makes `TKey` the value type. Pipelines are mutable, so the types change with each call. The `@phpstan-self-out` annotations track these changes through chained calls and through separate statements.
 
 ## Using Type-Safe Pipelines
 
 ### Type Inference
 
-Types are inferred automatically from the input:
+The analyzer infers types from the input:
 
 ```php
 use function Pipeline\fromArray;
 use function Pipeline\fromValues;
 
-$strings = fromValues('hello', 'world');    // Standard<int, string>
-$numbers = fromArray(['a' => 1, 'b' => 2]); // Standard<string, int>
+$strings = fromValues('hello', 'world');    // Standard<array-key, string>
+$numbers = fromArray(['a' => 1, 'b' => 2]); // Standard<array-key, int>
 ```
 
 ### Type Transformations
 
-Callback return types drive the inference, so typed closures give the best results:
+Callback return types drive the inference. Use typed closures for the best results:
 
 ```php
 use function Pipeline\take;
@@ -44,11 +44,11 @@ $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3])
     ->cast(fn(int $n): Foo => new Foo($n));
 
 foreach ($pipeline as $value) {
-    echo $value->bar(); // Analyzer knows $value is Foo
+    echo $value->bar(); // The analyzer infers that $value is Foo
 }
 ```
 
-The same inference works without chaining, one statement at a time:
+Inference also works with separate statements:
 
 ```php
 use function Pipeline\take;
@@ -56,24 +56,24 @@ use function Pipeline\take;
 $pipeline = take(['a' => 1, 'b' => 2, 'c' => 3]);
 $pipeline->map(fn(int $n): int => $n * 2);
 $pipeline->cast(fn(int $n): Foo => new Foo($n));
-// $pipeline is now Standard<string, Foo>
+// $pipeline is now Standard<mixed, Foo>
 ```
 
-If `Foo::bar()` were renamed or its constructor changed to expect a string, PHPStan would flag both the constructor call inside `cast()` and the `$value->bar()` call.
+If you rename `Foo::bar()`, PHPStan reports the `$value->bar()` call. If you change the constructor to require a string, PHPStan reports the constructor call in `cast()`.
 
 ### Extracting Data
 
-Terminal operations carry the types out into plain PHP arrays:
+Terminal operations return plain PHP arrays with the tracked types:
 
 ```php
 $list = $pipeline->toList();   // list<Foo>
-$assoc = $pipeline->toAssoc(); // array<string, Foo>
+$assoc = $pipeline->toAssoc(); // array<array-key, Foo>
 ```
 
 ## Important Considerations
 
-- **Untyped callbacks weaken inference**: `fn($x) => ...` gives the analyzer little to work with. Prefer parameter and return types on closures.
-- **Key-changing operations**: `chunk()`, `flip()`, `keys()`, `values()`, and `tuples()` rewrite the key/value relationship; the annotations model this, but in complex compositions an explicit annotation can help:
+- **Untyped callbacks weaken inference**: A closure such as `fn($x) => ...` gives the analyzer little type information. Add parameter and return types to closures.
+- **Key-changing operations**: `chunk()`, `flip()`, `keys()`, `values()`, and `tuples()` change the key/value relationship. The annotations model this. For complex compositions, an explicit annotation can help:
 
     ```php
     use Pipeline\Standard;
@@ -83,10 +83,10 @@ $assoc = $pipeline->toAssoc(); // array<string, Foo>
     $pipeline = fromArray(['a' => 1])->flip();
     ```
 
-- **Zero runtime cost**: All typing lives purely in PHPDoc comments; nothing changes at runtime.
+- **No runtime cost**: All type information is in PHPDoc comments. Runtime behavior does not change.
 
 ## Tool Setup & Tips
 
-- Run PHPStan or Psalm at a high analysis level; the library itself is checked at the maximum levels.
-- Provide explicit type hints when the data source isn't statically known (e.g., decoded JSON).
-- Integrate static analysis into your CI pipeline so type regressions surface in review.
+- Run PHPStan or Psalm at a high analysis level. PHPStan checks the library source at level `max`.
+- Add explicit type annotations when the data source has no static type (for example, decoded JSON).
+- Run static analysis in your CI pipeline so that type regressions show during review.

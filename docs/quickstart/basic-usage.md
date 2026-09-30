@@ -23,7 +23,7 @@ $pipeline = fromArray([1, 2, 3]);
 
 ### From an Iterable
 
-The recommended way to use the library is with iterables, which allows for lazy processing of data.
+Use iterables to process data lazily. This is the recommended way to use the library.
 
 ```php
 // From a generator
@@ -55,7 +55,7 @@ $pipeline = fromValues(1, 2, 3, 4, 5);
 
 ### Empty Pipeline
 
-You can also create an empty pipeline and add data to it later.
+Create an empty pipeline and add data to it later.
 
 ```php
 $pipeline = new Standard();
@@ -96,7 +96,7 @@ $result = take([1, 2, 3])
 
 ### `cast()` - One-to-One Transformations
 
-The `cast()` method applies a simple one-to-one callback. Unlike `map()`, it never expands generators, so what the callback returns is exactly what ends up in the pipeline.
+The `cast()` method applies a one-to-one callback. Unlike `map()`, it does not expand generators. The pipeline outputs each callback result unchanged.
 
 ```php
 // Convert strings to integers
@@ -114,7 +114,7 @@ $result = take(['hello', 'world'])
 
 ### `filter()` - Remove Falsy Elements
 
-The `filter()` method removes elements that do not pass a given test. Without a callback it removes all falsy values, exactly like `array_filter()`.
+The `filter()` method removes elements that do not pass a given test. Without a callback, it removes all falsy values, the same as `array_filter()`.
 
 ```php
 // Keep only even numbers
@@ -130,7 +130,7 @@ $result = take([0, 1, false, 2, null, 3, '', 4])
 
 ### `select()` - Predictable Filtering
 
-The `select()` method is the stricter sibling of `filter()`: without a callback it removes only `null` and `false`, keeping valid falsy data such as `0` and empty strings.
+The `select()` method is the strict form of `filter()`. Without a callback, it removes only `null` and `false`. It keeps other falsy values, such as `0` and empty strings.
 
 ```php
 $result = take([0, 1, false, 2, null, 3, '', 4])
@@ -172,7 +172,7 @@ $result = take([4, 5, 6])
 
 ### Iterating with `foreach`
 
-A pipeline is iterable; processing happens as you iterate, and you can stop at any time.
+A pipeline is iterable. The pipeline processes each element only when the loop requests it. You can stop the loop at any time.
 
 ```php
 foreach (take($hugeDataSet)->map($transform) as $value) {

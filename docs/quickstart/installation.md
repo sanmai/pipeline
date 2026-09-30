@@ -13,7 +13,7 @@ To add the library to your project, run:
 composer require sanmai/pipeline
 ```
 
-Composer picks an appropriate version constraint for you. To try the latest development version instead:
+Composer adds a version constraint to `composer.json`. To install the latest development version instead, run:
 
 ```bash
 composer require sanmai/pipeline:dev-main
@@ -21,7 +21,7 @@ composer require sanmai/pipeline:dev-main
 
 ## Autoloading
 
-The library follows the PSR-4 autoloading standard. Ensure you include Composer's autoloader in your project's entry point:
+The library uses PSR-4 autoloading. Include the Composer autoloader in the entry point of your project:
 
 ```php
 require_once 'vendor/autoload.php';
@@ -29,7 +29,7 @@ require_once 'vendor/autoload.php';
 
 ## Verifying the Installation
 
-To confirm the library is installed correctly, run this simple script:
+To verify the installation, run this script:
 
 ```php
 <?php
@@ -46,7 +46,7 @@ print_r($result); // Expected output: [2, 4, 6, 8, 10]
 
 ## Importing Functions and Classes
 
-The library provides helper functions in the `Pipeline` namespace. You can import them individually or use their fully qualified names.
+The helper functions are in the `Pipeline` namespace. Import them individually, or use their fully qualified names.
 
 ```php
 // Import individual functions
@@ -57,7 +57,7 @@ use function Pipeline\map;
 $pipeline = \Pipeline\take($data);
 ```
 
-For direct class usage, import the necessary classes:
+To use the class directly, import it:
 
 ```php
 use Pipeline\Standard;
@@ -67,7 +67,7 @@ $pipeline = new Standard($data);
 
 ## Development Setup
 
-If you plan to contribute to the library or run its test suite:
+To contribute to the library or run its test suite, do these steps:
 
 1. **Clone the repository:**
 
@@ -88,11 +88,11 @@ If you plan to contribute to the library or run its test suite:
     make test
     ```
 
-Static analysis and the rest of the quality checks run with `make analyze`; all checks together run with `make -j -k`.
+`make analyze` runs static analysis (PHPStan and Psalm). `make -j -k` runs all checks in parallel.
 
 ## Troubleshooting
 
-- **Memory Limit Issues**: If Composer fails due to memory limits, run it with an unlimited memory setting:
+- **Memory Limit Issues**: If Composer stops with a memory limit error, run it without a memory limit:
 
     ```bash
     COMPOSER_MEMORY_LIMIT=-1 composer require sanmai/pipeline
@@ -104,7 +104,7 @@ Static analysis and the rest of the quality checks run with `make analyze`; all 
     php -v
     ```
 
-- **Composer Version**: If you encounter other issues, ensure Composer is up-to-date:
+- **Composer Version**: For other errors, update Composer to the latest version:
 
     ```bash
     composer self-update

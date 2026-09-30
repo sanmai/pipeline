@@ -1,26 +1,26 @@
 # Building Testable & Maintainable Pipelines
 
-When building complex data processing workflows, testing can quickly become difficult. The **Pipeline-Helper Pattern** solves this by separating the high-level workflow from implementation details, making the code both more maintainable and easy to test.
+Complex data processing workflows are difficult to test. The Pipeline-Helper Pattern separates the high-level workflow from the implementation details. This separation makes the code easier to maintain and to test.
 
 ## The Pattern
 
-The Pipeline-Helper Pattern (an application of the Orchestrator-Implementor pattern) splits your logic into two parts:
+The Pipeline-Helper Pattern (an application of the Orchestrator-Implementor pattern) splits the logic into two parts:
 
-1. **The Orchestrator**: Defines *what* needs to happen and in *what order*
-2. **The Helper**: Implements *how* each step is performed
+1. **The Orchestrator**: Defines *what* happens and in *what order*.
+2. **The Helper**: Implements *how* each step operates.
 
-This separation transforms complex, hard-to-test logic into clean, testable components.
+Each part is a small component that you can test on its own.
 
 ## Example: Product Import Workflow
 
-Let's build a product import system that must:
+This product import system must do these steps:
 1. Validate CSV data
 2. Normalize values
 3. Check SKU format
 4. Verify the product doesn't exist in the database
 5. Create product entities
 
-The order is critical - we must validate the SKU *before* hitting the database.
+The order is important: the system must validate the SKU *before* it queries the database.
 
 ### The Data Model
 
@@ -38,7 +38,7 @@ final class Product
 
 ### The Helper: Implementation Details
 
-The helper contains all the "how" - each step as a small, focused method:
+The helper implements the "how". Each step is a small method:
 
 ```php
 // src/ProductImportHelper.php
@@ -80,7 +80,7 @@ class ProductImportHelper
 
 ### The Orchestrator: The Workflow
 
-The orchestrator defines the "what" - a clean, readable pipeline:
+The orchestrator defines the "what" as a pipeline:
 
 ```php
 // src/ProductImporter.php
@@ -102,13 +102,13 @@ class ProductImporter
 }
 ```
 
-Notice how PHP's first-class callable syntax (`$this->helper->method(...)`, which replaces the more verbose `[$this->helper, 'method']` array syntax) keeps every stage to a single line. The pipeline reads like a specification.
+PHP's first-class callable syntax (`$this->helper->method(...)`) replaces the longer `[$this->helper, 'method']` array syntax. With it, each stage uses a single line, and the pipeline reads like a specification.
 
 ## Testing Strategy
 
 ### Testing the Helper
 
-Each helper method is trivially testable:
+You can test each helper method directly:
 
 ```php
 // tests/ProductImportHelperTest.php
@@ -140,7 +140,7 @@ class ProductImportHelperTest extends TestCase
 
 ### Testing the Sequence Contract
 
-This is the main payoff of the pattern. We can verify the exact order of operations:
+This test is the main benefit of the pattern. It verifies the exact order of operations:
 
 ```php
 // tests/ProductImporterTest.php
@@ -189,7 +189,7 @@ class ProductImporterTest extends TestCase
         $helper->expects($this->once())->method('normalizeData')->willReturnArgument(0);
         $helper->expects($this->once())->method('isValidSku')->willReturn(false);
 
-        // This is the key: isNewProduct should NEVER be called for invalid SKUs
+        // The importer must NEVER call isNewProduct for invalid SKUs
         $helper->expects($this->never())->method('isNewProduct');
         $helper->expects($this->never())->method('createProductEntity');
 
@@ -204,38 +204,38 @@ class ProductImporterTest extends TestCase
 }
 ```
 
-The second test is crucial - it verifies that we never hit the database for invalid SKUs. This sequence enforcement prevents bugs and unnecessary side effects.
+The second test verifies that the importer does not query the database for invalid SKUs. A test of the sequence prevents bugs and unnecessary side effects.
 
 ## Benefits
 
-1. **Sequence Contract Enforcement**: Test and guarantee the order of operations, critical for workflows with side effects.
+1. **Sequence Contract Enforcement**: Tests guarantee the order of operations. This is important for workflows with side effects.
 
-2. **Separation of Concerns**: The orchestrator is a clean specification; the helper contains implementation details.
+2. **Separation of Concerns**: The orchestrator is the specification. The helper contains the implementation details.
 
-3. **Exceptional Testability**:
-   - Helper methods are simple unit tests
-   - Orchestrator logic is tested via mocks
-   - No complex test setup required
+3. **Testability**:
+   - Each helper method has a simple unit test.
+   - Mocks test the orchestrator logic.
+   - Tests do not require a complex setup.
 
-4. **Maintainability**: Changes to implementation don't affect the workflow definition, and vice versa.
+4. **Maintainability**: Changes to the implementation do not affect the workflow definition, and changes to the workflow do not affect the implementation.
 
-5. **Readability**: The orchestrator becomes self-documenting business logic.
+5. **Readability**: The orchestrator documents the business logic.
 
 ## When to Use This Pattern
 
-Consider the Pipeline-Helper Pattern when:
+Use the Pipeline-Helper Pattern when:
 
 - Your pipeline has multiple steps with complex logic
-- The order of operations is critical
+- The order of operations is important
 - You have side effects (database, API calls, file operations)
 - You need granular testing of each step
-- The pipeline logic is likely to evolve
+- The pipeline logic is likely to change
 
 ## Advanced Tips
 
 ### Composing Multiple Helpers
 
-For very complex workflows, you can use multiple specialized helpers:
+For large workflows, use multiple specialized helpers:
 
 ```php
 class OrderProcessor
@@ -259,7 +259,7 @@ class OrderProcessor
 
 ### Testing with Partial Mocks
 
-Sometimes you want to test with real implementations of some methods:
+A partial mock replaces some methods and keeps the real implementation of the others:
 
 ```php
 $helper = $this->getMockBuilder(ProductImportHelper::class)
@@ -273,6 +273,6 @@ $helper->method('isNewProduct')->willReturn(true);
 
 ## Conclusion
 
-The Pipeline-Helper Pattern transforms complex, monolithic pipelines into clean, testable components. By separating the "what" from the "how", you gain the ability to test each concern independently while maintaining readable, maintainable code.
+The Pipeline-Helper Pattern divides a large pipeline into small components. The orchestrator defines the "what" and the helper implements the "how", so you can test each part independently.
 
-Combined with PHP's first-class callable syntax, the result is a pipeline that reads like a specification while remaining fully testable.
+With PHP's first-class callable syntax, the pipeline reads like a specification and stays fully testable.
