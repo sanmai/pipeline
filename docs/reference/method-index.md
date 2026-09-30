@@ -55,6 +55,7 @@ A quick reference to every public method and helper function in the Pipeline lib
 | --- | --- | --- |
 | `toList()` | Returns all values as a list, discarding keys. Terminal. | [Collection](../api/collection.md#tolist) |
 | `toAssoc()` | Returns all values with keys preserved. Terminal. | [Collection](../api/collection.md#toassoc) |
+| `collect()` | Passes all values as a list to a callback and returns its result. Terminal. | [Collection](../api/collection.md#collect) |
 | `getIterator()` | Makes the pipeline `foreach`-able (`IteratorAggregate`). | [Collection](../api/collection.md#getiterator) |
 | `each()` | Eagerly iterates for side effects. Terminal. | [Collection](../api/collection.md#each) |
 | `cursor()` | Returns a forward-only iterator that survives loop breaks. | [Collection](../api/collection.md#cursor) |

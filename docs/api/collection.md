@@ -11,6 +11,7 @@ Understanding this is key to using the library effectively. No work is done unti
 Common terminal operations include:
 
 - `toList()` and `toAssoc()` - Convert to arrays
+- `collect()` - Pass all values to a callback
 - `fold()` and `reduce()` - Aggregate to a single value
 - `count()`, `min()`, `max()`, `first()`, `last()` - Compute simple aggregates
 - `each()` - Iterate and perform side effects
@@ -65,6 +66,31 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3])
 ```
 
 The deprecated `toArray()` method is an older spelling. Replace `toArray()` and `toArray(false)` with `toList()`; replace `toArray(true)` with `toAssoc()`.
+
+### `collect()`
+
+Passes a list of all values to a callback and returns the callback's result.
+
+**Signature**: `collect(?callable $func = null): mixed`
+
+- `$func`: A callback that receives a `list` of all values. Without a callback, `collect()` returns the list, the same as `toList()`.
+
+**Behavior**:
+
+- This is a terminal operation.
+- Keys are discarded, as with `toList()`.
+- Use it to end a pipeline with a function that requires the whole array, such as `implode()` or `array_sum()`.
+
+**Examples**:
+
+```php
+$csv = take(ItemCondition::cases())
+    ->cast(fn(ItemCondition $condition) => $condition->value)
+    ->collect(fn(array $values) => implode(',', $values));
+
+// With PHP 8.6 partial function application
+$csv = take($values)->collect(implode(',', ...));
+```
 
 ## Iteration
 

@@ -35,7 +35,7 @@ The streaming approach reads the file line by line and—just as importantly—s
 
 ## Array Fast Paths vs `stream()`
 
-When a pipeline holds a plain array, many methods take an eager fast path using native array functions: `filter()` and `select()` use `array_filter()`, `cast()` uses `array_map()`, `slice()` uses `array_slice()`, `chunk()` uses `array_chunk()`, and similarly for `keys()`, `values()`, `flip()`, `tuples()`, `fold()`, `count()`, `min()`, and `max()`. Notably, `map()` is always lazy, regardless of the source.
+When a pipeline holds a plain array, many methods take an eager fast path using native array functions: `filter()` and `select()` use `array_filter()`, `cast()` uses `array_map()`, `slice()` uses `array_slice()`, `chunk()` uses `array_chunk()`, `zip()` builds its tuples eagerly, and similarly for `keys()`, `values()`, `flip()`, `tuples()`, `fold()`, `count()`, `min()`, and `max()`. Notably, `map()` is always lazy, regardless of the source.
 
 These fast paths are quicker for small-to-medium arrays, but each one creates a new intermediate array in memory:
 
