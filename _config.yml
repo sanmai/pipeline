@@ -8,10 +8,12 @@ plugins:
 exclude:
   - AGENTS.md
   - Makefile
+  - "*.y*ml"
   - "*.json*"
   - "*.lock*"
-  - examples/
   - "*.dist"
+  - "*.php"
+  - docs/
   - src/
   - tests/
   - vendor/
