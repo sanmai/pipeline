@@ -114,6 +114,24 @@ class TypeInferenceTest extends TestCase
         $this->assertSame(['n'], $result1);
     }
 
+    public function testCollect(): void
+    {
+        $this->expectOutputString("2\n4\n2\n");
+
+        $foos = take(['a' => 2, 'b' => 4])
+            ->cast(fn(int $n): Foo => new Foo($n))
+            ->collect();
+
+        foreach ($foos as $foo) {
+            echo $foo->bar();
+        }
+
+        echo take(['a' => 2, 'b' => 4])
+            ->cast(fn(int $n): Foo => new Foo($n))
+            ->collect(fn(array $foos): Foo => $foos[0])
+            ->bar();
+    }
+
     public function testExtractFixtureNamesFromTests(): void
     {
         $iterator = new RecursiveIteratorIterator(
