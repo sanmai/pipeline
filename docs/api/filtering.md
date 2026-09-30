@@ -81,7 +81,7 @@ Both names call the same method with different defaults. Use the name with the d
 
 ## `skipWhile()`
 
-This method skips elements from the start of the pipeline while the predicate returns `true`. After the predicate returns `false` for the first time, the method keeps all remaining elements and ignores the predicate result.
+This method skips elements from the start of the pipeline while the predicate returns `true`. After the predicate returns `false` for the first time, the method keeps all remaining elements and does not call the predicate again.
 
 **Signature**: `skipWhile(callable $predicate): self`
 

@@ -76,6 +76,19 @@ final class SkipWhileTest extends TestCase
         $this->assertSame([3, 5, 1], $result);
     }
 
+    public function testPredicateNotCalledAfterSkipping(): void
+    {
+        $result = take([1, 1, 1, 2, 3, 4, 5, 6])
+            ->skipWhile(function ($number) {
+                $this->assertLessThan(3, $number, 'The predicate must not be called after the first non-matching element');
+
+                return 1 === $number;
+            })
+            ->toList();
+
+        $this->assertSame([2, 3, 4, 5, 6], $result);
+    }
+
     public function testDefaultCallback(): void
     {
         $result = fromValues(1, '0', null, false)
