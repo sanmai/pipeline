@@ -104,7 +104,7 @@ var_dump($value);
 // int(104)
 ```
 
-# API entry points
+# Entry points
 
 All entry points always return an instance of the pipeline.
 
@@ -117,7 +117,7 @@ All entry points always return an instance of the pipeline.
 | `zip()`  | Takes an iterable, and several more, transposing them together.  | `use function Pipeline\zip;` |
 
 
-# Instance methods in a nutshell
+# Instance methods
 
 |  Method     | Details                       | A.K.A.            |
 | ----------- | ----------------------------- | ----------------- |
@@ -136,7 +136,7 @@ All entry points always return an instance of the pipeline.
 | `select()`  | Selects elements for which the callback returns true. By default only removes `null` and `false`. Optional `onReject` for side effects.  |  `array_filter`, `filter`, `Where`                |
 | `filter()`  | Alias for `select()` with `strict: false` default. Removes all falsy values like `array_filter`. |  `array_filter`                |
 | `tap()`     | Performs side effects on each element without changing the values in the pipeline. |  |
-| `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  | 
+| `skipWhile()` | Skips elements while the predicate returns true, and keeps everything after the predicate return false just once. |  |
 | `slice()`  | Extracts a slice from the inputs. Keys are not discarded intentionally. Supports negative values for both arguments. |  `array_slice`                |
 | `peek()`  | Returns the first N items as a pipeline/iterable. Use `prepend()` to restore items if needed. | `array_splice` |
 | `fold()`  | Reduces input values to a single value. Defaults to summation. Requires an initial value. | `array_reduce`, `Aggregate`, `Sum` |
@@ -167,83 +167,7 @@ Pipeline can be used as an argument to `count()`. Implements `Countable`. Be war
 
 In general, Pipeline instances are mutable, meaning every Pipeline-returning method returns the very same Pipeline instance. This gives us great flexibility on trusting someone or something to add processing stages to a Pipeline instance, while also avoiding non-obvious mistakes, raised from a need to strictly follow a fluid interface. E.g. if you add a processing stage, it stays there no matter if you capture the return value or not. This peculiarity could have been a thread-safety hazard in other circumstances, but under PHP this is not an issue.
 
-# Caveats
-
-- Since most callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
-
-    ```php
-    foreach ($pipeline as $result) {
-        // Processing happens only if you consume the results.
-        // Want to stop early after few results? Not a problem here!
-    }
-    ```
-
-  Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
-  
-- That said, if a non-generator used to seed the pipeline, it will be executed eagerly.
-
-    ```php
-    $pipeline = new \Pipeline\Standard();
-    $pipeline->map(function () {
-        // will be executed immediately on the spot, unless yield is used
-        return $this->veryExpensiveMethod();
-    })->filter();
-    ```
-  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly whenever possible. Ergo, *when in doubt, use a generator.*
-  
-    ```php
-    $pipeline->map(function () {
-        // will be executed only as needed, when needed
-        yield $this->veryExpensiveMethod();
-    })->filter();
-    ```  
-
-- Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned.
-    
-    ```php
-	$pipeline = \Pipeline\map(function () {
-	    yield 'foo' => 'bar';
-	    yield 'foo' => 'baz';
-	});
-	
-	var_dump(iterator_to_array($pipeline));
-	/* ['foo' => 'baz'] */
-    ```
-  
-  Safer would be to use provided `toList()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
-  
-    ```php
-    var_dump($pipeline->toList());
-    /* ['bar', 'baz'] */
-    ```
-  If necessary to preserve the keys, there's a sister method `toAssoc()`.
-
-- The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
-
-	```php
-	$pipeline = \Pipeline\map(function () {
-	    yield 1;
-	});
-	
-	$sum = $pipeline->reduce();
-	
-	// Won't work the second time though
-	$pipeline->reduce();
-	// Exception: Cannot traverse an already closed generator
-	```
- 
-  Although there are some cases where a pipeline can be rewound and reused just like a regular array, if you need to pause iteration and continue later, or if you need to iterate strictly once without accidental resets or exceptions, use [`$pipeline->cursor()`](#pipeline-cursor).
- 
-- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
-
-    ```php
-    $iterator = new \IteratorIterator($pipeline);
-    /** @var $iterator \Iterator */
-    ```
-
-- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this. If you need to break out of iteration and continue later, see [`cursor()`](#pipeline-cursor).
-
-# Classes and interfaces: overview
+# Classes
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
 
@@ -253,7 +177,7 @@ This library is built to last. There's not a single place where an exception is 
 
 ## `__construct()`
 
-Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method. 
+Takes an instance of `Traversable` or none. In the latter case the pipeline must be primed by passing an initial generator to the `map` method.
 
 ## `$pipeline->map()`
 
@@ -349,7 +273,7 @@ Sequence-joins several iterables together, forming a feed with elements side by 
 $pipeline = take($iterableA);
 $pipeline->zip($iterableB, $iterableC);
 $pipeline->unpack(function ($elementOfA, $elementOfB, $elementOfC) {
-    // ... 
+    // ...
 });
 ```
 
@@ -632,15 +556,92 @@ PHPStan will correctly note that:
 - The first parameter of class `Foo` constructor expects `string` but `int` given.
 - There is a call to an undefined method `Foo::bar()`.
 
+# Caveats
+
+- Since most callback are [lazily evaluated](https://en.wikipedia.org/wiki/Lazy_evaluation) as more data coming in and out, you must consume the results with a plain `foreach` or use a `reduce()` to make sure processing happens.
+
+    ```php
+    foreach ($pipeline as $result) {
+        // Processing happens only if you consume the results.
+        // Want to stop early after few results? Not a problem here!
+    }
+    ```
+
+  Almost nothing will happen unless you use the results. That's the point of lazy evaluation after all!
+
+- That said, if a non-generator used to seed the pipeline, it will be executed eagerly.
+
+    ```php
+    $pipeline = new \Pipeline\Standard();
+    $pipeline->map(function () {
+        // will be executed immediately on the spot, unless yield is used
+        return $this->veryExpensiveMethod();
+    })->filter();
+    ```
+  In the above case the pipeline will store an array internally, with which the pipeline will operate eagerly whenever possible. Ergo, *when in doubt, use a generator.*
+
+    ```php
+    $pipeline->map(function () {
+        // will be executed only as needed, when needed
+        yield $this->veryExpensiveMethod();
+    })->filter();
+    ```
+
+- Keys for yielded values are being kept as is on a best effort basis, so one must take care when using `iterator_to_array()` on a pipeline: values with duplicate keys will be discarded with only the last value for a given key being returned.
+
+    ```php
+	$pipeline = \Pipeline\map(function () {
+	    yield 'foo' => 'bar';
+	    yield 'foo' => 'baz';
+	});
+
+	var_dump(iterator_to_array($pipeline));
+	/* ['foo' => 'baz'] */
+    ```
+
+  Safer would be to use provided `toList()` method. It will return all values regardless of keys used, making sure to discard all keys in the process.
+
+    ```php
+    var_dump($pipeline->toList());
+    /* ['bar', 'baz'] */
+    ```
+  If necessary to preserve the keys, there's a sister method `toAssoc()`.
+
+- The resulting pipeline is an iterator and should be assumed not rewindable, just like generators it uses.
+
+  ```php
+  $pipeline = \Pipeline\map(function () {
+      yield 1;
+  });
+
+  $sum = $pipeline->reduce();
+
+  // Won't work the second time though
+  $pipeline->reduce();
+  // Exception: Cannot traverse an already closed generator
+  ```
+
+  Although there are some cases where a pipeline can be rewound and reused just like a regular array, if you need to pause iteration and continue later, or if you need to iterate strictly once without accidental resets or exceptions, use [`$pipeline->cursor()`](#pipeline-cursor).
+
+- Pipeline implements `IteratorAggregate` which is not the same as `Iterator`. Where the latter needed, the pipeline can be wrapped with an `IteratorIterator`:
+
+    ```php
+    $iterator = new \IteratorIterator($pipeline);
+    /** @var $iterator \Iterator */
+    ```
+
+- Iterating over a pipeline all over again results in undefined behavior. Best to avoid doing this. If you need to break out of iteration and continue later, see [`cursor()`](#pipeline-cursor).
+
+
 # Contributions
 
-Contributions to documentation and test cases are welcome. Bug reports are welcome too. 
+Contributions to documentation and test cases are welcome. Bug reports are welcome too.
 
 API is expected to stay as simple as it is, though.
 
 # About collection pipelines in general
 
-About [collection pipelines programming pattern](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler. 
+About [collection pipelines programming pattern](https://martinfowler.com/articles/collection-pipeline/) by Martin Fowler.
 
 In a more general sense this library implements a subset of [CSP](https://en.wikipedia.org/wiki/Communicating_sequential_processes) paradigm, as opposed to [Actor model](https://en.wikipedia.org/wiki/Actor_model).
 
@@ -653,7 +654,7 @@ What else is out there:
 - [Knapsack](https://github.com/DusanKasan/Knapsack) is a close call. Can take a Traversable as an input, has lazy evaluation. But can't have multiple values produced from a single input. Has lots of utility functions for those who need them: they're out of scope for this project.
 - [transducers.php](https://github.com/mtdowling/transducers.php) is worth a close look if you're already familiar transducers from Clojure. API is not very PHP-esque. Read as not super friendly. [Detailed write-up from the author.](http://mtdowling.com/blog/2014/12/04/transducers-php/)
 - [Primitives for functional programming in PHP](https://github.com/lstrojny/functional-php) by Lars Strojny et al. is supposed to complement currently existing PHP functions, which it does, although it is subject to some of the same shortcomings as are `array_map` and `array_filter`. No method chaining.
-- [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation. 
+- [Chain](https://github.com/cocur/chain) provides a consistent and chainable way to work with arrays in PHP, although for arrays only. No lazy evaluation.
 - [Simple pipes with PHP generators](https://www.hughgrigg.com/posts/simple-pipes-php-generators/) by Hugh Grigg. Rationale and explanation for an exceptionally close concept. Probably one can use this library as a drop-in replacement, short of different method names.
 - [loophp's Collection](https://github.com/loophp/collection) looks like a viable alternative to this library, as far as processing of multi-gigabyte log files goes. [Supports fluent interface.](https://loophp-collection.readthedocs.io/en/stable/pages/usage.html) It takes the immutability as a first principle, even though PHP's generators are inherently mutable.
 - If you're familiar with Java, [package java.util.stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html) offers an implementation of the same concept.
