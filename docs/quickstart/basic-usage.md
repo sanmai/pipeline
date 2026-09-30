@@ -242,7 +242,7 @@ $errorCount = take(new SplFileObject('app.log'))
 
 // Process a CSV file
 $data = take(new SplFileObject('data.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```

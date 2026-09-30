@@ -11,7 +11,7 @@ The library is designed for streaming data. Prefer iterators and generators over
 ```php
 // Good: Streaming from a file
 $result = take(new SplFileObject('data.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->toList();
 
 // Good: Forcing a stream from a large array

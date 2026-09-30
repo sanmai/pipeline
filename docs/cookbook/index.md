@@ -29,7 +29,7 @@ Use `filter()` only to remove every falsy value, as `array_filter()` does.
 ```php
 // Process a large dataset in batches of 1000
 take(new SplFileObject('large-dataset.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->chunk(1000)
     ->each(function ($batch) {
         Database::bulkInsert($batch);
@@ -109,7 +109,7 @@ $overallStats = new RunningVariance($stats1, $stats2);
 
 ```php
 $data = take(new SplFileObject('data.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```

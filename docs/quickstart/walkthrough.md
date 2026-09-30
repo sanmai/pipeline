@@ -24,15 +24,15 @@ CSV;
 
 // Build the pipeline
 $users = take(explode("\n", $csv))
-    ->map(str_getcsv(...))                     // 1. Parse each line into an array
-    ->slice(1)                                 // 2. Skip the header row
-    ->map(fn($row) => [                        // 3. Transform into an associative array
+    ->map(str_getcsv(?, escape: ''))             // 2. Parse each line into an array
+    ->slice(1)                                 // 3. Skip the header row
+    ->map(fn($row) => [                        // 4. Transform into an associative array
         'name' => $row[0],
         'age' => (int) $row[1],
         'city' => $row[2],
     ])
-    ->filter(fn($user) => $user['age'] >= 30)  // 4. Keep users aged 30 or over
-    ->toList();                                // 5. Execute and collect the results
+    ->filter(fn($user) => $user['age'] >= 30)  // 5. Keep users aged 30 or over
+    ->toList();                                // 6. Execute and collect the results
 
 // The final result:
 // [
@@ -45,7 +45,7 @@ $users = take(explode("\n", $csv))
 
 1. **`take(explode("\n", $csv))`**: This call creates a pipeline from the CSV data. `explode()` splits the string into an array of lines. To read a file line by line, use `take(new SplFileObject('users.csv'))` instead.
 
-2. **`map(str_getcsv(...))`**: `map()` applies `str_getcsv()` to each line and converts each CSV string into an array of values. This step uses the first-class callable syntax. Any callable can be a pipeline stage.
+2. **`map(str_getcsv(?, escape: ''))`**: `map()` applies `str_getcsv()` to each line and converts each CSV string into an array of values. This step uses PHP 8.6 partial function application. Any callable can be a pipeline stage. On earlier PHP versions, use a closure: `fn(string $line) => str_getcsv($line, escape: '')`.
 
 3. **`slice(1)`**: This call skips the first element, which is the header row.
 
