@@ -739,6 +739,22 @@ class Standard implements IteratorAggregate, Countable
     }
 
     /**
+     * Passes all values as a list to the callback and returns its result. Without a callback, returns the list. This is a terminal operation.
+     *
+     * @template TResult
+     * @param null|callable(list<TValue>): TResult $func
+     * @return ($func is null ? list<TValue> : TResult)
+     */
+    public function collect(?callable $func = null): mixed
+    {
+        if (null === $func) {
+            return $this->toList();
+        }
+
+        return $func($this->toList());
+    }
+
+    /**
      * By default, returns all values regardless of keys used, discarding all keys in the process. This is a terminal operation.
      * @return list<TValue>
      */

@@ -153,6 +153,7 @@ All entry points always return an instance of the pipeline.
 | `each()`     | Eagerly iterates over the sequence. | `foreach`, `array_walk` |
 | `stream()` | Ensures subsequent operations use lazy, non-array paths | |
 | `runningCount()` | Counts seen values using a reference argument. | |
+| `collect()` | Passes a list of all values to a callback returning the result.  Eagerly executed. | Java's `collect()` |
 | `toList()` | Returns an array with all values. Eagerly executed. |  |
 | `toAssoc()` | Returns a final array with values and keys. Eagerly executed. | `dict`, `ToDictionary` |
 | `cursor()` | Returns a forward-only iterator that maintains position across iterations. | |
@@ -404,6 +405,24 @@ $total = $pipeline->reduce(function ($curry, $item) {
 ```
 
 The pipeline has a default callback that sums all values.
+
+## `$pipeline->collect()`
+
+Passes a list of all values to a callback and returns the result of the callback. Keys are ignored as with `toList()`.
+
+```php
+$csv = take(ItemCondition::cases())
+    ->cast(fn(ItemCondition $condition) => $condition->value)
+    ->collect(implode(',', ...));
+```
+
+Without PHP 8.6 partial functions, use a closure:
+
+```php
+->collect(fn(array $values) => implode(',', $values));
+```
+
+Without a callback, `collect()` returns the list, the same as `toList()`.
 
 ## `$pipeline->toList()`
 
