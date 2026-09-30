@@ -20,7 +20,9 @@ declare(strict_types=1);
 
 namespace Tests\Pipeline;
 
+use ArrayIterator;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function Pipeline\fromValues;
@@ -74,6 +76,30 @@ final class SkipWhileTest extends TestCase
             ->toList();
 
         $this->assertSame([3, 5, 1], $result);
+    }
+
+    public static function provideInputs(): iterable
+    {
+        yield 'array' => [[1, 1, 2, 1, 3]];
+
+        yield 'iterator' => [new ArrayIterator([1, 1, 2, 1, 3])];
+    }
+
+    #[DataProvider('provideInputs')]
+    public function testPredicateNotCalledAfterSkipping(iterable $input): void
+    {
+        $calls = [];
+
+        $result = take($input)
+            ->skipWhile(function ($number) use (&$calls) {
+                $calls[] = $number;
+
+                return 1 === $number;
+            })
+            ->toList();
+
+        $this->assertSame([2, 1, 3], $result);
+        $this->assertSame([1, 1, 2], $calls, 'The predicate must not be called after the first non-matching element');
     }
 
     public function testDefaultCallback(): void
