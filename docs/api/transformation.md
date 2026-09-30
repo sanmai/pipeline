@@ -1,10 +1,10 @@
 # Transformation Methods
 
-Transformation methods modify the elements within a pipeline. They are all non-terminal: each returns the same pipeline instance for further chaining.
+Transformation methods change the elements of a pipeline. All of them are non-terminal: each method returns the same pipeline instance for further chaining.
 
 ## `map()`
 
-Transforms each element using a callback. This is the most flexible transformation method: the callback can return a single value, or use `yield` to produce any number of values—including none, which makes `map()` a filter as well.
+Applies a callback to each element. The callback can return a single value, or use `yield` to produce any number of values. A callback that yields no values removes the element, so `map()` can also filter.
 
 **Signature**: `map(?callable $func = null): self`
 
@@ -14,10 +14,10 @@ Transforms each element using a callback. This is the most flexible transformati
 
 **Behavior**:
 
-- If the callback returns a `Generator` (any callback using `yield`), `map()` expands it, feeding each of its values into the pipeline with the keys the generator provides.
+- If the callback returns a `Generator` (any callback using `yield`), `map()` expands it and passes each yielded value to the pipeline with the key from the generator.
 - If the callback returns a plain value, the original key is kept.
 - On a fresh, unprimed pipeline, `map()` accepts a callback with no arguments and uses it to seed the pipeline; see the [`map()` helper function](creation.md#map).
-- `map()` is always lazy: even on an array-backed pipeline no callback runs until the pipeline is consumed.
+- On a primed pipeline, `map()` is evaluated lazily. Even with an array-backed pipeline, the callback executes only upon consumption.
 
 **Examples**:
 
@@ -47,7 +47,7 @@ $result = take([1, 2, 3, 4])
 
 ## `cast()`
 
-Transforms each element using a callback, with a key difference from `map()`: it never expands generators. Whatever the callback returns—even a `Generator` object—becomes the element. This makes it the right tool for strict one-to-one transformations.
+Applies a callback to each element. Unlike `map()`, `cast()` never expands generators: the return value of the callback becomes the element, even if it is a `Generator` object. Use `cast()` for strict one-to-one transformations.
 
 **Signature**: `cast(?callable $func = null): self`
 
@@ -56,7 +56,7 @@ Transforms each element using a callback, with a key difference from `map()`: it
 **Behavior**:
 
 - Original keys are always preserved.
-- On an array-backed pipeline, `cast()` uses `array_map()` eagerly, creating a new array in memory. Call [`stream()`](utility.md#stream) first to process large arrays lazily.
+- On an array-backed pipeline, `cast()` uses `array_map()` eagerly and creates a new array in memory. Call [`stream()`](utility.md#stream) first to process large arrays lazily.
 
 **Examples**:
 
@@ -97,7 +97,7 @@ $result = take([[1, 2], [3, 4]])
 
 ## `unpack()`
 
-Unpacks each array element into separate arguments for a callback—the pipeline counterpart of the spread operator.
+Unpacks each array element into separate arguments for a callback. This method is the pipeline counterpart of the spread operator.
 
 **Signature**: `unpack(?callable $func = null): self`
 
@@ -117,7 +117,7 @@ $result = take([1, 2, 3])
     ->toList(); // [10, 40, 90]
 ```
 
-Like `map()`, the callback may use `yield` to produce several values, and ordinary PHP type declarations on the arguments give you free validation.
+Like `map()`, the callback can use `yield` to produce several values. PHP type declarations on the callback parameters validate the unpacked arguments.
 
 ## `chunk()`
 
@@ -126,7 +126,7 @@ Splits the pipeline into arrays of a specified length. The last chunk may contai
 **Signature**: `chunk(int $length, bool $preserve_keys = false): self`
 
 - `$length`: The size of each chunk.
-- `$preserve_keys`: When `true`, keys are preserved inside chunks; by default chunks are reindexed numerically.
+- `$preserve_keys`: When `true`, each chunk keeps the original keys. By default, each chunk is reindexed numerically.
 
 **Examples**:
 
@@ -142,11 +142,11 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3])
 
 ## `chunkBy()`
 
-Splits the pipeline into chunks of varying sizes, taken from an iterable of sizes. Chunking stops when either the sizes or the data run out.
+Splits the pipeline into chunks of varying sizes, taken from an iterable of sizes. Chunking stops when the sizes or the data are exhausted.
 
 **Signature**: `chunkBy(iterable|callable $func, bool $preserve_keys = false): self`
 
-- `$func`: An iterable of chunk sizes, or a callable returning such an iterable (a generator function works well). A size of `0` produces an empty array.
+- `$func`: An iterable of chunk sizes, or a callable returning such an iterable (for example, a generator function). A size of `0` produces an empty array.
 - `$preserve_keys`: Same as in `chunk()`.
 
 **Examples**:
@@ -170,7 +170,7 @@ $result = take(range(1, 10))
 
 ## `slice()`
 
-Extracts a portion of the pipeline, much like `array_slice()` with `$preserve_keys` set to `true`.
+Extracts a portion of the pipeline, similar to `array_slice()` with `$preserve_keys` set to `true`.
 
 **Signature**: `slice(int $offset, ?int $length = null): self`
 
@@ -179,7 +179,7 @@ Extracts a portion of the pipeline, much like `array_slice()` with `$preserve_ke
 
 **Behavior**:
 
-- Keys are intentionally preserved; follow with [`values()`](utility.md#values) if you need reindexing mid-pipeline.
+- Keys are preserved intentionally. To reindex, call [`values()`](utility.md#values) after `slice()`.
 - On array-backed pipelines, `slice()` delegates to `array_slice()`.
 - On streaming pipelines, negative `$offset` or `$length` values require a rolling buffer of that many elements; see [Performance](../advanced/performance.md).
 

@@ -1,19 +1,19 @@
 # Performance Optimization
 
-This guide provides techniques for optimizing your pipelines for speed and memory efficiency.
+This guide describes how to make pipelines faster and how to reduce their memory usage.
 
 ## The Power of Streaming
 
-The library's core strength is its ability to process large datasets with minimal memory usage through streaming. Data is pulled through the pipeline one element at a time, and processing stops as soon as the consumer has what it needs.
+A pipeline processes large datasets with low memory usage because it streams them. The consumer pulls elements through the pipeline one at a time. Processing stops when the consumer receives all the elements it requires.
 
 **Example: Finding Errors in a Large Log File**
 
-Consider the task of finding the first five "ERROR" lines in a 10 GB log file.
+This example finds the first five "ERROR" lines in a 10 GB log file.
 
 **The Inefficient Way (Loading into Memory)**
 
 ```php
-// Warning: This will likely exhaust your server's memory.
+// Warning: This can exhaust the memory of your server.
 $lines = file('huge-10GB.log'); // Loads the entire 10 GB file into memory
 $errors = take($lines)
     ->filter(fn($line) => str_contains($line, 'ERROR'))
@@ -24,20 +24,29 @@ $errors = take($lines)
 **The Efficient Way (Streaming)**
 
 ```php
-// This is memory-safe and fast.
+// Memory usage stays constant.
 $errors = take(new SplFileObject('huge-10GB.log'))
     ->filter(fn($line) => str_contains($line, 'ERROR'))
     ->slice(0, 5)
     ->toList();
 ```
 
-The streaming approach reads the file line by line and—just as importantly—stops reading as soon as the fifth error is found. If the errors appear early, almost none of the file is read at all.
+The streaming version reads the file line by line. It stops reading when it finds the fifth error. If the errors occur near the start of the file, the pipeline reads only a small part of the file.
 
 ## Array Fast Paths vs `stream()`
 
-When a pipeline holds a plain array, many methods take an eager fast path using native array functions: `filter()` and `select()` use `array_filter()`, `cast()` uses `array_map()`, `slice()` uses `array_slice()`, `chunk()` uses `array_chunk()`, and similarly for `keys()`, `values()`, `flip()`, `tuples()`, `fold()`, `count()`, `min()`, and `max()`. Notably, `map()` is always lazy, regardless of the source.
+When a pipeline contains a plain array, many methods use an eager fast path with native array functions:
 
-These fast paths are quicker for small-to-medium arrays, but each one creates a new intermediate array in memory:
+- `filter()` and `select()` use `array_filter()`.
+- `cast()` uses `array_map()`.
+- `slice()` uses `array_slice()`.
+- `chunk()` uses `array_chunk()`.
+- `zip()` builds its tuples eagerly.
+- `keys()`, `values()`, `flip()`, `tuples()`, `fold()`, `count()`, `min()`, and `max()` also use array paths.
+
+`map()` is always lazy, regardless of the source.
+
+These fast paths are faster for small and medium arrays. But each fast path creates a new intermediate array in memory:
 
 ```php
 // Without stream(): intermediate arrays at each eager step
@@ -47,7 +56,7 @@ $result = take($largeArray)
     ->toList();
 ```
 
-The `stream()` method converts the pipeline to a generator, after which every element flows through the entire chain one at a time:
+The `stream()` method converts the pipeline to a generator. After this call, each element passes through the full chain one at a time:
 
 ```php
 // With stream(): flat memory usage
@@ -62,32 +71,32 @@ $result = take($largeArray)
 
 Use `stream()` when:
 
-- Working with large arrays that would create memory pressure
-- Transformations are expensive and you might not consume all elements
-- You want predictable memory usage regardless of input size
+- Large arrays would cause memory pressure.
+- Transformations are expensive and the consumer can stop before the last element.
+- Memory usage must stay constant for all input sizes.
 
 ### Trade-offs
 
-- **Memory**: `stream()` keeps peak memory flat; fast paths allocate whole arrays.
-- **Speed**: Native array functions are typically faster for small-to-medium datasets.
-- **Rule of thumb**: Data that is already an array in memory is usually fine to process as an array; data that *could* arrive as a stream is best kept as a stream from the start.
+- **Memory**: `stream()` keeps peak memory flat. Fast paths allocate full arrays.
+- **Speed**: Native array functions are faster for small and medium datasets.
+- **Rule of thumb**: If the data is already an array in memory, process it as an array. If the data can arrive as a stream, keep it as a stream from the start.
 
 ## Operations That Buffer
 
-Even on a streaming pipeline, a few operations must hold elements back to produce correct results. They remain memory-bounded, but the buffer size is worth knowing about:
+Some operations must buffer elements to produce correct results, also on a streaming pipeline. The memory usage of each buffer has a limit:
 
 - **`slice()` with a negative offset** buffers up to `|offset|` trailing elements.
 - **`slice()` with a negative length** buffers `|length|` elements in a rolling window.
-- **`chunk($n)`** holds up to `$n` elements—one chunk—at a time.
-- **`reservoir($n)`** holds the sample of `$n` elements.
-- **`last()`, `count()`, `finalVariance()`** consume the whole stream but store almost nothing.
+- **`chunk($n)`** stores up to `$n` elements (a single chunk) at a time.
+- **`reservoir($n)`** stores the sample of `$n` elements.
+- **`last()`, `count()`, `finalVariance()`** consume the full stream but store almost no data.
 
 ## Memory Management
 
-- **Process in chunks**: Use `chunk()` to hand large datasets to databases and APIs in manageable batches.
-- **Count for free**: Prefer `runningCount()` over a separate `count()` pass; the latter is a terminal operation that consumes the pipeline.
-- **Release resources**: When a generator holds a file handle or a database cursor, release it in a `finally` block inside the generator.
+- **Process in chunks**: Use `chunk()` to send large datasets to databases and APIs in batches.
+- **Count while streaming**: Use `runningCount()` instead of a separate `count()` pass. `count()` is a terminal operation and consumes the pipeline.
+- **Release resources**: If a generator opens a file handle or a database cursor, release it in a `finally` block of the generator.
 
 ## Profiling
 
-Before optimizing, always profile your code to identify the actual bottlenecks. Tools like Xdebug or Blackfire will give a clear picture of where pipeline time is really spent—more often than not, in the callbacks rather than the plumbing.
+Profile your code before you optimize it. Tools such as Xdebug or Blackfire show where the pipeline spends its time. Usually the callbacks use more time than the pipeline itself.

@@ -6,11 +6,11 @@ For the detailed version history, see the [GitHub releases page](https://github.
 
 ## Upgrading from Older Versions
 
-Code written against older versions of the library may use APIs that have since been renamed or removed. The replacements are mechanical:
+Code written for older versions of the library can use APIs that are now renamed, deprecated, or removed. The replacements are mechanical:
 
 ### Array Conversion
 
-The old `toArray()` method was split into two explicit methods:
+The deprecated `toArray()` method is replaced by two explicit methods:
 
 ```php
 // Before: keys discarded
@@ -30,18 +30,18 @@ $result = take($data)->toAssoc();
 
 ### Filtering Semantics
 
-`filter()` always removed every falsy value, like `array_filter()`. The newer `select()` removes only `null` and `false` by default, which is the safer choice when `0` or empty strings are valid data:
+`filter()` removes every falsy value, like `array_filter()`. The newer `select()` removes only `null` and `false` by default. Use `select()` when `0` or empty strings are valid data:
 
 ```php
 $result = take([0, '', false, null])->filter()->toList(); // []
 $result = take([0, '', false, null])->select()->toList(); // [0, '']
 ```
 
-Existing `filter()` calls keep working unchanged.
+Existing `filter()` calls operate as before.
 
 ## Newer Methods Worth Adopting
 
-If your codebase predates them, these methods can simplify common patterns:
+These methods replace common hand-written patterns in older code:
 
 ```php
 // tap(): side effects without modifying values
@@ -67,7 +67,7 @@ foreach ($cursor as $item) { // Continues where the first loop stopped
     process($item);
 }
 
-// peek(): look at the first N elements, then decide
+// peek(): remove the first N elements from the pipeline and return them
 $head = $pipeline->peek(5)->toList();
 ```
 

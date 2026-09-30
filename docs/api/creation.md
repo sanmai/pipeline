@@ -65,9 +65,9 @@ Creates a pipeline from a generator function or any other callback. The callback
 
 **Behavior**:
 
-- If the callback returns a generator (that is, it uses `yield`), the pipeline is populated lazily with the yielded values.
+- If the callback returns a generator (that is, it uses `yield`), the pipeline contains the yielded values and evaluates them lazily.
 - If the callback returns any other value, the pipeline will contain that single value.
-- With no callback, an empty pipeline is created.
+- With no callback, the function returns an empty pipeline.
 
 **Examples**:
 
@@ -87,7 +87,7 @@ $pipeline = map(fn() => 'Hello'); // Contains ['Hello']
 
 ### `fromArray()`
 
-Creates a pipeline from an array. Compared to `take()`, the narrower parameter type gives static analyzers more to work with when you specifically expect an array.
+Creates a pipeline from an array. Compared to `take()`, the narrower parameter type gives static analyzers more precise type information when the input is an array.
 
 **Signature**: `fromArray(array $input): Standard`
 
@@ -121,8 +121,8 @@ Combines multiple iterables into a single pipeline of tuples. See also the [`zip
 
 **Behavior**:
 
-- Creates a pipeline where each element is an array containing the corresponding elements from the input iterables.
-- If the iterables have different lengths, missing elements are filled with `null`.
+- Each item of the resulting pipeline is an array of the corresponding values from the input iterables.
+- If the iterables have different lengths, `null` replaces each missing value.
 
 **Examples**:
 
@@ -138,7 +138,7 @@ $result = zip($names, $ages)->toList();
 
 ## Adding Data to a Pipeline
 
-These instance methods extend an existing pipeline with more data. On an empty pipeline they simply set the initial contents.
+These instance methods extend an existing pipeline with more data. On an empty pipeline, these methods set the initial contents.
 
 ### `append()`
 
@@ -190,7 +190,7 @@ $pipeline = take([3, 4])->unshift(1, 2); // [1, 2, 3, 4]
 
 ## Working with Callables
 
-Methods like `map()`, `filter()`, and `cast()` accept any callable. PHP's first-class callable syntax is the recommended way to pass them: it is concise and gives the best IDE and static analysis support.
+Methods like `map()`, `filter()`, and `cast()` accept any callable. Use PHP's first-class callable syntax to pass them. This syntax is concise and gives IDEs and static analyzers the most type information.
 
 ```php
 // Built-in functions
@@ -208,7 +208,7 @@ $pipeline = take($users)
     ->map(User::normalize(...));
 ```
 
-The older callable styles work as well:
+Older callable styles also work:
 
 ```php
 // String callables

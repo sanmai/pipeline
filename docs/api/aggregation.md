@@ -4,11 +4,11 @@ Aggregation methods reduce a pipeline to a single value. They are terminal opera
 
 ## `fold()`
 
-Reduces the pipeline to a single value, starting from a required initial value. **This is the recommended method for aggregations**: the explicit initial value makes the result type predictable, for both readers and static analyzers.
+Reduces the pipeline to a single value, starting from a required initial value. Use this method for aggregations. The explicit initial value makes the result type predictable for readers and for static analyzers.
 
 **Signature**: `fold($initial, ?callable $func = null): mixed`
 
-- `$initial`: The required initial value for the accumulator. Also the result for an empty pipeline.
+- `$initial`: The required initial value for the accumulator. `fold()` returns this value for an empty pipeline.
 - `$func`: The reduction function. If `null`, it defaults to summation.
 
 **Callback Signature**: `function(mixed $carry, mixed $item): mixed`
@@ -32,12 +32,12 @@ $grouped = take($items)->fold([], function ($groups, $item) {
 
 ## `reduce()`
 
-An alias for `fold()` with the arguments reversed and the initial value optional, mirroring `array_reduce()`.
+This method is an alias for `fold()`. It reverses the argument order and makes the initial value optional, as `array_reduce()` does.
 
 **Signature**: `reduce(?callable $func = null, $initial = null): mixed`
 
 - `$func`: The reduction function. If `null`, it defaults to summation.
-- `$initial`: The initial value for the accumulator; `null` is treated as `0`, which suits the default summation.
+- `$initial`: The initial value for the accumulator. `reduce()` replaces `null` with `0`, which suits the default summation.
 
 **Examples**:
 
@@ -55,10 +55,10 @@ $product = take([2, 3, 4])->reduce(fn($carry, $item) => $carry * $item, 1); // 2
 $string = take(['Hello', ' ', 'World'])->reduce(fn($carry, $item) => $carry . $item, ''); // "Hello World"
 ```
 
-### Why Choose `fold()` Over `reduce()`?
+### Prefer `fold()` Over `reduce()`
 
 ```php
-// With reduce(): what is the initial value? What type comes out?
+// With reduce(): the initial value and the result type are implicit
 $result = take($items)->reduce($buildArray);
 
 // With fold(): the initial value, and therefore the type, is explicit
@@ -67,13 +67,13 @@ $result = take($items)->fold([], $buildArray);
 
 ## `count()`
 
-Counts the elements in the pipeline. A pipeline can also be passed to PHP's `count()` function, as it implements `Countable`.
+Counts the elements in the pipeline. The pipeline implements `Countable`, so PHP's `count()` function also accepts it.
 
 **Signature**: `count(): int`
 
 **Behavior**:
 
-- This is a terminal operation: it consumes a streaming pipeline. To count elements without consuming them, use [`runningCount()`](utility.md#runningcount).
+- This is a terminal operation. It consumes a streaming pipeline. To count elements without consuming them, use [`runningCount()`](utility.md#runningcount).
 - Returns `0` for an empty or unprimed pipeline.
 
 **Examples**:
@@ -132,7 +132,7 @@ Returns the first element of the pipeline.
 **Behavior**:
 
 - Returns `null` for an empty pipeline.
-- Stops processing immediately after the first element: with a streaming source, only one element is ever computed.
+- Stops processing after the first element. With a streaming source, the pipeline computes only the elements up to and including the first result.
 
 **Examples**:
 

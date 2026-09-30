@@ -1,14 +1,14 @@
 # Complex Pipeline Patterns
 
-This section explores advanced techniques for building sophisticated, maintainable, and scalable data processing pipelines.
+This page describes patterns for building large pipelines from small parts.
 
 ## Pipeline Composition
 
-One of the most powerful features of the library is the ability to compose complex pipelines from smaller, reusable components. This is achieved by encapsulating business logic into separate classes or functions, which can then be chained together.
+You can compose a complex pipeline from small, reusable components. Put the business logic into separate classes or functions, then chain them.
 
 ### Reusable Components
 
-By creating dedicated classes for pipeline operations, you can build a library of reusable, testable components.
+Put pipeline operations into dedicated classes. You can then reuse and test each class as a component.
 
 **Example: A `UserProcessor` Class**
 
@@ -33,7 +33,7 @@ class UserProcessor
 }
 ```
 
-These components can then be used to build a clean and readable pipeline:
+Build the pipeline with these components:
 
 ```php
 use App\Pipeline\Components\UserProcessor;
@@ -45,15 +45,15 @@ $processedUsers = take($rawUsers)
     ->toList();
 ```
 
-This approach offers several advantages:
+This approach has these advantages:
 
--   **Readability**: The pipeline clearly expresses the business logic.
--   **Testability**: Each component can be unit-tested in isolation.
--   **Reusability**: Components can be shared across multiple pipelines.
+-   **Readability**: The pipeline states the business logic directly.
+-   **Testability**: You can unit-test each component in isolation.
+-   **Reusability**: Multiple pipelines can share the same components.
 
 ## Stateful Transformations
 
-For operations that require state to be maintained between elements, you can use a class to encapsulate the state.
+If an operation must keep state between elements, encapsulate the state in a class.
 
 **Example: A `ChangeDetector`**
 
@@ -86,7 +86,7 @@ $changes = take($prices)
 
 ## Error Handling
 
-For pipelines that may encounter errors, you can create a wrapper to handle exceptions gracefully.
+If a transformation can throw exceptions, wrap it. The wrapper catches each exception and records the error.
 
 **Example: A `SafeProcessor`**
 
@@ -126,7 +126,7 @@ $errors = $processor->getErrors();
 
 ### Practical Example: Processing API Responses
 
-Here's a real-world example of handling errors when processing API responses:
+This example records errors while it processes API responses:
 
 ```php
 use function Pipeline\take;
@@ -175,7 +175,7 @@ $validUsers = take($apiResponses)
 
 ## Hierarchical Data
 
-For nested data structures, you can use recursion to process the entire tree.
+To process a nested data structure, apply the pipeline recursively to each level of the tree.
 
 **Example: A `TreeProcessor`**
 

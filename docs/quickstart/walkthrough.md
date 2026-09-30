@@ -1,10 +1,10 @@
 # Walkthrough: Processing CSV Data
 
-This walkthrough demonstrates the core concepts of the library by building a practical data processing pipeline.
+This walkthrough builds a CSV processing pipeline and shows the main concepts of the library.
 
 ## The Goal
 
-Our objective is to process a string of CSV data. We will parse the data, skip the header, transform it into a more usable format, filter it based on a condition, and finally, collect the results.
+The pipeline processes a string of CSV data. It parses each line, skips the header, converts each row into an associative array, filters the rows by age, and collects the result.
 
 ## The Pipeline
 
@@ -24,15 +24,15 @@ CSV;
 
 // Build the pipeline
 $users = take(explode("\n", $csv))
-    ->map(str_getcsv(...))                     // 1. Parse each line into an array
-    ->slice(1)                                 // 2. Skip the header row
-    ->map(fn($row) => [                        // 3. Transform into an associative array
+    ->map(str_getcsv(?, escape: ''))             // 2. Parse each line into an array
+    ->slice(1)                                 // 3. Skip the header row
+    ->map(fn($row) => [                        // 4. Transform into an associative array
         'name' => $row[0],
         'age' => (int) $row[1],
         'city' => $row[2],
     ])
-    ->filter(fn($user) => $user['age'] >= 30)  // 4. Keep users aged 30 or over
-    ->toList();                                // 5. Execute and collect the results
+    ->filter(fn($user) => $user['age'] >= 30)  // 5. Keep users aged 30 or over
+    ->toList();                                // 6. Execute and collect the results
 
 // The final result:
 // [
@@ -43,28 +43,28 @@ $users = take(explode("\n", $csv))
 
 ## Step-by-Step Explanation
 
-1. **`take(explode("\n", $csv))`**: We begin by creating a pipeline from the CSV data. `explode()` splits the string into an array of lines. In a real application this would more likely be `take(new SplFileObject('users.csv'))`, streaming the file line by line.
+1. **`take(explode("\n", $csv))`**: This call creates a pipeline from the CSV data. `explode()` splits the string into an array of lines. To read a file line by line, use `take(new SplFileObject('users.csv'))` instead.
 
-2. **`map(str_getcsv(...))`**: The `map()` method applies `str_getcsv()` to each line, converting each CSV string into an array of values. Note the first-class callable syntax: any callable works as a pipeline stage.
+2. **`map(str_getcsv(?, escape: ''))`**: `map()` applies `str_getcsv()` to each line and converts each CSV string into an array of values. This step uses PHP 8.6 partial function application. Any callable can be a pipeline stage. On earlier PHP versions, use a closure: `fn(string $line) => str_getcsv($line, escape: '')`.
 
-3. **`slice(1)`**: This skips the first element of the pipeline—the header row.
+3. **`slice(1)`**: This call skips the first element, which is the header row.
 
-4. **`map(fn($row) => ...)`**: We use `map()` again to transform each indexed row into a more readable associative array, casting the age to an integer along the way.
+4. **`map(fn($row) => ...)`**: The second `map()` converts each indexed row into an associative array and casts the age to an integer.
 
-5. **`filter(fn($user) => ...)`**: The `filter()` method applies our business logic, keeping only the users who are 30 years of age or older.
+5. **`filter(fn($user) => ...)`**: `filter()` keeps only the users aged 30 or older.
 
-6. **`toList()`**: This is a terminal operation. It triggers the execution of all the previous (lazy) operations and collects the final results into an array.
+6. **`toList()`**: This terminal operation starts the execution of all previous lazy operations and collects the values into an array.
 
 ## Key Concepts
 
-This example illustrates several core principles of the library:
+This example shows these principles of the library:
 
-- **Lazy Evaluation**: Steps 2 through 5 only describe the processing; nothing runs until `toList()` is called in step 6. Each line then flows through the whole chain, one at a time.
-- **Method Chaining**: Each operation returns the same pipeline object, allowing for a fluent and expressive syntax.
+- **Lazy Evaluation**: Steps 2 through 5 define the processing. Execution is deferred until `toList()` in step 6. Then each line passes through all stages, one line at a time.
+- **Method Chaining**: Each operation returns the same pipeline object, so you can chain the calls.
 - **Transformation**: `map()` changes the structure and format of the data.
-- **Filtering**: `filter()` and `slice()` selectively remove data.
+- **Filtering**: `filter()` and `slice()` remove items.
 
 ## Next Steps
 
-- Explore the [Cookbook](../cookbook/index.md) for ready-to-use recipes.
-- Consult the [API Reference](../api/creation.md) for detailed information on each method.
+- See the [Cookbook](../cookbook/index.md) for recipes.
+- See the [API Reference](../api/creation.md) for details on each method.

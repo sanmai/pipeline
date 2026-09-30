@@ -1,23 +1,22 @@
 # Filtering Methods
 
-Filtering methods remove elements from a pipeline based on a condition. Keys are always preserved; follow with [`values()`](utility.md#values) if you need reindexing mid-pipeline.
+Filtering methods remove elements from a pipeline that fail a condition. These methods preserve keys. To reindex the keys mid-pipeline, call [`values()`](utility.md#values) next.
 
 ## `select()`
 
-Selects elements for which the callback returns `true`. Without a callback, it removes only `null` and `false` values—a safe default that keeps legitimate falsy data such as `0` and empty strings.
+This method keeps elements for which the callback returns `true`. Without a callback, it removes only `null` and `false` values. This default keeps valid falsy data such as `0` and empty strings.
 
 **Signature**: `select(?callable $func = null, bool $strict = true, ?callable $onReject = null): self`
 
 - `$func`: A callback returning `true` to keep an element.
 - `$strict`: When `true` (the default), only `null` and `false` test results discard an element.
-- `$onReject`: An optional callback invoked with `($value, $key)` for each rejected element—useful for logging or collecting rejects.
+- `$onReject`: An optional callback invoked with `($value, $key)` for each rejected element. Use it to log or collect rejected elements.
 
 **Behavior**:
 
-- With no callback, `select()` removes only `null` and `false` values.
-- With a callback and the default `strict: true`, an element is kept unless the callback returns `null` or `false`; any other return value, even a falsy one, keeps the element.
-- With `strict: false`, the callback's return value is evaluated for truthiness, exactly like `array_filter()` would.
-- On array-backed pipelines, `select()` delegates to `array_filter()` eagerly.
+- With a callback and the default `strict: true`, `select()` keeps an element unless the callback returns `null` or `false`. Any other return value, including a falsy one, keeps the element.
+- With `strict: false`, `select()` evaluates the callback's return value for truthiness, the same as `array_filter()`.
+- On array-backed pipelines without `$onReject`, `select()` calls `array_filter()` eagerly. With `$onReject`, `select()` always uses a lazy generator.
 
 **Examples**:
 
@@ -43,12 +42,12 @@ $result = take($records)
 
 ## `filter()`
 
-An alias for `select()` with `strict: false` as the default: without a callback it removes all falsy values, exactly like `array_filter()`. With a callback, the return value is evaluated for truthiness.
+This method is an alias for `select()` with `strict: false` as the default. Without a callback, it removes all falsy values, the same as `array_filter()`. With a callback, it evaluates the return value for truthiness.
 
 **Signature**: `filter(?callable $func = null, bool $strict = false): self`
 
 - `$func`: A callback returning a truthy value to keep an element.
-- `$strict`: When `true`, behaves like `select()`.
+- `$strict`: When `true`, the method behaves like `select()`.
 
 **Examples**:
 
@@ -71,18 +70,18 @@ $result = take([1, '2', 3.0, 'four'])
 
 ### Choosing Between `select()` and `filter()`
 
-The two are the same method with different defaults; pick the one whose default reads as the intent:
+Both names call the same method with different defaults. Use the name with the default that matches your intent:
 
 | Goal | Call |
 | --- | --- |
 | Drop only `null` and `false`, keep `0` and `''` | `select()` |
 | Drop every falsy value, like `array_filter()` | `filter()` |
-| Keep elements your callback approves | Either, with a callback returning `bool` |
+| Keep elements for which your callback returns `true` | Either, with a callback returning `bool` |
 | Side effects for rejected elements | `select()` with `onReject:` |
 
 ## `skipWhile()`
 
-Skips elements from the beginning of the pipeline as long as a predicate returns `true`. Once the predicate returns `false` for the first time, all remaining elements pass through unchecked.
+This method skips elements from the start of the pipeline while the predicate returns `true`. After the predicate returns `false` for the first time, the method keeps all remaining elements and ignores the predicate result.
 
 **Signature**: `skipWhile(callable $predicate): self`
 
@@ -104,7 +103,7 @@ $result = take(new SplFileObject('data.txt'))
 
 ## Filtering with `map()`
 
-A `map()` callback that conditionally yields acts as a filter and a transformer in one step; see [`map()`](transformation.md#map):
+A `map()` callback that yields conditionally filters and transforms elements in a single step. See [`map()`](transformation.md#map).
 
 ```php
 $result = take([1, 2, 3, 4])

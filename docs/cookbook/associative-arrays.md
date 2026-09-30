@@ -1,8 +1,8 @@
 # Associative Array Recipes
 
-Working with associative arrays requires more than just transforming values. This guide shows how to manipulate both keys and values using the library's functional patterns.
+Associative arrays often require changes to keys as well as values. This guide shows how to change both with the library's functional patterns.
 
-For simple cases, dedicated methods already exist—reach for them first:
+Dedicated methods exist for simple cases. Use them first:
 
 - [`flip()`](../api/utility.md#flip) swaps keys and values.
 - [`keys()`](../api/utility.md#keys) and [`values()`](../api/utility.md#values) extract one side.
@@ -10,13 +10,13 @@ For simple cases, dedicated methods already exist—reach for them first:
 
 ## The Key Manipulation Pattern
 
-For anything beyond that, use this three-step pattern:
+For other key changes, use this three-step pattern:
 
 1. **`tuples()`** - Convert to `[key, value]` pairs
 2. **`map()`** or **`filter()`** - Transform or drop the pairs
 3. **`unpack()`** - Reconstruct the key-value stream
 
-The reconstruction step is always the same: `unpack(fn($key, $value) => yield $key => $value)` spreads each tuple back into a key and a value.
+The reconstruction step is always the same: `unpack(fn($key, $value) => yield $key => $value)` unpacks each tuple into a key and a value.
 
 ### Prefixing Keys
 
@@ -43,7 +43,7 @@ $result = take($data)
 
 ### Filtering by Key
 
-Remove entries based on their keys:
+Remove entries by key:
 
 ```php
 $data = ['user_id' => 1, 'password' => 'secret', 'email' => 'alice@example.com'];
