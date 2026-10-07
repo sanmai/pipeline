@@ -3,6 +3,7 @@ parameters:
     excludePaths:
         - %currentWorkingDirectory%/tests/ErrorsTest.php
         - %currentWorkingDirectory%/tests/Benchmarks/
+        - %currentWorkingDirectory%/tests/Php86/
     level: 2
     paths:
         - src
