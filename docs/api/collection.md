@@ -4,31 +4,32 @@ Collection methods convert a pipeline into an array or iterate over its elements
 
 ## Terminal Operations
 
-A pipeline is **lazy**: it does not process data until a **terminal operation** is called. These methods consume the pipeline to produce a final result.
+A pipeline defers execution until a **terminal operation** starts. Terminal operations consume the pipeline and produce a final result.
 
-Understanding this is key to using the library effectively. No work is done until one of these methods (or a `foreach` loop) pulls data through the pipeline. Once consumed, a streaming pipeline cannot be rewound—just like the generators it is built on.
+The pipeline processes data only when one of these methods (or a `foreach` loop) pulls data from it. After consumption, you cannot rewind a streaming pipeline. The same limit applies to the generators that it uses.
 
-Common terminal operations include:
+Terminal operations include:
 
 - `toList()` and `toAssoc()` - Convert to arrays
+- `collect()` - Pass all values to a callback
 - `fold()` and `reduce()` - Aggregate to a single value
 - `count()`, `min()`, `max()`, `first()`, `last()` - Compute simple aggregates
 - `each()` - Iterate and perform side effects
-- `finalVariance()` - Calculate comprehensive statistics
+- `finalVariance()` - Calculate statistics
 - `reservoir()` - Sample random elements
 
 ## Array Conversion
 
 ### `toList()`
 
-Returns all values as a numerically indexed array, discarding keys.
+Returns all values as a numerically indexed array and discards keys.
 
 **Signature**: `toList(): array`
 
 **Behavior**:
 
 - This is a terminal operation.
-- Because keys are discarded, every value is returned—even when keys repeat, as commonly happens after `map()` expands generators.
+- Because it discards keys, it returns every value, also when keys repeat. Repeated keys are frequent after `map()` expands generators.
 
 **Examples**:
 
@@ -41,19 +42,19 @@ $result = map(function () {
     yield 'foo' => 'bar';
     yield 'foo' => 'baz';
 })->toList();
-// ['bar', 'baz'] — iterator_to_array() would have returned just ['foo' => 'baz']
+// ['bar', 'baz']; iterator_to_array() returns only ['foo' => 'baz']
 ```
 
 ### `toAssoc()`
 
-Returns all values as an associative array, preserving keys.
+Returns all values as an associative array and preserves keys.
 
 **Signature**: `toAssoc(): array`
 
 **Behavior**:
 
 - This is a terminal operation.
-- With duplicate keys, later values overwrite earlier ones—an inherent property of PHP arrays. Use `toList()` when every value matters more than the keys.
+- With duplicate keys, later values overwrite earlier ones, as in any PHP array. Use `toList()` when you need every value more than the keys.
 
 **Examples**:
 
@@ -64,13 +65,38 @@ $result = take(['a' => 1, 'b' => 2, 'c' => 3])
 // ['a' => 2, 'b' => 4, 'c' => 6]
 ```
 
-The deprecated `toArray()` method is an older spelling. Replace `toArray()` and `toArray(false)` with `toList()`; replace `toArray(true)` with `toAssoc()`.
+The deprecated `toArray()` method is an older spelling. Replace `toArray()` and `toArray(false)` with `toList()`. Replace `toArray(true)` with `toAssoc()`.
+
+### `collect()`
+
+Passes a list of all values to a callback and returns the callback's result.
+
+**Signature**: `collect(?callable $func = null): mixed`
+
+- `$func`: A callback that receives a `list` of all values. Without a callback, `collect()` returns the list, the same as `toList()`.
+
+**Behavior**:
+
+- This is a terminal operation.
+- It discards keys, as `toList()` does.
+- Use it to end a pipeline with a function that requires the whole array, such as `implode()` or `array_sum()`.
+
+**Examples**:
+
+```php
+$csv = take(ItemCondition::cases())
+    ->cast(fn(ItemCondition $condition) => $condition->value)
+    ->collect(fn(array $values) => implode(',', $values));
+
+// With PHP 8.6 partial function application
+$csv = take($values)->collect(implode(',', ...));
+```
 
 ## Iteration
 
 ### `getIterator()`
 
-Makes the pipeline usable directly in a `foreach` loop; part of the `IteratorAggregate` interface, normally called by PHP itself.
+This method lets you use the pipeline directly in a `foreach` loop. It implements the `IteratorAggregate` interface, and PHP calls it for you.
 
 **Signature**: `getIterator(): Traversable`
 
@@ -84,20 +110,20 @@ foreach ($pipeline as $key => $value) {
 }
 ```
 
-An unprimed pipeline iterates as empty, so a function can return `new Standard()` instead of `null` and callers need no special checks. Where an `Iterator` (not just a `Traversable`) is required, wrap the pipeline: `new IteratorIterator($pipeline)`.
+An unprimed pipeline iterates as empty. Thus a function can return `new Standard()` instead of `null`, and callers need no special checks. Where code requires an `Iterator` (not only a `Traversable`), wrap the pipeline: `new IteratorIterator($pipeline)`.
 
 ### `each()`
 
-Eagerly iterates over all elements, applying a callback to each.
+Eagerly iterates over all elements and applies a callback to each.
 
 **Signature**: `each(callable $func, bool $discard = true): void`
 
-- `$func`: A callback receiving `($value, $key)`; its return value is ignored.
-- `$discard`: By default the pipeline is discarded after iteration, protecting against accidental reuse. Pass `false` to keep an array-backed pipeline intact for further use.
+- `$func`: A callback that receives `($value, $key)`. The method ignores its return value.
+- `$discard`: By default, the method discards the pipeline after iteration to prevent accidental reuse. Pass `false` to keep an array-backed pipeline for further use.
 
 **Behavior**:
 
-- This is a terminal operation, intended for side effects such as logging or database writes.
+- This is a terminal operation for side effects such as logging or database writes.
 
 **Examples**:
 
@@ -116,15 +142,15 @@ take($users)->each(fn($user) => $user->save());
 
 ### `cursor()`
 
-Returns a forward-only iterator that keeps its position across `foreach` loops. Where a generator would throw "Cannot traverse an already closed generator" on a second loop, a cursor simply continues from where the previous loop stopped—like a database cursor.
+Returns a forward-only iterator that keeps its position across `foreach` loops. On a second loop, a generator throws "Cannot traverse an already closed generator". A cursor continues from the position where the previous loop stopped, as a database cursor does.
 
 **Signature**: `cursor(): Iterator`
 
 **Behavior**:
 
-- Breaking out of a loop and re-entering continues *after* the last seen element.
-- An exhausted cursor iterates as empty; no errors.
-- Pass the cursor to `take()` to continue with pipeline operations on the remaining elements.
+- If you break out of a loop and start a new loop, iteration continues *after* the last element that the first loop received.
+- An exhausted cursor iterates as empty and causes no errors.
+- Pass the cursor to `take()` to apply pipeline operations to the remaining elements.
 
 **Examples**:
 
@@ -157,8 +183,8 @@ Removes the first N elements from the pipeline and returns them as a *new* pipel
 
 **Behavior**:
 
-- The returned pipeline is a new instance holding up to `$count` elements, keys preserved—including duplicates.
-- This is destructive: the peeked elements are consumed from the source pipeline. To put them back, use `prepend()`.
+- The returned pipeline is a new instance with up to `$count` elements. It preserves keys, including duplicate keys.
+- This operation is destructive: it consumes the peeked elements from the source pipeline. To restore them, use `prepend()`.
 
 **Examples**:
 
@@ -168,7 +194,7 @@ $pipeline = take([1, 2, 3, 4, 5]);
 $head = $pipeline->peek(2)->toList(); // [1, 2]
 $rest = $pipeline->toList();          // [3, 4, 5]
 
-// Non-destructive look at the first elements
+// Non-destructive inspection of the first elements
 $pipeline = take($stream);
 $sample = $pipeline->peek(10)->toList();
 $pipeline->prepend($sample); // Restore the peeked elements

@@ -627,7 +627,7 @@ class Standard implements IteratorAggregate, Countable
         $this->filter(static function ($value) use ($predicate): bool {
             static $done = false;
 
-            if ($predicate($value) && !$done) {
+            if (!$done && $predicate($value)) {
                 return false;
             }
 

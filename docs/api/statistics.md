@@ -1,20 +1,20 @@
 # Statistical Methods
 
-These methods perform statistical analysis on numeric pipeline data. Both build on the `RunningVariance` helper, which computes statistics in a single pass using [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm)—numerically stable and able to handle any number of data points in constant memory.
+These methods compute statistics for numeric pipeline data. Both methods use the `RunningVariance` helper. This helper computes statistics in a single pass with [Welford's online algorithm](https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm). The algorithm is numerically stable and processes any number of data points in constant memory.
 
 ## `finalVariance()`
 
-Consumes the pipeline and calculates a comprehensive set of statistics.
+This method consumes the pipeline and computes its statistics.
 
 **Signature**: `finalVariance(?callable $castFunc = null, ?RunningVariance $variance = null): RunningVariance`
 
 - `$castFunc`: A callback converting each value to `?float`. Defaults to `floatval`. Return `null` to exclude a value from the statistics.
-- `$variance`: An optional, pre-initialized `RunningVariance` to continue counting into.
+- `$variance`: An optional existing `RunningVariance`. The method adds new values to its statistics.
 
 **Behavior**:
 
-- This is a terminal operation returning a `RunningVariance` object.
-- Values for which `$castFunc` returns `null` are not counted.
+- This is a terminal operation. It returns a `RunningVariance` object.
+- The method ignores values when `$castFunc` returns `null` for them.
 
 **Examples**:
 
@@ -43,17 +43,17 @@ $combinedStats = take($secondBatch)->finalVariance(null, $initialStats);
 
 ## `runningVariance()`
 
-Observes values as they pass through, updating statistics without consuming the pipeline.
+This method updates statistics with each value in the stream. It does not consume the pipeline.
 
 **Signature**: `runningVariance(?RunningVariance &$variance, ?callable $castFunc = null): self`
 
-- `&$variance`: A reference to a `RunningVariance`; created for you when `null`.
+- `&$variance`: A reference to a `RunningVariance`. When it is `null`, the method creates a new instance.
 - `$castFunc`: Same as in `finalVariance()`.
 
 **Behavior**:
 
-- Non-terminal: statistics accumulate lazily as elements flow through, and can be inspected at any point.
-- Several `runningVariance()` stages can observe different aspects of the same stream, each with its own cast callback; values for which the callback returns `null` are excluded from that particular computation.
+- This is a non-terminal operation. Statistics are updated lazily during iteration. You can read them at any point.
+- Several `runningVariance()` stages can compute statistics for different parts of the same stream. Each stage uses a separate cast callback. When a callback returns `null` for a value, only the statistics of that stage ignore the value.
 
 **Examples**:
 
@@ -75,7 +75,7 @@ take($orders)
 
 ## The `RunningVariance` Helper Class
 
-`Pipeline\Helper\RunningVariance` holds the accumulated statistics:
+`Pipeline\Helper\RunningVariance` stores the accumulated statistics:
 
 - `getCount(): int`: The number of observed values.
 - `getMean(): float`: The arithmetic mean.
@@ -83,13 +83,13 @@ take($orders)
 - `getStandardDeviation(): float`: The sample standard deviation.
 - `getMin(): float`: The smallest observed value.
 - `getMax(): float`: The largest observed value.
-- `observe(float $value): float`: Feed in a value directly.
+- `observe(float $value): float`: Adds a value directly and returns it.
 
-With no observed values, `getMean()`, `getVariance()`, `getMin()`, and `getMax()` return `NAN`; with a single value, the variance is `0.0`.
+With no observed values, `getMean()`, `getVariance()`, `getMin()`, and `getMax()` return `NAN`. With a single value, the variance is `0.0`.
 
 ### Merging Statistics
 
-The constructor merges existing instances, which is useful for parallel processing or combining batches: statistics can be computed independently—even on different machines—and combined afterwards without revisiting the data.
+The constructor merges existing instances. Use it for parallel processing or to combine batches. You can compute statistics independently, also on different machines, and merge them later without a second pass over the data.
 
 ```php
 use Pipeline\Helper\RunningVariance;

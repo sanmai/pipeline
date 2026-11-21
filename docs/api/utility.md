@@ -4,7 +4,7 @@ Utility methods cover side effects, sampling, combining data, monitoring, and re
 
 ## `tap()`
 
-Performs side effects on each element without changing the values in the pipeline. Useful for debugging, logging, or progress reporting.
+Performs side effects on each element and does not change the values in the pipeline. Use it for debugging, logging, or progress reporting.
 
 **Signature**: `tap(callable $func): self`
 
@@ -12,7 +12,7 @@ Performs side effects on each element without changing the values in the pipelin
 
 **Behavior**:
 
-- Non-terminal: values continue unchanged to the next stage, and the callback runs lazily as elements flow through.
+- Non-terminal: the next stage receives the values unchanged. The pipeline calls the callback for each element only upon iteration.
 
 **Examples**:
 
@@ -25,14 +25,14 @@ $result = take($orders)
 
 ## `stream()`
 
-Converts the pipeline to a generator-backed stream, ensuring all subsequent operations are lazy and process elements one by one.
+Converts the pipeline to a generator-backed stream. All subsequent operations are evaluated lazily and process a single element at a time.
 
 **Signature**: `stream(): self`
 
 **Behavior**:
 
-- Non-terminal. After `stream()`, array fast paths no longer apply: no intermediate arrays are created.
-- Essential for memory efficiency when a large array enters a pipeline; a no-op for already-streaming pipelines.
+- Non-terminal. After `stream()`, the array fast paths do not apply, and the pipeline creates no intermediate arrays.
+- Use it to limit memory usage when a large array enters a pipeline. On a generator-backed pipeline, `stream()` has no effect.
 
 **Examples**:
 
@@ -47,7 +47,7 @@ $result = take($largeArray)
 
 ## `runningCount()`
 
-Counts elements as they pass through, without consuming the pipeline.
+Counts elements during iteration and does not consume the pipeline.
 
 **Signature**: `runningCount(?int &$count): self`
 
@@ -55,7 +55,7 @@ Counts elements as they pass through, without consuming the pipeline.
 
 **Behavior**:
 
-- Non-terminal: counting happens lazily as elements flow through, so the counter is only final after the pipeline has been consumed.
+- Non-terminal: the counter increments lazily for each element. Its value is final only after the pipeline is consumed.
 
 **Examples**:
 
@@ -72,7 +72,7 @@ echo $processed; // 50
 
 ## `reservoir()`
 
-Performs [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling): selects a fixed-size uniform random sample from a stream of unknown length, holding only the sample in memory.
+Performs [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling): selects a fixed-size uniform random sample from a stream of unknown length. Only the sample stays in memory.
 
 **Signature**: `reservoir(int $size, ?callable $weightFunc = null): array`
 
@@ -82,7 +82,7 @@ Performs [reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling):
 **Behavior**:
 
 - This is a terminal operation returning an array.
-- Uses Algorithm R for uniform sampling and Algorithm A-Chao for weighted sampling.
+- Uniform sampling uses Algorithm R. Weighted sampling uses Algorithm A-Chao.
 
 **Examples**:
 
@@ -107,7 +107,7 @@ Transposes the pipeline with one or more other iterables: each element becomes a
 **Behavior**:
 
 - Shorter inputs are padded with `null`.
-- Pairs naturally with [`unpack()`](transformation.md#unpack) to spread each tuple into callback arguments.
+- Use [`unpack()`](transformation.md#unpack) after `zip()` to pass each tuple to a callback as separate arguments.
 
 **Examples**:
 
@@ -127,7 +127,7 @@ take($names)
 
 ### `values()`
 
-Keeps only the values, discarding keys—the streaming counterpart of `array_values()`.
+Keeps only the values and discards the keys. This is the streaming counterpart of `array_values()`.
 
 **Signature**: `values(): self`
 
@@ -139,7 +139,7 @@ $result = take(['a' => 1, 'b' => 2])->values()->toList(); // [1, 2]
 
 ### `keys()`
 
-Keeps only the keys, making them the new values—the streaming counterpart of `array_keys()`.
+Keeps only the keys and outputs them as the new values. This is the streaming counterpart of `array_keys()`.
 
 **Signature**: `keys(): self`
 
@@ -151,7 +151,7 @@ $result = take(['a' => 1, 'b' => 2])->keys()->toList(); // ['a', 'b']
 
 ### `flip()`
 
-Swaps keys and values—the streaming counterpart of `array_flip()`.
+Swaps keys and values. This is the streaming counterpart of `array_flip()`.
 
 **Signature**: `flip(): self`
 
@@ -161,11 +161,11 @@ Swaps keys and values—the streaming counterpart of `array_flip()`.
 $result = take(['a' => 1, 'b' => 2])->flip()->toAssoc(); // [1 => 'a', 2 => 'b']
 ```
 
-On a streaming pipeline values become keys as-is, with no deduplication; collect with `toList()` or `toAssoc()` depending on whether repeated keys matter.
+On a streaming pipeline, values become keys without deduplication. Use `toList()` to keep every item, or `toAssoc()` to keep only the last value for each repeated key.
 
 ### `tuples()`
 
-Converts the stream into `[key, value]` pairs, making keys accessible to ordinary callbacks.
+Converts the stream into `[key, value]` pairs. Ordinary callbacks then receive the keys as part of each value.
 
 **Signature**: `tuples(): self`
 

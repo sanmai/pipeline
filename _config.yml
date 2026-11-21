@@ -1,0 +1,19 @@
+title: Build streaming pipelines in PHP
+description: A fluent, memory-efficient way to process iterable data in PHP
+theme: jekyll-theme-primer
+
+plugins:
+  - jekyll-relative-links
+
+exclude:
+  - AGENTS.md
+  - Makefile
+  - "*.y*ml"
+  - "*.json*"
+  - "*.lock*"
+  - "*.dist"
+  - "*.php"
+  - docs/
+  - src/
+  - tests/
+  - vendor/

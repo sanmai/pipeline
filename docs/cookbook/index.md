@@ -1,6 +1,6 @@
 # Pipeline Cookbook
 
-This cookbook provides practical, ready-to-use solutions for common data processing challenges.
+This cookbook gives solutions for common data processing tasks.
 
 ## Data Cleaning
 
@@ -16,7 +16,7 @@ $cleanedData = take($rawData)
     ->toList();
 ```
 
-Use plain `filter()` only when you genuinely want to drop every falsy value, like `array_filter()` does.
+Use `filter()` only to remove every falsy value, as `array_filter()` does.
 
 ## Batch Processing
 
@@ -29,14 +29,14 @@ Use plain `filter()` only when you genuinely want to drop every falsy value, lik
 ```php
 // Process a large dataset in batches of 1000
 take(new SplFileObject('large-dataset.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->chunk(1000)
     ->each(function ($batch) {
         Database::bulkInsert($batch);
     });
 ```
 
-Only one batch is in memory at a time. For ramp-up scenarios—a small trial batch first, then full-size batches—see [`chunkBy()`](../api/transformation.md#chunkby).
+Only one batch is in memory at a time. For ramp-up scenarios (a small trial batch first, then full-size batches), see [`chunkBy()`](../api/transformation.md#chunkby).
 
 ## Real-Time Analysis
 
@@ -65,7 +65,7 @@ take($liveStream)
 
 **Problem**: You need a moving average (or any windowed calculation) over a stream.
 
-**Solution**: Keep a small rolling buffer in a stateful `map()` callback, yielding once the window is full.
+**Solution**: Keep a rolling buffer in a stateful `map()` callback. The callback yields a value when the window is full.
 
 ```php
 $window = [];
@@ -109,14 +109,14 @@ $overallStats = new RunningVariance($stats1, $stats2);
 
 ```php
 $data = take(new SplFileObject('data.csv'))
-    ->map(str_getcsv(...))
+    ->map(str_getcsv(?, escape: ''))
     ->filter(fn($row) => count($row) === 3)
     ->toList();
 ```
 
 ### Log File Analysis
 
-**Problem**: You need counts and a sample of matching lines from a huge log file, in a single pass.
+**Problem**: You need counts and a sample of matching lines from a large log file, in a single pass.
 
 **Solution**: Combine `runningCount()` with the filtering chain; use `skipWhile()` to ignore a preamble.
 
@@ -129,16 +129,16 @@ $errors = take(new SplFileObject('app.log'))
     ->slice(0, 100)
     ->toList();
 
-// $errors holds the first 100 errors; $total counts all lines seen
+// $errors contains the first 100 errors; $total counts the lines read after the preamble
 ```
 
 ## Infinite Sequences
 
 ### Generating and Consuming Endless Streams
 
-**Problem**: You need to process a sequence with no natural end—generated data, polling results, an event stream.
+**Problem**: You need to process a sequence with no natural end: generated data, polling results, or an event stream.
 
-**Solution**: Seed the pipeline with an infinite generator; laziness guarantees only the consumed portion is ever computed. Bound the consumption with `slice()` or by breaking out of a `foreach`.
+**Solution**: Seed the pipeline with an infinite generator. Lazy evaluation computes only the items that you consume. Bound the consumption with `slice()` or by breaking out of a `foreach`.
 
 ```php
 use function Pipeline\map;
@@ -182,7 +182,7 @@ $results = take($inputs)
 
 ### Logging Rejected Items
 
-**Problem**: You filter out invalid records but still need to know what was dropped and why.
+**Problem**: You remove invalid records and must log each removed record.
 
 **Solution**: Use `select()` with its `onReject` callback.
 
@@ -201,7 +201,7 @@ $valid = take($records)
 
 **Problem**: You need to remove duplicate values from a large stream without loading it all into memory.
 
-**Solution**: Track seen keys in a set; memory grows with the number of *unique* items only.
+**Solution**: Store each processed key in an array that you use as a set. Memory grows with the number of unique items only.
 
 ```php
 $seen = [];
@@ -218,4 +218,4 @@ $unique = take($users)
     ->toList();
 ```
 
-For an array-backed pipeline of scalar values there is also a shortcut: `flip()->flip()` deduplicates via `array_flip()`, just as it would with plain arrays.
+For an array-backed pipeline of scalar values, `flip()->flip()` is a shortcut: it removes duplicates using `array_flip()`, as with plain arrays.
