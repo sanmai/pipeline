@@ -85,7 +85,7 @@ Passes a list of all values to a callback and returns the callback's result.
 
 ```php
 $csv = take(ItemCondition::cases())
-    ->cast(fn(ItemCondition $condition) => $condition->value)
+    ->cast(Enums::value(...))
     ->collect(fn(array $values) => implode(',', $values));
 
 // With PHP 8.6 partial function application

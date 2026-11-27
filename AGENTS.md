@@ -57,6 +57,11 @@ This is a PHP library called `sanmai/pipeline` that provides functional programm
    - Used by `cursor()` method to maintain position across multiple iterations
    - Enables partial consumption patterns (e.g., peek operations)
 
+5. **Enum Helper**: `src/Helper/Enums.php`
+   - Provides `Enums::value(...)` and `Enums::name(...)` as first-class callables for `cast()`, because PHP has no property reference syntax
+   - `value()` requires a `BackedEnum`; `name()` accepts any `UnitEnum`
+   - The private constructor exempts the class from the `sanmai.noPublicStaticMethods` PHPStan rule
+
 ### Key Design Principles
 
 1. **Lazy Evaluation**: Operations are deferred until results are consumed

@@ -184,3 +184,62 @@ $result = take($config)
 ```
 
 See the [Associative Arrays cookbook](../cookbook/associative-arrays.md) for the full key-manipulation pattern.
+
+## Enum Helpers
+
+PHP has no property reference syntax, so a callback that reads an enum property needs a full closure: `fn(Suit $suit) => $suit->value`. `Pipeline\Helper\Enums` provides these callbacks as static methods. Use them as first-class callables with [`cast()`](transformation.md#cast) or any other method that accepts a callback.
+
+The examples use this enum:
+
+```php
+enum Suit: string
+{
+    case Hearts = 'H';
+    case Spades = 'S';
+}
+```
+
+### `Enums::value()`
+
+Returns the backing value of an enum case.
+
+**Signature**: `Enums::value(BackedEnum $case): int|string`
+
+**Behavior**:
+
+- Accepts only backed enums. PHP raises a `TypeError` for a pure enum case or any other value.
+- Static analyzers infer the backing type: a string-backed enum yields `string` values.
+
+**Examples**:
+
+```php
+use Pipeline\Helper\Enums;
+
+$result = take(Suit::cases())
+    ->cast(Enums::value(...))
+    ->toList(); // ['H', 'S']
+
+$csv = take(Suit::cases())
+    ->cast(Enums::value(...))
+    ->collect(fn(array $values) => implode(',', $values)); // 'H,S'
+```
+
+### `Enums::name()`
+
+Returns the name of an enum case.
+
+**Signature**: `Enums::name(UnitEnum $case): string`
+
+**Behavior**:
+
+- Accepts pure and backed enums.
+
+**Examples**:
+
+```php
+use Pipeline\Helper\Enums;
+
+$result = take(Suit::cases())
+    ->cast(Enums::name(...))
+    ->toList(); // ['Hearts', 'Spades']
+```

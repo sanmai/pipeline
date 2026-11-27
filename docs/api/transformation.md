@@ -70,7 +70,14 @@ $result = take(['1', '2', '3'])
 $result = take([1, 2, 3])
     ->cast(fn($n) => new Money($n, 'USD'))
     ->toList(); // [Money, Money, Money]
+
+// Mapping enum cases to their backing values
+$result = take(Suit::cases())
+    ->cast(Enums::value(...))
+    ->toList(); // ['H', 'S']
 ```
+
+See [Enum Helpers](utility.md#enum-helpers) for `Enums::value()` and `Enums::name()`.
 
 ### Choosing Between `map()` and `cast()`
 

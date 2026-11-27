@@ -21,11 +21,13 @@ declare(strict_types=1);
 namespace Tests\Pipeline\Inference;
 
 use function dirname;
+use function implode;
 
 use Iterator;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use Pipeline\Helper\Enums;
 use Pipeline\Standard;
 
 use function Pipeline\take;
@@ -37,8 +39,10 @@ use ReflectionClass;
 use SplFileInfo;
 
 use function str_contains;
+use function strtolower;
 
 use Tests\Pipeline\Fixtures\Foo;
+use Tests\Pipeline\Fixtures\Suit;
 
 /**
  *
@@ -130,6 +134,21 @@ class TypeInferenceTest extends TestCase
             ->cast(fn(int $n): Foo => new Foo($n))
             ->collect(fn(array $foos): Foo => $foos[0])
             ->bar();
+    }
+
+    public function testEnumValues(): void
+    {
+        $values = take(Suit::cases())
+            ->cast(Enums::value(...))
+            ->toList();
+
+        $this->assertSame('hs', strtolower(implode('', $values)));
+
+        $names = take(Suit::cases())
+            ->cast(Enums::name(...))
+            ->toList();
+
+        $this->assertSame('hearts,spades', strtolower(implode(',', $names)));
     }
 
     public function testExtractFixtureNamesFromTests(): void

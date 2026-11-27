@@ -74,6 +74,8 @@ This page lists every public method and helper function of the Pipeline library 
 | `keys()` | Keeps only the keys as the new values. | [Utility](../api/utility.md#keys) |
 | `flip()` | Swaps keys and values. | [Utility](../api/utility.md#flip) |
 | `tuples()` | Converts the stream to `[key, value]` pairs. | [Utility](../api/utility.md#tuples) |
+| `Enums::value()` | Callback that maps a backed enum case to its backing value. | [Utility](../api/utility.md#enumsvalue) |
+| `Enums::name()` | Callback that maps an enum case to its name. | [Utility](../api/utility.md#enumsname) |
 
 ## Statistics
 

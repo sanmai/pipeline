@@ -170,6 +170,14 @@ In general, Pipeline instances are mutable, meaning every Pipeline-returning met
 # Classes
 
 - `\Pipeline\Standard` is the main user-facing class for the pipeline with sane defaults for most methods.
+- `\Pipeline\Helper\Enums` provides the `Enums::value(...)` and `Enums::name(...)` callbacks that map enum cases to their backing values or names.
+
+    ```php
+    use Pipeline\Helper\Enums;
+
+    take(Suit::cases())->cast(Enums::value(...))->toList();
+    // ['H', 'S']
+    ```
 
 This library is built to last. There's not a single place where an exception is thrown. Never mind any asserts whatsoever.
 
@@ -336,7 +344,7 @@ Passes a list of all values to a callback and returns the result of the callback
 
 ```php
 $csv = take(ItemCondition::cases())
-    ->cast(fn(ItemCondition $condition) => $condition->value)
+    ->cast(Enums::value(...))
     ->collect(implode(',', ...));
 ```
 
